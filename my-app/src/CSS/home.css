@@ -1,0 +1,42 @@
+/* Bootstrap Container Overrides - Force Full Width */
+.container, 
+.container-fluid, 
+.container-sm, 
+.container-md, 
+.container-lg, 
+.container-xl, 
+.container-xxl {
+  max-width: none !important;
+  width: 100vw !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
+/* Ensure full width for your main components */
+body, html {
+  width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow-x: hidden;
+}
+
+#root {
+  width: 100% !important;
+  max-width: none !important;
+}
+
+/* Your custom sections should be full width */
+section {
+  width: 100vw !important;
+  max-width: none !important;
+}
+
+/* Rows should also be full width */
+.row {
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  width: 100% !important;
+  max-width: none !important;
+}
