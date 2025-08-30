@@ -98,6 +98,7 @@ const QueryComponent: React.FC = () => {
       <ul>
         {users.map((user) => (
           <li key={user.uid}>
+            <p>{user.profile_picture}</p>
             <p>{user.username}</p>
             <p>{user.email}</p>
             <p>{new Date(user.last_login).toLocaleString()}</p>
