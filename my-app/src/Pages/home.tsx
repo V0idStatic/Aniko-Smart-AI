@@ -137,7 +137,7 @@ const Home: React.FC = () => {
     {/* Text Section */}
     <div className="col-lg-7 text-center text-lg-start">
       <h1 style={{ fontSize: "clamp(1.8rem, 4vw, 2.8rem)", fontWeight: 700, color: palette.c4 }}>
-        Frees app for soil health monitoring
+        Free app for soil health monitoring
       </h1>
       {/* Adjusting padding to match the text alignment */}
       <p style={{ fontSize: "clamp(1rem, 2vw, 1.2rem)", marginTop: 15, color: palette.c8, paddingLeft: "5px" }}>
