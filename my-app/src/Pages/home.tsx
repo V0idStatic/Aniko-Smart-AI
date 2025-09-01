@@ -132,41 +132,38 @@ const Home: React.FC = () => {
       <Header />
       
       {/* HERO - Full Width */}
-<section style={{ padding: "40px 15px", width: "100%" }}>
-  <div className="row align-items-center" style={{ maxWidth: "85%", margin: "0 auto" }}>
-    {/* Text Section */}
-    <div className="col-lg-7 text-center text-lg-start">
-      <h1 style={{ fontSize: "clamp(1.8rem, 4vw, 2.8rem)", fontWeight: 700, color: palette.c4 }}>
-        hello guys app for soil health monitoring
-      </h1>
-      <h1 style={{ fontSize: "clamp(1.8rem, 4vw, 2.8rem)", fontWeight: 700, color: palette.c4 }}>
-        SAMPLEEEEEEEEE
-        ISA PAAAAAAAAAAAAAAA
-      </h1>
-      {/* Adjusting padding to match the text alignment */}
-      <p style={{ fontSize: "clamp(1rem, 2vw, 1.2rem)", marginTop: 15, color: palette.c8, paddingLeft: "5px" }}>
-        The all-in-one app that gives you real-time soil insights for healthier crops and bigger harvests. Download now and grow smarter!
-      </p>
-    </div>
+      <section style={{ padding: "40px 15px", width: "100%" }}>
+        <div className="row align-items-center" style={{ maxWidth: "85%", margin: "0 auto" }}>
+          {/* Text Section */}
+          <div className="col-lg-7 text-center text-lg-start">
+            <h1 style={{ fontSize: "clamp(1.8rem, 4vw, 2.8rem)", fontWeight: 700, color: palette.c4 }}>
+              hello guys app for soil health monitoring
+            </h1>
+            <h1 style={{ fontSize: "clamp(1.8rem, 4vw, 2.8rem)", fontWeight: 700, color: palette.c4 }}>
+              SAMPLEEEEEEEEE
+              ISA PAAAAAAAAAAAAAAA
+            </h1>
+            {/* Adjusting padding to match the text alignment */}
+            <p style={{ fontSize: "clamp(1rem, 2vw, 1.2rem)", marginTop: 15, color: palette.c8, paddingLeft: "5px" }}>
+              The all-in-one app that gives you real-time soil insights for healthier crops and bigger harvests. Download now and grow smarter!
+            </p>
+          </div>
 
-    {/* Google Play Image Section */}
-    <div className="col-lg-5 text-center mt-4 mt-lg-0">
-      <img
-        src="/PICTURES/google-play.png"
-        alt="Download on Google Play"
-        className="hero-img img-fluid"
-        style={{
-          maxWidth: 250,
-          margin: "0 auto",  // Ensuring the image is centered
-          display: "block",  // Ensuring the image behaves like a block element
-        }}
-      />
-    </div>
-  </div>
-</section>
-
-
-
+          {/* Google Play Image Section */}
+          <div className="col-lg-5 text-center mt-4 mt-lg-0">
+            <img
+              src="/PICTURES/google-play.png"
+              alt="Download on Google Play"
+              className="hero-img img-fluid"
+              style={{
+                maxWidth: 250,
+                margin: "0 auto",  
+                display: "block",  
+              }}
+            />
+          </div>
+        </div>
+      </section>
 
       {/* Home Image - Full Width */}
       <div className="home-img-container" style={{ textAlign: "center", marginTop: -80, width: "100%" }}>
