@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { supabase } from "../firebase"; // Import your Supabase client
+import { supabase } from "../firebase"; // 
 
 // Define User type for better type safety
 interface User {
@@ -15,7 +15,7 @@ const QueryComponent: React.FC = () => {
   const [error, setError] = useState<string>("");
 
   useEffect(() => {
-    // Fetch users from Supabase initially
+    // Supabase database
     const fetchUsers = async () => {
       try {
         const { data, error } = await supabase
