@@ -139,6 +139,9 @@ const Home: React.FC = () => {
       <h1 style={{ fontSize: "clamp(1.8rem, 4vw, 2.8rem)", fontWeight: 700, color: palette.c4 }}>
         hello guys app for soil health monitoring
       </h1>
+      <h1 style={{ fontSize: "clamp(1.8rem, 4vw, 2.8rem)", fontWeight: 700, color: palette.c4 }}>
+        SAMPLEEEEEEEEE
+      </h1>
       {/* Adjusting padding to match the text alignment */}
       <p style={{ fontSize: "clamp(1rem, 2vw, 1.2rem)", marginTop: 15, color: palette.c8, paddingLeft: "5px" }}>
         The all-in-one app that gives you real-time soil insights for healthier crops and bigger harvests. Download now and grow smarter!
