@@ -1,5 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import "bootstrap-icons/font/bootstrap-icons.css";
 
 
 
@@ -31,7 +32,7 @@ const Header: React.FC = () => {
               <li className="nav-item"><Link className="nav-link" to="/">Home</Link></li>
               <li className="nav-item"><a className="nav-link" href="#about">About</a></li>
               <li className="nav-item"><a className="nav-link" href="#features">Features</a></li>
-              <li className="nav-item"><Link className="nav-link" to="/testimonials">Testimonial</Link></li>
+                <li className="nav-item"><Link className="nav-link" to="/testimonialDisplay">Testimonial</Link></li>
               <li className="nav-item"><a className="nav-link" href="#download">Download</a></li>
               <li className="nav-item"><a className="nav-link" href="#why-aniko">Why Aniko</a></li>
               <li className="nav-item"><a className="nav-link" href="#team">Team</a></li>
