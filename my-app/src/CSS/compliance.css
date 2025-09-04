@@ -21,7 +21,6 @@
 }
 
 html, body {
-  height: 100%;
   margin: 0 !important;
   padding: 0 !important;
   font-family: 'Inter', system-ui, sans-serif;
@@ -29,7 +28,11 @@ html, body {
   display: flex;
   flex-direction: column;
 }
-w
+
+.contact-section {
+  margin-top: 8rem !important;
+}
+
 .contact-section::before {
   content: '';
   position: absolute;
@@ -159,7 +162,7 @@ w
   border: 2px solid var(--pastel-green) !important;
   border-radius: 20px !important;
   padding: 20px 40px;
-  background: var(--c7);
+  background: white;
   transition: all 0.3s ease;
   font-size: 1rem;
   color: var(--primary-green) !important;
@@ -172,6 +175,7 @@ w
 .form-control:focus {
   border: 2px solid var(--primary-brown) !important;
   box-shadow: 0 0 0 0.25rem rgba(76, 100, 68, 0.25);
+  color: var(--primary-green) !important;
 }
 
 .form-floating > label {
@@ -183,8 +187,9 @@ w
   border: 2px solid var(--pastel-green) !important;
   border-radius: 15px;
   padding: 15px;
-  background: var(--c7);
-  color: var(--primary-brown);
+  background: white !important;
+  color: var(--primary-green);
+  font-weight: 500;
 }
 
 .form-select:hover {
@@ -243,7 +248,7 @@ w
   justify-content: center;
   width: 50px;
   height: 50px;
-  background: var(--light-green);
+  background: var(--light-green) !important;
   border-radius: 50%;
   color: var(--primary-green);
   transition: all 0.3s ease;
@@ -277,7 +282,8 @@ w
 
 .social-links a:hover {
   transform: translateY(-5px);
-  color: var(--c5);
+  color: var(--dark-brown) !important;
+  background-color: var(--bg-color) !important;
 }
 
 .form-check-input {

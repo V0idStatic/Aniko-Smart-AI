@@ -16,33 +16,33 @@ const Compliance: React.FC = () => {
               <div className="contact-info-section">
                 <h3>Get In Touch</h3>
                 <div className="contact-item">
-                  <i className="fas fa-map-marker-alt"></i>
+                  <i className="bi bi-geo-alt-fill"></i>
                   <div className="contact-item-content">
                     Olongapo City, Zambales, Philippines
                   </div>
                 </div>
                 <div className="contact-item">
-                  <i className="fas fa-phone"></i>
+                  <i className="bi bi-phone"></i>
                   <div className="contact-item-content">
                     0912-123-1234
                   </div>
                 </div>
                 <div className="contact-item">
-                  <i className="fas fa-envelope"></i>
+                  <i className="bi bi-envelope"></i>
                   <div className="contact-item-content">
                     anikosmartcropsystem@gmail.com
                   </div>
                 </div>
                 <div className="contact-item">
-                  <i className="fas fa-clock"></i>
+                  <i className="bi bi-clock"></i>
                   <div className="contact-item-content">
                     9:00 AM - 10:00 PM
                   </div>
                 </div>
                 <div className="social-links">
-                  <a href="#"><i className="fab fa-facebook-f"></i></a>
-                  <a href="#"><i className="fab fa-twitter"></i></a>
-                  <a href="#"><i className="fab fa-instagram"></i></a>
+                  <a href="#"><i className="bi bi-facebook"></i></a>
+                  <a href="#"><i className="bi bi-twitter"></i></a>
+                  <a href="#"><i className="bi bi-instagram"></i></a>
                 </div>
               </div>
 
