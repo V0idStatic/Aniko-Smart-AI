@@ -18,9 +18,9 @@ const Home: React.FC = () => {
           backgroundRepeat: "no-repeat",
         }}
       >
-        <div className="container-fluid">
-          <div className="row align-items-center">
-            <div className="col-lg-7 text-center text-lg-start text-white">
+        <div className="container hero-container">
+          <div className="row align-items-center hero-text-content">
+            <div className="col-lg-8 text-center text-lg-start text-white">
               <h1>Smart Soil Monitoring for Modern Farmers</h1>
               <p>
                 Transform your farming with real-time soil insights,
@@ -41,7 +41,7 @@ const Home: React.FC = () => {
                 </svg>
               </a>
             </div>
-            <div className="col-lg-5 text-center mt-4 mt-lg-0">
+            <div className="col-lg-4 text-center mt-4 mt-lg-0">
               <img
                 src="PICTURES/google-play.png"
                 alt="Download on Google Play"
@@ -65,7 +65,7 @@ const Home: React.FC = () => {
       </div>
 
       {/* ABOUT & STATS SECTION */}
-      <div className="container-fluid my-5 text-center">
+      <div className="container my-5 text-center aboutStats-container">
         <p className="subtext" id="about">
           Aniko revolutionizes agriculture with intelligent soil monitoring
           technology. Track moisture, temperature, sunlight, and humidity in
@@ -239,11 +239,11 @@ const Home: React.FC = () => {
         </div>
       </section>
 {/* WHY ANIKO SECTION */}
-<section id="why-aniko" className="py-5 bg-light">
-  <div className="container-fluid">
-    <div className="row align-items-center">
+<section id="why-aniko" className="py-5 whyAniko-section">
+  <div className="container whyAniko-container">
+    <div className="row align-items-center whyAniko-row">
       {/* Text Section */}
-      <div className="col-lg-6 mb-4 mb-lg-0">
+      <div className="col-lg-6 mb-4 mb-lg-0 whyAniko-text-section">
         <h2 className="fw-bold text-dark mb-3">Why Aniko?</h2>
         <p className="lead text-muted">
           We help farmers and agribusinesses save the world by improving
@@ -264,7 +264,7 @@ const Home: React.FC = () => {
     </div>
 
     {/* Card Section */}
-    <div className="row mt-5 g-4 text-center">
+    <div className="row mt-5 g-4 text-center whyAniko-card-parent">
       <div className="col-md-4">
         <div className="card h-100 shadow-sm border-0">
           <div className="card-body">
@@ -288,7 +288,7 @@ const Home: React.FC = () => {
       </div>
 
       <div className="col-md-4">
-        <div className="card h-100 shadow-sm border-0">
+        <div className="last-card">
           <div className="card-body">
             <img src="/IMG/why-icon3.png" alt="Icon 3" className="mb-3" width="60" />
             <p className="mb-0 text-muted">
