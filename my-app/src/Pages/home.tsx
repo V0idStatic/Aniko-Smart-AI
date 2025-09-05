@@ -257,7 +257,7 @@ const Home: React.FC = () => {
       <div className="col-md-4">
         <div className="card h-100 shadow-sm border-0">
           <div className="card-body">
-            <img src="/IMG/why-icon1.png" alt="Icon 1" className="mb-3" width="60" />
+            <img src="/PICTURES/why-icon.png" alt="Icon 1" className="mb-3" width="60" />
             <p className="mb-0 text-muted">
               The only real-time solution for managing soil and plant health
             </p>
@@ -268,7 +268,7 @@ const Home: React.FC = () => {
       <div className="col-md-4">
         <div className="card h-100 shadow-sm border-0">
           <div className="card-body">
-            <img src="/IMG/why-icon2.png" alt="Icon 2" className="mb-3" width="60" />
+            <img src="/PICTURES/why-icon.png" alt="Icon 2" className="mb-3" width="60" />
             <p className="mb-0 text-muted">
               Over 40% of crop loss are caused by extreme weather conditions
             </p>
@@ -279,7 +279,7 @@ const Home: React.FC = () => {
       <div className="col-md-4">
         <div className="last-card">
           <div className="card-body">
-            <img src="/IMG/why-icon3.png" alt="Icon 3" className="mb-3" width="60" />
+            <img src="/PICTURES/why-icon.png" alt="Icon 3" className="mb-3" width="60" />
             <p className="mb-0 text-muted">
               Over 40% of crop loss stem from poor plant disease diagnosis.
             </p>

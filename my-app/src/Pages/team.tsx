@@ -67,9 +67,7 @@ const TeamMembers: React.FC = () => {
 			  )}
 			  <h5 className="fw-bold">{m.name}</h5>
 			  <p className="text-muted">{m.role}</p>
-			  <small className="text-secondary">
-				Joined: {new Date(m.uploaded_at).toLocaleDateString()}
-			  </small>
+		
 			</div>
 		  ))}
 		</div>
