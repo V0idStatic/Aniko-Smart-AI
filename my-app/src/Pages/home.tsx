@@ -3,6 +3,10 @@ import "../CSS/home.css";
 import Header from "../INCLUDE/header-logged";
 import Footer from "../INCLUDE/footer";
 import TeamMembers from "./team";
+import Hero from "./hero";
+import Feature from "./feature";
+import WhyAniko from "./whyaniko";
+
 
 
 
@@ -60,17 +64,7 @@ const Home: React.FC = () => {
         </div>
       </section>
 
-      {/* IMAGE SECTION BELOW HERO */}
-      <div className="container-fluid my-5">
-        <div className="home-img-container text-center">
-          <img
-            src="PICTURES/index-figure.png"
-            alt="Aniko App Interface"
-            className="img-fluid"
-            style={{ maxWidth: "600px" }}
-          />
-        </div>
-      </div>
+     <Hero />
 
       {/* ABOUT & STATS SECTION */}
       <div className="container my-5 text-center aboutStats-container">
@@ -181,14 +175,8 @@ const Home: React.FC = () => {
                 </div>
               </div>
 
-              <div className="col-lg-4 text-center mt-4 mt-lg-0 solution-img-side">
-                <img
-                  src="PICTURES/straight-phone-mockup.png"
-                  alt="Aniko App Interface"
-                  className="img-fluid"
-                  style={{ maxWidth: "380px" }}
-                />
-              </div>
+             <Feature />
+
             </div>
 
             <hr className="custom-line" />
@@ -261,14 +249,7 @@ const Home: React.FC = () => {
         </p>
       </div>
 
-      {/* Image Section (Hardcoded) */}
-      <div className="col-lg-6 text-center">
-        <img
-          src="/IMG/why-aniko.jpg"
-          alt="Why Aniko"
-          className="img-fluid rounded shadow-sm"
-        />
-      </div>
+   <WhyAniko />
     </div>
 
     {/* Card Section */}
