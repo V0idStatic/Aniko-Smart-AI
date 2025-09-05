@@ -2,6 +2,14 @@ import React from "react";
 import "../CSS/home.css";
 import Header from "../INCLUDE/header-logged";
 import Footer from "../INCLUDE/footer";
+import TeamMembers from "./team";
+
+
+
+
+
+
+
 
 const Home: React.FC = () => {
   return (
@@ -320,46 +328,8 @@ const Home: React.FC = () => {
         </div>
       </section>
 
-      {/* TEAM MEMBERS SECTION */}
-      <section className="team-members py-5">
-        <div className="container-fluid text-center">
-          <div className="row justify-content-center">
-            {/* Example hardcoded team members */}
-            <div className="col-md-4 mb-4">
-              <img
-                src="PICTURES/member1.jpg"
-                alt="Member 1"
-                className="rounded-circle mb-3 team-member-img"
-                style={{ width: "150px", height: "150px", objectFit: "cover" }}
-              />
-              <h5 className="fw-bold">John Doe</h5>
-              <p className="text-muted">Backend Developer</p>
-            </div>
+ <TeamMembers />
 
-            <div className="col-md-4 mb-4">
-              <img
-                src="PICTURES/member2.jpg"
-                alt="Member 2"
-                className="rounded-circle mb-3 team-member-img"
-                style={{ width: "150px", height: "150px", objectFit: "cover" }}
-              />
-              <h5 className="fw-bold">Jane Smith</h5>
-              <p className="text-muted">UI/UX Designer</p>
-            </div>
-
-            <div className="col-md-4 mb-4">
-              <img
-                src="PICTURES/member3.jpg"
-                alt="Member 3"
-                className="rounded-circle mb-3 team-member-img"
-                style={{ width: "150px", height: "150px", objectFit: "cover" }}
-              />
-              <h5 className="fw-bold">Michael Lee</h5>
-              <p className="text-muted">Frontend Developer</p>
-            </div>
-          </div>
-        </div>
-      </section>
 
 
 

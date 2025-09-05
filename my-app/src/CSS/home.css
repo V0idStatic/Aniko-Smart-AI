@@ -1157,7 +1157,7 @@ html {
 }
 
 .message.user {
-  align-self: flex-end;
+  align-self: flex-end;    
   background: #d1e7dd;
   color: #0f5132;
   border: 1px solid #bcd0c7;
