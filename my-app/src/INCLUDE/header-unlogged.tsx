@@ -1,23 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { Link } from "react-router-dom";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import "bootstrap/dist/css/bootstrap.min.css";
-import { auth } from "../firebase";
-import { onAuthStateChanged, User, signOut } from "firebase/auth";
 
 const Header: React.FC = () => {
-  const [user, setUser] = useState<User | null>(null);
-
-  useEffect(() => {
-    const unsub = onAuthStateChanged(auth, (u) => setUser(u));
-    return () => unsub();
-  }, []);
-
-  const handleLogout = async () => {
-    await signOut(auth);
-    setUser(null);
-  };
-
   return (
     <header className="floating-header">
       <nav className="navbar navbar-expand-lg">
@@ -52,40 +38,11 @@ const Header: React.FC = () => {
               <li className="nav-item"><Link className="nav-link" to="/compliance">Compliance</Link></li>
             </ul>
 
-            {/* Right Side */}
+            {/* LOGIN BUTTON on the right side */}
             <div className="ms-lg-auto text-center mt-3 mt-lg-0">
-              {!user ? (
-                <Link to="/login" className="btn btn-outline-light px-4 rounded-pill">
-                  <i className="bi bi-box-arrow-in-right me-2"></i>Login
-                </Link>
-              ) : (
-                <div className="dropdown">
-                  <button
-                    className="btn d-flex align-items-center dropdown-toggle"
-                    id="profileDropdown"
-                    data-bs-toggle="dropdown"
-                    aria-expanded="false"
-                    style={{ background: "transparent", border: "none", color: "white" }}
-                  >
-                    <img
-                      src={user.photoURL || "/IMG/profile.png"}
-                      alt="Profile"
-                      width="40"
-                      height="40"
-                      className="rounded-circle border border-light me-2"
-                    />
-                    <span className="fw-semibold">{user.displayName || "User"}</span>
-                  </button>
-
-                  <ul className="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown">
-                    <li>
-                      <button className="dropdown-item text-danger" onClick={handleLogout}>
-                        <i className="bi bi-box-arrow-right me-2"></i> Logout
-                      </button>
-                    </li>
-                  </ul>
-                </div>
-              )}
+              <Link to="/login" className="btn btn-outline-light px-4 rounded-pill">
+                <i className="bi bi-box-arrow-in-right me-2"></i>Login
+              </Link>
             </div>
           </div>
         </div>
@@ -114,9 +71,15 @@ const Header: React.FC = () => {
         .floating-header .nav-link:hover {
           color: #BDE08A !important;
         }
-        .dropdown-menu {
-          border-radius: 12px;
-          box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        .floating-header .btn-outline-light {
+          border: 2px solid #BDE08A;
+          color: #BDE08A;
+          font-weight: 600;
+          transition: all 0.3s ease;
+        }
+        .floating-header .btn-outline-light:hover {
+          background: #BDE08A;
+          color: #112822;
         }
       `}</style>
     </header>

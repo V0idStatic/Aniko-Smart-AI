@@ -1,24 +1,38 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import "../CSS/home.css";
-import Header from "../INCLUDE/header-logged";
+import HeaderUnlogged from "../INCLUDE/header-unlogged";
+import HeaderLogged from "../INCLUDE/header-logged";
 import Footer from "../INCLUDE/footer";
 import TeamMembers from "./team";
 import Hero from "./hero";
 import Feature from "./feature";
 import WhyAniko from "./whyaniko";
+import "bootstrap/dist/css/bootstrap.min.css";
+import "bootstrap/dist/js/bootstrap.bundle.min.js"; // Popper included
 
-
-
-
-
-
-
-
+import { auth } from "../firebase"; 
+import { onAuthStateChanged, User } from "firebase/auth";
 
 const Home: React.FC = () => {
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const unsub = onAuthStateChanged(auth, (u) => {
+      setUser(u);
+      setLoading(false);
+    });
+    return () => unsub();
+  }, []);
+
+  if (loading) {
+    return <div>Loading...</div>; // Or a spinner if you want
+  }
+
   return (
     <div className="home-wrapper" style={{ paddingTop: "80px" }}>
-      <Header />
+      {/* ✅ Switch header depending on login state */}
+      {user ? <HeaderLogged /> : <HeaderUnlogged />}
 
       {/* HERO SECTION */}
       <section
@@ -64,7 +78,7 @@ const Home: React.FC = () => {
         </div>
       </section>
 
-     <Hero />
+      <Hero />
 
       {/* ABOUT & STATS SECTION */}
       <div className="container my-5 text-center aboutStats-container">
@@ -175,8 +189,7 @@ const Home: React.FC = () => {
                 </div>
               </div>
 
-             <Feature />
-
+              <Feature />
             </div>
 
             <hr className="custom-line" />
@@ -234,63 +247,63 @@ const Home: React.FC = () => {
           </div>
         </div>
       </section>
-{/* WHY ANIKO SECTION */}
-<section id="why-aniko" className="py-5 whyAniko-section">
-  <div className="container whyAniko-container">
-    <div className="row align-items-center whyAniko-row">
-      {/* Text Section */}
-      <div className="col-lg-6 mb-4 mb-lg-0 whyAniko-text-section">
-        <h2 className="fw-bold text-dark mb-3">Why Aniko?</h2>
-        <p className="lead text-muted">
-          We help farmers and agribusinesses save the world by improving
-          production efficiency, innovating cultivation techniques, and
-          optimizing resource use through market data analysis. Aniko is the
-          right solution for more sustainable and advanced agriculture.
-        </p>
-      </div>
 
-   <WhyAniko />
-    </div>
+      {/* WHY ANIKO SECTION */}
+      <section id="why-aniko" className="py-5 whyAniko-section">
+        <div className="container whyAniko-container">
+          <div className="row align-items-center whyAniko-row">
+            <div className="col-lg-6 mb-4 mb-lg-0 whyAniko-text-section">
+              <h2 className="fw-bold text-dark mb-3">Why Aniko?</h2>
+              <p className="lead text-muted">
+                We help farmers and agribusinesses save the world by improving
+                production efficiency, innovating cultivation techniques, and
+                optimizing resource use through market data analysis. Aniko is the
+                right solution for more sustainable and advanced agriculture.
+              </p>
+            </div>
 
-    {/* Card Section */}
-    <div className="row mt-5 g-4 text-center whyAniko-card-parent">
-      <div className="col-md-4">
-        <div className="card h-100 shadow-sm border-0">
-          <div className="card-body">
-            <img src="/PICTURES/why-icon.png" alt="Icon 1" className="mb-3" width="60" />
-            <p className="mb-0 text-muted">
-              The only real-time solution for managing soil and plant health
-            </p>
+            <WhyAniko />
+          </div>
+
+          {/* Card Section */}
+          <div className="row mt-5 g-4 text-center whyAniko-card-parent">
+            <div className="col-md-4">
+              <div className="card h-100 shadow-sm border-0">
+                <div className="card-body">
+                  <img src="/PICTURES/why-icon.png" alt="Icon 1" className="mb-3" width="60" />
+                  <p className="mb-0 text-muted">
+                    The only real-time solution for managing soil and plant health
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="col-md-4">
+              <div className="card h-100 shadow-sm border-0">
+                <div className="card-body">
+                  <img src="/PICTURES/why-icon.png" alt="Icon 2" className="mb-3" width="60" />
+                  <p className="mb-0 text-muted">
+                    Over 40% of crop loss are caused by extreme weather conditions
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="col-md-4">
+              <div className="last-card">
+                <div className="card-body">
+                  <img src="/PICTURES/why-icon.png" alt="Icon 3" className="mb-3" width="60" />
+                  <p className="mb-0 text-muted">
+                    Over 40% of crop loss stem from poor plant disease diagnosis.
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
+      </section>
 
-      <div className="col-md-4">
-        <div className="card h-100 shadow-sm border-0">
-          <div className="card-body">
-            <img src="/PICTURES/why-icon.png" alt="Icon 2" className="mb-3" width="60" />
-            <p className="mb-0 text-muted">
-              Over 40% of crop loss are caused by extreme weather conditions
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <div className="col-md-4">
-        <div className="last-card">
-          <div className="card-body">
-            <img src="/PICTURES/why-icon.png" alt="Icon 3" className="mb-3" width="60" />
-            <p className="mb-0 text-muted">
-              Over 40% of crop loss stem from poor plant disease diagnosis.
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
- {/* TEAM TEXT SECTION */}
+      {/* TEAM SECTION */}
       <section className="team-section position-relative" id="team">
         <div className="container-fluid p-0">
           <img
@@ -309,11 +322,7 @@ const Home: React.FC = () => {
         </div>
       </section>
 
- <TeamMembers />
-
-
-
-
+      <TeamMembers />
       <Footer />
     </div>
   );

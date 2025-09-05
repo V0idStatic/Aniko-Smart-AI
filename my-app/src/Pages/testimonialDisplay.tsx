@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import '../CSS/testimonialDisplay.css';
-import Header from "../INCLUDE/header-logged";
+import Header from "../INCLUDE/header-unlogged";
 import Footer from "../INCLUDE/footer";
 
 const TestimonialDisplay: React.FC = () => {
