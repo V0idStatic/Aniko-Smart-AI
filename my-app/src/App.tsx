@@ -6,6 +6,7 @@ import TestimonialSubmit from "./Pages/testimonialSubmit";   // ✅ Capitalized
 import QueryComponent from "./Pages/Query"; 
 import DualQueryComponent from "./Pages/DualQuery"; 
 import TestimonialDisplay from "./Pages/testimonialDisplay";
+import TestimonialSection from "./INCLUDE/testimonialSection";
 
 
 function App() {
@@ -19,6 +20,7 @@ function App() {
       <Route path="/query" element={<QueryComponent />} />
       <Route path="/dual-query" element={<DualQueryComponent />} />
       <Route path="/testimonialDisplay" element={<TestimonialDisplay />} />
+      <Route path="/testimonialSection" element={<TestimonialSection />} />
     </Routes>
   );
 }
