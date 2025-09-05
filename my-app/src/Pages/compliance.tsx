@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import '../CSS/compliance.module.css';
+import '../CSS/compliance.css';
 import Header from "../INCLUDE/header-logged";
 import Footer from "../INCLUDE/footer";
 

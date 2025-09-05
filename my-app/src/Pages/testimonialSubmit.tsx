@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import '../CSS/testimonialSubmit.module.css';
+import '../CSS/testimonialSubmit.css';
 import Header from "../INCLUDE/header-logged";
 import Footer from "../INCLUDE/footer";
 

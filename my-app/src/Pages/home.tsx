@@ -1,5 +1,5 @@
 import React from "react";
-import "../CSS/home.module.css";
+import "../CSS/home.css";
 import Header from "../INCLUDE/header-logged";
 import Footer from "../INCLUDE/footer";
 import TeamMembers from "./team";

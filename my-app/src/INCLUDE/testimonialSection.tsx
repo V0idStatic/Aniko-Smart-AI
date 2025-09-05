@@ -1,5 +1,4 @@
-import React from "react";
-import "../CSS/testimonialSection.module.css";
+import "../CSS/testimonialSection.css";
 import { Link } from "react-router-dom";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import 'bootstrap/dist/css/bootstrap.min.css';
