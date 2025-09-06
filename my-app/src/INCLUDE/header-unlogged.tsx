@@ -10,7 +10,7 @@ const Header: React.FC = () => {
         <div className="container-fluid">
           <Link className="navbar-brand" to="/">
             <img
-              src="/PICTURES/logo-hr.png"
+              src="/PICTURES/Logo-hr.png"
               alt="Aniko Logo"
               height="30"
               className="d-inline-block align-text-top"
