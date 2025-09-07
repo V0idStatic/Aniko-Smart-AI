@@ -25,7 +25,7 @@ export default function SignUpScreen() {
           <TextInput
             placeholder="Enter your Email Address"
             style={styles.input}
-            placeholderTextColor="#6b4226"
+            placeholderTextColor="#000000ff"
             keyboardType="email-address"
           />
         </View>
@@ -36,7 +36,7 @@ export default function SignUpScreen() {
           <TextInput
             placeholder="must contain special characters and numbers"
             style={styles.input}
-            placeholderTextColor="#6b4226"
+            placeholderTextColor="#000000ff"
           />
         </View>
 
@@ -48,7 +48,7 @@ export default function SignUpScreen() {
               placeholder="must be at least 8 characters with special characters"
               secureTextEntry={!passwordVisible}
               style={styles.passwordInput}
-              placeholderTextColor="#6b4226"
+              placeholderTextColor="#000000ff"
             />
             <TouchableOpacity
               onPress={() => setPasswordVisible(!passwordVisible)}
@@ -70,7 +70,7 @@ export default function SignUpScreen() {
               placeholder="re-enter your password"
               secureTextEntry={!confirmPasswordVisible}
               style={styles.passwordInput}
-              placeholderTextColor="#6b4226"
+              placeholderTextColor="#000000ff"
             />
             <TouchableOpacity
               onPress={() => setConfirmPasswordVisible(!confirmPasswordVisible)}
