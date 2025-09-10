@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import supabase from "../CONFIG/supabaseClient";
 import AdminHeader from "../INCLUDE/admin-header";
+import "../CSS/admin_testimonial.css";
+
 
 interface Testimonial {
   id: number;
@@ -14,7 +16,6 @@ const AdminTestimonial: React.FC = () => {
   const [pendingTestimonials, setPendingTestimonials] = useState<Testimonial[]>([]);
   const [approvedTestimonials, setApprovedTestimonials] = useState<Testimonial[]>([]);
 
-  // ✅ Fetch testimonials on load
   useEffect(() => {
     fetchTestimonials();
   }, []);
@@ -61,81 +62,89 @@ const AdminTestimonial: React.FC = () => {
     <div>
       <AdminHeader />
 
-      <div style={{ marginLeft: "290px", padding: "20px" }}>
-        <h2>Pending Testimonials</h2>
-        <table className="table table-bordered table-hover">
-          <thead className="table-warning">
-            <tr>
-              <th>ID</th>
-              <th>User ID</th>
-              <th>Testimonial</th>
-              <th>Date</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {pendingTestimonials.length > 0 ? (
-              pendingTestimonials.map((t) => (
-                <tr key={t.id}>
-                  <td>{t.id}</td>
-                  <td>{t.user_id}</td>
-                  <td>{t.testimonial}</td>
-                  <td>{new Date(t.created_at).toLocaleString()}</td>
-                  <td>
-                    <button className="btn btn-success btn-sm me-2" onClick={() => handleApprove(t.id)}>
-                      Approve
-                    </button>
-                    <button className="btn btn-danger btn-sm" onClick={() => handleDelete(t.id)}>
-                      Delete
-                    </button>
+      <div style={{ marginLeft: "290px", padding: "20px" }} className="adminTest-container">
+        <h1 className="adminTest-header">Testimonial Management</h1>
+        <h6 className="adminTest-subheader">Review and approve customer stories before publishing.</h6>
+        <div className="card adminTest-card">
+          <h5><i className="bi bi-clock"></i>Pending Testimonials</h5>
+          <table className="table table-bordered table-hover adminTest-pending-table">
+            <thead className="table-warning">
+              <tr>
+                <th>ID</th>
+                <th>User ID</th>
+                <th>Testimonial</th>
+                <th>Date</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {pendingTestimonials.length > 0 ? (
+                pendingTestimonials.map((t) => (
+                  <tr key={t.id}>
+                    <td>{t.id}</td>
+                    <td>{t.user_id}</td>
+                    <td>{t.testimonial}</td>
+                    <td>{new Date(t.created_at).toLocaleString()}</td>
+                    <td>
+                      <button className="btn btn-success btn-sm me-2" onClick={() => handleApprove(t.id)}>
+                        <i className="bi bi-check-circle-fill"></i>Approve
+                      </button>
+                      <button className="btn btn-danger btn-sm" onClick={() => handleDelete(t.id)}>
+                        <i className="bi bi-trash3-fill"></i>Delete
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={5} className="text-center">
+                    No pending testimonials
                   </td>
                 </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan={5} className="text-center">
-                  No pending testimonials
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+              )}
+            </tbody>
+          </table>
+        </div>
 
-        <h2 className="mt-5">Approved Testimonials</h2>
-        <table className="table table-bordered table-hover">
-          <thead className="table-success">
-            <tr>
-              <th>ID</th>
-              <th>User ID</th>
-              <th>Testimonial</th>
-              <th>Date</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {approvedTestimonials.length > 0 ? (
-              approvedTestimonials.map((t) => (
-                <tr key={t.id}>
-                  <td>{t.id}</td>
-                  <td>{t.user_id}</td>
-                  <td>{t.testimonial}</td>
-                  <td>{new Date(t.created_at).toLocaleString()}</td>
-                  <td>
-                    <button className="btn btn-danger btn-sm" onClick={() => handleDelete(t.id)}>
-                      Delete
-                    </button>
+
+        <div className="card adminTest-card">
+          <h5><i className="bi bi-check2-circle"></i>Approved Testimonials</h5>
+          <table className="table table-bordered table-hover adminTest-approved-table">
+            <thead className="table-success">
+              <tr>
+                <th>ID</th>
+                <th>User ID</th>
+                <th>Testimonial</th>
+                <th>Date</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {approvedTestimonials.length > 0 ? (
+                approvedTestimonials.map((t) => (
+                  <tr key={t.id}>
+                    <td>{t.id}</td>
+                    <td>{t.user_id}</td>
+                    <td>{t.testimonial}</td>
+                    <td>{new Date(t.created_at).toLocaleString()}</td>
+                    <td>
+                      <button className="btn btn-danger btn-sm" onClick={() => handleDelete(t.id)}>
+                        <i className="bi bi-trash3-fill"></i>Delete
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={5} className="text-center">
+                    No approved testimonials
                   </td>
                 </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan={5} className="text-center">
-                  No approved testimonials
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+              )}
+            </tbody>
+          </table>
+        </div>
+      
       </div>
     </div>
   );
