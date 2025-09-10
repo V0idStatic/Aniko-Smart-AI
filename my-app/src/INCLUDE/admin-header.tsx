@@ -50,7 +50,7 @@ const AdminHeader: React.FC = () => {
               border: "none",
               borderRadius: "10px",
             }}
-            onClick={() => navigate("/compliance")}
+            onClick={() => navigate("/admin_testimonial")}
           >
             Testimonial Management
           </button>
@@ -65,7 +65,7 @@ const AdminHeader: React.FC = () => {
               border: "none",
               borderRadius: "10px",
             }}
-            onClick={() => navigate("/testimonialDisplay")}
+            onClick={() => navigate("/admin_users")}
           >
             Account Management
           </button>
@@ -81,7 +81,7 @@ const AdminHeader: React.FC = () => {
               border: "none",
               borderRadius: "10px",
             }}
-            onClick={() => navigate("/contact_management")}
+            onClick={() => navigate("/admin_contact")}
           >
             Contact Management
           </button>
