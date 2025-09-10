@@ -37,10 +37,6 @@
     padding: 40px;
 }
 
-.adminLog-fc {
-    padding: 10px !important;
-}
-
 .adminLog-logo {
     width: 10%;
     justify-content: center;
@@ -50,7 +46,7 @@
     margin-bottom: 1.5rem !important;
 }
 
-.adminLog-btn {
+.adminLog-form button {
     background: var(--gradient-secondary);
     border: none !important;
     color: white;
@@ -68,4 +64,19 @@
 
 .adminLog-form label {
     color: var(--primary-brown) !important;
+}
+
+.adminLog-form .form-control {
+    padding: 10px !important;
+}
+
+.adminLog-form .form-control:hover{
+    padding: 10px !important;
+    border: 2px solid var(--primary-green) !important
+}
+
+.adminLog-form .form-control:focus{
+    padding: 10px !important;
+    border: 2px solid var(--dark-brown) !important;
+    background-color: #bee08a66 !important;
 }
