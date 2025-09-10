@@ -72,11 +72,11 @@
 
 .adminLog-form .form-control:hover{
     padding: 10px !important;
-    border: 2px solid var(--primary-green) !important
+    border: 2px solid var(--primary-green) !important;
 }
 
 .adminLog-form .form-control:focus{
     padding: 10px !important;
     border: 2px solid var(--dark-brown) !important;
-    background-color: #bee08a66 !important;
+    background-color: #bee08a26 !important;
 }

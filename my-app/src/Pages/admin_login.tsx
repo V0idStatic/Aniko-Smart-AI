@@ -53,7 +53,6 @@ const handleSubmit = async (e: React.FormEvent) => {
 
 
   return (
-    <body className="admin-login-body" style={{ margin: 0, fontFamily: 'Arial, sans-serif' }}>
       <div className="d-flex align-items-center justify-content-center vh-100 bg-light adminLogin-body">
         <div className="card shadow p-4 adminLog-card" style={{ width: "600px" }}>
           <img src="PICTURES/Logo-noText.png" className="adminLog-logo"/>
@@ -67,6 +66,7 @@ const handleSubmit = async (e: React.FormEvent) => {
                   type="text"
                   className="form-control"
                   value={username}
+
                   onChange={(e) => setUsername(e.target.value)}
                   required
                 />
@@ -88,9 +88,7 @@ const handleSubmit = async (e: React.FormEvent) => {
               </button>
             </form>
         </div>
-      </div>
-    </body>
-   
+      </div>   
   );
 };
 
