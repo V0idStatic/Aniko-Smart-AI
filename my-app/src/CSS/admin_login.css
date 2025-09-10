@@ -1,0 +1,71 @@
+:root {
+    --primary-green: #1D492C;
+    --accent-green: #84cc16;
+    --pastel-green: #BDE08A;
+    --light-green: #f0fdf4;
+    --dark-green: #143820;
+    --dark-gray: #374151;
+    --light-gray: #f9fafb;
+    --white: #ffffff;
+    --bg-color: #cfc4b2ff;
+    --primary-brown: #8A6440;
+    --dark-brown: #4D2D18;
+    --gradient-primary: linear-gradient(135deg, var(--primary-green), var(--accent-green));
+    --gradient-secondary: linear-gradient(135deg, var(--primary-green), var(--pastel-green));
+}
+
+.adminLogin-body {
+    min-height: 100vh; 
+    background: var(--gradient-secondary) !important;
+}
+
+.adminLog-card {
+    background-color: var(--light-green) !important;
+    border-radius: 0 !important;
+    border-top-right-radius: 80px !important;
+    border-bottom-left-radius: 80px !important;
+    border: 2px solid var(--primary-green) !important;
+    box-shadow: 0px 0px 20px 5px var(--pastel-green) !important
+}
+
+.adminLog-card h3 {
+    color: var(--primary-green) !important;
+    font-weight: bold;
+}
+
+.adminLog-form {
+    padding: 40px;
+}
+
+.adminLog-fc {
+    padding: 10px !important;
+}
+
+.adminLog-logo {
+    width: 10%;
+    justify-content: center;
+    align-items: center;
+    display: block;
+    margin: 0 auto !important;
+    margin-bottom: 1.5rem !important;
+}
+
+.adminLog-btn {
+    background: var(--gradient-secondary);
+    border: none !important;
+    color: white;
+    font-weight: 700;
+    border-radius: 20px;
+    margin-top: 2rem;
+    padding: 10px;
+    box-shadow: 0px 1px 3px 2px rgba(0, 0, 0, 0.189);
+}
+
+.adminLog-btn:hover {
+    background: var(--gradient-primary) !important;
+    color: var(--light-green) !important;
+}
+
+.adminLog-form label {
+    color: var(--primary-brown) !important;
+}

@@ -1,7 +1,10 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import supabase from "../CONFIG/supabaseClient"; // supabase client setup
+import supabase from "../CONFIG/supabaseClient"; 
 import bcrypt from "bcryptjs";
+import "../CSS/admin_login.css";
+
+
 
 const AdminLogin: React.FC = () => {
   const [username, setUsername] = useState("");
@@ -28,7 +31,6 @@ const handleSubmit = async (e: React.FormEvent) => {
       return;
     }
 
-    // ✅ Fix bcrypt hash prefix ($2y$ → $2a$ for bcryptjs)
     const hash = data.password.replace(/^\$2y\$/, "$2a$");
     console.log("Stored hash:", hash);
     console.log("Entered password:", password);
@@ -51,40 +53,45 @@ const handleSubmit = async (e: React.FormEvent) => {
 
 
   return (
-    <div className="d-flex align-items-center justify-content-center vh-100 bg-light">
-      <div className="card shadow p-4" style={{ width: "400px" }}>
-        <h3 className="text-center mb-3">Admin Login</h3>
-        {error && <div className="alert alert-danger">{error}</div>}
+    <body className="admin-login-body" style={{ margin: 0, fontFamily: 'Arial, sans-serif' }}>
+       <div className="d-flex align-items-center justify-content-center vh-100 bg-light adminLogin-body">
+        <div className="card shadow p-4 adminLog-card" style={{ width: "600px" }}>
+          <img src="PICTURES/Logo-noText.png" className="adminLog-logo"/>
+          <h3 className="text-center mb-3">Admin Login</h3>
+          {error && <div className="alert alert-danger">{error}</div>}
 
-        <form onSubmit={handleSubmit}>
-          <div className="mb-3">
-            <label className="form-label">Username</label>
-            <input
-              type="text"
-              className="form-control"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              required
-            />
-          </div>
+          <form onSubmit={handleSubmit} className="adminLog-form">
+            <div className="mb-3">
+              <label className="form-label">Username</label>
+              <input
+                type="text"
+                className="form-control adminLog-fc"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                required
+              />
+            </div>
 
-          <div className="mb-3">
-            <label className="form-label">Password</label>
-            <input
-              type="password"
-              className="form-control"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-          </div>
+            <div className="mb-3">
+              <label className="form-label">Password</label>
+              <input
+                type="password"
 
-          <button type="submit" className="btn btn-primary w-100">
-            Login
-          </button>
-        </form>
+                className="form-control adminLog-fc"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+            </div>
+
+            <button type="submit" className="btn adminLog-btn w-100">
+              Login
+            </button>
+          </form>
+        </div>
       </div>
-    </div>
+    </body>
+   
   );
 };
 
