@@ -1,0 +1,227 @@
+:root {
+    --primary-green: #1D492C;
+    --accent-green: #84cc16;
+    --pastel-green: #BDE08A;
+    --light-green: #f0fdf4;
+    --dark-green: #143820;
+    --dark-gray: #374151;
+    --light-gray: #f9fafb;
+    --white: #ffffff;
+    --bg-color: #cfc4b2ff;
+    --primary-brown: #8A6440;
+    --dark-brown: #4D2D18;
+    --gradient-primary: linear-gradient(135deg, var(--primary-green), var(--accent-green));
+    --gradient-secondary: linear-gradient(135deg, var(--primary-green), var(--pastel-green));
+}
+
+.adminCon-header {
+    color: var(--dark-brown);
+    font-weight:bold;
+    text-align: center;
+    margin-top: 2rem;
+}
+
+.adminCon-subheader {
+    color: var(--primary-brown);
+    text-align:center;
+    margin-bottom: 2rem;
+    font-weight: 500;
+    font-size: 20px;
+}
+
+.adminCon-card {
+    background: var(--gradient-secondary);
+    backdrop-filter: blur(12px) brightness(0.9);
+    -webkit-backdrop-filter: blur(12px) brightness(0.9);
+    padding: 30px 55px !important;
+    border-radius: 0;
+    border:2px solid var(--dark-green);
+    border-top-right-radius: 80px;
+    border-bottom-left-radius: 80px;
+}
+
+.adminCon-card h5 {
+    color: var(--light-green);
+    font-weight: 500;
+    margin-bottom: 1rem;
+}
+
+.adminCon-table {
+    border-radius: 20px;
+    overflow: hidden;
+    backdrop-filter: blur(10px);
+    background: rgba(255, 255, 255, 0.15); 
+    color: var(--white);
+    border:none !important;
+}
+
+.adminCon-table tbody tr:hover {
+    background: rgba(255, 255, 255, 0.08);
+    transition: 0.3s ease;
+}
+
+.adminCon-table th {
+        text-align: center;
+    font-weight: 600;
+    padding: 12px;
+    background: rgba(0, 0, 0, 0.25) !important; 
+    color: var(--light-green);
+}
+
+.adminCon-table td {
+    vertical-align: middle;
+    padding: 10px;
+    color: var(--primary-green) !important;
+}
+
+.adminCon-table td, 
+.adminCon-table th {
+    border: 1px solid #ccc; 
+}
+
+.adminCon-table tr:first-child th {
+    border-top: none; 
+}
+
+.adminCon-table tr:last-child td {
+    border-bottom: none; 
+}
+
+.adminCon-table td:first-child,
+.adminCon-table th:first-child {
+    border-left: none; 
+}
+
+.adminCon-table td:last-child,
+.adminCon-table th:last-child {
+    border-right: none; 
+}
+
+.adminCon-table tbody tr:hover {
+    background: rgba(255, 255, 255, 0.08) !important;
+    transition: 0.3s ease;
+}
+
+.adminCon-table thead tr  {
+    border-top: none !important;
+    background: linear-gradient(135deg, #16a34a, #166534) !important;
+    color: var(--dark-green) !important;
+    border-top-right-radius: 20px;
+    border-top-left-radius: 20px;
+}
+
+.reply-btn {
+    background-color: var(--pastel-green);
+    color: var(--primary-green);
+    border:none;
+    border-radius: 10px !important;
+}
+
+.reply-btn .bi {
+    margin-right: 5px;
+}
+
+.reply-btn:hover {
+    background-color: var(--primary-green);
+    color: white;
+}
+
+.del-btn {
+    background-color: #b91c1c !important;
+    border-radius: 10px !important;
+}
+
+.del-btn .bi {
+    margin-right: 5px !important;
+}
+
+.del-btn:hover {
+    background-color: #5d0909ff !important;
+}
+
+.card-heading {
+    color: vaR(--light-green);
+    margin-bottom: 1rem;
+}
+
+/* ================== REPLY MODAL ==================== */
+.replyMod-content {
+    border-radius: 50px;
+    border-bottom-left-radius: 0 !important;
+    border: 2px solid var(--dark-brown) !important;
+}
+.replyMod-header {
+    background-color: var(--pastel-green);
+    border-top-right-radius: 50px;
+    border-top-left-radius: 50px;
+}
+
+.replyMod-title {
+    color: var(--dark-brown) !important;
+    margin-left: 1rem;
+}
+
+.replyMod-title .bi {
+    margin-left: 10px; 
+}
+
+.replyMod-body {
+    padding: 30px; 
+    background-color: var(--light-green);
+}
+
+.replyMod-footer {
+    background-color: var(--primary-brown);
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 49px;
+}
+
+.replyMod-fc, .replyMod-textarea {
+    border: 1px solid var(--primary-brown) !important;
+}
+
+.replyMod-fc {
+    padding: 10px;
+}
+
+.replyMod-textarea {
+    padding: 10px;
+    resize: none; 
+}
+
+.adminCon-close {
+    margin-right: 7px !important;
+}
+
+.sendRep-btn {
+    background-color: rgba(207, 196, 178, 0.527) !important;
+    color: var(--dark-brown) !important;
+    font-weight: 500;
+    border: 2px solid var(--dark-brown) !important;
+    padding: 6px;
+    border-radius: 10px;
+    margin-right: 7px !important;
+}
+
+.sendRep-btn:hover {
+    background-color: var(--dark-brown) !important;
+    color: white !important;
+}
+
+.sendRep-btn .bi {
+    margin-right: 5px;
+}
+
+.cancelRep-btn {
+    background-color: transparent !important;
+    color: var(--dark-brown) !important;
+    font-weight: 500;
+    border: 2px solid var(--dark-brown) !important;
+    padding: 6px;
+    border-radius: 10px;
+    margin-right: 7px !important;
+}
+
+.cancelRep-btn:hover {
+    background-color: rgba(207, 196, 178, 0.527) !important;
+}

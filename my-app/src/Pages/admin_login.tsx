@@ -66,7 +66,7 @@ const handleSubmit = async (e: React.FormEvent) => {
                   type="text"
                   className="form-control"
                   value={username}
-
+                  placeholder="Enter your username"
                   onChange={(e) => setUsername(e.target.value)}
                   required
                 />
@@ -78,6 +78,7 @@ const handleSubmit = async (e: React.FormEvent) => {
                   type="password"
                   className="form-control"
                   value={password}
+                  placeholder="Enter your password"
                   onChange={(e) => setPassword(e.target.value)}
                   required
                 />

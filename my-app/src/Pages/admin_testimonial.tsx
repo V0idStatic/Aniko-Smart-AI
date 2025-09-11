@@ -34,7 +34,6 @@ const AdminTestimonial: React.FC = () => {
     }
   };
 
-  // ✅ Approve testimonial
   const handleApprove = async (id: number) => {
     const { error } = await supabase.from("testimonials").update({ status: "approved" }).eq("id", id);
 
@@ -43,10 +42,9 @@ const AdminTestimonial: React.FC = () => {
       return;
     }
 
-    fetchTestimonials(); // Refresh after update
+    fetchTestimonials(); 
   };
 
-  // ✅ Delete testimonial
   const handleDelete = async (id: number) => {
     const { error } = await supabase.from("testimonials").delete().eq("id", id);
 
@@ -55,14 +53,14 @@ const AdminTestimonial: React.FC = () => {
       return;
     }
 
-    fetchTestimonials(); // Refresh after delete
+    fetchTestimonials(); 
   };
 
   return (
     <div>
       <AdminHeader />
 
-      <div style={{ marginLeft: "290px", padding: "20px" }} className="adminTest-container">
+      <div style={{ marginLeft: "280px", padding: "20px" }} className="adminTest-container">
         <h1 className="adminTest-header">Testimonial Management</h1>
         <h6 className="adminTest-subheader">Review and approve customer stories before publishing.</h6>
         <div className="card adminTest-card">

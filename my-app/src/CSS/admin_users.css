@@ -1,0 +1,162 @@
+:root {
+    --primary-green: #1D492C;
+    --accent-green: #84cc16;
+    --pastel-green: #BDE08A;
+    --light-green: #f0fdf4;
+    --dark-green: #143820;
+    --dark-gray: #374151;
+    --light-gray: #f9fafb;
+    --white: #ffffff;
+    --bg-color: #cfc4b2ff;
+    --primary-brown: #8A6440;
+    --dark-brown: #4D2D18;
+    --gradient-primary: linear-gradient(135deg, var(--primary-green), var(--accent-green));
+    --gradient-secondary: linear-gradient(135deg, var(--primary-green), var(--pastel-green));
+}
+
+ .adminUsers-card {
+    background: var(--gradient-secondary);
+    backdrop-filter: blur(12px) brightness(0.9);
+    -webkit-backdrop-filter: blur(12px) brightness(0.9);
+    border: 2px solid var(--dark-green);
+    margin-bottom: 4rem !important;
+    border-radius: 20px;
+    padding: 20px 30px;
+    border-radius: 0;
+    border-top-right-radius: 80px;
+    border-bottom-left-radius: 80px;
+}
+
+.adminUsers-card h5 {
+    color: var(--light-green);
+    margin-bottom: 1rem !important;
+}
+
+.adminUsers-header {
+    color: var(--dark-brown);
+    font-weight: bold;
+    margin-top: 2rem;
+}
+
+.adminUsers-subheader {
+    color: var(--primary-brown) !important;
+    font-size: 18px;
+    font-weight: 400;
+    margin-bottom: 2rem;
+}
+
+.adminUsers-table {
+    border-radius: 20px;
+    overflow: hidden;
+    backdrop-filter: blur(10px);
+    background: rgba(255, 255, 255, 0.15); 
+    color: var(--white);
+    border:none !important;
+    border-collapse: collapse !important;
+    width: 100%;
+}
+
+.adminUsers-table th {
+    text-align: center;
+    font-weight: 600;
+    padding: 12px;
+    background: rgba(0, 0, 0, 0.25) !important; 
+    color: var(--light-green);
+}
+
+.adminUsers-table td {
+    vertical-align: middle;
+    padding: 10px;
+    color: var(--primary-green) !important;
+}
+
+.adminUsers-table td, 
+.adminUsers-table th {
+    border: 1px solid #ccc; 
+}
+
+.adminUsers-table tr:first-child th {
+    border-top: none; 
+}
+
+.adminUsers-table tr:last-child td {
+    border-bottom: none; 
+}
+
+.adminUsers-table td:first-child,
+.adminUsers-table th:first-child {
+    border-left: none; 
+}
+
+.adminUsers-table td:last-child,
+.adminUsers-table th:last-child {
+    border-right: none; 
+}
+
+.adminUsers-table tbody tr:hover {
+    background: rgba(255, 255, 255, 0.08) !important;
+    transition: 0.3s ease;
+}
+
+.adminUsers-table thead tr  {
+    background-color: var(--pastel-green);
+    color: var(--dark-green) !important;
+    border-top-right-radius: 20px;
+    border-top-left-radius: 20px;
+    border-top: none !important;
+}
+
+.adminUsers-table .btn {
+    border-radius: 20px;
+    font-size: 0.85rem;
+    padding: 4px 10px;
+    transition: all 0.3s ease;
+}
+
+.adminUsers-table .btn-success:hover {
+    background-color: var(--dark-green) !important;
+    color: var(--white);
+}
+
+.adminUsers-table .btn-danger {
+    background: #dc2626;
+    border: none;
+}
+
+.adminUsers-table .btn-danger:hover {
+    background: #b91c1c;
+}
+
+.bi {
+    margin-right: 1rem;
+}
+
+.bi-trash3-fill {
+    margin-right: 7px;
+}
+
+.heading {
+    display: flex;
+    align-items: center;
+    margin-bottom: 2rem;
+    justify-content: space-between !important;
+}
+
+.heading .col-6:last-child {
+    display: flex;
+    justify-content: flex-end; 
+    align-items: center;
+}
+
+.heading a {
+    background-color: var(--primary-brown) !important;
+    padding: 10px 20px;
+    border-radius: 20px;
+    border: none !important; 
+    font-weight: 500;
+}
+
+.heading a:hover {
+    background-color: var(--dark-brown) !important;
+    transition: all 0.3s ease-in-out;
+}
