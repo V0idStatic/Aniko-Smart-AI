@@ -9,6 +9,10 @@ import Feature from "./feature";
 import WhyAniko from "./whyaniko";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.bundle.min.js"; // Popper included
+import Testimonials from "./testimonial"; // ✅ fixed path
+
+
+
 
 import { auth } from "../firebase"; 
 import { onAuthStateChanged, User } from "firebase/auth";
@@ -247,6 +251,8 @@ const Home: React.FC = () => {
           </div>
         </div>
       </section>
+
+      <Testimonials />
 
       {/* WHY ANIKO SECTION */}
       <section id="why-aniko" className="py-5 whyAniko-section">

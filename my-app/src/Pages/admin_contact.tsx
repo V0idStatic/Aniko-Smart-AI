@@ -19,86 +19,136 @@ const AdminContact: React.FC = () => {
   const [messages, setMessages] = useState<ContactMessage[]>([]);
   const [loading, setLoading] = useState(true);
 
+<<<<<<< Updated upstream
+=======
+  // Reply modal states
+>>>>>>> Stashed changes
   const [showReplyModal, setShowReplyModal] = useState(false);
-  const [replyEmail, setReplyEmail] = useState("");
-  const [replySubject, setReplySubject] = useState("");
+  const [replyTo, setReplyTo] = useState<string>("");
+  const [replySubject, setReplySubject] = useState("Reply from Admin");
   const [replyMessage, setReplyMessage] = useState("");
-  const [replyToId, setReplyToId] = useState<number | null>(null);
 
+  // Fetch messages
   useEffect(() => {
+    const fetchMessages = async () => {
+      const { data, error } = await supabase.from("contact_messages").select("*");
+      if (error) {
+        console.error("Error fetching messages:", error.message);
+      } else {
+        setMessages(data || []);
+      }
+      setLoading(false);
+    };
+
     fetchMessages();
   }, []);
 
-  const fetchMessages = async () => {
-    const { data, error } = await supabase
-      .from("contact_messages")
-      .select("*")
-      .order("submitted_at", { ascending: false });
-
-    if (error) {
-      console.error("Error fetching messages:", error);
-    } else {
-      setMessages(data || []);
-    }
-    setLoading(false);
-  };
-
+  // Delete message
   const handleDelete = async (id: number) => {
     if (!window.confirm("Are you sure you want to delete this message?")) return;
-
     const { error } = await supabase.from("contact_messages").delete().eq("id", id);
-
     if (error) {
-      console.error("Error deleting message:", error);
+      console.error("Error deleting message:", error.message);
     } else {
       setMessages(messages.filter((msg) => msg.id !== id));
     }
   };
 
-  const openReplyModal = (id: number, email: string, subject: string) => {
-    setReplyToId(id);
-    setReplyEmail(email);
-    setReplySubject("Re: " + subject);
-    setReplyMessage("");
+  // Open reply modal
+  const handleReply = (email: string, subject: string) => {
+    setReplyTo(email);
+    setReplySubject(`Re: ${subject}`);
     setShowReplyModal(true);
   };
 
+  // Send reply
   const handleSendReply = async () => {
-    if (!replyToId || !replyMessage.trim()) {
-      alert("Reply message cannot be empty.");
-      return;
-    }
-
     try {
-      const response = await fetch("http://localhost/YOUR_PROJECT/send_reply.php", {
+      const response = await fetch("http://localhost:5000/send-reply", {
         method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: new URLSearchParams({
-          contact_id: replyToId.toString(),
-          to_email: replyEmail,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          to_email: replyTo,
           subject: replySubject,
           reply_message: replyMessage,
         }),
       });
 
-      if (response.ok) {
-        alert("Reply sent successfully to " + replyEmail);
+      const result = await response.json();
+      if (result.success) {
+        alert(result.message);
         setShowReplyModal(false);
+        setReplyMessage("");
+        setReplySubject("Reply from Admin");
       } else {
-        alert("Failed to send reply.");
+        alert("Failed to send reply: " + result.message);
       }
     } catch (err) {
       console.error("Error sending reply:", err);
-      alert("An error occurred while sending the reply.");
+      alert("Error sending reply. Check console for details.");
     }
   };
+
+  if (loading) {
+    return <p>Loading messages...</p>;
+  }
 
   return (
     <div>
       <AdminHeader />
+<<<<<<< Updated upstream
       <div style={{ marginLeft: "280px", padding: "20px" }}>
         <h1 className="adminCon-header">Contact Messages</h1>
         <h6 className="adminCon-subheader">Manage support requests and customer feedback</h6>
+=======
+      <div style={{ marginLeft: "290px", padding: "20px" }}>
+        <h1>Contact Messages</h1>
+        <table className="table table-bordered table-striped">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>First Name</th>
+              <th>Last Name</th>
+              <th>Email</th>
+              <th>Phone</th>
+              <th>Subject</th>
+              <th>Message</th>
+              <th>Newsletter</th>
+              <th>Submitted At</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {messages.map((msg) => (
+              <tr key={msg.id}>
+                <td>{msg.id}</td>
+                <td>{msg.first_name}</td>
+                <td>{msg.last_name}</td>
+                <td>{msg.email}</td>
+                <td>{msg.phone}</td>
+                <td>{msg.subject}</td>
+                <td>{msg.message}</td>
+                <td>{msg.newsletter ? "Yes" : "No"}</td>
+                <td>{new Date(msg.submitted_at).toLocaleString()}</td>
+                <td>
+                  <button
+                    className="btn btn-success btn-sm me-2"
+                    onClick={() => handleReply(msg.email, msg.subject)}
+                  >
+                    Reply
+                  </button>
+                  <button
+                    className="btn btn-danger btn-sm"
+                    onClick={() => handleDelete(msg.id)}
+                  >
+                    Delete
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+>>>>>>> Stashed changes
 
         <div className="card adminCon-card">
           <h5><i className="bi bi-envelope-fill"></i>Recent Messages</h5>
@@ -160,6 +210,7 @@ const AdminContact: React.FC = () => {
       
         {/* Reply Modal */}
         {showReplyModal && (
+<<<<<<< Updated upstream
           <div
             className="modal fade show replyModal"
             style={{ display: "block", background: "rgba(0,0,0,0.5)" }}
@@ -198,6 +249,45 @@ const AdminContact: React.FC = () => {
                   </button>
                   <button className="btn btn-success sendRep-btn" onClick={handleSendReply}>
                     <i className="bi bi-send"></i>Send Reply
+=======
+          <div className="modal show d-block" style={{ background: "rgba(0,0,0,0.5)" }}>
+            <div className="modal-dialog">
+              <div className="modal-content">
+                <div className="modal-header">
+                  <h5 className="modal-title">Reply to {replyTo}</h5>
+                  <button
+                    type="button"
+                    className="btn-close"
+                    onClick={() => setShowReplyModal(false)}
+                  ></button>
+                </div>
+                <div className="modal-body">
+                  <div className="mb-3">
+                    <label>Subject</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      value={replySubject}
+                      onChange={(e) => setReplySubject(e.target.value)}
+                    />
+                  </div>
+                  <div className="mb-3">
+                    <label>Message</label>
+                    <textarea
+                      className="form-control"
+                      rows={4}
+                      value={replyMessage}
+                      onChange={(e) => setReplyMessage(e.target.value)}
+                    ></textarea>
+                  </div>
+                </div>
+                <div className="modal-footer">
+                  <button className="btn btn-secondary" onClick={() => setShowReplyModal(false)}>
+                    Cancel
+                  </button>
+                  <button className="btn btn-primary" onClick={handleSendReply}>
+                    Send Reply
+>>>>>>> Stashed changes
                   </button>
                 </div>
               </div>
