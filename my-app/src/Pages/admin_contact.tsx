@@ -20,6 +20,10 @@ const AdminContact: React.FC = () => {
   const [loading, setLoading] = useState(true);
 
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
+=======
+  // Reply modal states
+>>>>>>> Stashed changes
 =======
   // Reply modal states
 >>>>>>> Stashed changes
@@ -148,6 +152,9 @@ const AdminContact: React.FC = () => {
             ))}
           </tbody>
         </table>
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
 
         <div className="card adminCon-card">
@@ -210,6 +217,7 @@ const AdminContact: React.FC = () => {
       
         {/* Reply Modal */}
         {showReplyModal && (
+<<<<<<< Updated upstream
 <<<<<<< Updated upstream
           <div
             className="modal fade show replyModal"
@@ -285,6 +293,43 @@ const AdminContact: React.FC = () => {
                   <button className="btn btn-secondary" onClick={() => setShowReplyModal(false)}>
                     Cancel
                   </button>
+=======
+          <div className="modal show d-block" style={{ background: "rgba(0,0,0,0.5)" }}>
+            <div className="modal-dialog">
+              <div className="modal-content">
+                <div className="modal-header">
+                  <h5 className="modal-title">Reply to {replyTo}</h5>
+                  <button
+                    type="button"
+                    className="btn-close"
+                    onClick={() => setShowReplyModal(false)}
+                  ></button>
+                </div>
+                <div className="modal-body">
+                  <div className="mb-3">
+                    <label>Subject</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      value={replySubject}
+                      onChange={(e) => setReplySubject(e.target.value)}
+                    />
+                  </div>
+                  <div className="mb-3">
+                    <label>Message</label>
+                    <textarea
+                      className="form-control"
+                      rows={4}
+                      value={replyMessage}
+                      onChange={(e) => setReplyMessage(e.target.value)}
+                    ></textarea>
+                  </div>
+                </div>
+                <div className="modal-footer">
+                  <button className="btn btn-secondary" onClick={() => setShowReplyModal(false)}>
+                    Cancel
+                  </button>
+>>>>>>> Stashed changes
                   <button className="btn btn-primary" onClick={handleSendReply}>
                     Send Reply
 >>>>>>> Stashed changes
