@@ -7,14 +7,90 @@ import HeaderUnlogged from "../INCLUDE/header-unlogged";
 import Footer from "../INCLUDE/footer";
 import { auth } from "../firebase";
 import { onAuthStateChanged, User } from "firebase/auth";
+import  supabase  from "../CONFIG/supabaseClient"; // ✅ Supabase client
+import "bootstrap/dist/js/bootstrap.bundle.min.js";
+import { Modal } from "bootstrap";
+
+
 
 const Compliance: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    subject: "",
+    message: "",
+    newsletter: false,
+  });
+  const [submitting, setSubmitting] = useState(false);
+  const [modalMessage, setModalMessage] = useState("");
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, (u) => setUser(u));
     return () => unsub();
   }, []);
+
+  // ✅ Fixed handleChange
+  const handleChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
+  ) => {
+    const { name, value, type } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]:
+        type === "checkbox"
+          ? (e.target as HTMLInputElement).checked
+          : value,
+    }));
+  };
+
+  // ✅ Submit to Supabase
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitting(true);
+
+    try {
+      const { error } = await supabase.from("contact_messages").insert([
+        {
+          first_name: formData.firstName,
+          last_name: formData.lastName,
+          email: formData.email,
+          phone: formData.phone,
+          subject: formData.subject,
+          message: formData.message,
+          newsletter: formData.newsletter,
+        },
+      ]);
+
+      if (error) {
+        console.error("❌ Error inserting message:", error.message);
+        setModalMessage("❌ Failed to send message. Please try again.");
+      } else {
+        setModalMessage("✅ Your message has been successfully sent!");
+        setFormData({
+          firstName: "",
+          lastName: "",
+          email: "",
+          phone: "",
+          subject: "",
+          message: "",
+          newsletter: false,
+        });
+      }
+
+      // ✅ Show modal
+      const modal = new (window as any).bootstrap.Modal(
+        document.getElementById("successModal")
+      );
+      modal.show();
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   return (
     <div className="page-wrapper">
@@ -56,7 +132,7 @@ const Compliance: React.FC = () => {
 
             {/* Contact Form */}
             <div className="contact-form-section">
-              <form action="process_contact.php" method="POST">
+              <form onSubmit={handleSubmit}>
                 <div className="row">
                   <div className="col-md-6">
                     <div className="form-floating">
@@ -65,6 +141,8 @@ const Compliance: React.FC = () => {
                         className="form-control"
                         id="firstName"
                         name="firstName"
+                        value={formData.firstName}
+                        onChange={handleChange}
                         placeholder="First Name"
                         required
                       />
@@ -78,6 +156,8 @@ const Compliance: React.FC = () => {
                         className="form-control"
                         id="lastName"
                         name="lastName"
+                        value={formData.lastName}
+                        onChange={handleChange}
                         placeholder="Last Name"
                         required
                       />
@@ -94,6 +174,8 @@ const Compliance: React.FC = () => {
                         className="form-control"
                         id="email"
                         name="email"
+                        value={formData.email}
+                        onChange={handleChange}
                         placeholder="Email Address"
                         required
                       />
@@ -107,6 +189,8 @@ const Compliance: React.FC = () => {
                         className="form-control"
                         id="phone"
                         name="phone"
+                        value={formData.phone}
+                        onChange={handleChange}
                         placeholder="Phone Number"
                       />
                       <label htmlFor="phone">Phone Number</label>
@@ -119,9 +203,11 @@ const Compliance: React.FC = () => {
                     className="form-select"
                     id="subject"
                     name="subject"
+                    value={formData.subject}
+                    onChange={handleChange}
                     required
                   >
-                    <option value="disable" disabled selected>
+                    <option value="" disabled>
                       Select a subject
                     </option>
                     <option value="general">General Inquiry</option>
@@ -138,6 +224,8 @@ const Compliance: React.FC = () => {
                     className="form-control"
                     id="message"
                     name="message"
+                    value={formData.message}
+                    onChange={handleChange}
                     placeholder="Your message"
                     style={{ height: "120px" }}
                     required
@@ -154,6 +242,8 @@ const Compliance: React.FC = () => {
                       type="checkbox"
                       id="newsletter"
                       name="newsletter"
+                      checked={formData.newsletter}
+                      onChange={handleChange}
                     />
                     <label className="form-check-label" htmlFor="newsletter">
                       I'd like to receive updates and news
@@ -161,15 +251,23 @@ const Compliance: React.FC = () => {
                   </div>
                 </div>
 
-                <button type="submit" className="btn btn-submit w-100">
-                  <i className="fas fa-paper-plane me-2"></i>Send Message
+                <button
+                  type="submit"
+                  className="btn btn-submit w-100"
+                  disabled={submitting}
+                >
+                  {submitting ? "Sending..." : (
+                    <>
+                      <i className="fas fa-paper-plane me-2"></i>Send Message
+                    </>
+                  )}
                 </button>
               </form>
             </div>
           </div>
         </section>
 
-        {/* Success Modal */}
+        {/* Modal */}
         <div
           className="modal fade"
           id="successModal"
@@ -186,7 +284,7 @@ const Compliance: React.FC = () => {
               }}
             >
               <div
-                className="modal-header bg-success text-white"
+                className="modal-header"
                 style={{
                   background: "var(--gradient-secondary)",
                   color: "var(--light-green)",
@@ -197,7 +295,7 @@ const Compliance: React.FC = () => {
                 }}
               >
                 <h5 className="modal-title" id="successModalLabel">
-                  <i className="fas fa-check-circle me-2"></i>Message Sent
+                  <i className="fas fa-check-circle me-2"></i>Message Status
                 </h5>
                 <button
                   type="button"
@@ -215,10 +313,9 @@ const Compliance: React.FC = () => {
                   padding: "30px",
                 }}
               >
-                Your message has been successfully sent. <br /> We'll get back
-                to you soon!
+                {modalMessage}
               </div>
-              <div className="modal-footer" style={{ padding: "0px !important" }}>
+              <div className="modal-footer">
                 <button
                   type="button"
                   className="btn btn-success ok-btn"
@@ -229,7 +326,7 @@ const Compliance: React.FC = () => {
                     border: "2px solid var(--primary-green)",
                     color: "var(--primary-green)",
                     fontWeight: "500",
-                    padding: "5px 20px !important",
+                    padding: "5px 20px",
                     margin: "10px",
                   }}
                 >

@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
-import { auth, db } from "../firebase";
+import { auth } from "../firebase"; // ✅ keep Firebase Auth for Google login
 import { GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from "firebase/auth";
-import { ref, set } from "firebase/database";
+import supabase  from "../CONFIG/supabaseClient"; // ✅ make sure you have this client
 import { useNavigate } from "react-router-dom";
 
 const Login: React.FC = () => {
@@ -19,13 +19,22 @@ const Login: React.FC = () => {
           const result = await signInWithPopup(auth, provider);
           const user = result.user;
 
-          // Save user info to Firebase
-          await set(ref(db, "users/" + user.uid), {
-            username: user.displayName ?? "",
-            email: user.email ?? "",
-            profile_picture: user.photoURL ?? "",
-            last_login: new Date().toISOString(),
-          });
+          // ✅ Save user info to Supabase (instead of Firebase)
+          const { error } = await supabase.from("users").upsert([
+            {
+              uid: user.uid,
+              username: user.displayName ?? "",
+              email: user.email ?? "",
+              profile_picture: user.photoURL ?? "",
+              last_login: new Date().toISOString(),
+            },
+          ]);
+
+          if (error) {
+            console.error("❌ Supabase error saving user:", error.message);
+          } else {
+            console.log("✅ User saved to Supabase:", user.uid);
+          }
 
           navigate("/testimonialSubmit");
         } catch (e: any) {
@@ -38,7 +47,7 @@ const Login: React.FC = () => {
     return () => unsub();
   }, [navigate]);
 
-  return null; // ✅ Show nothing while logging in
+  return <div></div>; // ✅ better UX than `null`
 };
 
 export default Login;
