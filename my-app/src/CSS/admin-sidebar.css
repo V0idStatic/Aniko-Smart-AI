@@ -1,0 +1,81 @@
+:root {
+    --primary-green: #1D492C;
+    --accent-green: #84cc16;
+    --pastel-green: #BDE08A;
+    --light-green: #f0fdf4;
+    --dark-green: #143820;
+    --dark-gray: #374151;
+    --light-gray: #f9fafb;
+    --white: #ffffff;
+    --bg-color: #cfc4b2ff;
+    --primary-brown: #8A6440;
+    --dark-brown: #4D2D18;
+    --gradient-primary: linear-gradient(135deg, var(--primary-green), var(--accent-green));
+    --gradient-secondary: linear-gradient(135deg, var(--primary-green), var(--pastel-green));
+}
+
+.admin-sidebar {
+    height: 90% !important;
+    width: 270px !important;
+    position: fixed !important;
+    left: 10px !important;
+    top: 50px !important;
+    background: var(--gradient-secondary) !important;
+    color: var(--light-green) !important;
+    border-radius: 20px !important;
+    padding-top: 20px !important;
+    transition: all 0.3s;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar-logo {
+    width: 20%;
+    justify-content: center;
+    align-items: center;
+    display: block;
+    margin: 0 auto !important;
+    margin-bottom: 1rem !important; 
+    margin-top: 2rem !important;
+}
+
+.admin-sidebar-title {
+    color: var(--light-green) !important;
+    font-weight: bold !important;
+    margin-bottom: 2rem !important
+}
+
+.admin-sidebar-btn {
+    text-align: left !important;
+    color: var(--light-green) !important;
+    font-weight: 500;
+}
+
+.sidebar-ul {
+    display: flex !important;
+    flex-direction: column !important;
+    height: 100% !important; 
+}
+
+.sidebar-ul li:last-child {
+    margin-top: auto !important;
+    margin-bottom: 1rem !important; 
+}
+
+.admin-sidebar-btn-logout {
+    color: var(--primary-green) !important;
+    font-weight: 500 !important;
+}
+
+.admin-sidebar-btn:hover {
+    background: var(--pastel-green);
+    color: var(--primary-green) !important;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+}
+
+.admin-sidebar-btn-logout:hover {
+    background-color: var(--primary-green) !important;
+    color: var(--light-green) !important;
+}

@@ -1,6 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import AdminHeader from "../INCLUDE/admin-header";
+import AdminHeader from "../INCLUDE/admin-sidebar";
 const AdminHome: React.FC = () => {
   const navigate = useNavigate();
 
