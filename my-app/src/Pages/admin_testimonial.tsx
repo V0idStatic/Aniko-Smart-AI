@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import supabase from "../CONFIG/supabaseClient";
-import AdminHeader from "../INCLUDE/admin-header";
+import AdminHeader from "../INCLUDE/admin-sidebar";
 import "../CSS/admin_testimonial.css";
 
 

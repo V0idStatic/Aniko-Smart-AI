@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import supabase from "../CONFIG/supabaseClient"; // ✅ always default import
-import AdminHeader from "../INCLUDE/admin-header";
+import AdminHeader from "../INCLUDE/admin-sidebar";
 import bcrypt from "bcryptjs"; // ✅ for password hashing
 import "../CSS/admin_users.css";
 

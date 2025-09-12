@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import supabase from "../CONFIG/supabaseClient"; // ✅ always use default import
-import AdminHeader from "../INCLUDE/admin-header";
+import AdminHeader from "../INCLUDE/admin-sidebar";
 import "../CSS/admin_contact.css";
 
 interface ContactMessage {
