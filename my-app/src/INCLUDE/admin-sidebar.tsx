@@ -56,7 +56,7 @@ const AdminHeader: React.FC = () => {
         <li className="nav-item mb-2">
           <button
             className="btn w-100 admin-sidebar-btn admin-sidebar-btn-content"
-            onClick={() => navigate("/content_management")}
+            onClick={() => navigate("/admin_cms")}
           >
             <i className="bi bi-body-text"></i>Content Management
           </button>

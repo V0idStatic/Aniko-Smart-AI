@@ -7,11 +7,9 @@ import HeaderUnlogged from "../INCLUDE/header-unlogged";
 import Footer from "../INCLUDE/footer";
 import { auth } from "../firebase";
 import { onAuthStateChanged, User } from "firebase/auth";
-import  supabase  from "../CONFIG/supabaseClient"; // ✅ Supabase client
+import supabase from "../CONFIG/supabaseClient"; // ✅ Supabase client
+import Modal from "bootstrap/js/dist/modal"; // ✅ direct import for modal
 import "bootstrap/dist/js/bootstrap.bundle.min.js";
-import { Modal } from "bootstrap";
-
-
 
 const Compliance: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -32,7 +30,6 @@ const Compliance: React.FC = () => {
     return () => unsub();
   }, []);
 
-  // ✅ Fixed handleChange
   const handleChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
@@ -48,12 +45,12 @@ const Compliance: React.FC = () => {
     }));
   };
 
-  // ✅ Submit to Supabase
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
 
     try {
+      // ✅ convert newsletter boolean to 1/0 for bigint column
       const { error } = await supabase.from("contact_messages").insert([
         {
           first_name: formData.firstName,
@@ -62,7 +59,7 @@ const Compliance: React.FC = () => {
           phone: formData.phone,
           subject: formData.subject,
           message: formData.message,
-          newsletter: formData.newsletter,
+          newsletter: formData.newsletter ? 1 : 0,
         },
       ]);
 
@@ -82,11 +79,11 @@ const Compliance: React.FC = () => {
         });
       }
 
-      // ✅ Show modal
-      const modal = new (window as any).bootstrap.Modal(
-        document.getElementById("successModal")
-      );
-      modal.show();
+      const modalEl = document.getElementById("successModal");
+      if (modalEl) {
+        const modal = new Modal(modalEl);
+        modal.show();
+      }
     } finally {
       setSubmitting(false);
     }
@@ -94,7 +91,6 @@ const Compliance: React.FC = () => {
 
   return (
     <div className="page-wrapper">
-      {/* ✅ Conditional Header */}
       {user ? <HeaderLogged /> : <HeaderUnlogged />}
 
       <div className="main-content">

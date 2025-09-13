@@ -12,6 +12,7 @@ import AdminHome from "./Pages/admin_home";
 import AdminTestimonial from "./Pages/admin_testimonial";
 import AdminUsers from "./Pages/admin_users";
 import AdminContact from "./Pages/admin_contact";
+import AdminCMS from "./Pages/admin_cms"; // ✅ Add this line
 
 function App() {
   return (
@@ -33,6 +34,8 @@ function App() {
       <Route path="/admin_testimonial" element={<AdminTestimonial />} />
       <Route path="/admin_users" element={<AdminUsers />} />
       <Route path="/admin_contact" element={<AdminContact />} />
+      <Route path="/admin_cms" element={<AdminCMS />} />
+
     </Routes>
   );
 }
