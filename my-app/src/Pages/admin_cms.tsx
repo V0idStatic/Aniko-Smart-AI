@@ -2,10 +2,9 @@ import React, { useEffect, useState } from "react";
 import supabase from "../CONFIG/supabaseClient";
 import AdminHeader from "../INCLUDE/admin-sidebar";
 
-
 interface HomeImage {
   id: number;
-  created_at: string;
+  uploaded_at: string;
   image_url: string;
 }
 
@@ -14,38 +13,31 @@ const AdminCMS: React.FC = () => {
   const [images, setImages] = useState<HomeImage[]>([]);
   const [file, setFile] = useState<File | null>(null);
 
-  // Delete modal state
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<number | null>(null);
-
-  // Success modal state
   const [showSuccessModal, setShowSuccessModal] = useState(false);
 
-  // Fetch images
+  // Fetch images from DB
   const fetchImages = async () => {
     const { data, error } = await supabase
       .from("home_images")
       .select("*")
       .order("id", { ascending: true });
 
-    if (!error && data) {
+    if (error) {
+      console.error("❌ Fetch images error:", error);
+    } else {
       setImages(data as HomeImage[]);
     }
   };
 
   useEffect(() => {
     fetchImages();
-
-    // Realtime subscription
     const imagesSub = supabase
       .channel("home-images-channel")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "home_images" },
-        () => {
-          fetchImages();
-        }
-      )
+      .on("postgres_changes", { event: "*", schema: "public", table: "home_images" }, () => {
+        fetchImages();
+      })
       .subscribe();
 
     return () => {
@@ -53,7 +45,7 @@ const AdminCMS: React.FC = () => {
     };
   }, []);
 
-  // Handle image upload
+  // Handle upload
   const handleUpload = async () => {
     if (!file) {
       alert("⚠️ Please select a file first.");
@@ -63,148 +55,122 @@ const AdminCMS: React.FC = () => {
     try {
       const fileExt = file.name.split(".").pop();
       const fileName = `${Date.now()}.${fileExt}`;
-      const filePath = `home_images/${fileName}`;
 
-      // Upload to Supabase Storage
-      const { error: storageError } = await supabase.storage
+      console.log("📂 Uploading file:", fileName);
+
+      // Upload to storage (bucket = home_images)
+      const { error: storageError, data: storageData } = await supabase.storage
         .from("home_images")
-        .upload(filePath, file);
+        .upload(fileName, file, { upsert: true });
 
       if (storageError) {
-        alert("❌ Upload failed: " + storageError.message);
+        console.error("❌ Storage upload error:", storageError);
+        alert("❌ Upload failed:\n" + JSON.stringify(storageError, null, 2));
         return;
       }
+      console.log("✅ Storage upload success:", storageData);
 
       // Get public URL
       const { data: publicUrlData } = supabase.storage
         .from("home_images")
-        .getPublicUrl(filePath);
+        .getPublicUrl(fileName);
 
       const imageUrl = publicUrlData.publicUrl;
+      console.log("🌍 Public URL:", imageUrl);
 
-      // Insert into DB
+      // Insert record in DB
       const { error: dbError } = await supabase.from("home_images").insert([
         {
           image_url: imageUrl,
-          created_at: new Date().toISOString(),
+          uploaded_at: new Date().toISOString(),
         },
       ]);
 
       if (dbError) {
-        alert("❌ Failed to save in database: " + dbError.message);
+        console.error("❌ Database insert error:", dbError);
+        alert("❌ DB Insert failed:\n" + JSON.stringify(dbError, null, 2));
         return;
       }
 
+      console.log("✅ Inserted into DB successfully");
       setFile(null);
       setShowSuccessModal(true);
       fetchImages();
     } catch (err) {
-      console.error("Upload error:", err);
-      alert("❌ An error occurred during upload.");
+      console.error("❌ Unexpected upload error:", err);
+      alert("❌ Unexpected error:\n" + (err as Error).message);
     }
   };
 
-  // Confirm delete
-  const confirmDelete = (id: number) => {
-    setDeleteTarget(id);
-    setShowDeleteModal(true);
-  };
-
-  // Handle delete (DB + Storage)
+  // Delete file + DB record
   const handleDelete = async () => {
     if (!deleteTarget) return;
 
     try {
-      // Find the image row first
       const targetImg = images.find((img) => img.id === deleteTarget);
       if (!targetImg) return;
 
-      // Extract file name from public URL
       const urlParts = targetImg.image_url.split("/");
       const fileName = urlParts[urlParts.length - 1];
-      const filePath = `home_images/${fileName}`;
 
-      // 1. Delete from storage
       const { error: storageError } = await supabase.storage
         .from("home_images")
-        .remove([filePath]);
+        .remove([fileName]);
 
-      if (storageError) {
-        console.error("Storage delete error:", storageError);
-      }
+      if (storageError) console.error("⚠️ Storage delete error:", storageError);
 
-      // 2. Delete from DB
       await supabase.from("home_images").delete().eq("id", deleteTarget);
 
+      console.log("✅ Deleted image:", fileName);
       setDeleteTarget(null);
       setShowDeleteModal(false);
       fetchImages();
     } catch (err) {
-      console.error("Delete error:", err);
+      console.error("❌ Delete error:", err);
     }
   };
 
   return (
     <div>
       <AdminHeader />
-
       <div style={{ marginLeft: "280px", padding: "20px" }}>
         <h1 className="adminCMS-header">Content Management</h1>
-        <h6 className="adminCMS-subheader">
-          Manage uploaded images for the homepage carousel/banner.
-        </h6>
+        <h6 className="adminCMS-subheader">Manage uploaded images</h6>
 
-        {/* Toggle buttons */}
         <div className="mb-3">
           <button
-            className={`btn me-2 ${
-              view === "upload" ? "btn-primary" : "btn-outline-primary"
-            }`}
+            className={`btn me-2 ${view === "upload" ? "btn-primary" : "btn-outline-primary"}`}
             onClick={() => setView("upload")}
           >
             Upload Image
           </button>
           <button
-            className={`btn me-2 ${
-              view === "uploaded" ? "btn-primary" : "btn-outline-primary"
-            }`}
+            className={`btn me-2 ${view === "uploaded" ? "btn-primary" : "btn-outline-primary"}`}
             onClick={() => setView("uploaded")}
           >
             Uploaded Images
           </button>
         </div>
 
-        {/* Upload Section */}
         {view === "upload" && (
           <div className="card p-4 adminCMS-card">
-            <h5>
-              <i className="bi bi-upload"></i> Upload New Image
-            </h5>
-            <div className="mt-3">
-              <input
-                type="file"
-                className="form-control"
-                accept="image/*"
-                onChange={(e) =>
-                  setFile(e.target.files ? e.target.files[0] : null)
-                }
-              />
-            </div>
-            <div className="mt-3">
-              <button className="btn btn-success" onClick={handleUpload}>
-                <i className="bi bi-cloud-arrow-up-fill"></i> Upload
-              </button>
-            </div>
+            <h5>Upload New Image</h5>
+            <input
+              type="file"
+              className="form-control"
+              accept="image/*"
+              onChange={(e) => setFile(e.target.files ? e.target.files[0] : null)}
+            />
+            <button className="btn btn-success mt-3" onClick={handleUpload}>
+              Upload
+            </button>
           </div>
         )}
 
-        {/* Uploaded Table */}
         {view === "uploaded" && (
           <div className="card adminCMS-card">
-            <h5>
-              <i className="bi bi-images"></i> Uploaded Images
-            </h5>
-            <table className="table table-bordered table-striped mt-3 adminCMS-table">
+            <h5>Uploaded Images</h5>
+            <table className="table table-bordered mt-3">
               <thead>
                 <tr>
                   <th>ID</th>
@@ -220,31 +186,25 @@ const AdminCMS: React.FC = () => {
                     <tr key={img.id}>
                       <td>{img.id}</td>
                       <td>
-                        <img
-                          src={img.image_url}
-                          alt="uploaded"
-                          width={80}
-                          height={60}
-                          style={{ objectFit: "cover", borderRadius: "8px" }}
-                        />
+                        <img src={img.image_url} alt="uploaded" width={80} height={60} />
                       </td>
                       <td>
-                        <a
-                          href={img.image_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
+                        <a href={img.image_url} target="_blank" rel="noreferrer">
                           {img.image_url}
                         </a>
                       </td>
-                      <td>{new Date(img.created_at).toLocaleString()}</td>
+                      <td>{new Date(img.uploaded_at).toLocaleString()}</td>
                       <td>
-                        <button
-                          className="btn btn-danger btn-sm d-flex"
-                          onClick={() => confirmDelete(img.id)}
-                        >
-                          <i className="bi bi-trash3-fill"></i> Delete
-                        </button>
+                     <button 
+  className="btn btn-danger btn-sm" 
+  onClick={() => {
+    setDeleteTarget(img.id);
+    handleDelete();
+  }}
+>
+  Delete
+</button>
+
                       </td>
                     </tr>
                   ))
@@ -260,75 +220,6 @@ const AdminCMS: React.FC = () => {
           </div>
         )}
       </div>
-
-      {/* Delete Confirmation Modal */}
-      {showDeleteModal && (
-        <div
-          className="modal fade show"
-          style={{ display: "block" }}
-          tabIndex={-1}
-        >
-          <div className="modal-dialog modal-dialog-centered">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title">Confirm Deletion</h5>
-                <button
-                  type="button"
-                  className="btn-close"
-                  onClick={() => setShowDeleteModal(false)}
-                ></button>
-              </div>
-              <div className="modal-body">
-                <p>Are you sure you want to delete this image?</p>
-              </div>
-              <div className="modal-footer">
-                <button
-                  className="btn btn-secondary"
-                  onClick={() => setShowDeleteModal(false)}
-                >
-                  Cancel
-                </button>
-                <button className="btn btn-danger" onClick={handleDelete}>
-                  Delete
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Success Modal */}
-      {showSuccessModal && (
-        <div
-          className="modal fade show"
-          style={{ display: "block" }}
-          tabIndex={-1}
-        >
-          <div className="modal-dialog modal-dialog-centered">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title text-success">Success</h5>
-                <button
-                  type="button"
-                  className="btn-close"
-                  onClick={() => setShowSuccessModal(false)}
-                ></button>
-              </div>
-              <div className="modal-body">
-                <p>✅ Image uploaded successfully!</p>
-              </div>
-              <div className="modal-footer">
-                <button
-                  className="btn btn-success"
-                  onClick={() => setShowSuccessModal(false)}
-                >
-                  OK
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

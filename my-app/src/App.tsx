@@ -13,6 +13,7 @@ import AdminTestimonial from "./Pages/admin_testimonial";
 import AdminUsers from "./Pages/admin_users";
 import AdminContact from "./Pages/admin_contact";
 import AdminCMS from "./Pages/admin_cms"; // ✅ Add this line
+import AdminRegister from "./Pages/admin_register";
 
 function App() {
   return (
@@ -35,6 +36,8 @@ function App() {
       <Route path="/admin_users" element={<AdminUsers />} />
       <Route path="/admin_contact" element={<AdminContact />} />
       <Route path="/admin_cms" element={<AdminCMS />} />
+      <Route path="/admin_register" element={<AdminRegister />} />
+      
 
     </Routes>
   );
