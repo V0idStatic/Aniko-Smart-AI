@@ -1,10 +1,19 @@
-import supabase from "./CONFIG/supaBase";  // Import Supabase client from CONFIG folder
+import supabase from "./CONFIG/supaBase";
 import React, { useState, useEffect } from "react";
-import { StyleSheet, Text, View, TouchableOpacity, TextInput, ScrollView, Alert } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  View,
+  TouchableOpacity,
+  TextInput,
+  ScrollView,
+  Alert,
+  Image,
+} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
+import { LinearGradient } from "expo-linear-gradient";
 
-// TypeScript interfaces
 interface User {
   id: string;
   username: string;
@@ -21,10 +30,10 @@ interface AuthUser {
 
 export default function Dashboard() {
   const [user, setUser] = useState<User | AuthUser | null>(null);
-  const [currentUser, setCurrentUser] = useState<User | null>(null); // Add separate state for current user
-  const [weather, setWeather] = useState({
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [weather] = useState({
     city: "Olongapo",
-    temperature: "31°C",
+    temperature: "31°",
     condition: "Partly Cloudy",
     highLow: "H:32° L:23°",
     hourlyWeather: [
@@ -37,27 +46,16 @@ export default function Dashboard() {
     ],
   });
 
-  const [cropsStatus, setCropsStatus] = useState("Good");
+  const [cropsStatus] = useState("Good");
   const router = useRouter();
 
-  // Get current user on component mount
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        // First try to get authenticated user
         const authUserFound = await getCurrentUser();
-        
-        // If no authenticated user found, fallback to last logged in user
-        if (!authUserFound) {
-          console.log('No authenticated user found, getting last logged in user');
-          const lastUserFound = await getLastLoggedInUser();
-          if (!lastUserFound) {
-            console.log('No users found at all');
-          }
-        }
+        if (!authUserFound) await getLastLoggedInUser();
       } catch (error) {
-        console.error('Error in fetchUserData:', error);
-        // Fallback to last logged in user
+        console.error("Error in fetchUserData:", error);
         await getLastLoggedInUser();
       }
     };
@@ -65,397 +63,520 @@ export default function Dashboard() {
     fetchUserData();
   }, []);
 
-  // Function to get the most recently logged in user
   const getLastLoggedInUser = async () => {
     try {
-      console.log('Fetching last logged in user from database...');
-      // Get the most recently logged in user from the database
       const { data, error } = await supabase
-        .from('users')
-        .select('*')
-        .order('last_login', { ascending: false })
+        .from("users")
+        .select("*")
+        .order("last_login", { ascending: false })
         .limit(1);
-      
-      if (error) {
-        console.error('Error fetching last logged user:', error);
-        return false;
-      }
-      
-      if (data && data.length > 0) {
+
+      if (!error && data?.length > 0) {
         setCurrentUser(data[0]);
-        console.log('Current user set to:', data[0].username);
-        return true;
-      } else {
-        console.log('No users found in database');
-        return false;
       }
     } catch (error) {
-      console.error('Error getting last logged user:', error);
-      return false;
+      console.error("Error getting last logged user:", error);
     }
   };
 
-  // Function to get current user from Supabase
   const getCurrentUser = async () => {
     try {
       const { data: { user }, error: authError } = await supabase.auth.getUser();
-      console.log('Auth user:', user);
-      
-      if (authError) {
-        console.error('Auth error:', authError);
-        return false;
-      }
-      
+      if (authError) return false;
+
       if (user) {
-        // Get additional user info from the users table
         const { data, error } = await supabase
-          .from('users')
-          .select('*')
-          .eq('id', user.id)
+          .from("users")
+          .select("*")
+          .eq("id", user.id)
           .single();
-        
-        if (error) {
-          console.error('Error fetching user data from users table:', error);
-          // Use auth user data as fallback
-          setUser(user);
-          return true;
-        } else {
-          setUser(data);
-          console.log('User set from users table:', data);
-          return true;
-        }
+
+        if (!error) setUser(data);
+        else setUser(user);
+        return true;
       }
       return false;
     } catch (error) {
-      console.error('Error getting current user:', error);
+      console.error("Error getting current user:", error);
       return false;
     }
   };
 
-  // Handle logout
   const handleLogout = async () => {
-    Alert.alert(
-      "Logout",
-      "Are you sure you want to logout?",
-      [
-        {
-          text: "Cancel",
-          style: "cancel"
+    Alert.alert("Logout", "Are you sure you want to logout?", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Logout",
+        onPress: async () => {
+          try {
+            const { error } = await supabase.auth.signOut();
+            if (!error) router.replace("/");
+          } catch (error) {
+            console.error("Logout error:", error);
+          }
         },
-        { 
-          text: "Logout", 
-          onPress: async () => {
-            try {
-              const { error } = await supabase.auth.signOut();
-              if (error) {
-                console.error('Error signing out:', error);
-                Alert.alert("Error", "Failed to logout. Please try again.");
-              } else {
-                // Successfully logged out, navigate to index
-                router.replace("/");
-              }
-            } catch (error) {
-              console.error('Logout error:', error);
-              Alert.alert("Error", "An unexpected error occurred during logout.");
-            }
-          } 
-        }
-      ]
-    );
+      },
+    ]);
   };
 
   return (
     <View style={styles.container}>
-      <ScrollView style={styles.scrollContainer}>
-        {/* Header Section */}
-        <View style={styles.headerContainer}>
-          <View style={styles.userInfo}>
+      {/* Header Background */}
+      <LinearGradient colors={["#1c4722", "#4d7f39"]} style={styles.headerBackground}>
+        <View style={styles.headerTop}>
+          <View>
+            <Text style={styles.greeting}>Good Morning,</Text>
             <Text style={styles.greeting}>
-              Good Morning, {currentUser?.username || (user && 'username' in user ? user.username : user?.email?.split('@')[0]) || "User"}
+              {currentUser?.username ||
+                (user && "username" in user
+                  ? user.username
+                  : user?.email?.split("@")[0]) ||
+                "User"}
             </Text>
-            <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
-              <Ionicons name="log-out-outline" size={20} color="white" />
-              <Text style={styles.logoutText}>Logout</Text>
+          </View>
+
+          <View style={styles.headerIcons}>
+            <Ionicons name="notifications-outline" size={22} color="white" />
+            <TouchableOpacity onPress={handleLogout} style={{ marginLeft: 12 }}>
+              <Ionicons name="log-out-outline" size={22} color="white" />
             </TouchableOpacity>
           </View>
-          
-          <View style={styles.searchContainer}>
-            <Ionicons name="search" size={20} color="gray" />
-            <TextInput style={styles.searchInput} placeholder="Search" />
-          </View>
-          <Ionicons name="notifications" size={24} color="white" />
         </View>
 
-        {/* Weather Section */}
-        <View style={styles.weatherContainer}>
-          <Text style={styles.city}>{weather.city}</Text>
-          <Text style={styles.temperature}>{weather.temperature}</Text>
-          <Text style={styles.weatherCondition}>{weather.condition}</Text>
-          <Text style={styles.highLow}>{weather.highLow}</Text>
+        {/* Search Bar */}
+        <View style={styles.searchContainer}>
+          <Ionicons name="search" size={18} color="gray" />
+          <TextInput placeholder="Search" style={styles.searchInput} placeholderTextColor="gray" />
+        </View>
+      </LinearGradient>
 
-          <ScrollView horizontal style={styles.weatherForecast} showsHorizontalScrollIndicator={false}>
-            {weather.hourlyWeather.map((item, index) => (
-              <View key={index} style={styles.weatherHour}>
-                <Text style={styles.weatherHourText}>{item.time}</Text>
-                <Ionicons name={item.icon} size={20} color="#76c7c0" />
-                <Text style={styles.weatherHourTemp}>{item.temp}°</Text>
+      {/* Floating Weather Card */}
+      <View style={styles.weatherCard}>
+        {/* Weather Header Row */}
+        <View style={styles.weatherHeaderRow}>
+          {/* Left Column: City + Temp */}
+          <View>
+            <Text style={styles.weatherCity}>{weather.city}</Text>
+            <Text style={styles.weatherTemp}>{weather.temperature}</Text>
+          </View>
+
+          {/* Right Column: Condition + High/Low + Icon */}
+          <View style={styles.weatherRightColumn}>
+            <Ionicons name="partly-sunny" size={30} color="white" style={{ marginBottom: 4 }} />
+            <Text style={styles.weatherCondition}>{weather.condition}</Text>
+            <Text style={styles.weatherHighLow}>{weather.highLow}</Text>
+          </View>
+        </View>
+
+
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginVertical: 10 }}>
+          {weather.hourlyWeather.map((item, index) => (
+            <View key={index} style={styles.weatherHourCard}>
+              <Text style={styles.weatherHour}>{item.time}</Text>
+              <Ionicons name={item.icon} size={20} color="white" />
+              <Text style={styles.weatherHourTemp}>{item.temp}°</Text>
+            </View>
+          ))}
+        </ScrollView>
+
+        <TouchableOpacity style={styles.weatherButton}>
+          <Text style={styles.weatherButtonText}>View Today's Weather</Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* Scrollable Content */}
+      <ScrollView contentContainerStyle={styles.scrollContent}>
+        <Text style={styles.sectionTitle}>My Crops</Text>
+
+        {/* Row with Status + Plant Diagnosis */}
+        <View style={styles.cropRow}>
+          {/* Status Card */}
+          <View style={styles.statusCard}>
+            <Text style={styles.statusLabel}>Status</Text>
+            <View style={styles.statusCircleWrapper}>
+              <View style={styles.statusCircleOuter}>
+                <View style={styles.statusCircleInner}>
+                  <Text style={styles.statusText}>{cropsStatus.toUpperCase()}</Text>
+                </View>
               </View>
-            ))}
-          </ScrollView>
-
-          <TouchableOpacity style={styles.viewWeatherButton}>
-            <Text style={styles.viewWeatherButtonText}>View Today's Weather</Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* My Crops Section */}
-        <View style={styles.cropsContainer}>
-          <Text style={styles.sectionTitle}>My Crops</Text>
-          <View style={styles.cropsStatus}>
-            <Text style={styles.statusLabel}>Status: </Text>
-            <Text style={styles.status}>{cropsStatus}</Text>
+            </View>
           </View>
-          <TouchableOpacity style={styles.diagnosisButton}>
-            <Text style={styles.buttonText}>Plant Diagnosis</Text>
+
+          {/* Plant Diagnosis Card */}
+          <TouchableOpacity style={styles.diagnosisCard}>
+            <Image
+              source={require("../assets/plant-bg.png")}
+              style={styles.diagnosisImage}
+            />
+            <View style={styles.diagnosisOverlay}>
+              <Text style={styles.diagnosisTitle}>Plant Diagnosis</Text>
+              <TouchableOpacity style={styles.tryNowButton}>
+                <Text style={styles.tryNowText}>Try Now</Text>
+              </TouchableOpacity>
+            </View>
           </TouchableOpacity>
         </View>
 
         {/* Weather History Section */}
-        <View style={styles.historyContainer}>
-          <Text style={styles.historyTitle}>Weather History: Last week</Text>
-          <View style={styles.weatherHistory}>
-            {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day, index) => (
-              <View key={index} style={styles.weatherDay}>
-                <Text style={styles.dayText}>{day}</Text>
-                <Text style={styles.dayStatus}>Good</Text>
+        <View style={styles.historyCard}>
+          <View style={styles.historyHeader}>
+            {/* Title and Legend in One Row */}
+            <View style={styles.historyHeaderRow}>
+              <Text style={styles.historyTitle}>Weather History: Last Week</Text>
+              <View style={styles.legendRow}>
+                {["Very Good", "Good", "Warning", "Bad"].map((label, i) => (
+                  <View key={i} style={styles.legendItem}>
+                    <View
+                      style={[
+                        styles.legendColor,
+                        { backgroundColor: i === 0 ? "#4CAF50" : i === 1 ? "#8BC34A" : i === 2 ? "#FFC107" : "#F44336" },
+                      ]}
+                    />
+                    <Text style={styles.legendText}>{label}</Text>
+                  </View>
+                ))}
+              </View>
+            </View>
+          </View>
+
+          {/* Days */}
+          <View style={styles.historyRow}>
+            {[
+              { day: "Mon", status: "Sunny", temp: "32°C", humidity: "60%" },
+              { day: "Tue", status: "Cloudy", temp: "31°C", humidity: "64%" },
+              { day: "Wed", status: "Sunny", temp: "32°C", humidity: "55%" },
+              { day: "Thu", status: "Rainy", temp: "29°C", humidity: "75%" },
+              { day: "Fri", status: "Sunny", temp: "33°C", humidity: "62%" },
+              { day: "Sat", status: "Cloudy", temp: "31°C", humidity: "58%" },
+              { day: "Sun", status: "Sunny", temp: "32°C", humidity: "60%" },
+            ].map((item, i) => (
+              <View key={i} style={styles.historyDayWrapper}>
+
+                {/* DAY BOX */}
+                <View
+                  style={[
+                    styles.dayBox,
+                    i === 3 ? { backgroundColor: "#FFC107" } : { backgroundColor: "#4CAF50" },
+                  ]}
+                >
+                  <Text style={styles.historyDayText}>{item.day}</Text>
+                </View>
+
+                {/* DETAILS BELOW */}
+                <Text style={styles.historyDetails}>{item.status}</Text>
+                <Text style={styles.historyDetails}>{item.temp}</Text>
+                <Text style={styles.historyDetails}>Humidity: {item.humidity}</Text>
               </View>
             ))}
           </View>
         </View>
-
-        {/* Add bottom padding to prevent content from being hidden behind footer */}
-        <View style={styles.bottomPadding} />
       </ScrollView>
 
       {/* Footer Navigation */}
       <View style={styles.footer}>
-        <TouchableOpacity style={styles.iconButton}>
-          <Ionicons name="leaf" size={30} color="white" />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.iconButton}>
-          <Ionicons name="camera" size={30} color="white" />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.iconButton}>
-          <Ionicons name="home" size={30} color="white" />
-        </TouchableOpacity>
+        <Ionicons name="leaf" size={28} color="white" />
+        <Ionicons name="camera" size={28} color="white" />
+        <Ionicons name="home" size={28} color="white" />
+        <Ionicons name="menu" size={28} color="white" />
       </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#f8f8f8",
-  },
-  scrollContainer: {
-    flex: 1,
-  },
-  headerContainer: {
-    backgroundColor: "#3b7e2a",
+  container: { flex: 1, backgroundColor: "#e7dbc8" },
+
+  headerBackground: {
     paddingTop: 50,
-    paddingBottom: 15,
+    paddingBottom: 80,
     paddingHorizontal: 20,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
   },
-  userInfo: {
-    flex: 1,
+  headerTop: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center"
   },
   greeting: {
-    color: "white",
     fontSize: 18,
     fontWeight: "bold",
-    marginBottom: 5,
+    color: "white"
   },
-  logoutButton: {
+  headerIcons: {
     flexDirection: "row",
-    alignItems: "center",
-  },
-  logoutText: {
-    color: "white",
-    marginLeft: 5,
-    fontSize: 12,
+    alignItems: "center"
   },
   searchContainer: {
     flexDirection: "row",
-    alignItems: "center",
     backgroundColor: "white",
-    padding: 8,
-    borderRadius: 15,
-    width: 150,
-    marginHorizontal: 10,
-  },
-  searchInput: {
-    marginLeft: 10,
-    flex: 1,
-    color: "gray",
-  },
-  weatherContainer: {
-    backgroundColor: "#76c7c0",
-    padding: 20,
-    margin: 15,
-    borderRadius: 15,
+    borderRadius: 12,
+    marginTop: 10,
+    paddingHorizontal: 10,
     alignItems: "center",
+    height: 40,
   },
-  city: {
-    fontSize: 22,
-    fontWeight: "bold",
+  searchInput: { marginLeft: 8, flex: 1, color: "black" },
+
+  weatherCard: {
+    position: "absolute",
+    top: 140,
+    left: 20,
+    right: 20,
+    backgroundColor: "#1c4722",
+    borderRadius: 20,
+    padding: 20,
+    zIndex: 10,
+    elevation: 8,
+    shadowColor: "#000",
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    marginTop: 20,
+  },
+  weatherHeaderRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 10,
+  },
+
+  weatherRightColumn: {
+    alignItems: "flex-end",
+  },
+
+  weatherCity: {
+    fontSize: 18,
     color: "white",
+    fontWeight: "600",
   },
-  temperature: {
+
+  weatherTemp: {
     fontSize: 48,
     fontWeight: "bold",
     color: "white",
-    marginVertical: 5,
   },
+
   weatherCondition: {
-    fontSize: 18,
-    color: "white",
-    marginBottom: 5,
-  },
-  highLow: {
     fontSize: 16,
     color: "white",
-    marginBottom: 15,
+    fontWeight: "500",
   },
-  weatherForecast: {
-    flexDirection: "row",
-    marginVertical: 15,
+
+  weatherHighLow: {
+    fontSize: 14,
+    color: "white",
+  },
+  weatherHourCard: {
+    backgroundColor: "rgba(255,255,255,0.15)",
+    borderRadius: 12,
+    padding: 8,
+    alignItems: "center",
+    marginRight: 8,
+    width: 60,
   },
   weatherHour: {
-    backgroundColor: "white",
-    padding: 12,
-    borderRadius: 10,
-    alignItems: "center",
-    marginHorizontal: 5,
-    minWidth: 60,
-  },
-  weatherHourText: {
-    color: "#3b7e2a",
     fontSize: 12,
-    fontWeight: "bold",
+    color: "white",
+    marginBottom: 4
   },
   weatherHourTemp: {
-    color: "#3b7e2a",
     fontSize: 14,
     fontWeight: "bold",
-    marginTop: 5,
+    color: "white",
   },
-  viewWeatherButton: {
-    marginTop: 15,
+  weatherButton: {
     backgroundColor: "white",
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    borderRadius: 8,
+    borderRadius: 10,
+    paddingVertical: 8,
+    marginTop: 8,
+    alignItems: "center",
   },
-  viewWeatherButtonText: {
-    color: "#3b7e2a",
+  weatherButtonText: {
+    color: "#1c4722",
     fontWeight: "bold",
-    fontSize: 16,
   },
-  cropsContainer: {
-    padding: 20,
-    marginHorizontal: 15,
-    backgroundColor: "white",
-    borderRadius: 15,
-    marginBottom: 15,
+
+  scrollContent: {
+    paddingHorizontal: 15,
+    paddingTop: 260,
+    paddingBottom: 100,
   },
   sectionTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "#3b7e2a",
+    marginTop: 20,
     marginBottom: 10,
-  },
-  cropsStatus: {
-    marginTop: 10,
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  statusLabel: {
-    fontSize: 16,
-    color: "#666",
-  },
-  status: {
-    fontWeight: "bold",
-    color: "#4CAF50",
-    fontSize: 16,
-  },
-  diagnosisButton: {
-    marginTop: 15,
-    backgroundColor: "#4CAF50",
-    padding: 15,
-    borderRadius: 8,
-    alignItems: "center",
-  },
-  historyContainer: {
-    padding: 20,
-    marginHorizontal: 15,
-    backgroundColor: "#e8f5e8",
-    borderRadius: 15,
-    marginBottom: 15,
-  },
-  historyTitle: {
     fontSize: 18,
     fontWeight: "bold",
-    color: "#3b7e2a",
-    marginBottom: 15,
+    color: "#1c4722",
   },
-  weatherHistory: {
+
+  cropRow: {
     flexDirection: "row",
     justifyContent: "space-between",
   },
-  weatherDay: {
-    alignItems: "center",
+  statusCard: {
     flex: 1,
+    backgroundColor: "#1c4722",
+    borderRadius: 10,
+    padding: 15,
+    alignItems: "center",
+    marginRight: 10,
   },
-  dayText: {
-    fontSize: 14,
+  statusLabel: {
+    color: "white",
     fontWeight: "bold",
-    color: "#3b7e2a",
+    marginBottom: 10,
+  },
+  statusCircleWrapper: {
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  statusCircleOuter: {
+    backgroundColor: "#FFD700",
+    padding: 5,
+    borderRadius: 50,
+  },
+  statusCircleInner: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: "#FFF",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  statusText: {
+    color: "#1c4722",
+    fontWeight: "bold",
+    fontSize: 16,
+  },
+
+  diagnosisCard: {
+    flex: 1,
+    borderRadius: 20,
+    overflow: "hidden",
+    marginLeft: 10,
+    height: 150,
+    position: "relative",
+  },
+  diagnosisImage: {
+    width: "100%",
+    height: "100%",
+    resizeMode: "cover",
+  },
+  diagnosisOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0,0,0,0.3)",
+  },
+  diagnosisTitle: {
+    color: "white",
+    fontWeight: "bold",
+    fontSize: 18,
+    marginBottom: 10,
+  },
+  tryNowButton: {
+    backgroundColor: "rgba(255,255,255,0.8)",
+    paddingVertical: 6,
+    paddingHorizontal: 20,
+    borderRadius: 20,
+  },
+  tryNowText: {
+    color: "#1c4722",
+    fontWeight: "bold",
+  },
+
+  historyCard: {
+    marginTop: 15,
+    backgroundColor: "#1c4722",
+    borderRadius: 20,
+    padding: 15,
+  },
+historyHeaderRow: {
+  flexDirection: "row",
+  alignItems: "center",
+  justifyContent: "space-between",
+  marginBottom: 10,
+},
+historyHeader: {
+  marginBottom: 4,
+},
+
+legendRow: {
+  flexDirection: "row",
+  alignItems: "center",
+},
+
+legendItem: {
+  flexDirection: "row",
+  alignItems: "center",
+  marginLeft: 8,
+  
+},
+
+legendColor: {
+  width: 10,
+  height: 10,
+  borderRadius: 5,
+  marginRight: 4,
+  
+},
+
+  historyTitle: {
+    color: "white",
+    fontWeight: "bold",
+    fontSize: 12,
+    
+  },
+
+
+  legendText: {
+    color: "white",
+    fontSize: 10,
+  },
+  historyRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    flexWrap: "wrap",
+    marginTop: 10,
+  },
+
+  historyDayWrapper: {
+    flexBasis: "13%",
+    alignItems: "center",
+    marginBottom: 8,
+  },
+
+  dayBox: {
+    width: 45,
+    height: 45,
+    borderRadius: 10,
+    justifyContent: "center",
+    alignItems: "center",
     marginBottom: 5,
   },
-  dayStatus: {
-    fontSize: 12,
-    color: "#4CAF50",
+
+  historyDayText: {
+    color: "white",
     fontWeight: "bold",
   },
+
+  historyDetails: {
+    fontSize: 10,
+    color: "white",
+    textAlign: "center",
+  },
+
+
   footer: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    backgroundColor: "#3b7e2a",
-    paddingVertical: 15,
     position: "absolute",
     bottom: 0,
     left: 0,
     right: 0,
-    elevation: 10,
-    shadowOffset: { width: 0, height: -2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-  },
-  iconButton: {
-    backgroundColor: "#4CAF50",
-    borderRadius: 25,
-    padding: 12,
-  },
-  buttonText: {
-    color: "white",
-    fontWeight: "bold",
-    fontSize: 16,
-  },
-  bottomPadding: {
-    height: 80, // Height of footer + some extra space
+    backgroundColor: "#1c4722",
+    flexDirection: "row",
+    justifyContent: "space-around",
+    paddingVertical: 15,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
   },
 });
