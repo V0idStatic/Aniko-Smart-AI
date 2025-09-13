@@ -398,11 +398,10 @@ const styles = StyleSheet.create({
 
   scrollContent: {
     paddingHorizontal: 15,
-    paddingTop: 260,
+    paddingTop: 220,
     paddingBottom: 100,
   },
   sectionTitle: {
-    marginTop: 20,
     marginBottom: 10,
     fontSize: 18,
     fontWeight: "bold",
