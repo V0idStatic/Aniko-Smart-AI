@@ -8,19 +8,29 @@ import Hero from "./hero";
 import Feature from "./feature";
 import WhyAniko from "./whyaniko";
 import "bootstrap/dist/css/bootstrap.min.css";
-import "bootstrap/dist/js/bootstrap.bundle.min.js"; // Popper included
-import Testimonials from "./testimonial"; // ✅ fixed path
+import "bootstrap/dist/js/bootstrap.bundle.min.js";
+import Testimonials from "./testimonial";
 
-
-
-
-import { auth } from "../firebase"; 
+import { auth } from "../firebase";
 import { onAuthStateChanged, User } from "firebase/auth";
+
+// ✅ Type for chat messages
+type ChatMessage = {
+  role: "user" | "assistant";
+  content: string;
+};
 
 const Home: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
+  // ✅ Chat states
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [input, setInput] = useState("");
+  const [chatLoading, setChatLoading] = useState(false);
+  const [showChat, setShowChat] = useState(false);
+
+  // ✅ Firebase auth
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, (u) => {
       setUser(u);
@@ -29,8 +39,69 @@ const Home: React.FC = () => {
     return () => unsub();
   }, []);
 
+  // ✅ Handle sending messages
+  const handleSend = async () => {
+    if (!input.trim()) return;
+
+    const newMessages: ChatMessage[] = [
+      ...messages,
+      { role: "user", content: input },
+    ];
+    setMessages(newMessages);
+    setInput("");
+    setChatLoading(true);
+
+    try {
+        console.log("🔑 Loaded Key:", process.env.REACT_APP_OPENROUTER_API_KEY);
+      const response = await fetch(
+        "https://openrouter.ai/api/v1/chat/completions",
+        {
+          method: "POST",
+          headers: {
+            Authorization:
+              "Bearer " + process.env.REACT_APP_OPENROUTER_API_KEY,
+            "HTTP-Referer": window.location.origin,
+            "X-Title": "Aniko-Smart-AI",
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            model: "deepseek/deepseek-r1:free",
+            messages: newMessages.map((msg) => ({
+              role: msg.role,
+              content: msg.content,
+            })),
+          }),
+        }
+      );
+
+      const data = await response.json();
+      console.log("🔍 API Response:", data);
+
+      // Support both chat and text responses
+      const reply =
+        data.choices?.[0]?.message?.content?.trim() ||
+        data.choices?.[0]?.text?.trim() ||
+        data.error?.message ||
+        "⚠️ No response from model.";
+
+      const updatedMessages: ChatMessage[] = [
+        ...newMessages,
+        { role: "assistant", content: reply },
+      ];
+      setMessages(updatedMessages);
+    } catch (error) {
+      console.error("Error:", error);
+      setMessages([
+        ...messages,
+        { role: "assistant", content: "❌ Something went wrong." },
+      ]);
+    } finally {
+      setChatLoading(false);
+    }
+  };
+
   if (loading) {
-    return <div>Loading...</div>; // Or a spinner if you want
+    return <div>Loading...</div>;
   }
 
   return (
@@ -92,42 +163,28 @@ const Home: React.FC = () => {
           real-time while getting AI-powered insights for healthier crops and
           maximum yields.
         </p>
-
         <hr className="custom-line" />
-
         <h2 className="section-heading">Trusted by Farmers Worldwide</h2>
-
         <p className="section-subtext">
           Discover how Aniko is transforming agriculture with data-driven
           insights, from real-time monitoring to improved crop yields.
         </p>
-
         <div className="row stats-section mt-4">
           <div className="col-md-4 col-12 mb-4">
             <div className="stat-box">
-              <img
-                src="PICTURES/soil-monitoring-icon.png"
-                alt="Soil Monitoring"
-              />
-              <p>
-                24/7 Continuous Soil Health Monitoring with Real-Time Alerts
-              </p>
+              <img src="PICTURES/soil-monitoring-icon.png" alt="Soil Monitoring" />
+              <p>24/7 Continuous Soil Health Monitoring with Real-Time Alerts</p>
             </div>
           </div>
-
           <div className="col-md-4 col-12 mb-4">
             <div className="stat-box">
-              <img
-                src="PICTURES/plant-treatment-icon.png"
-                alt="Plant Treatment"
-              />
+              <img src="PICTURES/plant-treatment-icon.png" alt="Plant Treatment" />
               <p>
                 AI-Powered Diagnosis for 780+ Plant Diseases with Treatment
                 Recommendations
               </p>
             </div>
           </div>
-
           <div className="col-md-4 col-12 mb-4">
             <div className="stat-box">
               <img src="PICTURES/climate-icon.png" alt="Climate Analysis" />
@@ -140,16 +197,18 @@ const Home: React.FC = () => {
       </div>
 
       {/* SOLUTION / BENEFITS SECTION */}
-      <section className="farmer-section" id="features" style={{ zIndex: 1, backgroundColor: "#1D492C" }}>
+      <section
+        className="farmer-section"
+        id="features"
+        style={{ zIndex: 1, backgroundColor: "#1D492C" }}
+      >
         <div className="container-fluid">
           <h1>Precision Agriculture Made Simple</h1>
-
           <div className="solutionBenefits-con mt-5">
             <div className="row align-items-center solutions-row">
               <div className="col-lg-6 solution-text-side">
                 <h3>Aniko</h3>
                 <p>Advanced Features for Smart Farming</p>
-
                 <div className="row g-4">
                   <div className="col-6 d-flex align-items-center">
                     <img
@@ -160,7 +219,6 @@ const Home: React.FC = () => {
                     />
                     <p className="mb-0">Climate Pattern Analysis</p>
                   </div>
-
                   <div className="col-6 d-flex align-items-center">
                     <img
                       src="PICTURES/fc2.png"
@@ -170,7 +228,6 @@ const Home: React.FC = () => {
                     />
                     <p className="mb-0">AI-Powered Plant Diagnosis</p>
                   </div>
-
                   <div className="col-6 d-flex align-items-center">
                     <img
                       src="PICTURES/fc3.png"
@@ -180,7 +237,6 @@ const Home: React.FC = () => {
                     />
                     <p className="mb-0">Real-Time Soil Monitoring</p>
                   </div>
-
                   <div className="col-6 d-flex align-items-center">
                     <img
                       src="PICTURES/fc4.png"
@@ -192,53 +248,38 @@ const Home: React.FC = () => {
                   </div>
                 </div>
               </div>
-
               <Feature />
             </div>
-
             <hr className="custom-line" />
-
             <div className="row mb-4 benefits-row">
               <div className="col-lg-10 solution-text-side">
                 <h3>Aniko</h3>
                 <p>Proven Benefits for Your Farm</p>
-
                 <div className="row g-4">
                   <div className="col-md-4 col-12">
                     <div className="benefit-card">
                       <h5>Monitor & Protect</h5>
-                      <img
-                        src="PICTURES/benefits-icon1.png"
-                        alt="24/7 Monitoring"
-                      />
+                      <img src="PICTURES/benefits-icon1.png" alt="24/7 Monitoring" />
                       <p>
                         Continuous field monitoring with instant alerts for
                         optimal crop protection and growth management.
                       </p>
                     </div>
                   </div>
-
                   <div className="col-md-4 col-12">
                     <div className="benefit-card">
                       <h5>Predict & Prevent</h5>
-                      <img
-                        src="PICTURES/benefits-icon2.png"
-                        alt="Climate Prediction"
-                      />
+                      <img src="PICTURES/benefits-icon2.png" alt="Climate Prediction" />
                       <p>
                         Advanced climate anomaly prediction helps you prepare
                         and protect your crops from weather threats.
                       </p>
                     </div>
                   </div>
-
                   <div className="col-md-4 col-12">
                     <div className="benefit-card">
                       <h5>Optimize & Grow</h5>
-                      <img
-                        src="PICTURES/benefits-icon3.png"
-                        alt="AI Features"
-                      />
+                      <img src="PICTURES/benefits-icon3.png" alt="AI Features" />
                       <p>
                         AI-powered insights and recommendations to maximize
                         yield and optimize resource usage efficiently.
@@ -263,44 +304,60 @@ const Home: React.FC = () => {
               <p className="lead text-muted">
                 We help farmers and agribusinesses save the world by improving
                 production efficiency, innovating cultivation techniques, and
-                optimizing resource use through market data analysis. Aniko is the
-                right solution for more sustainable and advanced agriculture.
+                optimizing resource use through market data analysis. Aniko is
+                the right solution for more sustainable and advanced
+                agriculture.
               </p>
             </div>
-
             <WhyAniko />
           </div>
 
-          {/* Card Section */}
+          {/* Cards */}
           <div className="row mt-5 g-4 text-center whyAniko-card-parent">
             <div className="col-md-4">
               <div className="card h-100 shadow-sm border-0">
                 <div className="card-body">
-                  <img src="/PICTURES/why-icon.png" alt="Icon 1" className="mb-3" width="60" />
+                  <img
+                    src="/PICTURES/why-icon.png"
+                    alt="Icon 1"
+                    className="mb-3"
+                    width="60"
+                  />
                   <p className="mb-0 text-muted">
-                    The only real-time solution for managing soil and plant health
+                    The only real-time solution for managing soil and plant
+                    health
                   </p>
                 </div>
               </div>
             </div>
-
             <div className="col-md-4">
               <div className="card h-100 shadow-sm border-0">
                 <div className="card-body">
-                  <img src="/PICTURES/why-icon.png" alt="Icon 2" className="mb-3" width="60" />
+                  <img
+                    src="/PICTURES/why-icon.png"
+                    alt="Icon 2"
+                    className="mb-3"
+                    width="60"
+                  />
                   <p className="mb-0 text-muted">
-                    Over 40% of crop loss are caused by extreme weather conditions
+                    Over 40% of crop loss are caused by extreme weather
+                    conditions
                   </p>
                 </div>
               </div>
             </div>
-
             <div className="col-md-4">
               <div className="last-card">
                 <div className="card-body">
-                  <img src="/PICTURES/why-icon.png" alt="Icon 3" className="mb-3" width="60" />
+                  <img
+                    src="/PICTURES/why-icon.png"
+                    alt="Icon 3"
+                    className="mb-3"
+                    width="60"
+                  />
                   <p className="mb-0 text-muted">
-                    Over 40% of crop loss stem from poor plant disease diagnosis.
+                    Over 40% of crop loss stem from poor plant disease
+                    diagnosis.
                   </p>
                 </div>
               </div>
@@ -330,6 +387,50 @@ const Home: React.FC = () => {
 
       <TeamMembers />
       <Footer />
+
+      {/* ✅ Floating chatbot button */}
+      <div
+        className="floating-circle"
+        onClick={() => setShowChat(true)}
+        style={{ cursor: "pointer" }}
+      >
+        <img
+          src="PICTURES/Logo-noText.png"
+          alt="Floating Logo"
+          className="floating-img"
+        />
+      </div>
+
+      {/* ✅ Chat modal */}
+      {showChat && (
+        <div className="chat-modal">
+          <div className="chat-header">
+            <h5>Aniko AI Assistant</h5>
+            <button onClick={() => setShowChat(false)}>✖</button>
+          </div>
+          <div className="chat-body">
+            {messages.map((msg, i) => (
+              <div key={i} className={`chat-msg ${msg.role}`}>
+                <strong>{msg.role === "user" ? "You" : "Aniko"}:</strong>{" "}
+                {msg.content}
+              </div>
+            ))}
+            {chatLoading && <p>⏳ Aniko is thinking...</p>}
+          </div>
+          <div className="chat-footer">
+            <input
+              type="text"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder="Type your question..."
+              onKeyDown={(e) => e.key === "Enter" && handleSend()}
+            />
+            <button onClick={handleSend} disabled={chatLoading}>
+              Send
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
