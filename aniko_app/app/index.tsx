@@ -273,9 +273,9 @@ useEffect(() => {
           )
         );
         
-        // Redirect to the dashboard after login
+        // Redirect to the getstarted after login
         setTimeout(() => {
-          router.push("/dashboard");
+          router.push("/getstarted");
         }, 500); // Small delay to ensure update is processed
       }
 
@@ -294,7 +294,7 @@ useEffect(() => {
   return (
     <View style={styles.container}>
       <View style={styles.arc}>
-        <Image source={require("../assets/image.png")} style={styles.logo} />
+        <Image source={require("../assets/logo.png")} style={styles.logo} />
         <Text style={styles.title}>LOG-IN YOUR ACCOUNT</Text>
 
         {/* Username Input */}
@@ -363,7 +363,17 @@ useEffect(() => {
           <Text style={styles.orText}>OR</Text>
           <View style={styles.divider} />
         </View>
+
+         {/* Google Login Button */}
+        <TouchableOpacity style={styles.googleButton}>
+          <Image
+            source={{ uri: "https://img.icons8.com/color/48/000000/google-logo.png" }}
+            style={styles.googleIcon}
+          />
+          <Text style={styles.googleText}>Log-in with Google</Text>
+        </TouchableOpacity>
       </View>
+      
 
       <StatusBar style="auto" />
     </View>
@@ -378,14 +388,14 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   arc: {
-    marginTop: 50,
+    marginTop: 100,
     width: "100%",
-    height: "90%",
+    height: 850,
     backgroundColor: "#EDE1CF",
     borderTopLeftRadius: 200,
     borderTopRightRadius: 200,
     alignItems: "center",
-    paddingTop: 40,
+    paddingTop: 30,
   },
   logo: {
     height: 120,
@@ -510,5 +520,27 @@ const styles = StyleSheet.create({
     color: "green",
     marginBottom: 10,
     textAlign: "center",
+  },
+
+    googleButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderColor: "brown",
+    borderWidth: 1,
+    borderRadius: 25,
+    padding: 15,
+    width: "90%",
+    justifyContent: "center",
+  },
+
+  googleIcon: {
+    width: 20,
+    height: 20,
+    marginRight: 10,
+  },
+
+  googleText: {
+    color: "brown",
+    fontWeight: "500",
   },
 });
