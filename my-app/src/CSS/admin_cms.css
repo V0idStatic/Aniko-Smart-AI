@@ -1,0 +1,214 @@
+:root {
+    --primary-green: #1D492C;
+    --accent-green: #84cc16;
+    --pastel-green: #BDE08A;
+    --light-green: #f0fdf4;
+    --dark-green: #143820;
+    --dark-gray: #374151;
+    --light-gray: #f9fafb;
+    --white: #ffffff;
+    --bg-color: #cfc4b2ff;
+    --primary-brown: #8A6440;
+    --dark-brown: #4D2D18;
+    --gradient-primary: linear-gradient(135deg, var(--primary-green), var(--accent-green));
+    --gradient-secondary: linear-gradient(135deg, var(--primary-green), var(--pastel-green));
+}
+  
+img.thumb { 
+    width: 120px; border-radius: 8px; 
+}
+
+.header {
+    color: var(--dark-brown);
+    font-weight: bold;
+    text-align:center;
+}
+
+.subheader {
+    font-size: 18px;
+    font-weight: 400;
+    color: var(--primary-brown);
+    text-align:center;
+    margin-bottom: 1rem;
+}
+
+.nav-tabs {
+    border-radius: 20px;
+    width: 30%;
+    justify-content: center;
+    align-items: center;
+    margin: 0 auto !important;
+    border: none !important;
+    background-color: var(--pastel-green);
+    backdrop-filter: blur(12px) brightness(0.9);
+    -webkit-backdrop-filter: blur(12px) brightness(0.9);
+    padding: 0;
+    margin-top: 2rem !important;
+    margin-bottom: 3rem !important;
+}
+
+.nav-link {
+    color: var(--primary-green);
+    text-decoration: none;
+    font-weight: 500 !important;
+    align-items: center !important;
+    display: flex; 
+}
+
+.nav-link:hover {
+    background-color: #1d492c65;
+    color: white;
+    text-decoration: none;
+    font-weight: 500;
+    border: none;
+    border-radius: 20px;
+}
+
+.nav-link.active {
+    background-color: var(--primary-brown) !important;
+    border: none !important;
+    border-radius: 20px;
+    color: var(--light-green) !important;
+    font-weight: bold !important;
+    margin: 0;
+    left: 0 !important;
+}
+
+.nav-tabs .nav-item:first-child .nav-link.active {
+    margin-left: -10px !important;
+}
+
+    .nav-tabs .nav-item:last-child .nav-link.active {
+    margin-right: -10px !important;
+}
+
+.card {
+    background: var(--gradient-secondary) !important;
+    backdrop-filter: blur(12px) brightness(0.9);
+    -webkit-backdrop-filter: blur(12px) brightness(0.9);
+    padding: 20px 30px !important;
+    border: 2px solid var(--dark-green) !important;
+    margin-bottom: 2rem;
+    border-radius: 0px;
+    border-top-right-radius: 80px;
+    border-bottom-left-radius: 80px;
+}
+
+.card h5 {
+    color: var(--light-green) !important;
+    margin-bottom: 1rem;
+}
+
+form {
+    display: flex;
+    align-items: center;
+}
+
+form button {
+    justify-content: space-between;
+    margin-left: auto;
+    background-color: transparent !important;
+    border: 2px solid var(--primary-brown) !important;
+    color: var(--primary-brown) !important;
+    font-weight: 500 !important;
+}
+
+form button:hover {
+    background-color: var(--pastel-green) !important;
+    color: var(--primary-green) !important;
+}
+
+input {
+    width: 88% !important;
+}
+
+.bi {
+    margin-right: 1rem;
+}
+
+table {
+    border-radius: 20px;
+    overflow: hidden;
+    backdrop-filter: blur(10px);
+    background: rgba(255, 255, 255, 0.15); 
+    color: var(--white);
+}
+
+.table th {
+    text-align: center;
+    font-weight: 600;
+    padding: 12px;
+    background: rgba(0, 0, 0, 0.25) !important; 
+    color: var(--light-green);
+    border-top: none !important;
+}
+
+.table td {
+    vertical-align: middle;
+    padding: 10px;
+    color: var(--primary-green) !important;
+}
+
+table td, 
+table th {
+    border: 1px solid #ccc; 
+}
+
+table tr:first-child th {
+    border-top: none; 
+}
+
+table tr:last-child td {
+    border-bottom: none; 
+}
+
+table td:first-child,
+table th:first-child {
+    border-left: none; 
+}
+
+table td:last-child,
+table th:last-child {
+    border-right: none; 
+}
+
+.table tbody tr:hover {
+    background: rgba(255, 255, 255, 0.08) !important;
+    transition: 0.3s ease;
+}
+
+.table thead tr  {
+    background: linear-gradient(135deg, #16a34a, #166534) !important;
+    color: var(--dark-green) !important;
+    border-top-right-radius: 20px;
+    border-top-left-radius: 20px;
+    border-top: none !important;
+}
+
+.team-fc {
+    display: block;
+}
+
+.team-fc input {
+    width: 100% !important;
+}
+
+.add-btn {
+    margin-top: 1rem;
+    justify-content: space-between;
+    margin-left: auto;
+    display: flex;
+}
+
+.bi-trash3-fill {
+    margin-right: 7px !important;
+}
+
+.btn-danger {
+    background-color: #b91c1c;
+    border-radius: 10px;
+}
+
+.btn-danger:hover {
+    background-color: #890c0cff;
+}
