@@ -210,7 +210,9 @@ export default function Dashboard() {
             />
             <View style={styles.diagnosisOverlay}>
               <Text style={styles.diagnosisTitle}>Plant Diagnosis</Text>
-              <TouchableOpacity style={styles.tryNowButton}>
+              <TouchableOpacity
+                style={styles.tryNowButton}
+                onPress={() => router.push("/plantdashboard")}>
                 <Text style={styles.tryNowText}>Try Now</Text>
               </TouchableOpacity>
             </View>
@@ -274,13 +276,24 @@ export default function Dashboard() {
 
       {/* Footer Navigation */}
       <View style={styles.footer}>
-        <Ionicons name="leaf" size={28} color="white" />
-        <Ionicons name="camera" size={28} color="white" />
-        <Ionicons name="home" size={28} color="white" />
-        <Ionicons name="menu" size={28} color="white" />
+        <TouchableOpacity>
+          <Ionicons name="home" size={28} color="white" />
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => router.push("/plantdashboard")}>
+          <Ionicons name="leaf" size={28} color="white" />
+        </TouchableOpacity>
+        <TouchableOpacity>
+          <Ionicons name="camera" size={28} color="white" />
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => router.push("/dashboard")}>
+          <Ionicons name="cloud" size={28} color="white" />
+        </TouchableOpacity>
+        <TouchableOpacity>
+          <Ionicons name="menu" size={28} color="white" />
+        </TouchableOpacity>
         <TouchableOpacity onPress={() => router.push("/sensor")}>
-    <Ionicons name="analytics-outline" size={28} color="white" />
-  </TouchableOpacity>
+          <Ionicons name="analytics-outline" size={28} color="white" />
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -493,41 +506,41 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     padding: 15,
   },
-historyHeaderRow: {
-  flexDirection: "row",
-  alignItems: "center",
-  justifyContent: "space-between",
-  marginBottom: 10,
-},
-historyHeader: {
-  marginBottom: 4,
-},
+  historyHeaderRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 10,
+  },
+  historyHeader: {
+    marginBottom: 4,
+  },
 
-legendRow: {
-  flexDirection: "row",
-  alignItems: "center",
-},
+  legendRow: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
 
-legendItem: {
-  flexDirection: "row",
-  alignItems: "center",
-  marginLeft: 8,
-  
-},
+  legendItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginLeft: 8,
 
-legendColor: {
-  width: 10,
-  height: 10,
-  borderRadius: 5,
-  marginRight: 4,
-  
-},
+  },
+
+  legendColor: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    marginRight: 4,
+
+  },
 
   historyTitle: {
     color: "white",
     fontWeight: "bold",
     fontSize: 12,
-    
+
   },
 
 
