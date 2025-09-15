@@ -278,14 +278,14 @@ export default function Dashboard() {
 
 
 
-                {/* Water level section */}
+                {/* Soil Moisture section */}
                 <View style={styles.waterCard}>
                     <ImageBackground
                         source={require("../assets/water.png")}
                         style={styles.waterBackground}
                         imageStyle={{ borderRadius: 20 }}
                     >
-                        <Text style={styles.waterTitle}>Water Level</Text>
+                        <Text style={styles.waterTitle}>Soil Moisture</Text>
 
                         <TouchableOpacity
                             style={styles.viewButton}
@@ -595,11 +595,11 @@ const styles = StyleSheet.create({
     },
 
     viewButton: {
-        backgroundColor: "rgba(255, 255, 255, 0.7)", // transparent white
+        backgroundColor: "rgba(255, 255, 255, 0.7)", 
         paddingHorizontal: 20,
         paddingVertical: 8,
         borderRadius: 10,
-        alignSelf: "flex-start", // not centered
+        alignSelf: "flex-start", 
     },
 
     viewText: {

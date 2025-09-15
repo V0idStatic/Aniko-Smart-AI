@@ -173,7 +173,7 @@ export default function Dashboard() {
           {weather.hourlyWeather.map((item, index) => (
             <View key={index} style={styles.weatherHourCard}>
               <Text style={styles.weatherHour}>{item.time}</Text>
-              <Ionicons name={item.icon} size={20} color="white" />
+              <Ionicons name={item.icon} size={18} color="white" />
               <Text style={styles.weatherHourTemp}>{item.temp}°</Text>
             </View>
           ))}
@@ -265,8 +265,8 @@ export default function Dashboard() {
                 </View>
 
                 {/* DETAILS BELOW */}
-                <Text style={styles.historyDetails}>{item.status}</Text>
-                <Text style={styles.historyDetails}>{item.temp}</Text>
+                <Text style={styles.historyDetails}>Weather: {item.status}</Text>
+                <Text style={styles.historyDetails}>Temp: {item.temp}</Text>
                 <Text style={styles.historyDetails}>Humidity: {item.humidity}</Text>
               </View>
             ))}
@@ -337,11 +337,11 @@ const styles = StyleSheet.create({
   weatherCard: {
     position: "absolute",
     top: 140,
-    left: 20,
-    right: 20,
+    left: 18,
+    right: 18,
     backgroundColor: "#1c4722",
     borderRadius: 20,
-    padding: 20,
+    padding: 15,
     zIndex: 10,
     elevation: 8,
     shadowColor: "#000",
@@ -361,42 +361,42 @@ const styles = StyleSheet.create({
   },
 
   weatherCity: {
-    fontSize: 18,
+    fontSize: 17,
     color: "white",
     fontWeight: "600",
   },
 
   weatherTemp: {
-    fontSize: 48,
+    fontSize: 47,
     fontWeight: "bold",
     color: "white",
   },
 
   weatherCondition: {
-    fontSize: 16,
+    fontSize: 15,
     color: "white",
     fontWeight: "500",
   },
 
   weatherHighLow: {
-    fontSize: 14,
+    fontSize: 13,
     color: "white",
   },
   weatherHourCard: {
     backgroundColor: "rgba(255,255,255,0.15)",
     borderRadius: 12,
-    padding: 8,
+    padding: 7,
     alignItems: "center",
-    marginRight: 8,
-    width: 60,
+    marginRight: 3,
+    width: 50,
   },
   weatherHour: {
-    fontSize: 12,
+    fontSize: 10,
     color: "white",
-    marginBottom: 4
+    marginBottom: 3
   },
   weatherHourTemp: {
-    fontSize: 14,
+    fontSize: 11,
     fontWeight: "bold",
     color: "white",
   },
@@ -404,7 +404,7 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
     borderRadius: 10,
     paddingVertical: 8,
-    marginTop: 8,
+    marginTop: 7,
     alignItems: "center",
   },
   weatherButtonText: {
@@ -414,7 +414,7 @@ const styles = StyleSheet.create({
 
   scrollContent: {
     paddingHorizontal: 15,
-    paddingTop: 220,
+    paddingTop: 190,
     paddingBottom: 100,
   },
   sectionTitle: {
@@ -539,14 +539,14 @@ const styles = StyleSheet.create({
   historyTitle: {
     color: "white",
     fontWeight: "bold",
-    fontSize: 12,
+    fontSize: 10,
 
   },
 
 
   legendText: {
     color: "white",
-    fontSize: 10,
+    fontSize: 8,
   },
   historyRow: {
     flexDirection: "row",
@@ -557,7 +557,6 @@ const styles = StyleSheet.create({
 
   historyDayWrapper: {
     flexBasis: "13%",
-    alignItems: "center",
     marginBottom: 8,
   },
 
@@ -576,9 +575,8 @@ const styles = StyleSheet.create({
   },
 
   historyDetails: {
-    fontSize: 10,
+    fontSize: 5,
     color: "white",
-    textAlign: "center",
   },
 
 
