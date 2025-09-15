@@ -14,7 +14,6 @@ const AdminLogin: React.FC = () => {
     setError("");
 
     try {
-      // ✅ Login with Supabase Auth
       const { data, error: authError } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -26,7 +25,6 @@ const AdminLogin: React.FC = () => {
         return;
       }
 
-      // ✅ Check if the logged-in user has admin role
       const user = data?.user;
       if (!user) {
         setError("No user found.");
@@ -36,14 +34,12 @@ const AdminLogin: React.FC = () => {
       const role = user.user_metadata?.role;
       if (role !== "admin") {
         setError("Access denied: Not an admin.");
-        await supabase.auth.signOut(); // logout immediately
+        await supabase.auth.signOut(); 
         return;
       }
 
-      // ✅ Save session locally (optional)
       localStorage.setItem("adminToken", user.id);
 
-      // ✅ Redirect to admin dashboard
       navigate("/admin_home");
     } catch (err) {
       console.error("Unexpected login error:", err);
@@ -56,8 +52,6 @@ const AdminLogin: React.FC = () => {
       <div className="card shadow p-4 adminLog-card" style={{ width: "600px" }}>
         <img src="PICTURES/Logo-noText.png" className="adminLog-logo" />
         <h3 className="text-center mb-3">Admin Login</h3>
-        {error && <div className="alert alert-danger">{error}</div>}
-
         <form onSubmit={handleSubmit} className="adminLog-form">
           <div className="mb-3">
             <label className="form-label">Email</label>
@@ -83,7 +77,9 @@ const AdminLogin: React.FC = () => {
             />
           </div>
 
-          <button type="submit" className="btn btn-primary w-100">
+          {error && <div className="alert alert-danger invalidAlert">{error}</div>}
+
+          <button type="submit" className="btn btn-primary w-100 adminLog-btn">
             Login
           </button>
         </form>
