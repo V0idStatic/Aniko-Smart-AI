@@ -36,7 +36,7 @@ const Login: React.FC = () => {
             console.log("✅ User saved to Supabase:", user.uid);
           }
 
-          navigate("/testimonialSubmit");
+          navigate("/home");
         } catch (e: any) {
           console.error("Login error:", e.message);
           navigate("/");

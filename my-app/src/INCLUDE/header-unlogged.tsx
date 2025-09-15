@@ -1,9 +1,24 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { auth } from "../firebase"; // ✅ adjust path if needed
 import "bootstrap-icons/font/bootstrap-icons.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 
-const Header: React.FC = () => {
+const HeaderUnlogged: React.FC = () => {
+  const navigate = useNavigate();
+
+  const requireLogin = (e: React.MouseEvent, targetPath: string) => {
+    e.preventDefault();
+    const user = auth.currentUser;
+    if (!user) {
+      // Not logged in → send to login
+      navigate("/login", { state: { redirectTo: targetPath } });
+    } else {
+      // Already logged in → go to target page
+      navigate(targetPath);
+    }
+  };
+
   return (
     <header className="floating-header">
       <nav className="navbar navbar-expand-lg">
@@ -31,11 +46,32 @@ const Header: React.FC = () => {
               <li className="nav-item"><Link className="nav-link" to="/">Home</Link></li>
               <li className="nav-item"><a className="nav-link" href="#about">About</a></li>
               <li className="nav-item"><a className="nav-link" href="#features">Features</a></li>
-              <li className="nav-item"><Link className="nav-link" to="/testimonialDisplay">Testimonial</Link></li>
+
+              {/* Require login for Testimonial */}
+              <li className="nav-item">
+                <a
+                  className="nav-link"
+                  href="/testimonialDisplay"
+                  onClick={(e) => requireLogin(e, "/testimonialDisplay")}
+                >
+                  Testimonial
+                </a>
+              </li>
+
               <li className="nav-item"><a className="nav-link" href="#download">Download</a></li>
               <li className="nav-item"><a className="nav-link" href="#why-aniko">Why Aniko</a></li>
               <li className="nav-item"><a className="nav-link" href="#team">Team</a></li>
-              <li className="nav-item"><Link className="nav-link" to="/compliance">Compliance</Link></li>
+
+              {/* Require login for Compliance */}
+              <li className="nav-item">
+                <a
+                  className="nav-link"
+                  href="/compliance"
+                  onClick={(e) => requireLogin(e, "/compliance")}
+                >
+                  Compliance
+                </a>
+              </li>
             </ul>
 
             {/* LOGIN BUTTON on the right side */}
@@ -86,4 +122,4 @@ const Header: React.FC = () => {
   );
 };
 
-export default Header;
+export default HeaderUnlogged;

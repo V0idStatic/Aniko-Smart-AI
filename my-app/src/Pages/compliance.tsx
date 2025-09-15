@@ -30,6 +30,20 @@ const Compliance: React.FC = () => {
     return () => unsub();
   }, []);
 
+  // ✅ Autofill email + name if user logged in
+  useEffect(() => {
+    if (user) {
+      setFormData((prev) => ({
+        ...prev,
+        email: user.email || "",
+        firstName: user.displayName ? user.displayName.split(" ")[0] : prev.firstName,
+        lastName: user.displayName && user.displayName.split(" ").length > 1
+          ? user.displayName.split(" ").slice(1).join(" ")
+          : prev.lastName,
+      }));
+    }
+  }, [user]);
+
   const handleChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
@@ -69,9 +83,12 @@ const Compliance: React.FC = () => {
       } else {
         setModalMessage("✅ Your message has been successfully sent!");
         setFormData({
-          firstName: "",
-          lastName: "",
-          email: "",
+          firstName: user?.displayName ? user.displayName.split(" ")[0] : "",
+          lastName:
+            user?.displayName && user.displayName.split(" ").length > 1
+              ? user.displayName.split(" ").slice(1).join(" ")
+              : "",
+          email: user?.email || "",
           phone: "",
           subject: "",
           message: "",
@@ -141,6 +158,7 @@ const Compliance: React.FC = () => {
                         onChange={handleChange}
                         placeholder="First Name"
                         required
+                        readOnly={!!user && !!user.displayName}
                       />
                       <label htmlFor="firstName">First Name</label>
                     </div>
@@ -156,6 +174,7 @@ const Compliance: React.FC = () => {
                         onChange={handleChange}
                         placeholder="Last Name"
                         required
+                        readOnly={!!user && !!user.displayName}
                       />
                       <label htmlFor="lastName">Last Name</label>
                     </div>
@@ -174,6 +193,7 @@ const Compliance: React.FC = () => {
                         onChange={handleChange}
                         placeholder="Email Address"
                         required
+                        readOnly={!!user} // ✅ autofilled when logged in
                       />
                       <label htmlFor="email">Email Address</label>
                     </div>

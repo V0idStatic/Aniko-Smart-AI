@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { HashLink } from "react-router-hash-link"; // ✅ Smooth scrolling
 import "bootstrap-icons/font/bootstrap-icons.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { auth } from "../firebase";
@@ -42,14 +43,30 @@ const Header: React.FC = () => {
 
           <div className="collapse navbar-collapse" id="navbarNav">
             <ul className="navbar-nav gap-3 mx-auto text-center">
-              <li className="nav-item"><Link className="nav-link" to="/">Home</Link></li>
-              <li className="nav-item"><a className="nav-link" href="#about">About</a></li>
-              <li className="nav-item"><a className="nav-link" href="#features">Features</a></li>
-              <li className="nav-item"><Link className="nav-link" to="/testimonialDisplay">Testimonial</Link></li>
-              <li className="nav-item"><a className="nav-link" href="#download">Download</a></li>
-              <li className="nav-item"><a className="nav-link" href="#why-aniko">Why Aniko</a></li>
-              <li className="nav-item"><a className="nav-link" href="#team">Team</a></li>
-              <li className="nav-item"><Link className="nav-link" to="/compliance">Compliance</Link></li>
+              <li className="nav-item">
+                <Link className="nav-link" to="/">Home</Link>
+              </li>
+              <li className="nav-item">
+                <HashLink smooth className="nav-link" to="/#about">About</HashLink>
+              </li>
+              <li className="nav-item">
+                <HashLink smooth className="nav-link" to="/#features">Features</HashLink>
+              </li>
+              <li className="nav-item">
+                <Link className="nav-link" to="/testimonialDisplay">Testimonial</Link>
+              </li>
+              <li className="nav-item">
+                <HashLink smooth className="nav-link" to="/#download">Download</HashLink>
+              </li>
+              <li className="nav-item">
+                <HashLink smooth className="nav-link" to="/#why-aniko">Why Aniko</HashLink>
+              </li>
+              <li className="nav-item">
+                <HashLink smooth className="nav-link" to="/#team">Team</HashLink>
+              </li>
+              <li className="nav-item">
+                <Link className="nav-link" to="/compliance">Compliance</Link>
+              </li>
             </ul>
 
             {/* Right Side */}
