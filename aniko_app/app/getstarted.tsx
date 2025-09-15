@@ -121,7 +121,7 @@ const styles = StyleSheet.create({
         paddingVertical: 10,
         paddingHorizontal: 15,
         marginVertical: 8,
-        width: "51%", 
+        width: "55%", 
         elevation: 3,
     },
 
