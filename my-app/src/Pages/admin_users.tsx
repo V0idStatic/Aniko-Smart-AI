@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
-import supabase from "../CONFIG/supabaseClient"; // ✅ always default import
+import supabase from "../CONFIG/supabaseClient"; 
 import AdminHeader from "../INCLUDE/admin-sidebar";
-import bcrypt from "bcryptjs"; // ✅ for password hashing
+import bcrypt from "bcryptjs"; 
 import "../CSS/admin_users.css";
 
 interface User {
@@ -27,26 +27,21 @@ const AdminUsers: React.FC = () => {
   const [showModal, setShowModal] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<{ id: number; type: "user" | "admin" } | null>(null);
 
-  // Register admin modal state
   const [showRegisterModal, setShowRegisterModal] = useState(false);
   const [newAdmin, setNewAdmin] = useState({ username: "", password: "" });
 
-  // Success modal state
   const [showSuccessModal, setShowSuccessModal] = useState(false);
 
-  // Fetch Users
   const fetchUsers = async () => {
     const { data, error } = await supabase.from("users").select("*").order("id", { ascending: true });
     if (!error && data) setUsers(data as User[]);
   };
 
-  // Fetch Admins
   const fetchAdmins = async () => {
     const { data, error } = await supabase.from("admin_accounts").select("*").order("id", { ascending: true });
     if (!error && data) setAdmins(data as AdminAccount[]);
   };
 
-  // Handle Delete
   const confirmDelete = (id: number, type: "user" | "admin") => {
     setDeleteTarget({ id, type });
     setShowModal(true);
@@ -65,7 +60,6 @@ const AdminUsers: React.FC = () => {
     setDeleteTarget(null);
   };
 
-  // Handle Register Admin (with password hashing)
   const handleRegisterAdmin = async () => {
     if (!newAdmin.username || !newAdmin.password) {
       alert("⚠️ Username and password are required.");
@@ -73,13 +67,12 @@ const AdminUsers: React.FC = () => {
     }
 
     try {
-      // 🔒 Hash the password before saving
       const hashedPassword = await bcrypt.hash(newAdmin.password, 10);
 
       const { error } = await supabase.from("admin_accounts").insert([
         {
           username: newAdmin.username,
-          password: hashedPassword, // ✅ store hashed password
+          password: hashedPassword, 
           created_at: new Date().toISOString(),
         },
       ]);
@@ -91,7 +84,6 @@ const AdminUsers: React.FC = () => {
         setShowRegisterModal(false);
         fetchAdmins();
 
-        // ✅ Show success modal instead of alert
         setShowSuccessModal(true);
       }
     } catch (err) {
@@ -104,7 +96,6 @@ const AdminUsers: React.FC = () => {
     fetchUsers();
     fetchAdmins();
 
-    // Realtime subscriptions
     const usersSub = supabase
       .channel("users-channel")
       .on("postgres_changes", { event: "*", schema: "public", table: "users" }, () => {
@@ -134,25 +125,21 @@ const AdminUsers: React.FC = () => {
         <h6 className="adminUsers-subheader">Central hub for managing all user and admin accounts.</h6>
 
         {/* Toggle Buttons */}
-        <div className="mb-3">
+        <div className="mb-3 adminUsers-toggle">
           <button
-            className={`btn me-2 ${view === "users" ? "btn-primary" : "btn-outline-primary"}`}
+            className={`btn adminUsers-userBtn me-2 ${view === "users" ? "btn-primary" : "btn-outline-primary"}`}
             onClick={() => setView("users")}
           >
             Users
           </button>
           <button
-            className={`btn me-2 ${view === "admins" ? "btn-primary" : "btn-outline-primary"}`}
+            className={`btn adminUsers-adminBtn me-2 ${view === "admins" ? "btn-primary" : "btn-outline-primary"}`}
             onClick={() => setView("admins")}
           >
             Admins
           </button>
 
-          {view === "admins" && (
-            <button className="btn btn-success" onClick={() => setShowRegisterModal(true)}>
-              <i className="bi bi-person-plus-fill"></i> Register Admin
-            </button>
-          )}
+       
         </div>
 
         {/* Users Table */}
@@ -209,6 +196,12 @@ const AdminUsers: React.FC = () => {
           </div>
         )}
 
+        {view === "admins" && (
+          <button className="btn btn-success adminUsers-regBtn" onClick={() => setShowRegisterModal(true)}>
+            <i className="bi bi-person-plus-fill"></i> Register Admin
+          </button>
+        )}
+
         {/* Admins Table */}
         {view === "admins" && (
           <div className="card adminUsers-card">
@@ -250,83 +243,99 @@ const AdminUsers: React.FC = () => {
         )}
       </div>
 
-      {/* Delete Confirmation Modal */}
-      {showModal && (
-        <div className="modal fade show" style={{ display: "block" }} tabIndex={-1}>
-          <div className="modal-dialog modal-dialog-centered">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title">Confirm Deletion</h5>
-                <button type="button" className="btn-close" onClick={() => setShowModal(false)}></button>
+  {/* Delete Confirmation Modal */}
+    {showModal && (
+      <>
+        {/* Backdrop */}
+        <div className="adminUsers-backdrop"></div>
+
+        <div className="modal fade show delModal" style={{ display: "block" }} tabIndex={-1}>
+          <div className="modal-dialog modal-dialog-centered delModal-dialog">
+            <div className="modal-content delModal-content">
+              <div className="modal-header delModal-header">
+                <h5 className="modal-title delModal-title"><i className="bi bi-person-dash-fill"></i>Confirm Deletion</h5>
               </div>
-              <div className="modal-body">
+              <div className="modal-body delModal-body">
                 <p>Are you sure you want to delete this {deleteTarget?.type}?</p>
               </div>
-              <div className="modal-footer">
-                <button className="btn btn-secondary" onClick={() => setShowModal(false)}>Cancel</button>
-                <button className="btn btn-danger" onClick={handleDelete}>Delete</button>
+              <div className="modal-footer delModal-footer">
+                <button className="btn delModal-cancelBtn btn-secondary" onClick={() => setShowModal(false)}>Cancel</button>
+                <button className="btn delModal-delBtn btn-danger" onClick={handleDelete}>Delete</button>
               </div>
             </div>
           </div>
         </div>
-      )}
+      </>
+    )}
 
-      {/* Register Admin Modal */}
+
+    {/* Register Admin Modal */}
       {showRegisterModal && (
-        <div className="modal fade show" style={{ display: "block" }} tabIndex={-1}>
-          <div className="modal-dialog modal-dialog-centered">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title">Register New Admin</h5>
-                <button type="button" className="btn-close" onClick={() => setShowRegisterModal(false)}></button>
-              </div>
-              <div className="modal-body">
-                <div className="mb-3">
-                  <label className="form-label">Username</label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    value={newAdmin.username}
-                    onChange={(e) => setNewAdmin({ ...newAdmin, username: e.target.value })}
-                  />
+        <>
+          {/* Backdrop */}
+          <div className="adminUsers-backdrop"></div>
+
+          <div className="modal fade show adminUsers-modal" style={{ display: "block" }} tabIndex={-1}>
+            <div className="modal-dialog modal-dialog-centered adminUsers-modal-dialog">
+              <div className="modal-content adminUsers-modal-content">
+                <div className="modal-header adminUsers-modal-header">
+                  <h5 className="modal-title adminUsers-modal-title"><i className="bi bi-person-add"></i>Register New Admin</h5>
                 </div>
-                <div className="mb-3">
-                  <label className="form-label">Password</label>
-                  <input
-                    type="password"
-                    className="form-control"
-                    value={newAdmin.password}
-                    onChange={(e) => setNewAdmin({ ...newAdmin, password: e.target.value })}
-                  />
+                <div className="modal-body adminUsers-modal-body">
+                  <div className="mb-3">
+                    <label className="form-label">Username</label>
+                    <input
+                      type="text"
+                      className="form-control adminUsers-fc"
+                      value={newAdmin.username}
+                      placeholder="Enter username"
+                      onChange={(e) => setNewAdmin({ ...newAdmin, username: e.target.value })}
+                    />
+                  </div>
+                  <div className="mb-3">
+                    <label className="form-label">Password</label>
+                    <input
+                      type="password"
+                      className="form-control adminUsers-fc"
+                      value={newAdmin.password}
+                      placeholder="Enter Password"
+                      onChange={(e) => setNewAdmin({ ...newAdmin, password: e.target.value })}
+                    />
+                  </div>
                 </div>
-              </div>
-              <div className="modal-footer">
-                <button className="btn btn-secondary" onClick={() => setShowRegisterModal(false)}>Cancel</button>
-                <button className="btn btn-success" onClick={handleRegisterAdmin}>Register</button>
+                <div className="modal-footer adminUsers-modal-footer">
+                  <button className="btn adminUsers-modal-cancelBtn btn-secondary" onClick={() => setShowRegisterModal(false)}>Cancel</button>
+                  <button className="btn adminUsers-modal-regBtn btn-success" onClick={handleRegisterAdmin}>Register</button>
+                </div>
               </div>
             </div>
           </div>
-        </div>
+        </>
       )}
 
-      {/* Success Modal */}
+     {/* Success Modal */}
       {showSuccessModal && (
-        <div className="modal fade show" style={{ display: "block" }} tabIndex={-1}>
-          <div className="modal-dialog modal-dialog-centered">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title text-success">Success</h5>
-                <button type="button" className="btn-close" onClick={() => setShowSuccessModal(false)}></button>
-              </div>
-              <div className="modal-body">
-                <p>✅ Admin registered successfully!</p>
-              </div>
-              <div className="modal-footer">
-                <button className="btn btn-success" onClick={() => setShowSuccessModal(false)}>OK</button>
+        <>
+          {/* Backdrop */}
+          <div className="adminUsers-backdrop"></div>
+
+          <div className="modal fade show" style={{ display: "block" }} tabIndex={-1}>
+            <div className="modal-dialog modal-dialog-centered">
+              <div className="modal-content">
+                <div className="modal-header">
+                  <h5 className="modal-title text-success">Success</h5>
+                  <button type="button" className="btn-close" onClick={() => setShowSuccessModal(false)}></button>
+                </div>
+                <div className="modal-body">
+                  <p>✅ Admin registered successfully!</p>
+                </div>
+                <div className="modal-footer">
+                  <button className="btn btn-success" onClick={() => setShowSuccessModal(false)}>OK</button>
+                </div>
               </div>
             </div>
           </div>
-        </div>
+        </>
       )}
     </div>
   );
