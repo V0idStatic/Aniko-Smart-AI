@@ -278,6 +278,9 @@ export default function Dashboard() {
         <Ionicons name="camera" size={28} color="white" />
         <Ionicons name="home" size={28} color="white" />
         <Ionicons name="menu" size={28} color="white" />
+        <TouchableOpacity onPress={() => router.push("/sensor")}>
+    <Ionicons name="analytics-outline" size={28} color="white" />
+  </TouchableOpacity>
       </View>
     </View>
   );
