@@ -194,10 +194,8 @@ export default function Dashboard() {
           <View style={styles.statusCard}>
             <Text style={styles.statusLabel}>Status</Text>
             <View style={styles.statusCircleWrapper}>
-              <View style={styles.statusCircleOuter}>
-                <View style={styles.statusCircleInner}>
-                  <Text style={styles.statusText}>{cropsStatus.toUpperCase()}</Text>
-                </View>
+              <View style={[styles.outerCircle, { borderColor: "#FFD700" }]}>
+                <Text style={styles.circleText}>GOOD</Text>
               </View>
             </View>
           </View>
@@ -401,14 +399,16 @@ const styles = StyleSheet.create({
     color: "white",
   },
   weatherButton: {
-    backgroundColor: "white",
+    backgroundColor: "rgba(255, 255, 255, 0.1)",
     borderRadius: 10,
     paddingVertical: 8,
     marginTop: 7,
     alignItems: "center",
+    borderColor: "#ffffffff",
+    borderWidth: 1,
   },
   weatherButtonText: {
-    color: "#1c4722",
+    color: "#ffffffff",
     fontWeight: "bold",
   },
 
@@ -445,23 +445,20 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  statusCircleOuter: {
-    backgroundColor: "#FFD700",
-    padding: 5,
-    borderRadius: 50,
-  },
-  statusCircleInner: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: "#FFF",
-    alignItems: "center",
+  outerCircle: {
+    width: 90,
+    height: 90,
+    borderRadius: 60,
+    borderWidth: 8,
     justifyContent: "center",
+    alignItems: "center",
+    marginRight: 12,
   },
-  statusText: {
-    color: "#1c4722",
+
+  circleText: {
+    fontSize: 19,
     fontWeight: "bold",
-    fontSize: 16,
+    color: "#FFC107",
   },
 
   diagnosisCard: {

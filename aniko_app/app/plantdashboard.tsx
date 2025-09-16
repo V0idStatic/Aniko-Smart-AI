@@ -372,7 +372,7 @@ const styles = StyleSheet.create({
 
     findPlantsButton: {
         marginTop: 10,
-        backgroundColor: "white",
+        backgroundColor: "rgba(255, 255, 255, 0.8)", 
         paddingVertical: 6,
         paddingHorizontal: 12,
         borderRadius: 10,
