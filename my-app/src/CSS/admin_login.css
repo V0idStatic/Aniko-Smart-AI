@@ -48,7 +48,7 @@
     margin-top: 2rem !important;
 }
 
-.adminLog-form button {
+.adminLog-btn {
     background: var(--gradient-secondary);
     border: none !important;
     color: white;
@@ -81,4 +81,16 @@
     padding: 10px !important;
     border: 2px solid var(--dark-brown) !important;
     background-color: #bee08a26 !important;
+}
+
+.invalidAlert {
+    margin-top: 2rem !important;
+    color: #6d111a !important;
+    background-color: #dc354684 !important;
+    border: 2px solid #6d111a !important;
+    padding: 10px !important;
+    border-radius: 20px !important;
+    text-align: center !important;
+    font-weight: 500 !important;
+    box-shadow: 0px 0px 10px 2px #f6265784 !important;
 }

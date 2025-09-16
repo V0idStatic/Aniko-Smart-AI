@@ -173,7 +173,7 @@ export default function Dashboard() {
           {weather.hourlyWeather.map((item, index) => (
             <View key={index} style={styles.weatherHourCard}>
               <Text style={styles.weatherHour}>{item.time}</Text>
-              <Ionicons name={item.icon} size={20} color="white" />
+              <Ionicons name={item.icon} size={18} color="white" />
               <Text style={styles.weatherHourTemp}>{item.temp}°</Text>
             </View>
           ))}
@@ -194,10 +194,8 @@ export default function Dashboard() {
           <View style={styles.statusCard}>
             <Text style={styles.statusLabel}>Status</Text>
             <View style={styles.statusCircleWrapper}>
-              <View style={styles.statusCircleOuter}>
-                <View style={styles.statusCircleInner}>
-                  <Text style={styles.statusText}>{cropsStatus.toUpperCase()}</Text>
-                </View>
+              <View style={[styles.outerCircle, { borderColor: "#FFD700" }]}>
+                <Text style={styles.circleText}>GOOD</Text>
               </View>
             </View>
           </View>
@@ -210,7 +208,9 @@ export default function Dashboard() {
             />
             <View style={styles.diagnosisOverlay}>
               <Text style={styles.diagnosisTitle}>Plant Diagnosis</Text>
-              <TouchableOpacity style={styles.tryNowButton}>
+              <TouchableOpacity
+                style={styles.tryNowButton}
+                onPress={() => router.push("/plantdashboard")}>
                 <Text style={styles.tryNowText}>Try Now</Text>
               </TouchableOpacity>
             </View>
@@ -263,8 +263,8 @@ export default function Dashboard() {
                 </View>
 
                 {/* DETAILS BELOW */}
-                <Text style={styles.historyDetails}>{item.status}</Text>
-                <Text style={styles.historyDetails}>{item.temp}</Text>
+                <Text style={styles.historyDetails}>Weather: {item.status}</Text>
+                <Text style={styles.historyDetails}>Temp: {item.temp}</Text>
                 <Text style={styles.historyDetails}>Humidity: {item.humidity}</Text>
               </View>
             ))}
@@ -274,10 +274,24 @@ export default function Dashboard() {
 
       {/* Footer Navigation */}
       <View style={styles.footer}>
-        <Ionicons name="leaf" size={28} color="white" />
-        <Ionicons name="camera" size={28} color="white" />
-        <Ionicons name="home" size={28} color="white" />
-        <Ionicons name="menu" size={28} color="white" />
+        <TouchableOpacity>
+          <Ionicons name="home" size={28} color="white" />
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => router.push("/plantdashboard")}>
+          <Ionicons name="leaf" size={28} color="white" />
+        </TouchableOpacity>
+        <TouchableOpacity>
+          <Ionicons name="camera" size={28} color="white" />
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => router.push("/dashboard")}>
+          <Ionicons name="cloud" size={28} color="white" />
+        </TouchableOpacity>
+        <TouchableOpacity>
+          <Ionicons name="menu" size={28} color="white" />
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => router.push("/sensor")}>
+          <Ionicons name="analytics-outline" size={28} color="white" />
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -321,11 +335,11 @@ const styles = StyleSheet.create({
   weatherCard: {
     position: "absolute",
     top: 140,
-    left: 20,
-    right: 20,
+    left: 18,
+    right: 18,
     backgroundColor: "#1c4722",
     borderRadius: 20,
-    padding: 20,
+    padding: 15,
     zIndex: 10,
     elevation: 8,
     shadowColor: "#000",
@@ -345,60 +359,62 @@ const styles = StyleSheet.create({
   },
 
   weatherCity: {
-    fontSize: 18,
+    fontSize: 17,
     color: "white",
     fontWeight: "600",
   },
 
   weatherTemp: {
-    fontSize: 48,
+    fontSize: 47,
     fontWeight: "bold",
     color: "white",
   },
 
   weatherCondition: {
-    fontSize: 16,
+    fontSize: 15,
     color: "white",
     fontWeight: "500",
   },
 
   weatherHighLow: {
-    fontSize: 14,
+    fontSize: 13,
     color: "white",
   },
   weatherHourCard: {
     backgroundColor: "rgba(255,255,255,0.15)",
     borderRadius: 12,
-    padding: 8,
+    padding: 7,
     alignItems: "center",
-    marginRight: 8,
-    width: 60,
+    marginRight: 3,
+    width: 50,
   },
   weatherHour: {
-    fontSize: 12,
+    fontSize: 10,
     color: "white",
-    marginBottom: 4
+    marginBottom: 3
   },
   weatherHourTemp: {
-    fontSize: 14,
+    fontSize: 11,
     fontWeight: "bold",
     color: "white",
   },
   weatherButton: {
-    backgroundColor: "white",
+    backgroundColor: "rgba(255, 255, 255, 0.1)",
     borderRadius: 10,
     paddingVertical: 8,
-    marginTop: 8,
+    marginTop: 7,
     alignItems: "center",
+    borderColor: "#ffffffff",
+    borderWidth: 1,
   },
   weatherButtonText: {
-    color: "#1c4722",
+    color: "#ffffffff",
     fontWeight: "bold",
   },
 
   scrollContent: {
     paddingHorizontal: 15,
-    paddingTop: 220,
+    paddingTop: 190,
     paddingBottom: 100,
   },
   sectionTitle: {
@@ -429,23 +445,20 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  statusCircleOuter: {
-    backgroundColor: "#FFD700",
-    padding: 5,
-    borderRadius: 50,
-  },
-  statusCircleInner: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: "#FFF",
-    alignItems: "center",
+  outerCircle: {
+    width: 90,
+    height: 90,
+    borderRadius: 60,
+    borderWidth: 8,
     justifyContent: "center",
+    alignItems: "center",
+    marginRight: 12,
   },
-  statusText: {
-    color: "#1c4722",
+
+  circleText: {
+    fontSize: 19,
     fontWeight: "bold",
-    fontSize: 16,
+    color: "#FFC107",
   },
 
   diagnosisCard: {
@@ -490,47 +503,47 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     padding: 15,
   },
-historyHeaderRow: {
-  flexDirection: "row",
-  alignItems: "center",
-  justifyContent: "space-between",
-  marginBottom: 10,
-},
-historyHeader: {
-  marginBottom: 4,
-},
+  historyHeaderRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 10,
+  },
+  historyHeader: {
+    marginBottom: 4,
+  },
 
-legendRow: {
-  flexDirection: "row",
-  alignItems: "center",
-},
+  legendRow: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
 
-legendItem: {
-  flexDirection: "row",
-  alignItems: "center",
-  marginLeft: 8,
-  
-},
+  legendItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginLeft: 8,
 
-legendColor: {
-  width: 10,
-  height: 10,
-  borderRadius: 5,
-  marginRight: 4,
-  
-},
+  },
+
+  legendColor: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    marginRight: 4,
+
+  },
 
   historyTitle: {
     color: "white",
     fontWeight: "bold",
-    fontSize: 12,
-    
+    fontSize: 10,
+
   },
 
 
   legendText: {
     color: "white",
-    fontSize: 10,
+    fontSize: 8,
   },
   historyRow: {
     flexDirection: "row",
@@ -541,7 +554,6 @@ legendColor: {
 
   historyDayWrapper: {
     flexBasis: "13%",
-    alignItems: "center",
     marginBottom: 8,
   },
 
@@ -560,9 +572,8 @@ legendColor: {
   },
 
   historyDetails: {
-    fontSize: 10,
+    fontSize: 5,
     color: "white",
-    textAlign: "center",
   },
 
 
