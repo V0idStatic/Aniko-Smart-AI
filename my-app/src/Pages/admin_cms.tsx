@@ -264,22 +264,22 @@ const AdminCMS: React.FC = () => {
         {/* Section Toggle Buttons */}
         <div className="mb-4 adminCms-navBtn">
           <button
-            className={`btn adminCms-heroBtn me-2 ${activeSection === "hero" ? "btn-primary" : "btn-outline-primary"}`}
-            onClick={() => setActiveSection("hero")}
+            className={`btn adminCms-whyBtn me-2 ${activeSection === "why" ? "btn-primary" : "btn-outline-primary"}`}
+            onClick={() => setActiveSection("why")}
           >
-            Hero
+            Why Aniko
           </button>
           <button
-            className={`btnadminCms-benBtn me-2 ${activeSection === "benefits" ? "btn-primary" : "btn-outline-primary"}`}
+            className={`btn adminCms-benBtn me-2 ${activeSection === "benefits" ? "btn-primary" : "btn-outline-primary"}`}
             onClick={() => setActiveSection("benefits")}
           >
             Benefits
           </button>
           <button
-            className={`btn adminCms-whyBtn me-2 ${activeSection === "why" ? "btn-primary" : "btn-outline-primary"}`}
-            onClick={() => setActiveSection("why")}
+            className={`btn adminCms-heroBtn me-2 ${activeSection === "hero" ? "btn-primary" : "btn-outline-primary"}`}
+            onClick={() => setActiveSection("hero")}
           >
-            Why Aniko
+            Hero
           </button>
           <button
             className={`btn adminCms-teamBtn ${activeSection === "team" ? "btn-primary" : "btn-outline-primary"}`}

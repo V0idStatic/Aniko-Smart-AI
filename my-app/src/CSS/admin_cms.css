@@ -34,19 +34,48 @@ img.thumb {
 }
 
 .adminCms-navBtn {
-    border-radius: 20px;
-    width: 30%;
-    justify-content: center;
-    align-items: center;
-    margin: 0 auto !important;
-    border: none !important;
-    background-color: var(--pastel-green);
-    backdrop-filter: blur(12px) brightness(0.9);
-    -webkit-backdrop-filter: blur(12px) brightness(0.9);
-    padding: 0;
+    justify-content: center !important;
+    align-items: center !important;
+    margin: auto !important;
+    display: flex;
+    margin-bottom: 2rem !important;
     margin-top: 2rem !important;
-    margin-bottom: 3rem !important;
 }
+
+.adminCms-navBtn button {
+    background-color: var(--pastel-green) !important;
+    padding: 20px !important;
+    border-radius: 0;
+    border: 2px solid var(--dark-brown) !important;
+    color: var(--dark-brown);
+    font-weight: 500;
+}
+
+.adminCms-benBtn, .adminCms-teamBtn {
+    border-top-left-radius: 50px !important;
+    border-bottom-right-radius: 50px !important;
+}
+
+.adminCms-heroBtn, .adminCms-whyBtn {
+    border-top-right-radius: 50px !important;
+    border-bottom-left-radius: 50px !important;
+}
+
+.adminCms-navBtn button:hover {
+    background-color: var(--primary-green) !important;
+    color: var(--light-green) !important;
+    border: 2px solid var(--dark-green) !important;
+    transition: all 0.3s ease-in-out;
+    transform: translateY(-2px);
+}
+
+.adminCms-navBtn .btn-primary {
+    background-color: var(--primary-green) !important;
+    border-color: var(--dark-green) !important;
+    color: var(--light-green) !important;
+    font-weight: 600;
+}
+
 
 .adminCms-card {
     background: var(--gradient-secondary) !important;
