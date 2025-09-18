@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import supabase from "../CONFIG/supabaseClient";
 import AdminHeader from "../INCLUDE/admin-sidebar";
+import "../CSS/admin_cms.css";
 
 // ----- Types -----
 interface ImageRow {
@@ -18,7 +19,6 @@ interface TeamMember {
 }
 
 const AdminCMS: React.FC = () => {
-  // ===== State for image tables =====
   const [homeImages, setHomeImages] = useState<ImageRow[]>([]);
   const [benefitImages, setBenefitImages] = useState<ImageRow[]>([]);
   const [whyAnikoImages, setWhyAnikoImages] = useState<ImageRow[]>([]);
@@ -27,20 +27,16 @@ const AdminCMS: React.FC = () => {
   const [benefitFile, setBenefitFile] = useState<File | null>(null);
   const [whyFile, setWhyFile] = useState<File | null>(null);
 
-  // ===== State for team_members =====
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
   const [memberFile, setMemberFile] = useState<File | null>(null);
   const [memberName, setMemberName] = useState("");
   const [memberRole, setMemberRole] = useState("");
 
-  // ===== Success modal =====
   const [showModal, setShowModal] = useState(false);
   const [modalMessage, setModalMessage] = useState("");
 
-  // ===== Section toggle (hero/benefits/why/team) =====
   const [activeSection, setActiveSection] = useState<"hero" | "benefits" | "why" | "team">("hero");
 
-  // ===== Fetch helpers =====
   const fetchTable = async (table: string, setter: (rows: any[]) => void) => {
     const { data, error } = await supabase
       .from(table)
@@ -50,7 +46,6 @@ const AdminCMS: React.FC = () => {
     else if (error) console.error(`❌ Fetch ${table}:`, error);
   };
 
-  // Initial + realtime
   useEffect(() => {
     fetchTable("home_images", setHomeImages);
     fetchTable("benefits_images", setBenefitImages);
@@ -74,7 +69,6 @@ const AdminCMS: React.FC = () => {
     return () => subs.forEach((s) => supabase.removeChannel(s));
   }, []);
 
-  // ===== Generic upload for simple image tables =====
   const uploadToTable = async (file: File, table: string) => {
     const ext = file.name.split(".").pop();
     const fileName = `${Date.now()}.${ext}`;
@@ -103,7 +97,6 @@ const AdminCMS: React.FC = () => {
     }
   };
 
-  // ===== Delete helper =====
   const deleteFromTable = async (table: string, id: number, url: string, refetch: () => void) => {
     const fileName = url.split("/").pop() || "";
     await supabase.storage.from(table).remove([fileName]);
@@ -113,7 +106,6 @@ const AdminCMS: React.FC = () => {
     setShowModal(true);
   };
 
-  // ===== Upload Team Member =====
   const handleMemberUpload = async () => {
     if (!memberFile || !memberName || !memberRole) return alert("Fill all fields");
     try {
@@ -149,7 +141,6 @@ const AdminCMS: React.FC = () => {
     }
   };
 
-  // ===== Reusable Image Section =====
   const TableSection = ({
     title,
     rows,
@@ -165,58 +156,81 @@ const AdminCMS: React.FC = () => {
     tableName: string;
     refetch: () => void;
   }) => (
-    <section className="card p-4 adminCMS-card mb-5">
-      <h3>{title}</h3>
-      <input type="file" accept="image/*" onChange={(e) => setFile(e.target.files?.[0] || null)} />
-      <button className="btn btn-success mt-2" onClick={() => handleUpload(file, tableName, refetch)}>
-        Upload
-      </button>
+    <>
+      {/* Upload Card */}
+      <section className="card p-4 adminCms-card mb-4">
+        <h5>{title} - Upload</h5>
+        <div className="adminCms-form">
+          <input
+            type="file"
+            accept="image/*"
+            onChange={(e) => setFile(e.target.files?.[0] || null)}
+            className="adminCms-chooseBtn"
+          />
+          <button
+            className="btn btn-success mt-2 adminCms-uploadBtn"
+            onClick={() => handleUpload(file, tableName, refetch)}
+          >
+            Upload Image
+          </button>
+        </div>
+        
+      </section>
 
-      <table className="table table-bordered mt-3">
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Image</th>
-            <th>URL</th>
-            <th>Created</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          {rows.length ? (
-            rows.map((img) => (
-              <tr key={img.id}>
-                <td>{img.id}</td>
-                <td>
-                  <img src={img.image_url} alt="" width={80} height={60} />
-                </td>
-                <td>
-                  <a href={img.image_url} target="_blank" rel="noreferrer">
-                    {img.image_url}
-                  </a>
-                </td>
-                <td>{new Date(img.uploaded_at).toLocaleString()}</td>
-                <td>
+      {/* Table Card */}
+      <section className="card p-4 adminCms-card mb-5">
+        <h5>{title} - Images</h5>
+        <table className="table table-bordered adminCms-table mt-3">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Image</th>
+              <th>URL</th>
+              <th>Created</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.length ? (
+              rows.map((img) => (
+                <tr key={img.id}>
+                  <td>{img.id}</td>
+                  <td>
+                    <img src={img.image_url} alt="" width={80} height={60} />
+                  </td>
+                  <td>
+                    <a href={img.image_url} target="_blank" rel="noreferrer">
+                      {img.image_url}
+                    </a>
+                  </td>
+                  <td>{new Date(img.uploaded_at).toLocaleString()}</td>
+                  <td>
                   <button
-                    className="btn btn-danger btn-sm"
-                    onClick={() => deleteFromTable(tableName, img.id, img.image_url, refetch)}
-                  >
-                    Delete
-                  </button>
+                className="btn btn-danger btn-sm d-inline-flex align-items-center gap-1"
+                onClick={() =>
+                  deleteFromTable(tableName, img.id, img.image_url, refetch)
+                }
+              >
+                <i className="bi bi-trash3-fill"></i>
+                <span>Delete</span>
+              </button>
+
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan={5} className="text-center">
+                  No images.
                 </td>
               </tr>
-            ))
-          ) : (
-            <tr>
-              <td colSpan={5} className="text-center">
-                No images.
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </table>
-    </section>
+            )}
+          </tbody>
+        </table>
+      </section>
+    </>
   );
+
 
   return (
     <div>
@@ -244,31 +258,31 @@ const AdminCMS: React.FC = () => {
 
       <AdminHeader />
       <div style={{ marginLeft: "280px", padding: "20px" }}>
-        <h1 className="adminCMS-header">Content Management</h1>
-        <h6 className="adminCMS-subheader">Manage Home, Benefits, Why Aniko, and Team Members</h6>
+        <h1 className="adminCms-header">Content Management</h1>
+        <h6 className="adminCms-subheader">Manage Home, Benefits, Why Aniko, and Team Members</h6>
 
         {/* Section Toggle Buttons */}
-        <div className="mb-4">
+        <div className="mb-4 adminCms-navBtn">
           <button
-            className={`btn me-2 ${activeSection === "hero" ? "btn-primary" : "btn-outline-primary"}`}
+            className={`btn adminCms-heroBtn me-2 ${activeSection === "hero" ? "btn-primary" : "btn-outline-primary"}`}
             onClick={() => setActiveSection("hero")}
           >
             Hero
           </button>
           <button
-            className={`btn me-2 ${activeSection === "benefits" ? "btn-primary" : "btn-outline-primary"}`}
+            className={`btnadminCms-benBtn me-2 ${activeSection === "benefits" ? "btn-primary" : "btn-outline-primary"}`}
             onClick={() => setActiveSection("benefits")}
           >
             Benefits
           </button>
           <button
-            className={`btn me-2 ${activeSection === "why" ? "btn-primary" : "btn-outline-primary"}`}
+            className={`btn adminCms-whyBtn me-2 ${activeSection === "why" ? "btn-primary" : "btn-outline-primary"}`}
             onClick={() => setActiveSection("why")}
           >
             Why Aniko
           </button>
           <button
-            className={`btn ${activeSection === "team" ? "btn-primary" : "btn-outline-primary"}`}
+            className={`btn adminCms-teamBtn ${activeSection === "team" ? "btn-primary" : "btn-outline-primary"}`}
             onClick={() => setActiveSection("team")}
           >
             Team
@@ -310,80 +324,88 @@ const AdminCMS: React.FC = () => {
         )}
 
         {activeSection === "team" && (
-          <section className="card p-4 adminCMS-card mb-5">
-            <h3>Team Members</h3>
-            <div className="mb-2">
-              <input
-                type="text"
-                placeholder="Name"
-                className="form-control mb-2"
-                value={memberName}
-                onChange={(e) => setMemberName(e.target.value)}
-              />
-              <input
-                type="text"
-                placeholder="Role"
-                className="form-control mb-2"
-                value={memberRole}
-                onChange={(e) => setMemberRole(e.target.value)}
-              />
-              <input
-                type="file"
-                accept="image/*"
-                className="form-control"
-                onChange={(e) => setMemberFile(e.target.files?.[0] || null)}
-              />
-              <button className="btn btn-success mt-2" onClick={handleMemberUpload}>
-                Add Member
-              </button>
-            </div>
+          <>
+            {/* Upload Form Card */}
+            <section className="card p-4 adminCms-card mb-4">
+              <h5>Add Team Member</h5>
+              <div>
+                <input
+                  type="text"
+                  placeholder="Name"
+                  className="form-control mb-2 adminCms-fc"
+                  value={memberName}
+                  onChange={(e) => setMemberName(e.target.value)}
+                />
+                <input
+                  type="text"
+                  placeholder="Role"
+                  className="form-control mb-2 adminCms-fc"
+                  value={memberRole}
+                  onChange={(e) => setMemberRole(e.target.value)}
+                />
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="form-control mb-2 adminCms-chooseTeamBtn"
+                  onChange={(e) => setMemberFile(e.target.files?.[0] || null)}
+                />
+                <button className="btn adminCms-addBtn btn-success mt-2" onClick={handleMemberUpload}>
+                  Add Member
+                </button>
+              </div>
+            </section>
 
-            <table className="table table-bordered mt-3">
-              <thead>
-                <tr>
-                  <th>ID</th>
-                  <th>Photo</th>
-                  <th>Name</th>
-                  <th>Role</th>
-                  <th>Uploaded</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {teamMembers.length ? (
-                  teamMembers.map((m) => (
-                    <tr key={m.id}>
-                      <td>{m.id}</td>
-                      <td>
-                        <img src={m.image_url} alt={m.name} width={80} height={60} />
-                      </td>
-                      <td>{m.name}</td>
-                      <td>{m.role}</td>
-                      <td>{new Date(m.uploaded_at).toLocaleString()}</td>
-                      <td>
-                        <button
-                          className="btn btn-danger btn-sm"
-                          onClick={() =>
-                            deleteFromTable("team_members", m.id, m.image_url, () =>
-                              fetchTable("team_members", setTeamMembers)
-                            )
-                          }
-                        >
-                          Delete
-                        </button>
+            {/* Table Card */}
+            <section className="card p-4 adminCms-card mb-5">
+              <h5>Team Members</h5>
+              <table className="table table-bordered mt-3 adminCms-table">
+                <thead className="adminCms-thead">
+                  <tr>
+                    <th>ID</th>
+                    <th>Photo</th>
+                    <th>Name</th>
+                    <th>Role</th>
+                    <th>Uploaded</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {teamMembers.length ? (
+                    teamMembers.map((m) => (
+                      <tr key={m.id}>
+                        <td>{m.id}</td>
+                        <td>
+                          <img src={m.image_url} alt={m.name} width={80} height={60} />
+                        </td>
+                        <td>{m.name}</td>
+                        <td>{m.role}</td>
+                        <td>{new Date(m.uploaded_at).toLocaleString()}</td>
+                        <td>
+                          <button
+                            className="btn btn-danger btn-sm adminCms-delBtn"
+                            onClick={() =>
+                              deleteFromTable("team_members", m.id, m.image_url, () =>
+                                fetchTable("team_members", setTeamMembers)
+                              )
+                            }
+                          >
+                            <i className="bi bi-trash3-fill"></i>
+                            Delete
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={6} className="text-center">
+                        No team members.
                       </td>
                     </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan={6} className="text-center">
-                      No team members.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </section>
+                  )}
+                </tbody>
+              </table>
+            </section>
+          </>
         )}
       </div>
     </div>

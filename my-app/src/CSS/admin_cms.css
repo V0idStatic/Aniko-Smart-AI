@@ -18,13 +18,14 @@ img.thumb {
     width: 120px; border-radius: 8px; 
 }
 
-.header {
+.adminCms-header {
     color: var(--dark-brown);
     font-weight: bold;
     text-align:center;
+    margin-top: 2rem;
 }
 
-.subheader {
+.adminCms-subheader {
     font-size: 18px;
     font-weight: 400;
     color: var(--primary-brown);
@@ -32,7 +33,7 @@ img.thumb {
     margin-bottom: 1rem;
 }
 
-.nav-tabs {
+.adminCms-navBtn {
     border-radius: 20px;
     width: 30%;
     justify-content: center;
@@ -47,42 +48,7 @@ img.thumb {
     margin-bottom: 3rem !important;
 }
 
-.nav-link {
-    color: var(--primary-green);
-    text-decoration: none;
-    font-weight: 500 !important;
-    align-items: center !important;
-    display: flex; 
-}
-
-.nav-link:hover {
-    background-color: #1d492c65;
-    color: white;
-    text-decoration: none;
-    font-weight: 500;
-    border: none;
-    border-radius: 20px;
-}
-
-.nav-link.active {
-    background-color: var(--primary-brown) !important;
-    border: none !important;
-    border-radius: 20px;
-    color: var(--light-green) !important;
-    font-weight: bold !important;
-    margin: 0;
-    left: 0 !important;
-}
-
-.nav-tabs .nav-item:first-child .nav-link.active {
-    margin-left: -10px !important;
-}
-
-    .nav-tabs .nav-item:last-child .nav-link.active {
-    margin-right: -10px !important;
-}
-
-.card {
+.adminCms-card {
     background: var(--gradient-secondary) !important;
     backdrop-filter: blur(12px) brightness(0.9);
     -webkit-backdrop-filter: blur(12px) brightness(0.9);
@@ -94,39 +60,61 @@ img.thumb {
     border-bottom-left-radius: 80px;
 }
 
-.card h5 {
+.adminCms-card h5 {
     color: var(--light-green) !important;
     margin-bottom: 1rem;
 }
 
-form {
+.adminCms-form {
     display: flex;
     align-items: center;
+    margin-bottom: 1rem;
 }
 
-form button {
+.adminCms-form button {
     justify-content: space-between;
     margin-left: auto;
     background-color: transparent !important;
     border: 2px solid var(--primary-brown) !important;
     color: var(--primary-brown) !important;
     font-weight: 500 !important;
+    border-radius: 20px; 
 }
 
-form button:hover {
+.adminCms-form button:hover {
     background-color: var(--pastel-green) !important;
     color: var(--primary-green) !important;
 }
 
-input {
+.adminCms-chooseBtn {
     width: 88% !important;
+    background-color: var(--light-green) !important;
+    border-radius: 20px !important;
+    padding: 0px !important;
+    margin-top: 0.5rem !important;
 }
 
-.bi {
+.adminCms-chooseBtn::file-selector-button {
+    background-color: var(--pastel-green);
+    color: var(--primary-green);
+    border: none;
+    padding: 8px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.adminCms-chooseBtn::file-selector-button:hover {
+  background-color: var(--primary-brown);
+  color: white;
+}
+
+
+.adminCms-card .bi {
     margin-right: 1rem;
 }
 
-table {
+.adminCms-table {
     border-radius: 20px;
     overflow: hidden;
     backdrop-filter: blur(10px);
@@ -134,7 +122,7 @@ table {
     color: var(--white);
 }
 
-.table th {
+.adminCms-table th {
     text-align: center;
     font-weight: 600;
     padding: 12px;
@@ -143,65 +131,68 @@ table {
     border-top: none !important;
 }
 
-.table td {
+.adminCms-table td {
     vertical-align: middle;
     padding: 10px;
     color: var(--primary-green) !important;
 }
 
-table td, 
-table th {
+.adminCms-table td, 
+.adminCms-table th {
     border: 1px solid #ccc; 
 }
 
-table tr:first-child th {
+.adminCms-table tr:first-child th {
     border-top: none; 
 }
 
-table tr:last-child td {
+.adminCms-table tr:last-child td {
     border-bottom: none; 
 }
 
-table td:first-child,
-table th:first-child {
+.adminCms-table td:first-child,
+.adminCms-table th:first-child {
     border-left: none; 
 }
 
-table td:last-child,
-table th:last-child {
+.adminCms-table td:last-child,
+.adminCms-table th:last-child {
     border-right: none; 
 }
 
-.table tbody tr:hover {
+.adminCms-table tbody tr:hover {
     background: rgba(255, 255, 255, 0.08) !important;
     transition: 0.3s ease;
 }
 
-.table thead tr  {
+.adminCms-table thead tr  {
     background: linear-gradient(135deg, #16a34a, #166534) !important;
     color: var(--dark-green) !important;
     border-top-right-radius: 20px;
     border-top-left-radius: 20px;
     border-top: none !important;
 }
-
-.team-fc {
-    display: block;
-}
-
-.team-fc input {
+.adminCms-fc {
     width: 100% !important;
+    padding: 10px !important;
 }
 
-.add-btn {
+.adminCms-chooseTeamBtn {
+    background-color: var(--light-green);
+    padding: 10px; 
+}
+
+.adminCms-addBtn {
     margin-top: 1rem;
     justify-content: space-between;
     margin-left: auto;
     display: flex;
+    border-radius: 20px;
 }
 
-.bi-trash3-fill {
+.adminCms-delBtn {
     margin-right: 7px !important;
+    display: flex;
 }
 
 .btn-danger {
