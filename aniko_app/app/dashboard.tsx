@@ -1,6 +1,6 @@
 import supabase from "./CONFIG/supaBase";
 import React, { useState, useEffect } from "react";
-
+import FooterNavigation from '../components/FooterNavigation';
 import {
   StyleSheet,
   Text,
@@ -958,27 +958,7 @@ export default function Dashboard() {
         </View>
       </Modal>
 
-      {/* Footer Navigation */}
-      <View style={styles.footer}>
-        <TouchableOpacity>
-          <Ionicons name="home" size={28} color="white" />
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => router.push("/plantdashboard")}>
-          <Ionicons name="leaf" size={28} color="white" />
-        </TouchableOpacity>
-        <TouchableOpacity>
-          <Ionicons name="camera" size={28} color="white" />
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => router.push("/dashboard")}>
-          <Ionicons name="cloud" size={28} color="white" />
-        </TouchableOpacity>
-        <TouchableOpacity>
-          <Ionicons name="menu" size={28} color="white" />
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => router.push("/sensor")}>
-          <Ionicons name="analytics-outline" size={28} color="white" />
-        </TouchableOpacity>
-      </View>
+      <FooterNavigation />
     </View>
   );
 }

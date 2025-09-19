@@ -120,6 +120,7 @@ export default function WaterDashboard() {
                         </TouchableOpacity>
                     </View>
                 </View>
+            
             </LinearGradient>
 
 
@@ -285,6 +286,16 @@ const styles = StyleSheet.create({
         alignItems: "center"
     },
 
+    searchContainer: {
+        flexDirection: "row",
+        backgroundColor: "white",
+        borderRadius: 12,
+        marginTop: 30,
+        paddingHorizontal: 10,
+        alignItems: "center",
+        height: 40,
+    },
+    searchInput: { marginLeft: 8, flex: 1, color: "black" },
 
 
     waveCard: {
@@ -466,7 +477,7 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         alignItems: "center",
         borderRadius: 20,
-        
+
         paddingVertical: 10,
         flex: 1,
 
