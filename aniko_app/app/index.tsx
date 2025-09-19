@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import supabase from "./CONFIG/supaBase"; // Import Supabase client
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, ScrollView } from "react-native";
 import { useRouter } from "expo-router";
@@ -9,13 +9,18 @@ export default function Login() {
   const [error, setError] = useState(""); // Error state for login failures
   const [isDatabaseConnected, setIsDatabaseConnected] = useState(false); // State to track DB connection
   const [debugInfo, setDebugInfo] = useState(""); // Debug information
+  const [realtimeStatus, setRealtimeStatus] = useState<string>('');
+  const lastRealtimeTs = useRef<number>(Date.now());
   const router = useRouter();
 
   interface User {
-  id: string;
-  username: string;
-  last_login: string | null;
-}
+    id: string; // stored as string from supabase, but is integer in DB
+    username: string;
+    last_login: string | null;
+  }
+
+  // Lazy import (avoid circular) for setting session
+  const { setCurrentUser } = require('./CONFIG/currentUser');
 
 interface RealtimePayload {
   eventType: 'INSERT' | 'UPDATE' | 'DELETE';
@@ -32,156 +37,73 @@ interface RealtimeUpdate {
 const [allUsers, setAllUsers] = useState<User[]>([]);
 const [realtimeUpdates, setRealtimeUpdates] = useState<RealtimeUpdate[]>([]);
 
+  // Helper to parse ISO or null safely
+  const parseDate = (d: string | null) => d ? new Date(d).getTime() : 0;
+
+  // Merge or insert user, then resort descending by last_login
+  const upsertAndSortUsers = (incoming: User, mode: 'insert' | 'update') => {
+    setAllUsers(prev => {
+      let next: User[];
+      const idx = prev.findIndex(u => u.id === incoming.id);
+      if (idx === -1) {
+        next = [...prev, incoming];
+      } else {
+        next = prev.map(u => u.id === incoming.id ? { ...u, ...incoming } : u);
+      }
+      next.sort((a,b) => parseDate(b.last_login) - parseDate(a.last_login));
+      return next;
+    });
+  };
+
+  // Remove user helper
+  const removeUserAndSort = (id: string) => {
+    setAllUsers(prev => prev.filter(u => u.id !== id));
+  };
+
   // Real-time listener for changes in the users table
-// Real-time listener for changes in the users table
-useEffect(() => {
-  let subscription: ReturnType<typeof supabase.channel> | null = null;
-
-  const setupRealtime = async () => {
-    try {
-      console.log('Setting up realtime connection...');
-      
-      // Test if realtime is available
-      const { data, error } = await supabase.from('users').select('id').limit(1);
-      if (error) {
-        console.error('Database not accessible for realtime:', error);
-        setDebugInfo(prev => prev + '\nDatabase not accessible: ' + error.message);
-        return;
-      }
-
-      subscription = supabase
-        .channel('users-channel') // Use a simpler channel name
-        .on(
-          'postgres_changes',
-          {
-            event: '*',
-            schema: 'public',
-            table: 'users'
-          },
-          (payload: any) => {
-            console.log('Real-time change received!', payload);
-            
-            try {
-              // Validate payload structure
-              if (!payload || typeof payload.eventType !== 'string') {
-                console.error('Invalid payload structure:', payload);
-                return;
-              }
-
-              // Type-safe access to payload data
-              const newUser = payload.new as User | null;
-              const oldUser = payload.old as User | null;
-
-              // Add to real-time updates log with proper error handling
-              setRealtimeUpdates((prev) => {
-                try {
-                  const updates = [
-                    ...prev,
-                    {
-                      type: payload.eventType,
-                      timestamp: new Date().toLocaleTimeString(),
-                      data: newUser || oldUser
-                    }
-                  ].slice(-5); // Keep only last 5 updates
-                  return updates;
-                } catch (err) {
-                  console.error('Error updating realtime log:', err);
-                  return prev;
-                }
-              });
-
-              // Update the users list based on the event type with proper validation
-              switch (payload.eventType) {
-                case 'INSERT':
-                  if (newUser && newUser.id && newUser.username) {
-                    setAllUsers((prev) => {
-                      // Check if user already exists to prevent duplicates
-                      const exists = prev.some(user => user.id === newUser.id);
-                      if (!exists) {
-                        return [...prev, newUser];
-                      }
-                      return prev;
-                    });
-                  }
-                  break;
-                  
-                case 'UPDATE':
-                  if (newUser && newUser.id) {
-                    setAllUsers((prev) =>
-                      prev.map((user) =>
-                        user.id === newUser.id ? { ...user, ...newUser } : user
-                      )
-                    );
-                  }
-                  break;
-                  
-                case 'DELETE':
-                  if (oldUser && oldUser.id) {
-                    setAllUsers((prev) =>
-                      prev.filter((user) => user.id !== oldUser.id)
-                    );
-                  }
-                  break;
-                  
-                default:
-                  console.warn('Unknown event type:', payload.eventType);
-              }
-            } catch (err) {
-              console.error('Error processing realtime payload:', err);
-              setDebugInfo(prev => prev + '\nError processing update: ' + 
-                (err instanceof Error ? err.message : 'Unknown error'));
-            }
-          }
-        )
-        .subscribe((status, err) => {
-          console.log('Real-time subscription status:', status);
-          
-          if (status === 'SUBSCRIBED') {
-            setDebugInfo(prevInfo => prevInfo + '\n✅ Realtime subscribed successfully');
-            console.log('✅ Successfully subscribed to realtime updates');
-          } else if (status === 'CLOSED') {
-            setDebugInfo(prevInfo => prevInfo + '\n❌ Realtime connection closed');
-            console.warn('❌ Realtime connection closed');
-          } else if (status === 'CHANNEL_ERROR') {
-            console.error('❌ Realtime channel error:', err);
-            setDebugInfo(prevInfo => prevInfo + '\n❌ Realtime channel error: ' + 
-              (err ? JSON.stringify(err) : 'Unknown error'));
-          } else if (status === 'TIMED_OUT') {
-            console.error('❌ Realtime connection timed out');
-            setDebugInfo(prevInfo => prevInfo + '\n❌ Realtime connection timed out');
-          }
-        });
-
-    } catch (err) {
-      console.error('Error setting up realtime:', err);
-      setDebugInfo(prevInfo => 
-        prevInfo + '\n❌ Realtime setup failed: ' + 
-        (err instanceof Error ? err.message : 'Unknown error')
-      );
-    }
-  };
-
-  // Add a small delay to ensure component is fully mounted
-  const timer = setTimeout(() => {
-    setupRealtime();
-  }, 100);
-
-  return () => {
-    // Clear the setup timer if component unmounts before setup
-    clearTimeout(timer);
-    
-    // Clean up subscription
-    if (subscription) {
+  useEffect(() => {
+    let channel: ReturnType<typeof supabase.channel> | null = null;
+    const setupRealtime = async () => {
       try {
-        console.log('Cleaning up realtime subscription...');
-        supabase.removeChannel(subscription); // Use removeChannel instead of unsubscribe
-        console.log('✅ Realtime subscription cleaned up');
-      } catch (err) {
-        console.error('❌ Error cleaning up subscription:', err);
+        // Test if realtime is available
+        const { error } = await supabase.from('users').select('id').limit(1);
+        if (error) {
+         setRealtimeStatus('Realtime unavailable');
+         setDebugInfo(prev => prev + '\nRealtime unavailable: ' + error.message);
+         return; 
+        }
+        channel = supabase
+          .channel('public:users')
+          .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'users' }, (payload: any) => {
+            const newUser = payload.new as User | null;
+            if (newUser?.id) upsertAndSortUsers(newUser,'insert');
+            lastRealtimeTs.current = Date.now();
+            setRealtimeStatus('Last event: INSERT ' + new Date().toLocaleTimeString());
+          })
+          .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'users' }, (payload: any) => {
+            const newUser = payload.new as User | null;
+            if (newUser?.id) upsertAndSortUsers(newUser,'update');
+            lastRealtimeTs.current = Date.now();
+            setRealtimeStatus('Last event: UPDATE ' + new Date().toLocaleTimeString());
+          })
+          .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'users' }, (payload: any) => {
+            const oldUser = payload.old as User | null;
+            if (oldUser?.id) removeUserAndSort(oldUser.id);
+            lastRealtimeTs.current = Date.now();
+            setRealtimeStatus('Last event: DELETE ' + new Date().toLocaleTimeString());
+          })
+          .subscribe((status, err) => {
+            if (status === 'SUBSCRIBED') setRealtimeStatus('Realtime connected');
+            if (status === 'CHANNEL_ERROR') setRealtimeStatus('Realtime error');
+            if (status === 'CLOSED') setRealtimeStatus('Realtime closed');
+          });
+      } catch (e) {
+        setRealtimeStatus('Realtime setup failed');
       }
-    }
-  };
-}, []); // Empty dependency array to run only once
+    };
+    const timer = setTimeout(setupRealtime, 120);
+    return () => { clearTimeout(timer); if (channel) supabase.removeChannel(channel); };
+  }, []); // Empty dependency array to run only once
 
 
   // Test database connection
@@ -224,14 +146,22 @@ useEffect(() => {
   const handleLogin = async () => {
     try {
       const searchUsername = username.trim();
+
+      // NEW: Guard against empty input so it doesn't match everyone with '%%'
+      if (!searchUsername) {
+        setError("Please enter your username.");
+        return;
+      }
+
+      setError(""); // clear previous error
       setDebugInfo(`Searching for: ${searchUsername}`);
       console.log("Searching for username:", searchUsername);
 
-      // Query the users table to find a matching username
+      // Query users table – keep ilike but WITHOUT wildcards for exact (case-insensitive) match
       const { data, error } = await supabase
         .from("users")
         .select("*")
-        .ilike("username", `%${searchUsername}%`) // Use ilike with wildcards for better matching
+        .ilike("username", searchUsername) // exact case-insensitive (no % to avoid broad match)
         .limit(1);
 
       if (error) {
@@ -247,17 +177,15 @@ useEffect(() => {
         return;
       }
 
-      const user = data[0]; // Get the first user
-
+  const user = data[0];
       console.log("User logged in:", user);
       setDebugInfo(prev => prev + "\nUser found: " + JSON.stringify(user));
 
-      // Update last_login after successful login with proper ISO string
-      const newLastLogin = new Date().toISOString();
+  const newLastLogin = new Date().toISOString();
       const { error: updateError } = await supabase
         .from("users")
         .update({ last_login: newLastLogin })
-        .eq("id", user.id); // Update the user's last login
+        .eq("id", user.id);
 
       if (updateError) {
         console.error("Error updating last login:", updateError);
@@ -265,20 +193,18 @@ useEffect(() => {
       } else {
         console.log("Last login updated successfully to:", newLastLogin);
         setDebugInfo(prev => prev + "\nLast login updated successfully");
-        
-        // Update local state immediately
-        setAllUsers(prevUsers => 
-          prevUsers.map(u => 
-            u.id === user.id ? {...u, last_login: newLastLogin} : u
-          )
-        );
-        
-        // Redirect to the getstarted after login
-        setTimeout(() => {
-          router.push("/getstarted");
-        }, 500); // Small delay to ensure update is processed
+        setAllUsers(prevUsers => prevUsers.map(u => u.id === user.id ? { ...u, last_login: newLastLogin } : u));
+        // Store current user session (convert id to number for consistency)
+        try {
+          const numericId = parseInt(user.id, 10);
+          if (!Number.isNaN(numericId)) {
+            setCurrentUser({ id: numericId, username: user.username, last_login: newLastLogin });
+          }
+        } catch {}
+        // Immediate refresh to reflect any order change if realtime lags
+        debugAllUsers();
+        setTimeout(() => { router.push("/getstarted"); }, 500);
       }
-
     } catch (err) {
       console.error("Unexpected Error:", err);
       setError("An unexpected error occurred.");
@@ -289,6 +215,24 @@ useEffect(() => {
   useEffect(() => {
     testDatabaseConnection();
     debugAllUsers();
+  }, []);
+
+  // Fallback polling: if no realtime event in last 45s, fetch again
+  useEffect(() => {
+    const interval = setInterval(async () => {
+      const age = Date.now() - lastRealtimeTs.current;
+      if (age > 45000) { // stale
+        try {
+          const { data, error } = await supabase.from('users').select('*').order('last_login', { ascending: false });
+          if (!error && data) {
+            setAllUsers(data);
+            setRealtimeStatus(prev => prev.includes('Realtime') ? prev + ' • polled' : 'Polled (no realtime)');
+            lastRealtimeTs.current = Date.now();
+          }
+        } catch {}
+      }
+    }, 15000); // check every 15s
+    return () => clearInterval(interval);
   }, []);
 
   return (
@@ -340,6 +284,7 @@ useEffect(() => {
               {user.username} - Last login: {user.last_login ? new Date(user.last_login).toLocaleString() : 'Never'}
             </Text>
           ))}
+          {!!realtimeStatus && <Text style={{fontSize:10,color:'#555',marginTop:6}}>Status: {realtimeStatus}</Text>}
         </ScrollView>
 
         {/* Real-time updates */}

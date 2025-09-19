@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
+import supabase from "./CONFIG/supaBase"; // Import Supabase client
+import { getCurrentUser } from './CONFIG/currentUser';
 import {
   View,
   Text,
@@ -24,13 +26,29 @@ interface SensorData {
   timestamp: number;
 }
 
+interface ReadingRow {
+  id: number;
+  user_id: number;
+  measured_at: string;
+  temp_c: string | null;
+  moisture_pct: string | null;
+  ec_us_cm: string | null;
+  ph_level: string | null;
+  nitrogen_ppm: string | null;
+  phosphorus_ppm: string | null;
+  potassium_ppm: string | null;
+  humidity_pct: string | null;
+}
+
 const { width } = Dimensions.get('window');
 
 const NPKSensorDashboard: React.FC = () => {
   const [sensorData, setSensorData] = useState<SensorData | null>(null);
+  const [recentReadings, setRecentReadings] = useState<ReadingRow[]>([]);
+  const [dbStatus, setDbStatus] = useState<string>('');
   const [isConnected, setIsConnected] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState('Disconnected');
-  const [arduinoIP, setArduinoIP] = useState('192.168.18.56'); // Default IP
+  const [arduinoIP, setArduinoIP] = useState('192.168.18.56'); // Default IP 192.168.18.34 - wireless ip
   const [showIPInput, setShowIPInput] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
 const fetchIntervalRef = useRef<number | null>(null);
@@ -57,7 +75,7 @@ const fetchIntervalRef = useRef<number | null>(null);
         const data = await response.json();
         console.log('Received sensor data:', data);
         
-        setSensorData({
+        const normalized: SensorData = {
           temperature: data.temperature || 0,
           moisture: data.moisture || 0,
           ec: data.ec || 0,
@@ -66,7 +84,34 @@ const fetchIntervalRef = useRef<number | null>(null);
           phosphorus: data.phosphorus || 0,
           potassium: data.potassium || 0,
           timestamp: data.timestamp || Date.now()
-        });
+        };
+        setSensorData(normalized);
+
+        // Insert into database for current user
+        const current = getCurrentUser();
+        if (current) {
+          const insertPayload = {
+            user_id: current.id,
+            measured_at: new Date().toISOString(),
+            temp_c: normalized.temperature,
+            moisture_pct: normalized.moisture,
+            ec_us_cm: normalized.ec,
+            ph_level: normalized.ph,
+            nitrogen_ppm: normalized.nitrogen,
+            phosphorus_ppm: normalized.phosphorus,
+            potassium_ppm: normalized.potassium,
+            // humidity_pct intentionally omitted (not in sensorData yet)
+          };
+          const { error: insertError } = await supabase.from('esp32_readings').insert(insertPayload);
+          if (insertError) {
+            console.log('Insert error:', insertError.message);
+            setDbStatus('Insert failed: ' + insertError.message);
+          } else {
+            setDbStatus('Inserted at ' + new Date().toLocaleTimeString());
+          }
+        } else {
+          setDbStatus('No current user in session; cannot store reading');
+        }
         
         if (!isConnected) {
           setIsConnected(true);
@@ -178,6 +223,33 @@ const fetchIntervalRef = useRef<number | null>(null);
         clearInterval(fetchIntervalRef.current);
       }
     };
+  }, []);
+
+  // Initial load of last N readings & realtime subscription
+  useEffect(() => {
+    const current = getCurrentUser();
+    if (!current) {
+      setDbStatus('No logged-in user; cannot load readings');
+      return;
+    }
+    let channel: ReturnType<typeof supabase.channel> | null = null;
+    (async () => {
+      const { data, error } = await supabase
+        .from('esp32_readings')
+        .select('*')
+        .eq('user_id', current.id)
+        .order('measured_at', { ascending: false })
+        .limit(20);
+      if (!error && data) setRecentReadings(data as any);
+      channel = supabase
+        .channel('public:esp32_readings:user:' + current.id)
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'esp32_readings', filter: 'user_id=eq.' + current.id }, (payload: any) => {
+          const row = payload.new as ReadingRow;
+          setRecentReadings(prev => [row, ...prev.slice(0, 49)]); // keep up to 50
+        })
+        .subscribe();
+    })();
+    return () => { if (channel) supabase.removeChannel(channel); };
   }, []);
 
   const getSensorStatus = (value: number, type: string): string => {
@@ -399,7 +471,19 @@ const fetchIntervalRef = useRef<number | null>(null);
               <Text style={styles.lastUpdatedSubtitle}>
                 Updates every 3 seconds
               </Text>
+              {!!dbStatus && <Text style={[styles.lastUpdatedSubtitle,{marginTop:8}]}>Database status: {dbStatus}</Text>}
             </View>
+            {/* Recent DB readings */}
+            {recentReadings.length > 0 && (
+              <View style={styles.lastUpdated}>
+                <Text style={styles.lastUpdatedTitle}>Recent Stored Readings</Text>
+                {recentReadings.slice(0,6).map(r => (
+                  <Text key={r.id} style={styles.lastUpdatedSubtitle}>
+                    {new Date(r.measured_at).toLocaleTimeString()} | T {r.temp_c ?? '-'}°C | M {r.moisture_pct ?? '-'}% | pH {r.ph_level ?? '-'}
+                  </Text>
+                ))}
+              </View>
+            )}
           </>
         )}
 
@@ -423,7 +507,7 @@ const fetchIntervalRef = useRef<number | null>(null);
             
             {/* Test URLs for manual verification */}
             <View style={styles.testUrlContainer}>
-              <Text style={styles.testUrlTitle}>Test URLs manually first:</Text>
+              <Text style={styles.testUrlTitle}>Emergency url:</Text>
               <Text style={styles.testUrl}>http://{arduinoIP}/api/status</Text>
               <Text style={styles.testUrl}>http://{arduinoIP}/api/sensor-data</Text>
             </View>
