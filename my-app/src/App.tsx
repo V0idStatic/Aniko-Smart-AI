@@ -12,8 +12,11 @@ import AdminHome from "./Pages/admin_home";
 import AdminTestimonial from "./Pages/admin_testimonial";
 import AdminUsers from "./Pages/admin_users";
 import AdminContact from "./Pages/admin_contact";
-import AdminCMS from "./Pages/admin_cms"; // ✅ Add this line
+import AdminCMS from "./Pages/admin_cms";
 import AdminRegister from "./Pages/admin_register";
+
+
+import Chatbox from "./Pages/Chatbox";
 
 function App() {
   return (
@@ -29,6 +32,9 @@ function App() {
       <Route path="/testimonialDisplay" element={<TestimonialDisplay />} />
       <Route path="/apiWeather" element={<ApiWeather />} />
 
+      {/* ✅ Chatbot Page */}
+      <Route path="/chat" element={<Chatbox />} />
+
       {/* Admin Pages */}
       <Route path="/admin_login" element={<AdminLogin />} />
       <Route path="/admin_home" element={<AdminHome />} />
@@ -37,8 +43,6 @@ function App() {
       <Route path="/admin_contact" element={<AdminContact />} />
       <Route path="/admin_cms" element={<AdminCMS />} />
       <Route path="/admin_register" element={<AdminRegister />} />
-      
-
     </Routes>
   );
 }

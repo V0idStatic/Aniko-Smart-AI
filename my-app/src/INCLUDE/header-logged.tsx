@@ -53,7 +53,7 @@ const Header: React.FC = () => {
                 <HashLink smooth className="nav-link" to="/#features">Features</HashLink>
               </li>
               <li className="nav-item">
-                <Link className="nav-link" to="/testimonialDisplay">Testimonial</Link>
+                <Link className="nav-link" to="/testimonialSubmit">Testimonial</Link>
               </li>
               <li className="nav-item">
                 <HashLink smooth className="nav-link" to="/#download">Download</HashLink>

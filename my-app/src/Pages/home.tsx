@@ -10,6 +10,7 @@ import WhyAniko from "./whyaniko";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.bundle.min.js";
 import Testimonials from "./testimonial";
+import Chatbox from "./Chatbox"; // adjust path as needed
 
 import { auth } from "../firebase";
 import { onAuthStateChanged, User } from "firebase/auth";
@@ -39,67 +40,7 @@ const Home: React.FC = () => {
     return () => unsub();
   }, []);
 
-  // ✅ Handle sending messages
-  const handleSend = async () => {
-    if (!input.trim()) return;
-
-    const newMessages: ChatMessage[] = [
-      ...messages,
-      { role: "user", content: input },
-    ];
-    setMessages(newMessages);
-    setInput("");
-    setChatLoading(true);
-
-    try {
-        console.log("🔑 Loaded Key:", process.env.REACT_APP_OPENROUTER_API_KEY);
-      const response = await fetch(
-        "https://openrouter.ai/api/v1/chat/completions",
-        {
-          method: "POST",
-          headers: {
-            Authorization:
-              "Bearer " + process.env.REACT_APP_OPENROUTER_API_KEY,
-            "HTTP-Referer": window.location.origin,
-            "X-Title": "Aniko-Smart-AI",
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            model: "deepseek/deepseek-r1:free",
-            messages: newMessages.map((msg) => ({
-              role: msg.role,
-              content: msg.content,
-            })),
-          }),
-        }
-      );
-
-      const data = await response.json();
-      console.log("🔍 API Response:", data);
-
-      // Support both chat and text responses
-      const reply =
-        data.choices?.[0]?.message?.content?.trim() ||
-        data.choices?.[0]?.text?.trim() ||
-        data.error?.message ||
-        "⚠️ No response from model.";
-
-      const updatedMessages: ChatMessage[] = [
-        ...newMessages,
-        { role: "assistant", content: reply },
-      ];
-      setMessages(updatedMessages);
-    } catch (error) {
-      console.error("Error:", error);
-      setMessages([
-        ...messages,
-        { role: "assistant", content: "❌ Something went wrong." },
-      ]);
-    } finally {
-      setChatLoading(false);
-    }
-  };
-
+ 
   if (loading) {
     return <div>Loading...</div>;
   }
@@ -386,51 +327,68 @@ const Home: React.FC = () => {
       </section>
 
       <TeamMembers />
-      <Footer />
-
-      {/* ✅ Floating chatbot button */}
+     {/* ✅ Floating Circle Button */}
       <div
-        className="floating-circle"
+        style={{
+          position: "fixed",
+          bottom: "20px",
+          right: "20px",
+          width: "60px",
+          height: "60px",
+          borderRadius: "50%",
+          backgroundColor: "#ffffff",
+          boxShadow: "0 4px 12px rgba(0, 0, 0, 0.2)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          cursor: "pointer",
+          zIndex: 9999,
+        }}
         onClick={() => setShowChat(true)}
-        style={{ cursor: "pointer" }}
       >
         <img
           src="PICTURES/Logo-noText.png"
-          alt="Floating Logo"
-          className="floating-img"
+          alt="Chat"
+          style={{ width: "40px", height: "40px", objectFit: "contain" }}
         />
       </div>
 
-      {/* ✅ Chat modal */}
+      {/* ✅ Bootstrap Modal */}
       {showChat && (
-        <div className="chat-modal">
-          <div className="chat-header">
-            <h5>Aniko AI Assistant</h5>
-            <button onClick={() => setShowChat(false)}>✖</button>
-          </div>
-          <div className="chat-body">
-            {messages.map((msg, i) => (
-              <div key={i} className={`chat-msg ${msg.role}`}>
-                <strong>{msg.role === "user" ? "You" : "Aniko"}:</strong>{" "}
-                {msg.content}
+        <div
+          className="modal fade show"
+          style={{
+            display: "block",
+            backgroundColor: "rgba(0, 0, 0, 0.6)",
+          }}
+        >
+          <div className="modal-dialog modal-dialog-centered">
+            <div className="modal-content">
+              {/* Modal Header */}
+              <div className="modal-header">
+                <h5 className="modal-title">Aniko Chatbot</h5>
+                <button
+                  type="button"
+                  className="btn-close"
+                  onClick={() => setShowChat(false)}
+                ></button>
               </div>
-            ))}
-            {chatLoading && <p>⏳ Aniko is thinking...</p>}
-          </div>
-          <div className="chat-footer">
-            <input
-              type="text"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder="Type your question..."
-              onKeyDown={(e) => e.key === "Enter" && handleSend()}
-            />
-            <button onClick={handleSend} disabled={chatLoading}>
-              Send
-            </button>
+
+              {/* Modal Body (Your Chatbox Component) */}
+              <div className="modal-body">
+               
+                <Chatbox />
+              </div>
+            </div>
           </div>
         </div>
       )}
+
+      <Footer />
+
+     
+
+  
     </div>
   );
 };
