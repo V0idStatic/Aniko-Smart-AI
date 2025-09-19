@@ -79,39 +79,45 @@ const AdminHeader: React.FC = () => {
       </div>
 
       {/* Logout Confirmation Modal */}
-      {showModal && (
-        <div className="modal fade show d-block" tabIndex={-1}>
-          <div className="modal-dialog modal-dialog-centered">
-            <div className="modal-content shadow">
-              <div className="modal-header">
-                <h5 className="modal-title">Confirm Logout</h5>
-                <button
-                  type="button"
-                  className="btn-close"
-                  onClick={() => setShowModal(false)}
-                ></button>
-              </div>
-              <div className="modal-body">
-                <p>Are you sure you want to logout?</p>
-              </div>
-              <div className="modal-footer">
-                <button
-                  className="btn btn-secondary"
-                  onClick={() => setShowModal(false)}
-                >
-                  Cancel
-                </button>
-                <button
-                  className="btn btn-danger"
-                  onClick={handleLogout}
-                >
-                  Logout
-                </button>
+        {showModal && (
+          <>
+            {/* Backdrop */}
+            <div className="fade show logout-backdrop"></div>
+
+            <div className="modal logout-modal fade show d-block" tabIndex={-1}>
+              <div className="modal-dialog modal-dialog-centered logout-modDialog">
+                <div className="modal-content shadow logout-modContent">
+                  <div className="modal-header logout-modHeader">
+                    <h6 className="modal-title logout-modTitle"><i className="bi bi-box-arrow-left"></i>Confirm Logout</h6>
+                    <button
+                      type="button"
+                      className="btn-close logout-closeBtn"
+                      onClick={() => setShowModal(false)}
+                    ></button>
+                  </div>
+                  <div className="modal-body logout-modBody">
+                    <p>Are you sure you want to logout?</p>
+                  </div>
+                  <div className="modal-footer logout-modFooter">
+                    <button
+                      className="btn btn-secondary logout-cancelBtn"
+                      onClick={() => setShowModal(false)}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      className="btn btn-danger logout-mod-logoutBtn"
+                      onClick={handleLogout}
+                    >
+                      Logout
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-        </div>
-      )}
+          </>
+        )}
+
     </>
   );
 };
