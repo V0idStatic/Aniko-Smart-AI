@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import supabase from "../CONFIG/supabaseClient";
 import AdminHeader from "../INCLUDE/admin-sidebar";
 import "../CSS/admin_cms.css";
@@ -32,10 +32,30 @@ const AdminCMS: React.FC = () => {
   const [memberName, setMemberName] = useState("");
   const [memberRole, setMemberRole] = useState("");
 
-  const [showModal, setShowModal] = useState(false);
-  const [modalMessage, setModalMessage] = useState("");
+  // 👉 ref to reset file input after successful upload
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-  const [activeSection, setActiveSection] = useState<"hero" | "benefits" | "why" | "team">("hero");
+  // Modal states
+  const [showModal, setShowModal] = useState(false);
+  const [modalTitle, setModalTitle] = useState("");
+  const [modalMessage, setModalMessage] = useState("");
+  const [onConfirm, setOnConfirm] = useState<() => Promise<void> | void>(() => () => {});
+  const [modalLoading, setModalLoading] = useState(false);
+
+  const [activeSection, setActiveSection] =
+    useState<"hero" | "benefits" | "why" | "team">("hero");
+
+  // --- helper: robust filename extractor from URL ---
+  const extractStorageFileName = (url: string | null | undefined) => {
+    if (!url) return "";
+    try {
+      const last = url.split("/").pop() || "";
+      const clean = last.split("?")[0].split("#")[0];
+      return decodeURIComponent(clean);
+    } catch {
+      return "";
+    }
+  };
 
   const fetchTable = async (table: string, setter: (rows: any[]) => void) => {
     const { data, error } = await supabase
@@ -67,6 +87,7 @@ const AdminCMS: React.FC = () => {
     );
 
     return () => subs.forEach((s) => supabase.removeChannel(s));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const uploadToTable = async (file: File, table: string) => {
@@ -84,61 +105,123 @@ const AdminCMS: React.FC = () => {
     if (dbErr) throw dbErr;
   };
 
-  const handleUpload = async (file: File | null, table: string, refetch: () => void) => {
-    if (!file) return;
-    try {
-      await uploadToTable(file, table);
-      refetch();
-      setModalMessage(`Image added to ${table} successfully!`);
-      setShowModal(true);
-    } catch (e) {
-      console.error(`❌ Upload to ${table}:`, e);
-      alert(`Upload to ${table} failed. Check console.`);
-    }
-  };
-
-  const deleteFromTable = async (table: string, id: number, url: string, refetch: () => void) => {
-    const fileName = url.split("/").pop() || "";
-    await supabase.storage.from(table).remove([fileName]);
-    await supabase.from(table).delete().eq("id", id);
-    refetch();
-    setModalMessage(`Deleted from ${table} successfully!`);
+  const confirmAction = (title: string, message: string, action: () => Promise<void> | void) => {
+    setModalTitle(title);
+    setModalMessage(message);
+    setOnConfirm(() => action);
     setShowModal(true);
   };
 
-  const handleMemberUpload = async () => {
-    if (!memberFile || !memberName || !memberRole) return alert("Fill all fields");
-    try {
-      const ext = memberFile.name.split(".").pop();
-      const fileName = `${Date.now()}.${ext}`;
-
-      const { error: storageErr } = await supabase.storage
-        .from("team_members")
-        .upload(fileName, memberFile, { upsert: true });
-      if (storageErr) throw storageErr;
-
-      const { data: pub } = supabase.storage.from("team_members").getPublicUrl(fileName);
-
-      const { error: dbErr } = await supabase.from("team_members").insert([
-        {
-          name: memberName,
-          role: memberRole,
-          image_url: pub.publicUrl,
-          uploaded_at: new Date().toISOString(),
-        },
-      ]);
-      if (dbErr) throw dbErr;
-
-      setMemberName("");
-      setMemberRole("");
-      setMemberFile(null);
-      fetchTable("team_members", setTeamMembers);
-      setModalMessage("Team member added successfully!");
-      setShowModal(true);
-    } catch (e) {
-      console.error("❌ Upload team member:", e);
-      alert("Failed to add team member. Check console.");
+  const handleUpload = (file: File | null, table: string, refetch: () => void) => {
+    if (!file) {
+      alert("Please choose a file first.");
+      return;
     }
+
+    confirmAction(
+      "Confirm Upload",
+      `Upload this image to ${table}?`,
+      async () => {
+        setModalLoading(true);
+        try {
+          await uploadToTable(file, table);
+          refetch();
+          setModalTitle("Success");
+          setModalMessage(`Image added to ${table} successfully!`);
+        } catch (e) {
+          console.error(`Upload to ${table}:`, e);
+          setModalTitle("Error");
+          setModalMessage("Upload failed. Check console for details.");
+        } finally {
+          setModalLoading(false);
+        }
+      }
+    );
+  };
+
+  const deleteFromTable = (
+    table: string,
+    id: number,
+    url: string,
+    refetch: () => void
+  ) => {
+    confirmAction(
+      "Confirm Delete",
+      `Are you sure you want to delete this image from ${table}?`,
+      async () => {
+        setModalLoading(true);
+        try {
+          const fileName = extractStorageFileName(url);
+          if (fileName) {
+            await supabase.storage.from(table).remove([fileName]);
+          }
+          await supabase.from(table).delete().eq("id", id);
+          refetch();
+          setModalTitle("Success");
+          setModalMessage(` Deleted from ${table} successfully!`);
+        } catch (err) {
+          console.error(" Delete error:", err);
+          setModalTitle("Error");
+          setModalMessage("Delete failed. Check console for details.");
+        } finally {
+          setModalLoading(false);
+        }
+      }
+    );
+  };
+
+  const handleMemberUpload = () => {
+    if (!memberFile || !memberName || !memberRole)
+      return alert("Fill all fields");
+
+    confirmAction(
+      "Confirm Upload",
+      `Add team member "${memberName}" with role "${memberRole}"?`,
+      async () => {
+        setModalLoading(true);
+        try {
+          const ext = memberFile.name.split(".").pop();
+          const fileName = `${Date.now()}.${ext}`;
+
+          const { error: storageErr } = await supabase.storage
+            .from("team_members")
+            .upload(fileName, memberFile, { upsert: true });
+          if (storageErr) throw storageErr;
+
+          const { data: pub } = supabase.storage
+            .from("team_members")
+            .getPublicUrl(fileName);
+
+          const { error: dbErr } = await supabase.from("team_members").insert([
+            {
+              name: memberName,
+              role: memberRole,
+              image_url: pub.publicUrl,
+              uploaded_at: new Date().toISOString(),
+            },
+          ]);
+          if (dbErr) throw dbErr;
+
+          // ✅ Clear all inputs and file input UI
+          setMemberName("");
+          setMemberRole("");
+          setMemberFile(null);
+          if (fileInputRef.current) {
+            fileInputRef.current.value = "";
+          }
+
+          fetchTable("team_members", setTeamMembers);
+          setModalTitle("Success");
+          setModalMessage("✅ Team member added successfully!");
+        } catch (e) {
+          console.error("❌ Upload team member:", e);
+          setModalTitle("Error");
+          setModalMessage("Failed to add team member. Check console.");
+        } finally {
+          setModalLoading(false);
+        }
+      }
+    );
   };
 
   const TableSection = ({
@@ -157,7 +240,6 @@ const AdminCMS: React.FC = () => {
     refetch: () => void;
   }) => (
     <>
-      {/* Upload Card */}
       <section className="card p-4 adminCms-card mb-4">
         <h5>{title} - Upload</h5>
         <div className="adminCms-form">
@@ -174,16 +256,15 @@ const AdminCMS: React.FC = () => {
             Upload Image
           </button>
         </div>
-        
       </section>
 
-      {/* Table Card */}
       <section className="card p-4 adminCms-card mb-5">
         <h5>{title} - Images</h5>
         <table className="table table-bordered adminCms-table mt-3">
           <thead>
             <tr>
               <th>ID</th>
+              <th>Stored File Name</th>
               <th>Image</th>
               <th>URL</th>
               <th>Created</th>
@@ -192,35 +273,43 @@ const AdminCMS: React.FC = () => {
           </thead>
           <tbody>
             {rows.length ? (
-              rows.map((img) => (
-                <tr key={img.id}>
-                  <td>{img.id}</td>
-                  <td>
-                    <img src={img.image_url} alt="" width={80} height={60} />
-                  </td>
-                  <td>
-                    <a href={img.image_url} target="_blank" rel="noreferrer">
-                      {img.image_url}
-                    </a>
-                  </td>
-                  <td>{new Date(img.uploaded_at).toLocaleString()}</td>
-                  <td>
-                  <button
-                className="btn btn-danger btn-sm d-inline-flex align-items-center gap-1"
-                onClick={() =>
-                  deleteFromTable(tableName, img.id, img.image_url, refetch)
-                }
-              >
-                <i className="bi bi-trash3-fill"></i>
-                <span>Delete</span>
-              </button>
-
-                  </td>
-                </tr>
-              ))
+              rows.map((img) => {
+                const storedName = img.image_url ? extractStorageFileName(img.image_url) : "—";
+                return (
+                  <tr key={img.id}>
+                    <td>{img.id}</td>
+                    <td>{storedName}</td>
+                    <td>
+                      <img src={img.image_url} alt="" width={80} height={60} />
+                    </td>
+                    <td>
+                      <a href={img.image_url} target="_blank" rel="noreferrer">
+                        {img.image_url}
+                      </a>
+                    </td>
+                    <td>{new Date(img.uploaded_at).toLocaleString()}</td>
+                    <td>
+                      <button
+                        className="btn btn-danger btn-sm d-inline-flex align-items-center gap-1"
+                        onClick={() =>
+                          deleteFromTable(
+                            tableName,
+                            img.id,
+                            img.image_url,
+                            refetch
+                          )
+                        }
+                      >
+                        <i className="bi bi-trash3-fill"></i>
+                        <span>Delete</span>
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })
             ) : (
               <tr>
-                <td colSpan={5} className="text-center">
+                <td colSpan={6} className="text-center">
                   No images.
                 </td>
               </tr>
@@ -231,25 +320,70 @@ const AdminCMS: React.FC = () => {
     </>
   );
 
-
   return (
     <div>
-      {/* Success Modal */}
       {showModal && (
-        <div className="modal fade show d-block" tabIndex={-1} style={{ background: "rgba(0,0,0,0.5)" }}>
+        <div
+          className="modal fade show d-block"
+          tabIndex={-1}
+          style={{ background: "rgba(0,0,0,0.5)" }}
+        >
           <div className="modal-dialog modal-dialog-centered">
             <div className="modal-content">
               <div className="modal-header">
-                <h5 className="modal-title">Success</h5>
-                <button type="button" className="btn-close" onClick={() => setShowModal(false)}></button>
+                <h5 className="modal-title">{modalTitle}</h5>
+                <button
+                  type="button"
+                  className="btn-close"
+                  onClick={() => {
+                    if (!modalLoading) setShowModal(false);
+                  }}
+                ></button>
               </div>
               <div className="modal-body">
                 <p>{modalMessage}</p>
               </div>
               <div className="modal-footer">
-                <button type="button" className="btn btn-primary" onClick={() => setShowModal(false)}>
-                  OK
-                </button>
+                {modalTitle.startsWith("Confirm") ? (
+                  <>
+                    <button
+                      type="button"
+                      className="btn btn-secondary"
+                      onClick={() => {
+                        if (!modalLoading) setShowModal(false);
+                      }}
+                      disabled={modalLoading}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="button"
+                      className="btn btn-primary"
+                      onClick={() => {
+                        try {
+                          onConfirm();
+                        } catch (err) {
+                          console.error("Confirm action error:", err);
+                          setModalTitle("Error");
+                          setModalMessage("An error occurred while running the action.");
+                        }
+                      }}
+                      disabled={modalLoading}
+                    >
+                      {modalLoading ? "Processing..." : "Confirm"}
+                    </button>
+                  </>
+                ) : (
+                  <button
+                    type="button"
+                    className="btn btn-primary"
+                    onClick={() => {
+                      setShowModal(false);
+                    }}
+                  >
+                    OK
+                  </button>
+                )}
               </div>
             </div>
           </div>
@@ -259,37 +393,45 @@ const AdminCMS: React.FC = () => {
       <AdminHeader />
       <div style={{ marginLeft: "280px", padding: "20px" }}>
         <h1 className="adminCms-header">Content Management</h1>
-        <h6 className="adminCms-subheader">Manage Home, Benefits, Why Aniko, and Team Members</h6>
+        <h6 className="adminCms-subheader">
+          Manage Home, Benefits, Why Aniko, and Team Members
+        </h6>
 
-        {/* Section Toggle Buttons */}
         <div className="mb-4 adminCms-navBtn">
           <button
-            className={`btn adminCms-whyBtn me-2 ${activeSection === "why" ? "btn-primary" : "btn-outline-primary"}`}
+            className={`btn me-2 ${
+              activeSection === "why" ? "btn-primary" : "btn-outline-primary"
+            }`}
             onClick={() => setActiveSection("why")}
           >
             Why Aniko
           </button>
           <button
-            className={`btn adminCms-benBtn me-2 ${activeSection === "benefits" ? "btn-primary" : "btn-outline-primary"}`}
+            className={`btn me-2 ${
+              activeSection === "benefits" ? "btn-primary" : "btn-outline-primary"
+            }`}
             onClick={() => setActiveSection("benefits")}
           >
             Benefits
           </button>
           <button
-            className={`btn adminCms-heroBtn me-2 ${activeSection === "hero" ? "btn-primary" : "btn-outline-primary"}`}
+            className={`btn me-2 ${
+              activeSection === "hero" ? "btn-primary" : "btn-outline-primary"
+            }`}
             onClick={() => setActiveSection("hero")}
           >
             Hero
           </button>
           <button
-            className={`btn adminCms-teamBtn ${activeSection === "team" ? "btn-primary" : "btn-outline-primary"}`}
+            className={`btn ${
+              activeSection === "team" ? "btn-primary" : "btn-outline-primary"
+            }`}
             onClick={() => setActiveSection("team")}
           >
             Team
           </button>
         </div>
 
-        {/* Conditional Sections */}
         {activeSection === "hero" && (
           <TableSection
             title="Home Images"
@@ -325,7 +467,6 @@ const AdminCMS: React.FC = () => {
 
         {activeSection === "team" && (
           <>
-            {/* Upload Form Card */}
             <section className="card p-4 adminCms-card mb-4">
               <h5>Add Team Member</h5>
               <div>
@@ -347,21 +488,25 @@ const AdminCMS: React.FC = () => {
                   type="file"
                   accept="image/*"
                   className="form-control mb-2 adminCms-chooseTeamBtn"
+                  ref={fileInputRef}           // ✅ ref added
                   onChange={(e) => setMemberFile(e.target.files?.[0] || null)}
                 />
-                <button className="btn adminCms-addBtn btn-success mt-2" onClick={handleMemberUpload}>
+                <button
+                  className="btn adminCms-addBtn btn-success mt-2"
+                  onClick={handleMemberUpload}
+                >
                   Add Member
                 </button>
               </div>
             </section>
 
-            {/* Table Card */}
             <section className="card p-4 adminCms-card mb-5">
               <h5>Team Members</h5>
               <table className="table table-bordered mt-3 adminCms-table">
                 <thead className="adminCms-thead">
                   <tr>
                     <th>ID</th>
+                    <th>Stored File Name</th>
                     <th>Photo</th>
                     <th>Name</th>
                     <th>Role</th>
@@ -374,6 +519,7 @@ const AdminCMS: React.FC = () => {
                     teamMembers.map((m) => (
                       <tr key={m.id}>
                         <td>{m.id}</td>
+                        <td>{extractStorageFileName(m.image_url)}</td>
                         <td>
                           <img src={m.image_url} alt={m.name} width={80} height={60} />
                         </td>
@@ -397,7 +543,7 @@ const AdminCMS: React.FC = () => {
                     ))
                   ) : (
                     <tr>
-                      <td colSpan={6} className="text-center">
+                      <td colSpan={7} className="text-center">
                         No team members.
                       </td>
                     </tr>

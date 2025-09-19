@@ -37,9 +37,10 @@ const Compliance: React.FC = () => {
         ...prev,
         email: user.email || "",
         firstName: user.displayName ? user.displayName.split(" ")[0] : prev.firstName,
-        lastName: user.displayName && user.displayName.split(" ").length > 1
-          ? user.displayName.split(" ").slice(1).join(" ")
-          : prev.lastName,
+        lastName:
+          user.displayName && user.displayName.split(" ").length > 1
+            ? user.displayName.split(" ").slice(1).join(" ")
+            : prev.lastName,
       }));
     }
   }, [user]);
@@ -64,7 +65,7 @@ const Compliance: React.FC = () => {
     setSubmitting(true);
 
     try {
-      // ✅ convert newsletter boolean to 1/0 for bigint column
+      // ✅ insert with correct schema
       const { error } = await supabase.from("contact_messages").insert([
         {
           first_name: formData.firstName,
@@ -73,15 +74,16 @@ const Compliance: React.FC = () => {
           phone: formData.phone,
           subject: formData.subject,
           message: formData.message,
-          newsletter: formData.newsletter ? 1 : 0,
+          newsletter: formData.newsletter ? 1 : 0, // bigint
+          submitted_at: new Date().toISOString(), // ✅ ensure timestamp
         },
       ]);
 
       if (error) {
-        console.error("❌ Error inserting message:", error.message);
-        setModalMessage("❌ Failed to send message. Please try again.");
+        console.error(" Error inserting message:", error); // full error log
+        setModalMessage(" Failed to send message. Please try again.");
       } else {
-        setModalMessage("✅ Your message has been successfully sent!");
+        setModalMessage(" Your message has been successfully sent!");
         setFormData({
           firstName: user?.displayName ? user.displayName.split(" ")[0] : "",
           lastName:
@@ -96,6 +98,7 @@ const Compliance: React.FC = () => {
         });
       }
 
+      // ✅ Show modal after submission
       const modalEl = document.getElementById("successModal");
       if (modalEl) {
         const modal = new Modal(modalEl);
@@ -193,7 +196,7 @@ const Compliance: React.FC = () => {
                         onChange={handleChange}
                         placeholder="Email Address"
                         required
-                        readOnly={!!user} // ✅ autofilled when logged in
+                        readOnly={!!user}
                       />
                       <label htmlFor="email">Email Address</label>
                     </div>

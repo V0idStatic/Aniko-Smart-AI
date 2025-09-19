@@ -32,11 +32,11 @@ const AdminRegister: React.FC = () => {
     });
 
     if (loginError) {
-      setMsg("⚠️ Registered but login failed: " + loginError.message);
+      setMsg("Registered but login failed: " + loginError.message);
       return;
     }
 
-    setMsg("✅ Admin created & logged in! You can now access admin dashboard.");
+    setMsg(" Admin created & logged in! You can now access admin dashboard.");
   };
 
   return (
