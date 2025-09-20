@@ -208,13 +208,13 @@
 }
 
 .adminUsers-regBtn {
-    background-color: var(--primary-brown); 
-    border: 2px solid var(--dark-brown) !important;
+    background-color: var(--pastel-green); 
+    border: 2px solid var(--primary-brown) !important;
     border-radius: 20px !important;
     margin-bottom: 1rem !important;
     padding: 10px;
-    color: var(--dark-brown) !important;
-    font-weight: 500;
+    color: var(--primary-green) !important;
+    font-weight: 500 !important;
     transition: all 0.3s ease;
 }
 
@@ -249,13 +249,13 @@
     border-bottom-left-radius: 100px !important;
     background-color: var(--light-green) !important;
     border: none !important;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    box-shadow: 0px 0px 20px 5px var(--pastel-green) !important;
     overflow: hidden;
-    border: 2px solid var(--primary-brown) !important;
+    border: 2px solid var(--dark-brown) !important;
 }
 
 .adminUsers-modal-header {
-    background-color: var(--pastel-green) !important;
+    background: var(--gradient-secondary) !important;
     border: none !important;
     border-radius: 0 !important;
     border-top-right-radius: 100px !important;
@@ -263,7 +263,7 @@
 }
 
 .adminUsers-modal-title {
-    color: var(--dark-brown);
+    color: var(--light-green);
     font-weight: bold;
     font-size: 1.25rem;
 }
@@ -292,75 +292,79 @@
 .adminUsers-modal-footer {
     display: flex;
     justify-content: flex-end;
-    padding: 15px 20px;
+    padding: 5px !important;
     border: none !important;
+    margin-bottom: 1rem;
 }
 
 .adminUsers-modal-cancelBtn {
+    background-color: transparent !important;
+    border: 2px solid var(--primary-brown) !important;
+    color: var(--primary-brown) !important;
     border-radius: 20px;
-    padding: 8px 20px;
     font-weight: 500;
+}
+
+.adminUsers-modal-cancelBtn:hover {
+    background-color: var(--bg-color) !important;
 }
 
 .adminUsers-modal-regBtn {
     border-radius: 20px;
-    padding: 8px 20px;
     font-weight: 600;
-    background-color: var(--primary-brown) !important;
-    border:2px solid var(--dark-brown) !important;
+    background: var(--gradient-secondary) !important;
+    border:2px solid var(--dark-green) !important;
     transition: 0.3s ease;
     color: white;
 }
 
 .adminUsers-modal-regBtn:hover {
-    background-color: var(--primary-green) !important;
+    background: var(--gradient-primary) !important;
     border-color: var(--dark-green) !important;
 }
 
+/* ================== delete modal ============== */
+
 .delModal-content {
     border-radius: 30px !important;
-    border: 2px solid var(--dark-brown) !important;
+    border: 2px solid #490b13 !important;
+    box-shadow: 0px 0px 20px 5px #f43c4eb8;
 }
 
 .delModal-header { 
-    background-color: var(--primary-brown) !important;
-    border-bottom: 2px dashed var(--dark-brown) !important;
+    background: linear-gradient(135deg, #7a1420, #a01926, #f21d32);
     border-top-left-radius: 28px !important;
     border-top-right-radius: 28px !important;
     padding: 10px !important;
-    color: var(--bg-color);
+    color: white;
+    font-weight: 18px !important;
 }
 
 .delModal-body {
-    background-color: var(--bg-color) !important;
+    background-color: white !important;
     color: var(--dark-brown);
-    padding: 20px !important; 
+    padding-bottom: 50px !important; 
     font-weight: 500 !important;
 }
 
 .delModal-footer {
     padding: 5px !important;
-    background-color: var(--bg-color) !important;
     border-bottom-left-radius: 28px !important;
     border-bottom-right-radius: 28px !important;
-    border: none !important;
 }
 
 .delModal-footer button {
-    margin-bottom: 1rem !important;
     border-radius: 20px; 
 }
 
 .delModal-cancelBtn {
-    background-color: var(--bg-color) !important;
-    border: 2px solid var(--dark-brown) !important;
-    color: var(--dark-brown) !important;
-    font-weight: 500;
+    border: 2px solid var(--primary-brown) !important;
+    color: var(--primary-brown) !important;
+    background-color: transparent !important;
 }
 
 .delModal-cancelBtn:hover {
-    background-color: var(--primary-brown) !important;
-    color: var(--bg-color) !important;
+     background-color: var(--bg-color) !important;
 }
 
 .delModal-delBtn {
