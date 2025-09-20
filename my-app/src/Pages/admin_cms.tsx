@@ -400,38 +400,42 @@ const [activeSection, setActiveSection] = useState<"why" | "benefits" | "hero" |
         </h6>
 
         <div className="mb-4 adminCms-navBtn">
-          <button
-            className={`btn me-2 ${
-              activeSection === "why" ? "btn-primary" : "btn-outline-primary"
-            }`}
-            onClick={() => setActiveSection("why")}
-          >
-            Why Aniko
-          </button>
-          <button
-            className={`btn me-2 ${
-              activeSection === "benefits" ? "btn-primary" : "btn-outline-primary"
-            }`}
-            onClick={() => setActiveSection("benefits")}
-          >
-            Benefits
-          </button>
-          <button
-            className={`btn me-2 ${
-              activeSection === "hero" ? "btn-primary" : "btn-outline-primary"
-            }`}
-            onClick={() => setActiveSection("hero")}
-          >
-            Hero
-          </button>
-          <button
-            className={`btn ${
-              activeSection === "team" ? "btn-primary" : "btn-outline-primary"
-            }`}
-            onClick={() => setActiveSection("team")}
-          >
-            Team
-          </button>
+                <button
+          className={`btn me-2 adminCms-whyBtn ${
+            activeSection === "why" ? "btn-primary" : "btn-outline-primary"
+          }`}
+          onClick={() => setActiveSection("why")}
+        >
+          Why Aniko
+        </button>
+
+        <button
+          className={`btn me-2 adminCms-benBtn ${
+            activeSection === "benefits" ? "btn-primary" : "btn-outline-primary"
+          }`}
+          onClick={() => setActiveSection("benefits")}
+        >
+          Benefits
+        </button>
+
+         <button
+          className={`btn me-2 adminCms-heroBtn ${
+            activeSection === "hero" ? "btn-primary" : "btn-outline-primary"
+          }`}
+          onClick={() => setActiveSection("hero")}
+        >
+          Hero
+        </button>
+
+         <button
+          className={`btn adminCms-teamBtn ${
+            activeSection === "team" ? "btn-primary" : "btn-outline-primary"
+          }`}
+          onClick={() => setActiveSection("team")}
+        >
+          Team
+        </button>
+
         </div>
 
         {activeSection === "hero" && (
