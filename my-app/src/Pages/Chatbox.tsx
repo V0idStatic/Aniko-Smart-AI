@@ -524,21 +524,18 @@ const Chatbox: React.FC = () => {
                     )}
 
                   {/* Intro Message */}
-                  {showIntro &&
-                    (!activeSession?.messages.length ||
-                      activeSession.messages.length === 0) && (
-                      <div className="text-center mt-5">
-                        <motion.div
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ duration: 0.6 }}
-                          className="fw-bold fs-5 text-muted"
-                        >
-                          Hello, I’m <span className="text-primary">Aniko</span>, here
-                          to assist you today!
-                        </motion.div>
-                      </div>
-                    )}
+              {showIntro && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6 }}
+                    className="fw-bold fs-5 text-muted"
+                  >
+                    Hello, I’m <span className="text-primary">Aniko</span>, here
+                    to assist you today!
+                  </motion.div>
+                )}
+
                 </div>
 
                 {/* Input */}
