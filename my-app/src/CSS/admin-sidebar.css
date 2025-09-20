@@ -99,11 +99,11 @@
 
 .logout-modHeader {
     padding: 10px !important;
-    background: var(--gradient-secondary) !important; 
+    background-color: var(--primary-brown) !important; 
     border-top-right-radius:19px;
     border-top-left-radius: 19px;
     color: var(--light-green); 
-    border-bottom: 2px solid var(--dark-brown) !important;
+    border-bottom: 2px dashed var(--dark-brown) !important;
 }
 
 .logout-modFooter {
@@ -115,7 +115,7 @@
 
 .logout-modBody {
     background-color: var(--light-green) !important;
-    color: var(--primary-green);
+    color: var(--primary-brown);
     font-weight: 500;
 }
 

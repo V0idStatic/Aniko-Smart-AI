@@ -173,44 +173,68 @@ const AdminTestimonial: React.FC = () => {
         </div>
       </div>
 
-      {/* Confirmation Modal */}
+     {/* Confirmation Modal */}
       {modalAction.type && (
-        <div
-          className="modal fade show"
-          style={{ display: "block", background: "rgba(0,0,0,0.5)" }}
-        >
-          <div className="modal-dialog">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title">
-                  {modalAction.type === "approve" ? "Approve Testimonial" : "Delete Testimonial"}
-                </h5>
-                <button
-                  type="button"
-                  className="btn-close"
-                  onClick={() => setModalAction({ type: null, id: null })}
-                ></button>
-              </div>
-              <div className="modal-body">
-                {modalAction.type === "approve"
-                  ? "Are you sure you want to approve this testimonial?"
-                  : "Are you sure you want to delete this testimonial? This action cannot be undone."}
-              </div>
-              <div className="modal-footer">
-                <button
-                  type="button"
-                  className="btn btn-secondary"
-                  onClick={() => setModalAction({ type: null, id: null })}
-                >
-                  Cancel
-                </button>
-                <button type="button" className="btn btn-primary" onClick={handleConfirm}>
-                  Confirm
-                </button>
+        <>
+          {/* Backdrop */}
+          <div className="fade show adminTest-backdrop"></div>
+
+          <div className="modal fade show d-block adminTest-modals" tabIndex={-1}>
+            <div className="modal-dialog modal-dialog-centered">
+              <div
+                className={`modal-content adminTest-modContent ${
+                  modalAction.type === "approve" ? "approve-modal" : "delete-modal"
+                }`}
+              >
+                <div className="modal-header">
+                  <h6
+                    className={`modal-title ${
+                      modalAction.type === "approve" ? "text-success" : "text-danger"
+                    }`}
+                  >
+                    {modalAction.type === "approve" ? (
+                      <>
+                      <i className="bi bi-check-circle"></i> Approve Testimonial
+                      </>
+                    ) : (
+                      <>
+                      <i className="bi bi-trash3-fill"></i> Delete Testimonial
+                      </>
+                    )}
+                  </h6>
+                  <button
+                    type="button"
+                    className="btn-close"
+                    onClick={() => setModalAction({ type: null, id: null })}
+                  ></button>
+                </div>
+                <div className="modal-body">
+                  {modalAction.type === "approve"
+                    ? "Are you sure you want to approve this testimonial?"
+                    : "Are you sure you want to delete this testimonial? This action cannot be undone."}
+                </div>
+                <div className="modal-footer">
+                  <button
+                    type="button"
+                    className="btn action-btn cancel-btn btn-secondary"
+                    onClick={() => setModalAction({ type: null, id: null })}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    className={`btn action-btn confirm-btn ${
+                      modalAction.type === "approve" ? "btn-success" : "btn-danger"
+                    }`}
+                    onClick={handleConfirm}
+                  >
+                    Confirm
+                  </button>
+                </div>
               </div>
             </div>
           </div>
-        </div>
+        </>
       )}
     </div>
   );
