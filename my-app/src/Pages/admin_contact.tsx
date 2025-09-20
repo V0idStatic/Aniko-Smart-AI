@@ -209,131 +209,177 @@ const AdminContact: React.FC = () => {
 
         {/* Delete Confirmation Modal */}
         {showDeleteModal && (
-          <div
-            className="modal fade show"
-            style={{ display: "block" }}
-            tabIndex={-1}
-          >
-            <div className="modal-dialog modal-dialog-centered">
-              <div className="modal-content">
-                <div className="modal-header">
-                  <h5 className="modal-title">Confirm Deletion</h5>
-                  <button
-                    type="button"
-                    className="btn-close"
-                    onClick={() => setShowDeleteModal(false)}
-                  ></button>
-                </div>
-                <div className="modal-body">
-                  <p>Are you sure you want to delete this message?</p>
-                </div>
-                <div className="modal-footer">
-                  <button
-                    className="btn btn-secondary"
-                    onClick={() => setShowDeleteModal(false)}
-                  >
-                    Cancel
-                  </button>
-                  <button className="btn btn-danger" onClick={handleDelete}>
-                    Delete
-                  </button>
+          <>
+            {/* Backdrop */}
+            <div className="adminContact-backdrop fade show"></div>
+
+            <div
+              className="modal fade show adminCon-delModal"
+              style={{ display: "block" }}
+              tabIndex={-1}
+            >
+              <div className="modal-dialog modal-dialog-centered adminCon-delModal-dialog">
+                <div className="modal-content admin adminCon-delModal-content">
+                  <div className="modal-header">
+                    <h5 className="modal-title"><i className="bi bi-trash3-fill"></i>Confirm Deletion</h5>
+                    <button
+                      type="button"
+                      className="btn-close"
+                      onClick={() => setShowDeleteModal(false)}
+                    ></button>
+                  </div>
+                  <div className="modal-body">
+                    <p>Are you sure you want to delete this message?</p>
+                  </div>
+                  <div className="modal-footer">
+                    <button
+                      className="btn btn-secondary cancel-btn"
+                      onClick={() => setShowDeleteModal(false)}
+                    >
+                      Cancel
+                    </button>
+                    <button className="btn btn-danger" onClick={handleDelete}>
+                      Delete
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
+          </>
         )}
 
-        {/* Reply Modal */}
+
+       {/* Reply Modal */}
         {showReplyModal && (
-          <div
-            className="modal show d-block"
-            style={{ background: "rgba(0,0,0,0.5)" }}
-          >
-            <div className="modal-dialog">
-              <div className="modal-content">
-                <div className="modal-header">
-                  <h5 className="modal-title">Reply to {replyTo}</h5>
-                  <button
-                    type="button"
-                    className="btn-close"
-                    onClick={() => setShowReplyModal(false)}
-                  ></button>
-                </div>
-                <div className="modal-body">
-                  <div className="mb-3">
-                    <label>Subject</label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      value={replySubject}
-                      onChange={(e) => setReplySubject(e.target.value)}
-                    />
+          <>
+            {/* Backdrop */}
+            <div className="adminContact-backdrop fade show"></div>
+
+            <div className="modal show d-block">
+              <div className="modal-dialog modal-dialog-centered">
+                <div className="modal-content replyMod-content">
+                  <div className="modal-header replyMod-header">
+                    <h5 className="modal-title replyMod-title">
+                      <i className="bi bi-chat-dots"></i>Reply to {replyTo}
+                    </h5>
+                    <button
+                      type="button"
+                      className="btn-close adminCon-close"
+                      onClick={() => setShowReplyModal(false)}
+                    ></button>
                   </div>
-                  <div className="mb-3">
-                    <label>Message</label>
-                    <textarea
-                      className="form-control"
-                      rows={4}
-                      value={replyMessage}
-                      onChange={(e) => setReplyMessage(e.target.value)}
-                    ></textarea>
+
+                  <div className="modal-body replyMod-body">
+                    <div className="mb-3">
+                      <label className="form-label">Subject</label>
+                      <input
+                        type="text"
+                        className="form-control replyMod-fc"
+                        value={replySubject}
+                        onChange={(e) => setReplySubject(e.target.value)}
+                        readOnly
+                      />
+                    </div>
+                    <div className="mb-3">
+                      <label className="form-label">Message</label>
+                      <textarea
+                        className="form-control replyMod-textarea"
+                        rows={4}
+                        value={replyMessage}
+                        onChange={(e) => setReplyMessage(e.target.value)}
+                      ></textarea>
+                    </div>
                   </div>
-                </div>
-                <div className="modal-footer">
-                  <button
-                    className="btn btn-secondary"
-                    onClick={() => setShowReplyModal(false)}
-                  >
-                    Cancel
-                  </button>
-                  <button className="btn btn-primary" onClick={handleSendReply}>
-                    Send Reply
-                  </button>
+
+                  <div className="modal-footer replyMod-footer">
+                    <button
+                      className="cancelRep-btn"
+                      onClick={() => setShowReplyModal(false)}
+                    >
+                      Cancel
+                    </button>
+                    <button className="sendRep-btn" onClick={handleSendReply}>
+                      <i className="bi bi-send"></i> Send Reply
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
+          </>
         )}
 
-        {/* Success/Error Modal */}
+
+       {/* Success/Error Modal */}
         {modalType && (
-          <div
-            className="modal fade show"
-            style={{ display: "block" }}
-            tabIndex={-1}
-          >
-            <div className="modal-dialog modal-dialog-centered">
-              <div className="modal-content">
-                <div className="modal-header">
-                  <h5
-                    className={`modal-title ${
-                      modalType === "success" ? "text-success" : "text-danger"
-                    }`}
-                  >
-                    {modalType === "success" ? "Success" : "Error"}
-                  </h5>
-                  <button
-                    type="button"
-                    className="btn-close"
-                    onClick={() => setModalType("")}
-                  ></button>
-                </div>
-                <div className="modal-body">
-                  <p>{modalMessage}</p>
-                </div>
-                <div className="modal-footer">
-                  <button
-                    className={`btn ${
-                      modalType === "success" ? "btn-success" : "btn-danger"
-                    }`}
-                    onClick={() => setModalType("")}
-                  >
-                    OK
-                  </button>
+          <>
+            {/* Backdrop */}
+            <div className="adminContact-backdrop fade show"></div>
+
+            <div
+              className="modal fade show"
+              style={{ display: "block" }}
+              tabIndex={-1}
+            >
+              <div className="modal-dialog modal-dialog-centered adminCon-sucEr-modDialog">
+                <div
+                  className={`modal-content adminCon-sucEr-modContent ${
+                    modalType === "success" ? "success-reply" : "error-reply"
+                  }`}
+                >
+                  <div className="modal-header">
+                    <h5 className="modal-title">
+                        {modalType === "success" ? (
+                        <>
+                          <i className="bi bi-envelope-check"></i> Success
+                        </>
+                        ) : (
+                        <>
+                          <i className="bi bi-exclamation-octagon"></i> Error
+                        </>
+                        )}
+                    </h5>
+                    <button
+                      type="button"
+                      className="btn-close"
+                      onClick={() => setModalType("")}
+                    ></button>
+                  </div>
+
+                  <div className="modal-body">
+                    <p>{modalMessage}</p>
+                  </div>
+
+                 <div className="modal-footer">
+                    {modalType === "success" && (
+                      <button
+                        className="success-ok-btn"
+                        onClick={() => setModalType("")}
+                      >
+                        OK
+                      </button>
+                    )}
+
+                    {modalType === "error" && (
+                      <>
+                        <button
+                          className="error-ok-btn"
+                          onClick={() => setModalType("")}
+                        >
+                          OK
+                        </button>
+                        <button
+                          className="error-cancel-btn"
+                          onClick={() => setModalType("")}
+                        >
+                          Cancel
+                        </button>
+                      </>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
+          </>
         )}
       </div>
     </div>

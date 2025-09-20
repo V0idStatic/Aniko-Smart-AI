@@ -145,20 +145,34 @@
 }
 
 /* ================== REPLY MODAL ==================== */
+.adminContact-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.395);
+    backdrop-filter: blur(4px); 
+    z-index: 1040; 
+}
+
 .replyMod-content {
     border-radius: 50px;
     border-bottom-left-radius: 0 !important;
     border: 2px solid var(--dark-brown) !important;
+    box-shadow: 0px 0px 20px 5px var(--pastel-green) !important;
 }
 .replyMod-header {
-    background-color: var(--pastel-green);
+    background: var(--gradient-secondary);
     border-top-right-radius: 50px;
     border-top-left-radius: 50px;
+    padding: 20px; 
 }
 
 .replyMod-title {
-    color: var(--dark-brown) !important;
+    color: var(--light-green) !important;
     margin-left: 1rem;
+    font-size: 18px !important;
 }
 
 .replyMod-title .bi {
@@ -171,13 +185,13 @@
 }
 
 .replyMod-footer {
-    background-color: var(--primary-brown);
+    background-color: var(--light-green);
     border-bottom-left-radius: 0;
     border-bottom-right-radius: 49px;
 }
 
 .replyMod-fc, .replyMod-textarea {
-    border: 1px solid var(--primary-brown) !important;
+    border: 2px solid var(--primary-brown) !important;
 }
 
 .replyMod-fc {
@@ -194,13 +208,15 @@
 }
 
 .sendRep-btn {
-    background-color: rgba(207, 196, 178, 0.527) !important;
-    color: var(--dark-brown) !important;
+    background: var(--gradient-secondary) !important;
+    color: var(--light-green) !important;
     font-weight: 500;
-    border: 2px solid var(--dark-brown) !important;
+    border: 2px solid var(--dark-green) !important;
     padding: 6px;
-    border-radius: 10px;
+    border-radius: 20px;
     margin-right: 7px !important;
+    padding-right: 20px;
+    padding-left: 20px;
 }
 
 .sendRep-btn:hover {
@@ -220,8 +236,192 @@
     padding: 6px;
     border-radius: 10px;
     margin-right: 7px !important;
+    border-radius: 20px !important;
+    padding-right: 20px;
+    padding-left: 20px;
 }
 
 .cancelRep-btn:hover {
     background-color: rgba(207, 196, 178, 0.527) !important;
 }
+
+/* ========= DELETE MODAL ================ */
+.adminCon-delModal-content {
+    border-radius: 20px !important;
+    border: 2px solid #490b13 !important;
+    box-shadow: 0px 0px 20px 5px #f43c4eb8;
+}
+
+.adminCon-delModal-content .modal-header {
+    background: linear-gradient(135deg, #7a1420, #a01926, #f21d32);
+    border-top-right-radius: 19px !important;
+    border-top-left-radius: 19px !important;
+}
+
+.adminCon-delModal-content .btn-close {
+    margin-right: 0.1rem !important;
+    color: white !important;
+}
+
+.adminCon-delModal-content .confirm-btn {
+    background-color: #a01926 !important;
+    border: none;
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+}
+
+.adminCon-delModal-content .confirm-btn:hover {
+    background-color: #7a1420 !important;
+    transform: translateY(-2px);
+}
+
+.adminCon-delModal-content .modal-title {
+    font-size: 18px !important;
+    font-weight: bold; 
+    color: white !important;
+}
+
+.adminCon-delModal-content .modal-footer {
+    padding: 5px !important;
+}
+
+.adminCon-delModal-content .modal-body {
+    padding-bottom: 50px !important;
+    color: var(--dakr-brown) !important;
+}
+
+.adminCon-delModal-content .cancel-btn {
+    border: 2px solid var(--primary-brown) !important;
+    color: var(--primary-brown) !important;
+    background-color: transparent !important;
+}
+
+.adminCon-delModal-content .cancel-btn:hover {
+    background-color: var(--bg-color) !important;
+}
+
+.adminCon-delModal-content .modal-footer button {
+    border-radius: 20px !important;
+}
+
+/* ================== SUCCESS MODAL ================== */
+.success-reply {
+  box-shadow: 0px 0px 20px 10px var(--light-green) !important;
+  border-radius: 20px !important;
+  border: 2px solid var(--dark-green) !important;
+}
+
+.success-reply .modal-header {
+  background: var(--pastel-green) !important;
+  border-top-right-radius: 20px !important;
+  border-top-left-radius: 20px !important;
+}
+
+.success-reply .modal-title {
+  color: var(--primary-green) !important;
+  font-size: 18px !important;
+  font-weight: bold;
+}
+
+.success-reply .modal-footer {
+  border-bottom-right-radius: 20px !important;
+  border-bottom-left-radius: 20px !important;
+  padding: 5px;
+  background-color: var(--light-green) !important;
+}
+
+.success-reply .modal-body {
+  padding-bottom: 40px;
+  background-color: var(--light-green) !important;
+  color: var(--primary-green) !important;
+}
+
+/* ================== ERROR MODAL ================== */
+.error-reply {
+  border-radius: 20px !important;
+  border: 2px solid #490b13 !important;
+  box-shadow: 0px 0px 20px 5px #f43c4eb8;
+}
+
+.error-reply .modal-header {
+  background: linear-gradient(135deg, #7a1420, #a01926, #f21d32);
+  border-top-right-radius: 19px !important;
+  border-top-left-radius: 19px !important;
+}
+
+.error-reply .btn-close {
+  margin-right: 0.1rem !important;
+  color: white !important;
+}
+
+.error-reply .modal-title {
+  font-size: 18px !important;
+  font-weight: bold;
+  color: white !important;
+}
+
+.error-reply .modal-body {
+  padding-bottom: 40px !important;
+  color: var(--dark-brown) !important;
+}
+
+.error-reply .modal-footer {
+  padding: 5px !important;
+}
+
+/* ================== SUCCESS MODAL BUTTON ================== */
+.success-ok-btn {
+    font-size: 0.95rem;
+    font-weight: 600;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    background: var(--gradient-secondary) !important;
+    border: none;
+    color: #fff;
+    padding: 6px 20px;
+    box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+}
+
+.success-ok-btn:hover {
+    background-color: var(--gradient-primary) !important;
+    transform: translateY(-2px);
+}
+
+/* ================== ERROR MODAL BUTTONS ================== */
+.error-ok-btn {
+    font-size: 0.95rem;
+    font-weight: 600;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    background-color: #a01926;
+    border: none;
+    color: #fff;
+    padding: 6px 20px;
+    box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+}
+
+.error-ok-btn:hover {
+    background-color: #7a1420;
+    transform: translateY(-2px);
+}
+
+.error-cancel-btn {
+    font-size: 0.95rem;
+    font-weight: 600;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    background: transparent;
+    border: 2px solid var(--primary-brown);
+    color: var(--primary-brown);
+    padding: 6px 14px;
+}
+
+.error-cancel-btn:hover {
+    background-color: var(--bg-color);
+    transform: translateY(-2px);
+}
+
+
