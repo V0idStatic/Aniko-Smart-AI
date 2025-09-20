@@ -260,62 +260,64 @@ const AdminCMS: React.FC = () => {
 
       <section className="card p-4 adminCms-card mb-5">
         <h5>{title} - Images</h5>
-        <table className="table table-bordered adminCms-table mt-3">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Stored File Name</th>
-              <th>Image</th>
-              <th>URL</th>
-              <th>Created</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.length ? (
-              rows.map((img) => {
-                const storedName = img.image_url ? extractStorageFileName(img.image_url) : "—";
-                return (
-                  <tr key={img.id}>
-                    <td>{img.id}</td>
-                    <td>{storedName}</td>
-                    <td>
-                      <img src={img.image_url} alt="" width={80} height={60} />
-                    </td>
-                    <td>
-                      <a href={img.image_url} target="_blank" rel="noreferrer">
-                        {img.image_url}
-                      </a>
-                    </td>
-                    <td>{new Date(img.uploaded_at).toLocaleString()}</td>
-                    <td>
-                      <button
-                        className="btn btn-danger btn-sm d-inline-flex align-items-center gap-1"
-                        onClick={() =>
-                          deleteFromTable(
-                            tableName,
-                            img.id,
-                            img.image_url,
-                            refetch
-                          )
-                        }
-                      >
-                        <i className="bi bi-trash3-fill"></i>
-                        <span>Delete</span>
-                      </button>
-                    </td>
-                  </tr>
-                );
-              })
-            ) : (
+        <div className="table-responsive">{/* ✅ Added wrapper */}
+          <table className="table table-bordered adminCms-table mt-3">
+            <thead>
               <tr>
-                <td colSpan={6} className="text-center">
-                  No images.
-                </td>
+                <th>ID</th>
+                <th>Stored File Name</th>
+                <th>Image</th>
+                <th>URL</th>
+                <th>Created</th>
+                <th>Action</th>
               </tr>
-            )}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {rows.length ? (
+                rows.map((img) => {
+                  const storedName = img.image_url ? extractStorageFileName(img.image_url) : "—";
+                  return (
+                    <tr key={img.id}>
+                      <td>{img.id}</td>
+                      <td>{storedName}</td>
+                      <td>
+                        <img src={img.image_url} alt="" width={80} height={60} />
+                      </td>
+                      <td>
+                        <a href={img.image_url} target="_blank" rel="noreferrer">
+                          {img.image_url}
+                        </a>
+                      </td>
+                      <td>{new Date(img.uploaded_at).toLocaleString()}</td>
+                      <td>
+                        <button
+                          className="btn btn-danger btn-sm d-inline-flex align-items-center gap-1"
+                          onClick={() =>
+                            deleteFromTable(
+                              tableName,
+                              img.id,
+                              img.image_url,
+                              refetch
+                            )
+                          }
+                        >
+                          <i className="bi bi-trash3-fill"></i>
+                          <span>Delete</span>
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })
+              ) : (
+                <tr>
+                  <td colSpan={6} className="text-center">
+                    No images.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       </section>
     </>
   );
@@ -502,54 +504,56 @@ const AdminCMS: React.FC = () => {
 
             <section className="card p-4 adminCms-card mb-5">
               <h5>Team Members</h5>
-              <table className="table table-bordered mt-3 adminCms-table">
-                <thead className="adminCms-thead">
-                  <tr>
-                    <th>ID</th>
-                    <th>Stored File Name</th>
-                    <th>Photo</th>
-                    <th>Name</th>
-                    <th>Role</th>
-                    <th>Uploaded</th>
-                    <th>Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {teamMembers.length ? (
-                    teamMembers.map((m) => (
-                      <tr key={m.id}>
-                        <td>{m.id}</td>
-                        <td>{extractStorageFileName(m.image_url)}</td>
-                        <td>
-                          <img src={m.image_url} alt={m.name} width={80} height={60} />
-                        </td>
-                        <td>{m.name}</td>
-                        <td>{m.role}</td>
-                        <td>{new Date(m.uploaded_at).toLocaleString()}</td>
-                        <td>
-                          <button
-                            className="btn btn-danger btn-sm adminCms-delBtn"
-                            onClick={() =>
-                              deleteFromTable("team_members", m.id, m.image_url, () =>
-                                fetchTable("team_members", setTeamMembers)
-                              )
-                            }
-                          >
-                            <i className="bi bi-trash3-fill"></i>
-                            Delete
-                          </button>
+              <div className="table-responsive">{/* ✅ Added wrapper */}
+                <table className="table table-bordered mt-3 adminCms-table">
+                  <thead className="adminCms-thead">
+                    <tr>
+                      <th>ID</th>
+                      <th>Stored File Name</th>
+                      <th>Photo</th>
+                      <th>Name</th>
+                      <th>Role</th>
+                      <th>Uploaded</th>
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {teamMembers.length ? (
+                      teamMembers.map((m) => (
+                        <tr key={m.id}>
+                          <td>{m.id}</td>
+                          <td>{extractStorageFileName(m.image_url)}</td>
+                          <td>
+                            <img src={m.image_url} alt={m.name} width={80} height={60} />
+                          </td>
+                          <td>{m.name}</td>
+                          <td>{m.role}</td>
+                          <td>{new Date(m.uploaded_at).toLocaleString()}</td>
+                          <td>
+                            <button
+                              className="btn btn-danger btn-sm adminCms-delBtn"
+                              onClick={() =>
+                                deleteFromTable("team_members", m.id, m.image_url, () =>
+                                  fetchTable("team_members", setTeamMembers)
+                                )
+                              }
+                            >
+                              <i className="bi bi-trash3-fill"></i>
+                              Delete
+                            </button>
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan={7} className="text-center">
+                          No team members.
                         </td>
                       </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td colSpan={7} className="text-center">
-                        No team members.
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
+                    )}
+                  </tbody>
+                </table>
+              </div>
             </section>
           </>
         )}
