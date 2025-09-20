@@ -1,4 +1,4 @@
-// components/FooterNavigation.js
+// components/FooterNavigation.tsx
 import React from 'react';
 import { View, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
@@ -9,28 +9,28 @@ const FooterNavigation = () => {
 
   return (
     <View style={styles.footer}>
-      <TouchableOpacity>
-        <Ionicons name="home" size={28} color="white" />
+      <TouchableOpacity onPress={() => router.push("/")}>
+        <Ionicons name="home" size={28} color="#fff" />
       </TouchableOpacity>
-      
+
       <TouchableOpacity onPress={() => router.push("/plantdashboard")}>
-        <Ionicons name="leaf" size={28} color="white" />
+        <Ionicons name="leaf" size={28} color="#fff" />
       </TouchableOpacity>
-      
+
       <TouchableOpacity>
-        <Ionicons name="camera" size={28} color="white" />
+        <Ionicons name="camera" size={28} color="#fff" />
       </TouchableOpacity>
-      
+
       <TouchableOpacity onPress={() => router.push("/dashboard")}>
-        <Ionicons name="cloud" size={28} color="white" />
+        <Ionicons name="cloud" size={28} color="#fff" />
       </TouchableOpacity>
-      
+
       <TouchableOpacity onPress={() => router.push("/sensor")}>
-        <Ionicons name="analytics-outline" size={28} color="white" />
+        <Ionicons name="analytics-outline" size={28} color="#fff" />
       </TouchableOpacity>
-      
+
       <TouchableOpacity>
-        <Ionicons name="menu" size={28} color="white" />
+        <Ionicons name="menu" size={28} color="#fff" />
       </TouchableOpacity>
     </View>
   );
@@ -38,11 +38,16 @@ const FooterNavigation = () => {
 
 const styles = StyleSheet.create({
   footer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    backgroundColor: '#333',
-    paddingVertical: 12,
-    paddingHorizontal: 16,
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: "#1c4722",     // dark green background
+    flexDirection: "row",
+    justifyContent: "space-around",
+    paddingVertical: 15,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
   },
 });
 
