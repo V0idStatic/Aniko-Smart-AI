@@ -260,8 +260,8 @@ const AdminCMS: React.FC = () => {
 
       <section className="card p-4 adminCms-card mb-5">
         <h5>{title} - Images</h5>
-        <div className="table-responsive">{/* ✅ Added wrapper */}
-          <table className="table table-bordered adminCms-table mt-3">
+        <div className="table-responsive">
+          <table className="table table-bordered adminCms-table mt-3" style={{ tableLayout: "auto", width: "100%" }}>
             <thead>
               <tr>
                 <th>ID</th>
@@ -283,7 +283,7 @@ const AdminCMS: React.FC = () => {
                       <td>
                         <img src={img.image_url} alt="" width={80} height={60} />
                       </td>
-                      <td>
+                      <td style={{ wordBreak: "break-all", maxWidth: "250px" }}>
                         <a href={img.image_url} target="_blank" rel="noreferrer">
                           {img.image_url}
                         </a>
@@ -504,8 +504,8 @@ const AdminCMS: React.FC = () => {
 
             <section className="card p-4 adminCms-card mb-5">
               <h5>Team Members</h5>
-              <div className="table-responsive">{/* ✅ Added wrapper */}
-                <table className="table table-bordered mt-3 adminCms-table">
+              <div className="table-responsive">
+                <table className="table table-bordered mt-3 adminCms-table" style={{ tableLayout: "auto", width: "100%" }}>
                   <thead className="adminCms-thead">
                     <tr>
                       <th>ID</th>
