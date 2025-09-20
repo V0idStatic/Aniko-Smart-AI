@@ -232,3 +232,67 @@ img.thumb {
 .btn-danger:hover {
     background-color: #890c0cff;
 }
+/* ===================== MODALSSSSS =========== */
+/* === Backdrop === */
+.adminCms-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    backdrop-filter: blur(4px);
+    z-index: 1040;
+}
+
+/* === Base Modal === */
+.adminCms-modal-content {
+    border-radius: 20px;
+    transition: all 0.3s ease-in-out;
+    overflow: hidden;
+}
+
+/* ======= Add Team Modal ====== */
+.adminCms-modal-content .addTeam-modal {
+    border: 2px solid var(--dark-green) !important;
+    box-shadow: 0px 0px 20px 5px var(--light-green) !important;
+}
+
+.addTeam-modal .modal-header {
+    background: var(--gradient-secondary) !important;
+    color: #fff;
+}
+
+/* ===== Delete Modal ======= */
+.adminCms-modal-content.delete-modal {
+    border-radius: 20px !important;
+    border: 2px solid #490b13 !important;
+    box-shadow: 0px 0px 20px 5px #f43c4eb8;
+}
+.adminCms-modal-content.delete-modal .modal-header {
+    background: linear-gradient(135deg, #7a1420, #a01926, #f21d32);
+    border-top-right-radius: 19px !important;
+    border-top-left-radius: 19px !important;
+}
+
+/* ========== Modal Buttons ==========*/
+.addTeam-btn {
+    background-color: #198754;
+    color: #fff;
+    border-radius: 8px;
+    padding: 6px 14px;
+}
+.addTeam-btn:hover {
+    background-color: #157347;
+}
+
+.adminCms-delBtn {
+    background-color: #a01926;
+    color: white;
+    border-radius: 8px;
+    padding: 6px 14px;
+    border-radius: 20px !important;
+    font-weight: 500;
+}
+.adminCms-delBtn:hover {
+    background-color: #7a1420;
+    transform: translateY(-2px);
+    color: white;
+}

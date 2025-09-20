@@ -325,71 +325,97 @@ const [activeSection, setActiveSection] = useState<"why" | "benefits" | "hero" |
   return (
     <div>
       {showModal && (
-        <div
-          className="modal fade show d-block"
-          tabIndex={-1}
-          style={{ background: "rgba(0,0,0,0.5)" }}
-        >
-          <div className="modal-dialog modal-dialog-centered">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title">{modalTitle}</h5>
-                <button
-                  type="button"
-                  className="btn-close"
-                  onClick={() => {
-                    if (!modalLoading) setShowModal(false);
-                  }}
-                ></button>
-              </div>
-              <div className="modal-body">
-                <p>{modalMessage}</p>
-              </div>
-              <div className="modal-footer">
-                {modalTitle.startsWith("Confirm") ? (
-                  <>
-                    <button
-                      type="button"
-                      className="btn btn-secondary"
-                      onClick={() => {
-                        if (!modalLoading) setShowModal(false);
-                      }}
-                      disabled={modalLoading}
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      type="button"
-                      className="btn btn-primary"
-                      onClick={() => {
-                        try {
-                          onConfirm();
-                        } catch (err) {
-                          console.error("Confirm action error:", err);
-                          setModalTitle("Error");
-                          setModalMessage("An error occurred while running the action.");
-                        }
-                      }}
-                      disabled={modalLoading}
-                    >
-                      {modalLoading ? "Processing..." : "Confirm"}
-                    </button>
-                  </>
-                ) : (
+        <>
+          {/* Backdrop */}
+          <div className="fade show adminCms-modal-backdrop"></div>
+
+          <div
+            className="modal fade show d-block adminCms-modal"
+            tabIndex={-1}
+          >
+            <div className="modal-dialog modal-dialog-centered adminCms-modal-dialog">
+              <div
+                className={`modal-content adminCms-modal-content ${
+                  modalTitle.includes("Add") ? "addTeam-modal" :
+                  modalTitle.includes("Delete") ? "delete-modal" : ""
+                }`}
+              >
+                <div className="modal-header">
+                  <h5
+                    className={`modal-title ${
+                      modalTitle.includes("Add") ? "text-success" :
+                      modalTitle.includes("Delete") ? "text-danger" : ""
+                    }`}
+                  >
+                    {modalTitle.includes("Add") && (
+                      <><i className="bi bi-person-plus-fill"></i> {modalTitle}</>
+                    )}
+                    {modalTitle.includes("Delete") && (
+                      <><i className="bi bi-trash3-fill"></i> {modalTitle}</>
+                    )}
+                    {!modalTitle.includes("Add") && !modalTitle.includes("Delete") && modalTitle}
+                  </h5>
                   <button
                     type="button"
-                    className="btn btn-primary"
+                    className="btn-close"
                     onClick={() => {
-                      setShowModal(false);
+                      if (!modalLoading) setShowModal(false);
                     }}
-                  >
-                    OK
-                  </button>
-                )}
+                  ></button>
+                </div>
+
+                <div className="modal-body">
+                  <p>{modalMessage}</p>
+                </div>
+
+                <div className="modal-footer">
+                  {modalTitle.startsWith("Confirm") ? (
+                    <>
+                      <button
+                        type="button"
+                        className="btn addTeam-btn"
+                        onClick={() => {
+                          if (!modalLoading) setShowModal(false);
+                        }}
+                        disabled={modalLoading}
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="button"
+                        className={`btn ${
+                          modalTitle.includes("Add") ? "addTeam-btn" : "adminCms-delBtn"
+                        }`}
+                        onClick={() => {
+                          try {
+                            onConfirm();
+                          } catch (err) {
+                            console.error("Confirm action error:", err);
+                            setModalTitle("Error");
+                            setModalMessage("An error occurred while running the action.");
+                          }
+                        }}
+                        disabled={modalLoading}
+                      >
+                        {modalLoading ? "Processing..." : "Confirm"}
+                      </button>
+                    </>
+                  ) : (
+                    <button
+                      type="button"
+                      className="btn addTeam-btn"
+                      onClick={() => {
+                        setShowModal(false);
+                      }}
+                    >
+                      OK
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
           </div>
-        </div>
+        </>
       )}
 
       <AdminHeader />
