@@ -1,6 +1,13 @@
 import supabase from "./CONFIG/supaBase";
 import React, { useState, useEffect } from "react";
 import FooterNavigation from '../components/FooterNavigation';
+import Header from "../components/Header";
+import SearchBar from "../components/SearchBar";
+import StatusCard from "../components/StatusCard";
+import DiagnosisCard from "../components/DiagnosisCard";
+import WeatherHistory from "../components/WeatherHistory";
+
+
 import {
   StyleSheet,
   Text,
@@ -157,7 +164,7 @@ export default function Dashboard() {
         onPress: async () => {
           try {
             const { error } = await supabase.auth.signOut();
-            if (!error) router.replace("/");
+            if (!error) router.replace("/Login");
           } catch (error) {
             console.error("Logout error:", error);
           }
@@ -741,10 +748,7 @@ export default function Dashboard() {
           </View>
         </View>
 
-        <View style={styles.searchContainer}>
-          <Ionicons name="search" size={18} color="gray" />
-          <TextInput placeholder="Search" style={styles.searchInput} placeholderTextColor="gray" />
-        </View>
+         <SearchBar />
       </View>
 
       {/* Location Selection Modal */}
@@ -857,107 +861,12 @@ export default function Dashboard() {
         <Text style={styles.sectionTitle}>My Crops</Text>
 
         <View style={styles.cropRow}>
-          <View style={styles.statusCard}>
-            <Text style={styles.statusLabel}>Status</Text>
-            <View style={styles.statusCircleWrapper}>
-              <View style={[styles.outerCircle, { borderColor: "#FFD700" }]}>
-                <Text style={styles.circleText}>GOOD</Text>
-              </View>
-            </View>
-          </View>
-
-          {/* Plant Diagnosis Card */}
-          <TouchableOpacity style={styles.diagnosisCard}>
-            <Image source={require("../assets/plant-bg.png")} style={styles.diagnosisImage} />
-            <View style={styles.diagnosisOverlay}>
-              <Text style={styles.diagnosisTitle}>Plant Diagnosis</Text>
-              <TouchableOpacity
-                style={styles.tryNowButton}
-                onPress={() => router.push("/plantdashboard")}
-              >
-                <Text style={styles.tryNowText}>Try Now</Text>
-              </TouchableOpacity>
-            </View>
-          </TouchableOpacity>
+          <StatusCard status="GOOD" color="#FFD700" />
+          <DiagnosisCard />
         </View>
 
-        {/* Weather History Section */}
-        <View style={styles.historyCard}>
-          <View style={styles.historyHeader}>
-            <View style={styles.historyHeaderRow}>
-              <Text style={styles.historyTitle}>Weather History: This Week</Text>
-              <View style={styles.legendRow}>
-                {["Very Good", "Good", "Warning", "Bad"].map((label, i) => (
-                  <View key={i} style={styles.legendItem}>
-                    <View
-                      style={[
-                        styles.legendColor,
-                        { backgroundColor: i === 0 ? "#4CAF50" : i === 1 ? "#8BC34A" : i === 2 ? "#FFC107" : "#F44336" },
-                      ]}
-                    />
-                    <Text style={styles.legendText}>{label}</Text>
-                  </View>
-                ))}
-              </View>
-            </View>
-          </View>
-
-          {/* Days */}
-          <View style={styles.historyRow}>
-            {weeklyWeather.map((item, i) => (
-              <TouchableOpacity
-                key={i}
-                style={styles.historyDayWrapper}
-                onPress={() => {
-                  setSelectedDay(item);
-                  setShowDayModal(true);
-                }}
-                activeOpacity={0.8}
-              >
-                <View style={[styles.dayBox, { backgroundColor: item.color }]}>
-                  <Text style={styles.historyDayText}>{item.day}</Text>
-                </View>
-                {/* Removed detail texts below each day */}
-              </TouchableOpacity>
-            ))}
-          </View>
-        </View>
+      <WeatherHistory weeklyWeather={weeklyWeather} />
       </ScrollView>
-
-      {/* Day Analysis Modal */}
-      <Modal visible={showDayModal} transparent animationType="fade">
-        <View style={styles.locationModalOverlay}>
-          <View style={styles.locationModalContainer}>
-            <Text style={styles.locationModalTitle}>
-              {selectedDay ? `${selectedDay.day} — Analysis` : "Day Analysis"}
-            </Text>
-
-            {selectedDay && (
-              <View>
-                <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}>
-                  <View style={[styles.legendColor, { backgroundColor: selectedDay.color }]} />
-                  <Text style={{ color: '#2e4d2f', fontWeight: '600' }}>{selectedDay.status}</Text>
-                </View>
-
-                <View style={{ paddingVertical: 6 }}>
-                  <Text style={{ color: '#1c4722', marginBottom: 4 }}>Temperature (max): {selectedDay.temp}</Text>
-                  <Text style={{ color: '#1c4722' }}>Humidity (avg): {selectedDay.humidity}</Text>
-                </View>
-
-                {/* Add more fields later if needed (rain chance, precipitation, min temp, etc.) */}
-              </View>
-            )}
-
-            <TouchableOpacity
-              style={[styles.closeModalBtn, { marginTop: 16 }]}
-              onPress={() => setShowDayModal(false)}
-            >
-              <Text style={styles.closeModalText}>Close</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
-
       <FooterNavigation />
     </View>
   );
@@ -1060,163 +969,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
   },
-  statusCard: {
-    flex: 1,
-    backgroundColor: "#1c4722",
-    borderRadius: 10,
-    padding: 15,
-    alignItems: "center",
-    marginRight: 10,
-  },
-  statusLabel: {
-    color: "white",
-    fontWeight: "bold",
-    marginBottom: 10,
-  },
-  statusCircleWrapper: {
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  outerCircle: {
-    width: 90,
-    height: 90,
-    borderRadius: 60,
-    borderWidth: 8,
-    justifyContent: "center",
-    alignItems: "center",
-    marginRight: 12,
-  },
-
-  circleText: {
-    fontSize: 19,
-    fontWeight: "bold",
-    color: "#FFC107",
-  },
-
-  diagnosisCard: {
-    flex: 1,
-    borderRadius: 20,
-    overflow: "hidden",
-    marginLeft: 10,
-    height: 150,
-    position: "relative",
-  },
-  diagnosisImage: {
-    width: "100%",
-    height: "100%",
-    resizeMode: "cover",
-  },
-  diagnosisOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "rgba(0,0,0,0.3)",
-  },
-  diagnosisTitle: {
-    color: "white",
-    fontWeight: "bold",
-    fontSize: 18,
-    marginBottom: 10,
-  },
-  tryNowButton: {
-    backgroundColor: "rgba(255,255,255,0.8)",
-    paddingVertical: 6,
-    paddingHorizontal: 20,
-    borderRadius: 20,
-  },
-  tryNowText: {
-    color: "#1c4722",
-    fontWeight: "bold",
-  },
-
-  historyCard: {
-    marginTop: 15,
-    backgroundColor: "#1c4722",
-    borderRadius: 20,
-    padding: 15,
-  },
-  historyHeaderRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: 10,
-  },
-  historyHeader: {
-    marginBottom: 4,
-  },
-
-  legendRow: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-
-  legendItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginLeft: 8,
-
-  },
-
-  legendColor: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    marginRight: 4,
-
-  },
-
-  historyTitle: {
-    color: "white",
-    fontWeight: "bold",
-    fontSize: 10,
-
-  },
-
-  legendText: {
-    color: "white",
-    fontSize: 8,
-  },
-  historyRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    flexWrap: "wrap",
-    marginTop: 10,
-  },
-
-  historyDayWrapper: {
-    flexBasis: "13%",
-    marginBottom: 8,
-  },
-
-  dayBox: {
-    width: 45,
-    height: 45,
-    borderRadius: 10,
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 5,
-  },
-
-  historyDayText: {
-    color: "white",
-    fontWeight: "bold",
-  },
-
-  historyDetails: {
-    fontSize: 5,
-    color: "white",
-  },
-
-  footer: {
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
-    backgroundColor: "#1c4722",
-    flexDirection: "row",
-    justifyContent: "space-around",
-    paddingVertical: 15,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-  },
+ 
 });
+

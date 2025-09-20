@@ -1,0 +1,165 @@
+import { StyleSheet } from "react-native";
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#D9C6A5",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  arc: {
+    marginTop: 100,
+    width: "100%",
+    height: 850,
+    backgroundColor: "#EDE1CF",
+    borderTopLeftRadius: 200,
+    borderTopRightRadius: 200,
+    alignItems: "center",
+    paddingTop: 30,
+  },
+  logo: {
+    height: 120,
+    width: 120,
+    resizeMode: "contain",
+    marginBottom: 20,
+  },
+  title: {
+    fontWeight: "bold",
+    fontSize: 18,
+    color: "brown",
+    marginBottom: 20,
+  },
+  inputGroup: {
+    width: "90%",
+    marginBottom: 15,
+  },
+  label: {
+    color: "black",
+    fontWeight: "600",
+    marginBottom: 5,
+  },
+  input: {
+    padding: 15,
+    borderRadius: 25,
+    borderWidth: 1,
+    borderColor: "black",
+    color: "black",
+    backgroundColor: "white",
+  },
+  loginButton: {
+    backgroundColor: "green",
+    width: "90%",
+    padding: 15,
+    borderRadius: 25,
+    alignItems: "center",
+    marginTop: 15,
+    marginBottom: 10,
+  },
+  loginText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  debugButtons: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: "90%",
+    marginBottom: 10,
+  },
+  debugButton: {
+    backgroundColor: "blue",
+    padding: 10,
+    borderRadius: 15,
+    alignItems: "center",
+    flex: 1,
+    marginHorizontal: 5,
+  },
+  debugText: {
+    color: "#fff",
+    fontSize: 12,
+  },
+  debugContainer: {
+    width: "90%",
+    maxHeight: 100,
+    backgroundColor: "#f5f5f5",
+    padding: 10,
+    borderRadius: 10,
+    marginBottom: 10,
+  },
+  realtimeContainer: {
+    width: "90%",
+    maxHeight: 100,
+    backgroundColor: "#e6f7ff",
+    padding: 10,
+    borderRadius: 10,
+    marginBottom: 10,
+  },
+  debugTitle: {
+    fontWeight: "bold",
+    marginBottom: 5,
+    color: "#333",
+    fontSize: 12,
+  },
+  userInfo: {
+    fontSize: 10,
+    color: "green",
+    marginBottom: 2,
+  },
+  realtimeInfo: {
+    fontSize: 10,
+    color: "blue",
+    marginBottom: 2,
+    fontStyle: "italic",
+  },
+  signupText: {
+    color: "brown",
+    marginBottom: 20,
+  },
+  dividerContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 20,
+    width: "85%",
+  },
+  divider: {
+    flex: 1,
+    height: 1,
+    backgroundColor: "#000",
+  },
+  orText: {
+    marginHorizontal: 10,
+    color: "#000",
+    fontWeight: "500",
+  },
+  errorText: {
+    color: "red",
+    marginBottom: 10,
+    textAlign: "center",
+  },
+  successText: {
+    color: "green",
+    marginBottom: 10,
+    textAlign: "center",
+  },
+  googleButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderColor: "brown",
+    borderWidth: 1,
+    borderRadius: 25,
+    padding: 15,
+    width: "90%",
+    justifyContent: "center",
+  },
+  googleIcon: {
+    width: 20,
+    height: 20,
+    marginRight: 10,
+  },
+  googleText: {
+    color: "brown",
+    fontWeight: "500",
+  },
+});
+
+export default styles;
