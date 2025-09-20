@@ -42,8 +42,8 @@ const AdminCMS: React.FC = () => {
   const [onConfirm, setOnConfirm] = useState<() => Promise<void> | void>(() => () => {});
   const [modalLoading, setModalLoading] = useState(false);
 
-  const [activeSection, setActiveSection] =
-    useState<"hero" | "benefits" | "why" | "team">("hero");
+const [activeSection, setActiveSection] = useState<"why" | "benefits" | "hero" | "team">("why");
+
 
   // --- helper: robust filename extractor from URL ---
   const extractStorageFileName = (url: string | null | undefined) => {

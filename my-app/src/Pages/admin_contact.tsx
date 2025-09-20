@@ -77,7 +77,6 @@ const AdminContact: React.FC = () => {
 
     console.log("🗑️ Attempting to delete row with id:", numericId);
 
-    // ❗ Temporarily keep "id", but logs above will show the real key to use
     const { data, error } = await supabase
       .from("contact_messages")
       .delete()
@@ -159,45 +158,52 @@ const AdminContact: React.FC = () => {
           {messages.length === 0 ? (
             <p>No messages found.</p>
           ) : (
-            <table className="table table-bordered adminCon-table">
-              <thead>
-                <tr>
-                  {Object.keys(messages[0]).map((key) => (
-                    <th key={key}>{key}</th>
-                  ))}
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {messages.map((msg) => (
-                  <tr key={msg.id || msg.contact_id || msg.message_id}>
-                    {Object.keys(msg).map((key) => (
-                      <td key={key}>{String(msg[key])}</td>
+            <div className="table-responsive">
+              <table
+                className="table table-bordered adminCon-table"
+                style={{ tableLayout: "auto", width: "100%" }}
+              >
+                <thead>
+                  <tr>
+                    {Object.keys(messages[0]).map((key) => (
+                      <th key={key}>{key}</th>
                     ))}
-                    <td>
-                      <div className="d-flex gap-2 justify-content-center w-100">
-                        <button
-                          className="btn btn-primary btn-sm me-2 reply-btn"
-                          onClick={() => handleReply(msg.email, msg.subject)}
-                        >
-                          <i className="bi bi-reply-fill"></i> Reply
-                        </button>
-                        <button
-                          className="btn btn-danger btn-sm del-btn"
-                          onClick={() =>
-                            confirmDelete(
-                              msg.id || msg.contact_id || msg.message_id
-                            )
-                          }
-                        >
-                          <i className="bi bi-trash3-fill"></i> Delete
-                        </button>
-                      </div>
-                    </td>
+                    <th>Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {messages.map((msg) => (
+                    <tr key={msg.id || msg.contact_id || msg.message_id}>
+                      {Object.keys(msg).map((key) => (
+                        <td key={key} style={{ wordBreak: "break-all" }}>
+                          {String(msg[key])}
+                        </td>
+                      ))}
+                      <td>
+                        <div className="d-flex gap-2 justify-content-center w-100">
+                          <button
+                            className="btn btn-primary btn-sm me-2 reply-btn"
+                            onClick={() => handleReply(msg.email, msg.subject)}
+                          >
+                            <i className="bi bi-reply-fill"></i> Reply
+                          </button>
+                          <button
+                            className="btn btn-danger btn-sm del-btn"
+                            onClick={() =>
+                              confirmDelete(
+                                msg.id || msg.contact_id || msg.message_id
+                              )
+                            }
+                          >
+                            <i className="bi bi-trash3-fill"></i> Delete
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           )}
         </div>
 
