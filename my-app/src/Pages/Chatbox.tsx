@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { marked } from "marked";
 import { RotateCw, Send } from "lucide-react";
 import { motion } from "framer-motion";
+import "../CSS/chatbot.css";
 
 type Message = {
   role: "user" | "assistant";
@@ -303,12 +304,12 @@ const Chatbox: React.FC = () => {
       style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
     >
       <div
-        className="modal-dialog modal-dialog-centered"
+        className="modal-dialog modal-dialog-centered chatbot-modDialog"
         style={{ maxWidth: "900px", width: "900px" }}
       >
-        <div className="modal-content" style={{ height: "600px" }}>
-          <div className="modal-header">
-            <h5 className="modal-title">Aniko Smart AI</h5>
+        <div className="modal-content chatbot-modContent" style={{ height: "600px" }}>
+          <div className="modal-header chatbot-modHeader">
+            <h5 className="modal-title chatbot-modTitle">Aniko Smart AI</h5>
             <button
               type="button"
               className="btn-close"
@@ -317,32 +318,37 @@ const Chatbox: React.FC = () => {
             />
           </div>
 
-          <div className="modal-body p-0" style={{ height: "100%" }}>
+          <div className="modal-body chatbot-modBody p-0" style={{ height: "100%" }}>
             <div className="d-flex" style={{ height: "100%" }}>
               {/* Sidebar */}
               <div
+                className="cb-sidebar-body"
                 style={{
                   width: "260px",
                   flexShrink: 0,
-                  backgroundColor: "#f8f9fa",
-                  borderRight: "1px solid #ddd",
                   padding: "10px",
                   overflowY: "auto",
                 }}
               >
-                <h6 className="text-muted">Chat History</h6>
                 <button
-                  className="btn btn-outline-primary btn-sm w-100 mb-3"
+                  className="btn btn-outline-primary btn-sm w-100 mb-3 newChat-btn"
                   onClick={newChat}
                 >
-                  + New Chat
+                  <i className="bi bi-pencil-square"></i>New Chat
                 </button>
+
+                <h6 className="text-muted historyHeader">Chats</h6>
 
                 <ul className="list-unstyled m-0 p-0">
                   {sessions.map((session) => (
                     <li key={session.id} style={{ position: "relative" }}>
                       <div
                         onClick={() => switchChat(session.id)}
+                        className={
+                          session.id === activeSessionId
+                            ? "active-chat"
+                            : "inactive-chat"
+                        }
                         style={{
                           display: "flex",
                           alignItems: "center",
@@ -354,8 +360,7 @@ const Chatbox: React.FC = () => {
                           border: "1px solid #ddd",
                           marginBottom: "8px",
                           cursor: "pointer",
-                          background:
-                            session.id === activeSessionId ? "#0d6efd" : "#f8f9fa",
+                          background: session.id === activeSessionId ? "#0d6efd" : "#f8f9fa",
                           color: session.id === activeSessionId ? "#fff" : "#000",
                           overflow: "hidden",
                           whiteSpace: "nowrap",
@@ -424,13 +429,12 @@ const Chatbox: React.FC = () => {
               </div>
 
               {/* Chat Window */}
-              <div className="flex-grow-1 d-flex flex-column">
+              <div className="flex-grow-1 d-flex flex-column chat-window">
                 <div
                   style={{
                     flex: 1,
                     overflowY: "auto",
                     padding: "15px",
-                    backgroundColor: "#ffffff",
                     position: "relative",
                   }}
                 >
@@ -488,7 +492,7 @@ const Chatbox: React.FC = () => {
                         }}
                       />
                       <div
-                        className="p-2 rounded bg-light border text-muted small"
+                        className="p-2 rounded bg-light border text-muted small thinking-text"
                         style={{ maxWidth: "75%" }}
                       >
                         Aniko is thinking...
@@ -500,7 +504,7 @@ const Chatbox: React.FC = () => {
                   {suggested.length > 0 &&
                     (!activeSession?.messages.length ||
                       activeSession.messages.length === 0) && (
-                      <div className="p-2 border-top bg-light mt-3">
+                      <div className="p-2 border-top mt-3 suggestQs-container">
                         <div className="d-flex justify-content-between align-items-center mb-2">
                           <span className="fw-bold small">Suggested Questions</span>
                           <RotateCw
@@ -529,9 +533,9 @@ const Chatbox: React.FC = () => {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6 }}
-                    className="fw-bold fs-5 text-muted"
+                    className="fw-bold fs-5 winIntro-mess"
                   >
-                    Hello, I’m <span className="text-primary">Aniko</span>, here
+                    Hello, I’m <span className="text-primary aniko-winHeader">Aniko</span>, here
                     to assist you today!
                   </motion.div>
                 )}
@@ -539,20 +543,19 @@ const Chatbox: React.FC = () => {
                 </div>
 
                 {/* Input */}
-                <div className="p-3 border-top" style={{ backgroundColor: "#f8f9fa" }}>
+                <div className="p-3 border-top">
                   <div
+                    className="cb-inputArea"
                     style={{
                       display: "flex",
                       alignItems: "center",
-                      backgroundColor: "#fff",
-                      border: "1px solid #ccc",
                       borderRadius: "25px",
                       padding: "5px 10px",
                     }}
                   >
                     <input
                       type="text"
-                      className="form-control border-0 shadow-none"
+                      className="form-control border-0 shadow-none cb-inputForm"
                       placeholder="Ask a question..."
                       style={{ borderRadius: "25px", flex: 1 }}
                       value={userInput}
@@ -560,7 +563,7 @@ const Chatbox: React.FC = () => {
                       onKeyDown={(e) => e.key === "Enter" && sendMessage()}
                     />
                     <button
-                      className="btn btn-success rounded-circle ms-2"
+                      className="btn btn-success rounded-circle ms-2 cb-sendBtn"
                       style={{
                         width: "40px",
                         height: "40px",
