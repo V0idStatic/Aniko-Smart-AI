@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import supabase from "./CONFIG/supaBase"; // Import Supabase client
 import { getCurrentUser } from './CONFIG/currentUser';
+import { useAppContext } from './CONFIG/GlobalContext';
+import type { SensorData as GlobalSensorData } from './CONFIG/GlobalContext';
 import {
   View,
   Text,
@@ -43,15 +45,16 @@ interface ReadingRow {
 const { width } = Dimensions.get('window');
 
 const NPKSensorDashboard: React.FC = () => {
-  const [sensorData, setSensorData] = useState<SensorData | null>(null);
+  // Use global context for sensor state
+  const { sensorData, setSensorData, isSensorConnected, setIsSensorConnected } = useAppContext();
+  
   const [recentReadings, setRecentReadings] = useState<ReadingRow[]>([]);
   const [dbStatus, setDbStatus] = useState<string>('');
-  const [isConnected, setIsConnected] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState('Disconnected');
   const [arduinoIP, setArduinoIP] = useState('192.168.18.56'); // Default IP 192.168.18.34 - wireless ip
   const [showIPInput, setShowIPInput] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
-const fetchIntervalRef = useRef<number | null>(null);
+  const fetchIntervalRef = useRef<number | null>(null);
   const router = useRouter();
 
   // Fetch data from Arduino
@@ -113,8 +116,8 @@ const fetchIntervalRef = useRef<number | null>(null);
           setDbStatus('No current user in session; cannot store reading');
         }
         
-        if (!isConnected) {
-          setIsConnected(true);
+        if (!isSensorConnected) {
+          setIsSensorConnected(true);
           setConnectionStatus('Connected');
         }
       } else {
@@ -124,8 +127,8 @@ const fetchIntervalRef = useRef<number | null>(null);
       console.error('Error fetching sensor data:', error);
       console.error('Error details:', error.message);
       
-      if (isConnected) {
-        setIsConnected(false);
+      if (isSensorConnected) {
+        setIsSensorConnected(false);
         setConnectionStatus('Connection Lost');
         Alert.alert('Connection Error', `Lost connection to Arduino sensor: ${error.message}`);
       }
@@ -164,7 +167,7 @@ const fetchIntervalRef = useRef<number | null>(null);
         console.log('Status data received:', data);
         
         setConnectionStatus('Connected');
-        setIsConnected(true);
+        setIsSensorConnected(true);
         setShowIPInput(false);
         
         // Set up interval and store the reference
@@ -183,7 +186,7 @@ const fetchIntervalRef = useRef<number | null>(null);
       console.error('Error message:', error.message);
       
       setConnectionStatus('Connection Failed');
-      setIsConnected(false);
+      setIsSensorConnected(false);
       
       let errorMessage = 'Unknown error occurred';
       
@@ -211,7 +214,7 @@ const fetchIntervalRef = useRef<number | null>(null);
       clearInterval(fetchIntervalRef.current);
       fetchIntervalRef.current = null;
     }
-    setIsConnected(false);
+    setIsSensorConnected(false);
     setConnectionStatus('Disconnected');
     setSensorData(null);
   };
@@ -374,7 +377,7 @@ const fetchIntervalRef = useRef<number | null>(null);
           <View style={styles.connectionInfo}>
             <View style={[
               styles.statusDot, 
-              { backgroundColor: isConnected ? '#4CAF50' : '#F44336' }
+              { backgroundColor: isSensorConnected ? '#4CAF50' : '#F44336' }
             ]} />
             <View>
               <Text style={styles.connectionText}>
@@ -386,7 +389,7 @@ const fetchIntervalRef = useRef<number | null>(null);
             </View>
           </View>
           
-          {!isConnected ? (
+          {!isSensorConnected ? (
             <TouchableOpacity
               style={[styles.connectButton, isConnecting && styles.connectingButton]}
               onPress={testConnection}
@@ -487,14 +490,14 @@ const fetchIntervalRef = useRef<number | null>(null);
           </>
         )}
 
-        {!sensorData && isConnected && (
+        {!sensorData && isSensorConnected && (
           <View style={styles.waitingContainer}>
             <Ionicons name="sync-outline" size={48} color="#9E9E9E" />
             <Text style={styles.waitingText}>Fetching sensor data...</Text>
           </View>
         )}
 
-        {!isConnected && !showIPInput && (
+        {!isSensorConnected && !showIPInput && (
           <View style={styles.instructionContainer}>
             <Ionicons name="information-circle-outline" size={48} color="#9E9E9E" />
             <Text style={styles.instructionTitle}>Setup Instructions</Text>

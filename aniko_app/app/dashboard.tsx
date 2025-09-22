@@ -1,5 +1,7 @@
 import supabase from "./CONFIG/supaBase";
 import React, { useState, useEffect } from "react";
+import { useAppContext } from "./CONFIG/GlobalContext";
+import type { PhLocation } from "./CONFIG/GlobalContext";
 import FooterNavigation from '../components/FooterNavigation';
 import Header from "../components/Header";
 import SearchBar from "../components/SearchBar";
@@ -77,9 +79,12 @@ export default function Dashboard() {
   const [user, setUser] = useState<User | AuthUser | null>(null);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
 
+  // Use global context for location management
+  const { selectedLocation, setSelectedLocation } = useAppContext();
+
   // Fix the initial weather state - don't hardcode the city
   const [weather, setWeather] = useState<WeatherData>({
-    city: "Loading...", // Changed from "Olongapo"
+    city: selectedLocation?.city || "Loading...", // Use global location
     temperature: "—",
     condition: "Loading…",
     highLow: "—",
@@ -92,20 +97,20 @@ export default function Dashboard() {
   const [showDayModal, setShowDayModal] = useState(false);
   const [selectedDay, setSelectedDay] = useState<DayWeatherData | null>(null);
 
-  // Location selection state
-  interface PhLocation { province: string; city: string; lat: number; lon: number; }
-  
-  // Replace static array with dynamic state
+  // Location selection state  
   const [locations, setLocations] = useState<PhLocation[]>([]);
-  
-  const [selectedLocation, setSelectedLocation] = useState<PhLocation | null>(null);
   const [showLocationModal, setShowLocationModal] = useState(false);
   const [showInlinePicker, setShowInlinePicker] = useState(false);
   
-  // Derive provinces from dynamic locations
-  const provinces = Array.from(new Set(locations.map(l => l.province)));
-  const [activeProvince, setActiveProvince] = useState<string>("");
+  // Derive regions, provinces, cities from dynamic locations
+  const regions = Array.from(new Set(locations.map(l => l.region)));
+  const provinces = Array.from(new Set(locations.filter(l => l.region === selectedRegion).map(l => l.province)));
+  const cities = locations.filter(l => l.region === selectedRegion && l.province === selectedProvince);
+  
+  const [selectedRegion, setSelectedRegion] = useState<string>("");
   const [selectedProvince, setSelectedProvince] = useState<string>("");
+  const [activeRegion, setActiveRegion] = useState<string>("");
+  const [activeProvince, setActiveProvince] = useState<string>("");
 
   const router = useRouter();
   const [nowClock, setNowClock] = useState<string>(new Date().toLocaleTimeString('en-PH',{ hour: '2-digit', minute: '2-digit', second:'2-digit'}));
@@ -175,9 +180,20 @@ export default function Dashboard() {
 
   /* ===================== Location helpers ===================== */
   const handleLocationSelect = async (location: PhLocation) => {
+    console.log('Location selected:', location);
     setSelectedLocation(location);
+    setSelectedRegion(location.region);
+    setSelectedProvince(location.province);
+    setActiveRegion(location.region);
+    setActiveProvince(location.province);
     setShowLocationModal(false);
     setShowInlinePicker(false);
+    
+    // Update weather city immediately
+    setWeather(prev => ({
+      ...prev,
+      city: location.city
+    }));
     
     // Update weather data for the new location
     setIsFullFetching(true);
@@ -609,6 +625,7 @@ export default function Dashboard() {
         const { data, error } = await supabase
           .from('denormalized_locations')
           .select('*')
+          .order('reg_desc', { ascending: true })
           .order('province_desc', { ascending: true })
           .order('city_desc', { ascending: true });
 
@@ -619,24 +636,26 @@ export default function Dashboard() {
 
         if (data && data.length > 0) {
           const dbLocations: PhLocation[] = data.map((row: any) => {
+            const region = row.reg_desc || 'Unknown';
             const province = row.province_desc || 'Unknown';
             const city = row.city_desc || 'Unknown';
             const lat = Number(row.lat);
             const lon = Number(row.lon);
 
-            // Validate coordinates - only use if they're valid numbers
+            // Validate coordinates
             const validLat = !isNaN(lat) && lat >= -90 && lat <= 90 ? lat : null;
             const validLon = !isNaN(lon) && lon >= -180 && lon <= 180 ? lon : null;
 
             if (!validLat || !validLon) {
-              console.warn(`Invalid coordinates for ${city}, ${province}: lat=${lat}, lon=${lon}`);
+              console.warn(`Invalid coordinates for ${city}, ${province}, ${region}: lat=${lat}, lon=${lon}`);
             }
 
             return { 
+              region,
               province, 
               city, 
-              lat: validLat || 0, // Will be filtered out below
-              lon: validLon || 0  // Will be filtered out below
+              lat: validLat || 0,
+              lon: validLon || 0
             };
           });
 
@@ -653,9 +672,18 @@ export default function Dashboard() {
           // Set initial location to first valid location from DB
           if (!selectedLocation && validLocations.length > 0) {
             const firstLocation = validLocations[0];
+            console.log('Setting initial location:', firstLocation);
             setSelectedLocation(firstLocation);
-            setActiveProvince(firstLocation.province);
+            setSelectedRegion(firstLocation.region);
             setSelectedProvince(firstLocation.province);
+            setActiveRegion(firstLocation.region);
+            setActiveProvince(firstLocation.province);
+            
+            // Update weather city immediately
+            setWeather(prev => ({
+              ...prev,
+              city: firstLocation.city
+            }));
           }
         }
       } catch (err) {
@@ -682,6 +710,27 @@ export default function Dashboard() {
     };
     init();
   }, []);
+
+  // Add a useEffect to update weather when location changes
+  useEffect(() => {
+    if (selectedLocation) {
+      console.log('Selected location changed to:', selectedLocation);
+      // Update the city name immediately when location changes
+      setWeather(prev => ({
+        ...prev,
+        city: selectedLocation.city
+      }));
+      
+      // Then fetch new weather data
+      const fetchNewWeather = async () => {
+        setIsFullFetching(true);
+        await fetchWeatherData();
+        setIsFullFetching(false);
+      };
+      
+      fetchNewWeather();
+    }
+  }, [selectedLocation]); // This triggers when selectedLocation changes
 
   // Update the selectedLocation dependency
   useEffect(() => {
@@ -756,26 +805,73 @@ export default function Dashboard() {
         <View style={styles.locationModalOverlay}>
           <View style={styles.locationModalContainer}>
             <Text style={styles.locationModalTitle}>Select Location (PH)</Text>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ maxHeight: 48, marginBottom: 8 }}>
-              {provinces.map(prov => (
-                <TouchableOpacity key={prov} onPress={() => setActiveProvince(prov)} style={[styles.provinceChip, activeProvince === prov && styles.provinceChipActive]}>
-                  <Text style={[styles.provinceChipText, activeProvince === prov && styles.provinceChipTextActive]}>{prov}</Text>
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
-            <ScrollView style={styles.locationList}>
-              {locations.filter(l => l.province === activeProvince).map(loc => (
+            
+            {/* Region Selection */}
+            <Text style={styles.selectionLabel}>Region</Text>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.chipScrollContainer}>
+              {regions.map(region => (
                 <TouchableOpacity 
-                  key={loc.city} 
-                  style={styles.locationItem} 
-                  onPress={() => handleLocationSelect(loc)}
+                  key={region} 
+                  onPress={() => {
+                    setActiveRegion(region);
+                    setActiveProvince(""); // Reset province when region changes
+                  }} 
+                  style={[styles.selectionChip, activeRegion === region && styles.selectionChipActive]}
                 >
-                  <Ionicons name={selectedLocation?.city === loc.city ? 'radio-button-on' : 'radio-button-off'} size={18} color="#4d7f39" />
-                  <Text style={styles.locationItemText}>{loc.city}</Text>
-                  <Text style={styles.locationItemCoords}>{loc.lat.toFixed(3)}, {loc.lon.toFixed(3)}</Text>
+                  <Text style={[styles.selectionChipText, activeRegion === region && styles.selectionChipTextActive]}>
+                    {region}
+                  </Text>
                 </TouchableOpacity>
               ))}
             </ScrollView>
+
+            {/* Province Selection */}
+            {activeRegion && (
+              <>
+                <Text style={[styles.selectionLabel, {marginTop: 12}]}>Province</Text>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.chipScrollContainer}>
+                  {locations.filter(l => l.region === activeRegion)
+                    .map(l => l.province)
+                    .filter((province, index, arr) => arr.indexOf(province) === index) // unique provinces
+                    .map(province => (
+                    <TouchableOpacity 
+                      key={province} 
+                      onPress={() => setActiveProvince(province)} 
+                      style={[styles.selectionChip, activeProvince === province && styles.selectionChipActive]}
+                    >
+                      <Text style={[styles.selectionChipText, activeProvince === province && styles.selectionChipTextActive]}>
+                        {province}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
+              </>
+            )}
+
+            {/* City Selection */}
+            {activeRegion && activeProvince && (
+              <>
+                <Text style={[styles.selectionLabel, {marginTop: 12}]}>City / Municipality</Text>
+                <ScrollView style={styles.locationList}>
+                  {locations.filter(l => l.region === activeRegion && l.province === activeProvince).map(loc => (
+                    <TouchableOpacity 
+                      key={loc.city} 
+                      style={styles.locationItem} 
+                      onPress={() => handleLocationSelect(loc)}
+                    >
+                      <Ionicons 
+                        name={selectedLocation?.city === loc.city ? 'radio-button-on' : 'radio-button-off'} 
+                        size={18} 
+                        color="#4d7f39" 
+                      />
+                      <Text style={styles.locationItemText}>{loc.city}</Text>
+                      <Text style={styles.locationItemCoords}>{loc.lat.toFixed(3)}, {loc.lon.toFixed(3)}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
+              </>
+            )}
+
             <TouchableOpacity style={styles.closeModalBtn} onPress={() => setShowLocationModal(false)}>
               <Text style={styles.closeModalText}>Close</Text>
             </TouchableOpacity>
@@ -794,39 +890,81 @@ export default function Dashboard() {
                 <Ionicons name="location-outline" size={14} color="#fff" />
                 <Text style={styles.changeLocationText}>{showInlinePicker ? 'Hide Location' : 'Change Location'}</Text>
               </TouchableOpacity>
+              
+              {/* Enhanced Inline Picker */}
               {showInlinePicker && (
                 <View style={styles.inlinePickerBox}>
-                  <Text style={styles.inlinePickerLabel}>Province</Text>
-                  <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.inlineProvinceRow}>
-                    {provinces.map(p => (
+                  {/* Region Selection */}
+                  <Text style={styles.inlinePickerLabel}>Region</Text>
+                  <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.inlineSelectionRow}>
+                    {regions.map(region => (
                       <TouchableOpacity 
-                        key={p} 
+                        key={region} 
                         onPress={() => { 
-                          console.log('Province selected:', p);
-                          setSelectedProvince(p); 
+                          console.log('Inline region selected:', region);
+                          setSelectedRegion(region);
+                          setSelectedProvince(""); // Reset province
                         }} 
-                        style={[styles.inlineProvinceChip, selectedProvince === p && styles.inlineProvinceChipActive]}
+                        style={[styles.inlineSelectionChip, selectedRegion === region && styles.inlineSelectionChipActive]}
                       >
-                        <Text style={[styles.inlineProvinceChipText, selectedProvince === p && styles.inlineProvinceChipTextActive]}>{p}</Text>
+                        <Text style={[styles.inlineSelectionChipText, selectedRegion === region && styles.inlineSelectionChipTextActive]}>
+                          {region}
+                        </Text>
                       </TouchableOpacity>
                     ))}
                   </ScrollView>
-                  <Text style={[styles.inlinePickerLabel,{marginTop:6}]}>City / Municipality</Text>
-                  <View style={styles.inlineCityList}>
-                    <ScrollView style={{maxHeight:140}}>
-                      {locations.filter(l => l.province === selectedProvince).map(loc => (
-                        <TouchableOpacity 
-                          key={loc.city} 
-                          style={styles.inlineCityItem} 
-                          onPress={() => handleLocationSelect(loc)}
-                        >
-                          <Ionicons name={selectedLocation?.city === loc.city ? 'radio-button-on' : 'radio-button-off'} size={16} color="#4d7f39" />
-                          <Text style={styles.inlineCityName}>{loc.city}</Text>
-                          <Text style={styles.inlineCityCoords}>{loc.lat.toFixed(2)}, {loc.lon.toFixed(2)}</Text>
-                        </TouchableOpacity>
-                      ))}
-                    </ScrollView>
-                  </View>
+
+                  {/* Province Selection */}
+                  {selectedRegion && (
+                    <>
+                      <Text style={[styles.inlinePickerLabel, {marginTop: 8}]}>Province</Text>
+                      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.inlineSelectionRow}>
+                        {locations.filter(l => l.region === selectedRegion)
+                          .map(l => l.province)
+                          .filter((province, index, arr) => arr.indexOf(province) === index)
+                          .map(province => (
+                          <TouchableOpacity 
+                            key={province} 
+                            onPress={() => { 
+                              console.log('Inline province selected:', province);
+                              setSelectedProvince(province);
+                            }} 
+                            style={[styles.inlineSelectionChip, selectedProvince === province && styles.inlineSelectionChipActive]}
+                          >
+                            <Text style={[styles.inlineSelectionChipText, selectedProvince === province && styles.inlineSelectionChipTextActive]}>
+                              {province}
+                            </Text>
+                          </TouchableOpacity>
+                        ))}
+                      </ScrollView>
+                    </>
+                  )}
+
+                  {/* City Selection */}
+                  {selectedRegion && selectedProvince && (
+                    <>
+                      <Text style={[styles.inlinePickerLabel, {marginTop: 8}]}>City / Municipality</Text>
+                      <View style={styles.inlineCityList}>
+                        <ScrollView style={{maxHeight: 120}}>
+                          {locations.filter(l => l.region === selectedRegion && l.province === selectedProvince).map(loc => (
+                            <TouchableOpacity 
+                              key={loc.city} 
+                              style={styles.inlineCityItem} 
+                              onPress={() => handleLocationSelect(loc)}
+                            >
+                              <Ionicons 
+                                name={selectedLocation?.city === loc.city ? 'radio-button-on' : 'radio-button-off'} 
+                                size={16} 
+                                color="#4d7f39" 
+                              />
+                              <Text style={styles.inlineCityName}>{loc.city}</Text>
+                              <Text style={styles.inlineCityCoords}>{loc.lat.toFixed(2)}, {loc.lon.toFixed(2)}</Text>
+                            </TouchableOpacity>
+                          ))}
+                        </ScrollView>
+                      </View>
+                    </>
+                  )}
                 </View>
               )}
             </View>
@@ -872,7 +1010,7 @@ export default function Dashboard() {
   );
 }
 
-/* ===================== Styles ===================== */
+/* ===================== Enhanced Styles ===================== */
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#e7dbc8" },
 
@@ -969,6 +1107,55 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
   },
- 
+
+  // New styles for enhanced location selection
+  selectionLabel: { 
+    fontSize: 14, 
+    fontWeight: '600', 
+    marginBottom: 6, 
+    color: '#2e4d2f' 
+  },
+  chipScrollContainer: { 
+    maxHeight: 48, 
+    marginBottom: 8 
+  },
+  selectionChip: { 
+    paddingHorizontal: 12, 
+    paddingVertical: 6, 
+    backgroundColor: '#f0f4f0', 
+    borderRadius: 16, 
+    marginRight: 8 
+  },
+  selectionChipActive: { 
+    backgroundColor: '#4d7f39' 
+  },
+  selectionChipText: { 
+    fontSize: 12, 
+    color: '#2e4d2f' 
+  },
+  selectionChipTextActive: { 
+    color: '#fff' 
+  },
+  inlineSelectionRow: { 
+    maxHeight: 40 
+  },
+  inlineSelectionChip: { 
+    paddingHorizontal: 10, 
+    paddingVertical: 6, 
+    backgroundColor: 'rgba(255,255,255,0.15)', 
+    borderRadius: 16, 
+    marginRight: 8 
+  },
+  inlineSelectionChipActive: { 
+    backgroundColor: 'white' 
+  },
+  inlineSelectionChipText: { 
+    color: 'white', 
+    fontSize: 12, 
+    fontWeight: '600' 
+  },
+  inlineSelectionChipTextActive: { 
+    color: '#1c4722' 
+  },
 });
 
