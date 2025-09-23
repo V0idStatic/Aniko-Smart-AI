@@ -29,8 +29,8 @@ const FooterNavigation = () => {
         <Ionicons name="analytics-outline" size={28} color="#fff" />
       </TouchableOpacity>
 
-      <TouchableOpacity>
-        <Ionicons name="menu" size={28} color="#fff" />
+      <TouchableOpacity onPress={() => router.push("/analysis")}>
+        <Ionicons name="stats-chart-outline" size={28} color="#fff" />
       </TouchableOpacity>
     </View>
   );
