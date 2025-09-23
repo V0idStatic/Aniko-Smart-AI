@@ -8,25 +8,13 @@ import SearchBar from "../components/SearchBar";
 import StatusCard from "../components/StatusCard";
 import DiagnosisCard from "../components/DiagnosisCard";
 import WeatherHistory from "../components/WeatherHistory";
-
-
-import {
-  StyleSheet,
-  Text,
-  View,
-  TouchableOpacity,
-  TextInput,
-  ScrollView,
-  Alert,
-  Image,
-  Modal,
+import {StyleSheet,Text,View,TouchableOpacity,TextInput,ScrollView,Alert,Image, Modal,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 import { fetchWeatherApi } from "openmeteo";
 
-/* ===================== Types ===================== */
 interface User {
   id: string;
   username: string;
@@ -60,8 +48,6 @@ interface DayWeatherData {
   humidity: string;
   color: string;
 }
-
-// NEW: DB location type
 type DbLocation = {
   location_id: number;
   region_id: number;
@@ -123,7 +109,6 @@ export default function Dashboard() {
     return () => clearInterval(tick);
   }, []);
 
-  /* ===================== Supabase helpers ===================== */
   const getLastLoggedInUser = async () => {
     try {
       const { data, error } = await supabase
@@ -1004,6 +989,18 @@ export default function Dashboard() {
         </View>
 
       <WeatherHistory weeklyWeather={weeklyWeather} />
+
+
+        <View style={styles.chatbotCard}>
+  <TouchableOpacity
+    style={styles.chatbotInner}
+    onPress={() => router.push("/chatbot")} // 👈 route to chatbot.tsx
+  >
+    <Ionicons name="chatbubbles-outline" size={28} color="#fff" />
+    <Text style={styles.chatbotTitle}>AI Chatbot</Text>
+    <Text style={styles.chatbotSubtitle}>Ask questions or get help</Text>
+  </TouchableOpacity>
+</View>
       </ScrollView>
       <FooterNavigation />
     </View>
@@ -1157,5 +1154,31 @@ const styles = StyleSheet.create({
   inlineSelectionChipTextActive: { 
     color: '#1c4722' 
   },
+
+  chatbotCard: {
+  backgroundColor: '#4d7f39',
+  borderRadius: 20,
+  marginTop: 20,
+  padding: 16,
+  shadowColor: '#000',
+  shadowOpacity: 0.2,
+  shadowRadius: 6,
+  elevation: 4,
+},
+chatbotInner: {
+  flexDirection: 'row',
+  alignItems: 'center',
+},
+chatbotTitle: {
+  color: '#fff',
+  fontSize: 18,
+  fontWeight: '700',
+  marginLeft: 12,
+},
+chatbotSubtitle: {
+  color: 'rgba(255,255,255,0.85)',
+  fontSize: 12,
+  marginLeft: 12,
+},
 });
 
