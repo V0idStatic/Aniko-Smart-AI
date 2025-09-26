@@ -151,19 +151,34 @@ const Testimonials: React.FC = () => {
   return (
     <>
       <section id="testimonials" className="testSection container">
-        <h2 className="testSec-header">What Our Users Say</h2>
-        <h6 className="testSec-subheader">Real experiences from real farmers who are growing smarter with Aniko.</h6>
+        <div className="testSection-header-wrapper">
+          <div className="testSection-headers">
+            <h2 className="testSec-header">What Our Users Say</h2>
+            <h6 className="testSec-subheader">Real experiences from real farmers who are growing smarter with Aniko.</h6>
+          </div>
+
+          <div className="testSection-headerBtn">
+            <button className="testDisplay-btn"><a href="testimonialDisplay.tsx">View Testimonials</a></button>
+          </div>
+        </div>
+        
         <div className="testimonial-scroll testSec-scroll" ref={scrollRef}>
           {data.map((t) => (
             <div className="card testSec-card" key={t.id}>
-              <img
-                src={t.users?.profile_picture || "/PICTURES/default-avatar.png"}
-                alt={t.users?.username || "User"}
-                draggable={false}
-                className="testSec-userProfile"
-              />
-              <h5 className="testSec-username">{t.users?.username ?? "Unknown User"}</h5>
-              <small className="testSec-email">{t.users?.email ?? "No email"}</small>
+              <div className="testSec-userDetails">
+                 <img
+                  src={t.users?.profile_picture || "/PICTURES/default-avatar.png"}
+                  alt={t.users?.username || "User"}
+                  draggable={false}
+                  className="testSec-userProfile"
+                />
+                <div className="testSec-nameDeets">
+                  <h5 className="testSec-username">{t.users?.username ?? "Unknown User"}</h5>
+                  <small className="testSec-email">{t.users?.email ?? "No email"}</small>
+                </div>
+               
+              </div>
+              
               <p className="testSec-text">“{t.testimonial}”</p>
             </div>
           ))}

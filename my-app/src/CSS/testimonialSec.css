@@ -15,7 +15,7 @@
 }
 
 .testSection {
-    padding: 3rem 0;
+    padding: 5rem 0;
     background: #f8f9fa;
     font-family: system-ui, sans-serif;
     padding: 25px !important;
@@ -27,8 +27,49 @@
     border: 5px dashed var(--dark-green) !important;
 }
 
+.testSection-header-wrapper {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.testSection-headers {
+    flex: 1; 
+    margin-left: 0.5rem !important;
+}
+
+.testSection-headerBtn {
+    margin-left: auto; 
+    margin-right: 0.5rem !important;
+}
+
+.testDisplay-btn {
+    background: var(--pastel-green);
+    border: none;
+    border-radius: 20px;
+    padding: 0.6rem 1.2rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s ease;
+    box-shadow: 0px 0px 10px 2px var(--accent-green) !important;
+}
+
+.testDisplay-btn a {
+    color: white;
+    text-decoration: none;
+    text-shadow: 0 0 6px var(--accent-green), 0 0 2px var(--accent-green);
+}
+
+.testDisplay-btn:hover {
+    background: var(--primary-green);
+    box-shadow: 0px 0px 10px 2px var(--light-green) !important;
+    animation: sway 1.2s infinite alternate ease-in-out;
+}
+
+
+
 .testSec-header {
-    text-align: center;
     font-weight: 700;
     font-size: 50px !important; 
     color: var(--light-green) !important;
@@ -36,7 +77,6 @@
 }
 
 .testSec-subheader {
-    text-align: center;
     margin-bottom: 1rem;
     font-size: 20px;
     color: var(--pastel-green); 
@@ -44,85 +84,100 @@
 
 .testSec-scroll {
     display: flex;
-    gap: 1rem;
-    padding: 0 1rem;
-    overflow-x: auto;
-    scroll-snap-type: x mandatory;
-    -ms-overflow-style: none;  
-    scrollbar-width: none;     
-    touch-action: pan-y;       
-    cursor: grab;
-    display: flex;
     flex-direction: row;
-    gap: 3rem; /* space between cards */
+    gap: 2rem;
+    padding: 1rem;
+    overflow-x: auto;
+    overflow-y: hidden;  
+    scroll-snap-type: x mandatory;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+    touch-action: pan-x;  
+    cursor: grab;
 }
 
-.testSec-scroll::-webkit-scrollbar { display: none; }
+.testSec-scroll::-webkit-scrollbar {
+    display: none;
+}
 
 .testSec-scroll.dragging {
-    cursor: grabbing;
+     cursor: grabbing;
 }
 
 .testSec-card {
-    flex: 0 0 calc(33.333% - 1rem); 
+    flex: 0 0 calc(33.333% - 1rem);
     min-width: 280px;
-    background: #fff;
-    border-radius: 1rem;
-    padding: 1.25rem;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
-    text-align: center;
-    scroll-snap-align: start;
-    user-select: none; 
     background-color: var(--light-green) !important;
     border-radius: 0 !important;
-    border-top-right-radius: 80px !important;
+    border-top-right-radius: 50px !important;
+    border-bottom-left-radius: 50px !important;
     border: 2px solid var(--accent-green) !important;
-    overflow-y: hidden;
-    margin-bottom: 2rem;
+    padding: 20px; 
+    text-align: center;
+    scroll-snap-align: start;
+    user-select: none;
+    position: relative;
+    margin-bottom: 0;      
+    overflow: hidden;   
+    box-shadow: 0px 0px 10px 2px var(--pastel-green) !important;   
+    background-image: url('https://www.transparenttextures.com/patterns/diamond-upholstery.png');
+    background-repeat: repeat;
+    background-size: auto;
+    opacity: 0.98;
 }
 
-.testSec-card {
-  position: relative;       /* makes the card a reference */
-  overflow: visible;        /* so the image can overflow */
+.testSec-userDetails {
+    display: flex !important;
+}
+
+.testSec-nameDeets {
+    text-align: left !important;
+    margin-left: 1rem !important; 
 }
 
 .testSec-userProfile {
-  width: 90px;
-  height: 90px;
+  width: 50px;
+  height: 50px;
   border-radius: 50%;
   object-fit: cover;
-  border: 3px solid #2d6a4f;
-  position: absolute;
-  bottom: -45px;
-  right: -35px;
-  background:#fff;
-  z-index: 10;
   box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+  margin-top: 8px !important;
 }
 
 .testSec-username {
-    margin: 0 0 0.25rem;
-    font-size: 1.05rem;
+  margin: 0.5rem 0 0.25rem;
+  font-size: 1.05rem;
+  font-weight: bold; 
+  color: var(--dark-brown) !important;
 }
 
 .testSec-email {
-    display: block;
-    color: #6c757d;
-    margin-bottom: 0.5rem;
-}
-    
-.testSec-text{
-    font-size: 0.95rem;
-    line-height: 1.4;
-    color: #333;
-    margin: 0;
+  display: block;
+  color: #6c757d;
+  margin-bottom: 0.5rem;
+  color: var(--primary-brown) !important;
 }
 
-/* =========== RESPONSIVENESS ============ */
+.testSec-text {
+  font-size: 0.95rem;
+  line-height: 1.4;
+  color: var(--primary-green);
+  margin-top: 2rem;
+  text-align: left !important;
+  font-weight: 400!important;
+}
+
+/* ======== RESPONSIVENESS ======== */
 @media (max-width: 900px) {
-    .testimonial-card { flex: 0 0 calc(50% - 1rem); min-width: 240px; }
+  .testSec-card {
+    flex: 0 0 calc(50% - 1rem);
+    min-width: 240px;
+  }
 }
 
 @media (max-width: 540px) {
-    .testimonial-card { flex: 0 0 calc(100% - 1rem); min-width: 220px; }
+  .testSec-card {
+    flex: 0 0 calc(100% - 1rem);
+    min-width: 220px;
+  }
 }
