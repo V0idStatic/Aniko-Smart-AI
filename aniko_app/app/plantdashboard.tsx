@@ -73,6 +73,7 @@ export default function Dashboard() {
     // Plant history modal state
     const [showHistoryModal, setShowHistoryModal] = useState(false);
     const [selectedDayHistory, setSelectedDayHistory] = useState<DailyMonitoringData | null>(null);
+    const [weeklyMonitoringData, setWeeklyMonitoringData] = useState<DailyMonitoringData[]>([]);
     
     // Derive categories and plants from crops data
     const originalCategories = Array.from(new Set(crops.map(c => c.crop_categories)));
@@ -148,6 +149,51 @@ export default function Dashboard() {
         }
     };
 
+    // Fetch ESP32 sensor data from database
+    const fetchESP32SensorData = async (userId: string) => {
+        try {
+            console.log('🔍 Fetching ESP32 sensor data for user:', userId);
+            
+            const { data: latestReading, error } = await supabase
+                .from('esp32_readings')
+                .select('*')
+                .eq('user_id', userId)
+                .order('measured_at', { ascending: false })
+                .limit(1)
+                .single();
+
+            if (error) {
+                console.error('❌ Error fetching ESP32 data:', error);
+                return null;
+            }
+
+            if (latestReading) {
+                console.log('✅ Successfully loaded REAL ESP32 sensor data:', latestReading);
+                
+                // Map database fields to sensor data interface
+                const mappedSensorData: SensorData = {
+                    temperature: latestReading.temp_c || 0,
+                    moisture: latestReading.moisture_pct || 0,
+                    ph: latestReading.ph_level || 0,
+                    ec: latestReading.ec_us_cm || 0,
+                    nitrogen: latestReading.nitrogen_ppm || 0,
+                    potassium: latestReading.potassium_ppm || 0,
+                    phosphorus: latestReading.phosphorus_ppm || 0,
+                    timestamp: new Date(latestReading.measured_at).getTime()
+                };
+
+                setSensorData(mappedSensorData);
+                return mappedSensorData;
+            }
+
+            console.log('📭 No ESP32 sensor records found for this user');
+            return null;
+        } catch (err) {
+            console.error('❌ Failed to fetch ESP32 sensor data:', err);
+            return null;
+        }
+    };
+
     // Function to check if sensor reading is within optimal range
     const getSensorStatus = (value: number, min: number, max: number) => {
         if (value >= min && value <= max) {
@@ -160,7 +206,163 @@ export default function Dashboard() {
     };
 
     // Generate real sensor-based monitoring history for last 7 days
-    const generateWeeklyMonitoringData = (): DailyMonitoringData[] => {
+    const generateWeeklyMonitoringData = async (): Promise<DailyMonitoringData[]> => {
+        if (!currentUser && !user) {
+            console.log('📭 No user available for sensor history');
+            return generateMockWeeklyData();
+        }
+        
+        const userId = currentUser?.id || (user as User)?.id;
+        if (!userId) {
+            console.log('📭 No user ID available for sensor history');
+            return generateMockWeeklyData();
+        }
+
+        try {
+            // Get the last 7 days of data
+            const today = new Date();
+            const sevenDaysAgo = new Date(today);
+            sevenDaysAgo.setDate(today.getDate() - 6);
+            
+            console.log('📊 Fetching sensor history from:', sevenDaysAgo.toISOString(), 'to:', today.toISOString());
+
+            const { data: sensorHistory, error } = await supabase
+                .from('esp32_readings')
+                .select('*')
+                .eq('user_id', userId)
+                .gte('measured_at', sevenDaysAgo.toISOString())
+                .lte('measured_at', today.toISOString())
+                .order('measured_at', { ascending: true });
+
+            if (error) {
+                console.error('❌ Error fetching sensor history:', error);
+                return generateMockWeeklyData(); // Fallback to mock data
+            }
+
+            if (!sensorHistory || sensorHistory.length === 0) {
+                console.log('📭 No sensor history found, using mock data for demo');
+                return generateMockWeeklyData(); // Fallback to mock data
+            }
+
+            console.log('✅ Found real sensor history:', sensorHistory.length, 'readings');
+
+            // Group readings by day
+            const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            const weekData: DailyMonitoringData[] = [];
+            
+            // Create day buckets for last 7 days
+            for (let i = 6; i >= 0; i--) {
+                const currentDate = new Date(today);
+                currentDate.setDate(today.getDate() - i);
+                const dayName = dayNames[currentDate.getDay()];
+                const dateString = currentDate.toISOString().split('T')[0];
+                
+                // Filter readings for this specific day
+                const dayReadings = sensorHistory.filter(reading => {
+                    const readingDate = new Date(reading.measured_at).toISOString().split('T')[0];
+                    return readingDate === dateString;
+                });
+
+                if (dayReadings.length === 0) {
+                    // No data for this day - create placeholder
+                    weekData.push({
+                        date: dateString,
+                        day: dayName,
+                        plantName: selectedCrop?.crop_name || "No Plant Selected",
+                        monitoringDuration: 0,
+                        sessionsCount: 0,
+                        avgTemperature: 0,
+                        avgHumidity: 0,
+                        avgPh: 0,
+                        avgNitrogen: 0,
+                        avgPotassium: 0,
+                        avgPhosphorus: 0,
+                        overallStatus: 'Bad' as const,
+                        statusColor: '#9E9E9E',
+                        hourlyReadings: []
+                    });
+                    continue;
+                }
+
+                // Calculate daily averages from real sensor data
+                const avgTemp = dayReadings.reduce((sum, r) => sum + (r.temp_c || 0), 0) / dayReadings.length;
+                const avgHumidity = dayReadings.reduce((sum, r) => sum + (r.moisture_pct || 0), 0) / dayReadings.length;
+                const avgPh = dayReadings.reduce((sum, r) => sum + (r.ph_level || 0), 0) / dayReadings.length;
+                const avgNitrogen = dayReadings.reduce((sum, r) => sum + (r.nitrogen_ppm || 0), 0) / dayReadings.length;
+                const avgPotassium = dayReadings.reduce((sum, r) => sum + (r.potassium_ppm || 0), 0) / dayReadings.length;
+                const avgPhosphorus = dayReadings.reduce((sum, r) => sum + (r.phosphorus_ppm || 0), 0) / dayReadings.length;
+
+                // Convert readings to hourly format for timeline
+                const hourlyReadings = dayReadings.map(reading => ({
+                    timestamp: new Date(reading.measured_at).toLocaleTimeString('en-US', { 
+                        hour: '2-digit', 
+                        minute: '2-digit',
+                        hour12: false 
+                    }),
+                    temperature: reading.temp_c || 0,
+                    humidity: reading.moisture_pct || 0,
+                    ph: reading.ph_level || 0,
+                    nitrogen: reading.nitrogen_ppm || 0,
+                    potassium: reading.potassium_ppm || 0,
+                    phosphorus: reading.phosphorus_ppm || 0
+                }));
+
+                // Determine status based on crop parameters and real sensor readings
+                let overallStatus: 'Good' | 'Warning' | 'Bad' = 'Good';
+                let statusColor = '#4CAF50';
+                
+                if (cropParameters) {
+                    const tempStatus = getSensorStatus(avgTemp, cropParameters.temperature_min, cropParameters.temperature_max);
+                    const phStatus = getSensorStatus(avgPh, cropParameters.ph_level_min, cropParameters.ph_level_max);
+                    const moistureStatus = getSensorStatus(avgHumidity, cropParameters.moisture_min, cropParameters.moisture_max);
+                    
+                    const badCount = [tempStatus, phStatus, moistureStatus].filter(s => s.status === 'Bad').length;
+                    const warningCount = [tempStatus, phStatus, moistureStatus].filter(s => s.status === 'Warning').length;
+                    
+                    if (badCount > 0) {
+                        overallStatus = 'Bad';
+                        statusColor = '#F44336';
+                    } else if (warningCount > 0) {
+                        overallStatus = 'Warning';
+                        statusColor = '#FFC107';
+                    }
+                }
+
+                // Calculate monitoring duration and sessions
+                const firstReading = dayReadings[0];
+                const lastReading = dayReadings[dayReadings.length - 1];
+                const durationHours = firstReading && lastReading ? 
+                    (new Date(lastReading.measured_at).getTime() - new Date(firstReading.measured_at).getTime()) / (1000 * 60 * 60) : 0;
+
+                weekData.push({
+                    date: dateString,
+                    day: dayName,
+                    plantName: selectedCrop?.crop_name || "No Plant Selected",
+                    monitoringDuration: Math.max(0, durationHours),
+                    sessionsCount: dayReadings.length,
+                    avgTemperature: avgTemp,
+                    avgHumidity: avgHumidity,
+                    avgPh: avgPh,
+                    avgNitrogen: avgNitrogen,
+                    avgPotassium: avgPotassium,
+                    avgPhosphorus: avgPhosphorus,
+                    overallStatus,
+                    statusColor,
+                    hourlyReadings
+                });
+            }
+            
+            return weekData;
+            
+        } catch (err) {
+            console.error('❌ Failed to fetch sensor history:', err);
+            return generateMockWeeklyData(); // Fallback to mock data
+        }
+    };
+
+    // Fallback function for mock data when no real data exists
+    const generateMockWeeklyData = (): DailyMonitoringData[] => {
+        console.log('📝 Generating mock sensor data for development/demo');
         const today = new Date();
         const weekData: DailyMonitoringData[] = [];
         const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -253,8 +455,6 @@ export default function Dashboard() {
         return weekData;
     };
 
-    const weeklyMonitoringData = generateWeeklyMonitoringData();
-
     // Get overall plant health status based on sensor data vs parameters
     const getPlantHealthStatus = () => {
         if (!cropParameters || !sensorData) return { status: 'Unknown', color: '#9E9E9E' };
@@ -271,6 +471,19 @@ export default function Dashboard() {
         if (badCount > 0) return { status: 'Bad', color: '#F44336' };
         if (warningCount > 0) return { status: 'Warning', color: '#FFC107' };
         return { status: 'Good', color: '#4CAF50' };
+    };
+
+    // Handle refresh ESP32 data manually
+    const handleRefreshSensorData = async () => {
+        const userId = currentUser?.id || (user as User)?.id;
+        if (userId) {
+            console.log('🔄 Manual refresh of ESP32 sensor data...');
+            await fetchESP32SensorData(userId);
+            
+            // Also refresh the weekly history
+            const newWeeklyData = await generateWeeklyMonitoringData();
+            setWeeklyMonitoringData(newWeeklyData);
+        }
     };
 
     useEffect(() => {
@@ -317,6 +530,27 @@ export default function Dashboard() {
             loadCropParameters(selectedCrop.crop_name);
         }
     }, [selectedCrop]);
+
+    // Fetch ESP32 sensor data when user is available
+    useEffect(() => {
+        const loadSensorAndHistory = async () => {
+            const userId = currentUser?.id || (user as User)?.id;
+            if (userId) {
+                console.log('🚀 Loading ESP32 sensor data and history for user:', userId);
+                
+                // Try to fetch real ESP32 sensor data first
+                await fetchESP32SensorData(userId);
+                
+                // Load sensor history (real or mock)
+                const historyData = await generateWeeklyMonitoringData();
+                setWeeklyMonitoringData(historyData);
+            }
+        };
+
+        if ((currentUser || user) && selectedCrop) {
+            loadSensorAndHistory();
+        }
+    }, [currentUser, user, selectedCrop, cropParameters]);
 
     const getLastLoggedInUser = async () => {
         try {
@@ -400,6 +634,9 @@ export default function Dashboard() {
                     </View>
 
                     <View style={styles.headerIcons}>
+                        <TouchableOpacity onPress={handleRefreshSensorData} style={{ marginRight: 12 }}>
+                            <Ionicons name="refresh-outline" size={22} color="white" />
+                        </TouchableOpacity>
                         <Ionicons name="notifications-outline" size={22} color="white" />
                         <TouchableOpacity onPress={handleLogout} style={{ marginLeft: 12 }}>
                             <Ionicons name="log-out-outline" size={22} color="white" />
@@ -552,7 +789,7 @@ export default function Dashboard() {
                                     <View style={styles.historyStatsRow}>
                                         <View style={styles.historyStat}>
                                             <Text style={styles.historyStatLabel}>Duration</Text>
-                                            <Text style={styles.historyStatValue}>{selectedDayHistory.monitoringDuration}h</Text>
+                                            <Text style={styles.historyStatValue}>{selectedDayHistory.monitoringDuration.toFixed(1)}h</Text>
                                         </View>
                                         <View style={styles.historyStat}>
                                             <Text style={styles.historyStatLabel}>Sessions</Text>
@@ -601,11 +838,11 @@ export default function Dashboard() {
                                                 <Text style={styles.timelineTimestamp}>{reading.timestamp}</Text>
                                                 <View style={styles.timelineReadings}>
                                                     <Text style={styles.timelineReading}>🌡️ {reading.temperature.toFixed(1)}°C</Text>
-                                                    <Text style={styles.timelineReading}>💧 {reading.humidity}%</Text>
+                                                    <Text style={styles.timelineReading}>💧 {reading.humidity.toFixed(0)}%</Text>
                                                     <Text style={styles.timelineReading}>⚗️ pH {reading.ph.toFixed(1)}</Text>
-                                                    <Text style={styles.timelineReading}>🟢 N {reading.nitrogen}</Text>
-                                                    <Text style={styles.timelineReading}>🔵 K {reading.potassium}</Text>
-                                                    <Text style={styles.timelineReading}>🟡 P {reading.phosphorus}</Text>
+                                                    <Text style={styles.timelineReading}>🟢 N {reading.nitrogen.toFixed(0)}</Text>
+                                                    <Text style={styles.timelineReading}>🔵 K {reading.potassium.toFixed(0)}</Text>
+                                                    <Text style={styles.timelineReading}>🟡 P {reading.phosphorus.toFixed(0)}</Text>
                                                 </View>
                                             </View>
                                         ))}
@@ -923,12 +1160,14 @@ export default function Dashboard() {
                 <TouchableOpacity onPress={() => router.push("/dashboard")}>
                     <Ionicons name="cloud" size={28} color="white" />
                 </TouchableOpacity>
-                <TouchableOpacity>
-                    <Ionicons name="menu" size={28} color="white" />
-                </TouchableOpacity>
+                
                 <TouchableOpacity onPress={() => router.push("/sensor")}>
                     <Ionicons name="analytics-outline" size={28} color="white" />
                 </TouchableOpacity>
+
+                <TouchableOpacity onPress={() => router.push("/analysis")}>
+                        <Ionicons name="stats-chart-outline" size={28} color="#fff" />
+                      </TouchableOpacity>
             </View>
         </View>
     );
@@ -1029,9 +1268,9 @@ const styles = StyleSheet.create({
     },
 
     outerCircle: {
-        width: 60,
-        height: 60,
-        borderRadius: 30,
+        width: 70, // Increased from 60
+        height: 70, // Increased from 60
+        borderRadius: 35, // Increased from 30
         borderWidth: 8,
         justifyContent: "center",
         alignItems: "center",
@@ -1039,9 +1278,10 @@ const styles = StyleSheet.create({
     },
 
     circleText: {
-        fontSize: 12,
+        fontSize: 16, // Increased from 12
         fontWeight: "bold",
         color: "white",
+        textAlign: "center",
     },
 
     textGroup: {
@@ -1050,20 +1290,23 @@ const styles = StyleSheet.create({
 
     conditionLabel: {
         fontWeight: "bold",
-        fontSize: 10,
+        fontSize: 14, // Increased from 10
         color: "white",
         marginRight: 4,
     },
 
     conditionSub: {
-        fontSize: 10,
+        fontSize: 16, // Increased from 10
         color: "white",
+        fontWeight: "600", // Added for better readability
+        marginBottom: 2,
     },
 
     conditionRange: {
-        fontSize: 8,
+        fontSize: 12, // Increased from 8
         color: "#cccccc",
         fontStyle: "italic",
+        marginBottom: 6,
     },
 
     rightCondition: {
@@ -1078,30 +1321,31 @@ const styles = StyleSheet.create({
     },
 
     nutrientIcon: {
-        width: 40,
-        height: 40,
-        marginRight: 6,
+        width: 45, // Increased from 40
+        height: 45, // Increased from 40
+        marginRight: 8,
         resizeMode: "contain",
     },
 
     nutrientText: {
-        fontSize: 8,
+        fontSize: 12, // Increased from 8
         color: "white",
         fontWeight: "bold",
-        marginBottom: 6,
+        marginBottom: 8,
     },
 
     nutrientValue: {
         color: "white",
-        fontWeight: "normal",
-        fontSize: 8,
+        fontWeight: "bold", // Changed from normal to bold
+        fontSize: 18, // Increased from 8
+        marginBottom: 4,
     },
 
     nutrientRange: {
         color: "#cccccc",
-        fontSize: 6,
+        fontSize: 10, // Increased from 6
         fontStyle: "italic",
-        marginTop: 2,
+        marginTop: 4,
     },
 
     nutrientTextContainer: {

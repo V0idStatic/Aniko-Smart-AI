@@ -234,6 +234,7 @@ const Home: React.FC = () => {
         </div>
       </section>
 
+      {/* TESTIMONIAL SECTION */}
       <Testimonials />
 
       {/* WHY ANIKO SECTION */}

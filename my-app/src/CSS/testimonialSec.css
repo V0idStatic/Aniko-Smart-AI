@@ -1,0 +1,128 @@
+:root {
+  --primary-green: #1D492C;
+  --accent-green: #84cc16;
+  --pastel-green: #BDE08A;
+  --light-green: #f0fdf4;
+  --dark-green: #143820;
+  --dark-gray: #374151;
+  --light-gray: #f9fafb;
+  --white: #ffffff;
+  --bg-color: #cfc4b2ff;
+  --primary-brown: #8A6440;
+  --dark-brown: #4D2D18;
+  --gradient-primary: linear-gradient(135deg, var(--primary-green), var(--accent-green));
+  --gradient-secondary: linear-gradient(135deg, var(--primary-green), var(--pastel-green));
+}
+
+.testSection {
+    padding: 3rem 0;
+    background: #f8f9fa;
+    font-family: system-ui, sans-serif;
+    padding: 25px !important;
+    margin-top: 2rem;
+    margin-bottom: 2rem;
+    border-radius: 80px;
+    border-bottom-left-radius: 0px !important;
+    background: var(--gradient-secondary) !important;
+    border: 5px dashed var(--dark-green) !important;
+}
+
+.testSec-header {
+    text-align: center;
+    font-weight: 700;
+    font-size: 50px !important; 
+    color: var(--light-green) !important;
+    text-shadow: 0px 0px 10px var(--accent-green) !important;
+}
+
+.testSec-subheader {
+    text-align: center;
+    margin-bottom: 1rem;
+    font-size: 20px;
+    color: var(--pastel-green); 
+}
+
+.testSec-scroll {
+    display: flex;
+    gap: 1rem;
+    padding: 0 1rem;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -ms-overflow-style: none;  
+    scrollbar-width: none;     
+    touch-action: pan-y;       
+    cursor: grab;
+    display: flex;
+    flex-direction: row;
+    gap: 3rem; /* space between cards */
+}
+
+.testSec-scroll::-webkit-scrollbar { display: none; }
+
+.testSec-scroll.dragging {
+    cursor: grabbing;
+}
+
+.testSec-card {
+    flex: 0 0 calc(33.333% - 1rem); 
+    min-width: 280px;
+    background: #fff;
+    border-radius: 1rem;
+    padding: 1.25rem;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+    text-align: center;
+    scroll-snap-align: start;
+    user-select: none; 
+    background-color: var(--light-green) !important;
+    border-radius: 0 !important;
+    border-top-right-radius: 80px !important;
+    border: 2px solid var(--accent-green) !important;
+    overflow-y: hidden;
+    margin-bottom: 2rem;
+}
+
+.testSec-card {
+  position: relative;       /* makes the card a reference */
+  overflow: visible;        /* so the image can overflow */
+}
+
+.testSec-userProfile {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #2d6a4f;
+  position: absolute;
+  bottom: -45px;
+  right: -35px;
+  background:#fff;
+  z-index: 10;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+}
+
+.testSec-username {
+    margin: 0 0 0.25rem;
+    font-size: 1.05rem;
+}
+
+.testSec-email {
+    display: block;
+    color: #6c757d;
+    margin-bottom: 0.5rem;
+}
+    
+.testSec-text{
+    font-size: 0.95rem;
+    line-height: 1.4;
+    color: #333;
+    margin: 0;
+}
+
+/* =========== RESPONSIVENESS ============ */
+@media (max-width: 900px) {
+    .testimonial-card { flex: 0 0 calc(50% - 1rem); min-width: 240px; }
+}
+
+@media (max-width: 540px) {
+    .testimonial-card { flex: 0 0 calc(100% - 1rem); min-width: 220px; }
+}
