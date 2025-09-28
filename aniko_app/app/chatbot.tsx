@@ -32,7 +32,7 @@ export default function Chatbot() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: "Bearer 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", // 🔑 Replace with your actual OpenRouter API key
+          Authorization: "Bearer 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", // 🔑 Replace with your actual OpenRouter API key
         },
         body: JSON.stringify({
           model: "openai/gpt-3.5-turbo", // ✅ Stable model

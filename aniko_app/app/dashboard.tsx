@@ -8,13 +8,25 @@ import SearchBar from "../components/SearchBar";
 import StatusCard from "../components/StatusCard";
 import DiagnosisCard from "../components/DiagnosisCard";
 import WeatherHistory from "../components/WeatherHistory";
-import {StyleSheet,Text,View,TouchableOpacity,TextInput,ScrollView,Alert,Image, Modal,
+
+
+import {
+  StyleSheet,
+  Text,
+  View,
+  TouchableOpacity,
+  TextInput,
+  ScrollView,
+  Alert,
+  Image,
+  Modal,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 import { fetchWeatherApi } from "openmeteo";
 
+/* ===================== Types ===================== */
 interface User {
   id: string;
   username: string;
@@ -48,6 +60,8 @@ interface DayWeatherData {
   humidity: string;
   color: string;
 }
+
+// NEW: DB location type
 type DbLocation = {
   location_id: number;
   region_id: number;
@@ -115,26 +129,9 @@ export default function Dashboard() {
       return () => clearInterval(tick);
     }, []);
 
-  const getLastLoggedInUser = async () => {
-    try {
-      const { data, error } = await supabase
-        .from("users")
-        .select("*")
-        .order("last_login", { ascending: false })
-        .limit(1);
-
-      if (!error && data?.length > 0) setCurrentUser(data[0]);
-    } catch (error) {
-      console.error("Error getting last logged user:", error);
-    }
-  };
-
-  const getCurrentUser = async () => {
-    try {
-      const { data: { user }, error: authError } = await supabase.auth.getUser();
-      if (authError) return false;
-
-      if (user) {
+    /* ===================== Supabase helpers ===================== */
+    const getLastLoggedInUser = async () => {
+      try {
         const { data, error } = await supabase
           .from("users")
           .select("*")
@@ -1057,21 +1054,7 @@ export default function Dashboard() {
             </View>
 
             <WeatherHistory weeklyWeather={weeklyWeather} />
-          </ScrollView>
-          <FooterNavigation />
-        </View>
-
-        <Text style={styles.sectionTitle}>My Crops</Text>
-
-        <View style={styles.cropRow}>
-          <StatusCard status="GOOD" color="#FFD700" />
-          <DiagnosisCard />
-        </View>
-
-      <WeatherHistory weeklyWeather={weeklyWeather} />
-
-
-        <View style={styles.chatbotCard}>
+              <View style={styles.chatbotCard}>
   <TouchableOpacity
     style={styles.chatbotInner}
     onPress={() => router.push("/chatbot")} // 👈 route to chatbot.tsx
@@ -1081,171 +1064,160 @@ export default function Dashboard() {
     <Text style={styles.chatbotSubtitle}>Ask questions or get help</Text>
   </TouchableOpacity>
 </View>
-      </ScrollView>
-      <FooterNavigation />
-    </View>
-  );
-}
-
-/* ===================== Enhanced Styles ===================== */
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#e7dbc8" },
-
-  headerGradientLayer: { position:'absolute', left:0, right:0, top:0, height:220, zIndex:0, borderBottomLeftRadius:20, borderBottomRightRadius:20 },
-  headerContent: { paddingTop:50, paddingBottom:60, paddingHorizontal:20, zIndex:1 },
-  headerTop: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center"
-  },
-  greeting: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "white"
-  },
-  headerIcons: {
-    flexDirection: "row",
-    alignItems: "center"
-  },
-  searchContainer: {
-    flexDirection: "row",
-    backgroundColor: "white",
-    borderRadius: 12,
-    marginTop: 10,
-    paddingHorizontal: 10,
-    alignItems: "center",
-    height: 40,
-  },
-  searchInput: { marginLeft: 8, flex: 1, color: "black" },
-
-  weatherCardInline: { backgroundColor: '#1c4722', borderRadius: 20, padding: 15, shadowColor:'#000', shadowOpacity:0.2, shadowRadius:8, elevation:5, marginTop:-20 },
-  weatherHeaderRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 },
-  weatherCity: { color: 'white', fontSize: 18, fontWeight: 'bold' },
-  weatherTemp: { color: 'white', fontSize: 34, fontWeight: 'bold', marginTop: 2 },
-  weatherRightColumn: { alignItems: 'flex-end', justifyContent: 'flex-start' },
-  weatherCondition: { color: 'white', fontSize: 14, fontWeight: '600' },
-  weatherHighLow: { color: 'white', fontSize: 12, opacity: 0.85, marginTop: 2 },
-  weatherHourCard: { width: 55, backgroundColor: 'rgba(255,255,255,0.12)', borderRadius: 12, paddingVertical: 8, paddingHorizontal: 6, alignItems: 'center', marginRight: 8 },
-  weatherHour: { color: 'white', fontSize: 11, marginBottom: 4 },
-  weatherHourTemp: { color: 'white', fontSize: 13, fontWeight: 'bold', marginTop: 2 },
-
-  // Active/current hour emphasis (lighter card)
-  weatherHourCardActive: {
-    backgroundColor: 'rgba(255,255,255,0.95)',
-    borderWidth: 1,
-    borderColor: '#FFD54F',
-    shadowColor: '#000',
-    shadowOpacity: 0.25,
-    shadowRadius: 8,
-    elevation: 6,
-  },
-  weatherHourActive: { color: '#1c4722', fontSize: 11, fontWeight: '700' },
-  weatherHourTempActive: { color: '#1c4722' },
-  changeLocationBtn: { flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.15)', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 14, marginTop: 6, alignSelf: 'flex-start' },
-  changeLocationText: { color: '#fff', fontSize: 11, marginLeft: 4, fontWeight: '600' },
-  locationModalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', padding: 16 },
-  locationModalContainer: { backgroundColor: '#fff', borderRadius: 12, padding: 16, maxHeight: '80%' },
-  locationModalTitle: { fontSize: 16, fontWeight: '600', marginBottom: 8, color: '#2e4d2f' },
-  locationList: { borderTopWidth: 1, borderColor: '#eee', marginTop: 4 },
-  locationItem: { flexDirection: 'row', alignItems: 'center', paddingVertical: 10, borderBottomWidth: 1, borderColor: '#f1f1f1' },
-  locationItemText: { flex: 1, fontSize: 14, color: '#1c4722', marginLeft: 8 },
-  locationItemCoords: { fontSize: 11, color: '#555' },
-  closeModalBtn: { marginTop: 12, backgroundColor: '#4d7f39', paddingVertical: 10, borderRadius: 8, alignItems: 'center' },
-  closeModalText: { color: '#fff', fontWeight: '600' },
-  provinceChip: { paddingHorizontal: 12, paddingVertical: 6, backgroundColor: '#f0f4f0', borderRadius: 16, marginRight: 8 },
-  provinceChipActive: { backgroundColor: '#4d7f39' },
-  provinceChipText: { fontSize: 12, color: '#2e4d2f' },
-  provinceChipTextActive: { color: '#fff' },
-  inlinePickerBox: { backgroundColor: 'rgba(255,255,255,0.12)', padding: 10, borderRadius: 12, marginTop: 10 },
-  inlinePickerLabel: { color: 'white', fontSize: 12, fontWeight: '600', marginBottom: 4 },
-  inlineProvinceRow: { maxHeight: 40 },
-  inlineProvinceChip: { paddingHorizontal: 10, paddingVertical: 6, backgroundColor: 'rgba(255,255,255,0.15)', borderRadius: 16, marginRight: 8 },
-  inlineProvinceChipActive: { backgroundColor: 'white' },
-  inlineProvinceChipText: { color: 'white', fontSize: 12, fontWeight: '600' },
-  inlineProvinceChipTextActive: { color: '#1c4722' },
-  inlineCityList: { marginTop: 6 },
-  inlineCityItem: { flexDirection: 'row', alignItems: 'center', paddingVertical: 6 },
-  inlineCityName: { color: 'white', fontSize: 12, flex: 1, marginLeft: 6 },
-  inlineCityCoords: { color: 'rgba(255,255,255,0.7)', fontSize: 10 },
-
-  scrollContent: {
-    paddingHorizontal: 15,
-    paddingTop: 20,
-    paddingBottom: 110,
-  },
-  sectionTitle: {
-    marginBottom: 10,
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#1c4722",
-  },
-
-  cropRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-  },
-
-  // New styles for enhanced location selection
-  selectionLabel: { 
-    fontSize: 14, 
-    fontWeight: '600', 
-    marginBottom: 6, 
-    color: '#2e4d2f' 
-  },
-  chipScrollContainer: { 
-    maxHeight: 48, 
-    marginBottom: 8 
-  },
-  selectionChip: { 
-    paddingHorizontal: 12, 
-    paddingVertical: 6, 
-    backgroundColor: '#f0f4f0', 
-    borderRadius: 16, 
-    marginRight: 8 
-  },
-  selectionChipActive: { 
-    backgroundColor: '#4d7f39' 
-  },
-  selectionChipText: { 
-    fontSize: 12, 
-    color: '#2e4d2f' 
-  },
-  selectionChipTextActive: { 
-    color: '#fff' 
-  },
-  inlineSelectionRow: { 
-    maxHeight: 40 
-  },
-  inlineSelectionChip: { 
-    paddingHorizontal: 10, 
-    paddingVertical: 6, 
-    backgroundColor: 'rgba(255,255,255,0.15)', 
-    borderRadius: 16, 
-    marginRight: 8 
-  },
-  inlineSelectionChipActive: { 
-    backgroundColor: 'white' 
-  },
-  inlineSelectionChipText: { 
-    color: 'white', 
-    fontSize: 12, 
-    fontWeight: '600' 
-  },
-  inlineSelectionChipTextActive: { 
-    color: '#1c4722' 
-  },
-
-  chatbotCard: {
-  backgroundColor: '#4d7f39',
-  borderRadius: 20,
-  marginTop: 20,
-  padding: 16,
-  shadowColor: '#000',
-  shadowOpacity: 0.2,
-  shadowRadius: 6,
-  elevation: 4,
-},
-chatbotInner: {
+          </ScrollView>
+          <FooterNavigation />
+        </View>
+      );
+    }
+    
+    /* ===================== Enhanced Styles ===================== */
+    const styles = StyleSheet.create({
+      container: { flex: 1, backgroundColor: "#e7dbc8" },
+  
+      headerGradientLayer: { position:'absolute', left:0, right:0, top:0, height:220, zIndex:0, borderBottomLeftRadius:20, borderBottomRightRadius:20 },
+      headerContent: { paddingTop:50, paddingBottom:60, paddingHorizontal:20, zIndex:1 },
+      headerTop: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center"
+      },
+      greeting: {
+        fontSize: 18,
+        fontWeight: "bold",
+        color: "white"
+      },
+      headerIcons: {
+        flexDirection: "row",
+        alignItems: "center"
+      },
+      searchContainer: {
+        flexDirection: "row",
+        backgroundColor: "white",
+        borderRadius: 12,
+        marginTop: 10,
+        paddingHorizontal: 10,
+        alignItems: "center",
+        height: 40,
+      },
+      searchInput: { marginLeft: 8, flex: 1, color: "black" },
+  
+      weatherCardInline: { backgroundColor: '#1c4722', borderRadius: 20, padding: 15, shadowColor:'#000', shadowOpacity:0.2, shadowRadius:8, elevation:5, marginTop:-20 },
+      weatherHeaderRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 },
+      weatherCity: { color: 'white', fontSize: 18, fontWeight: 'bold' },
+      weatherTemp: { color: 'white', fontSize: 34, fontWeight: 'bold', marginTop: 2 },
+      weatherRightColumn: { alignItems: 'flex-end', justifyContent: 'flex-start' },
+      weatherCondition: { color: 'white', fontSize: 14, fontWeight: '600' },
+      weatherHighLow: { color: 'white', fontSize: 12, opacity: 0.85, marginTop: 2 },
+      weatherHourCard: { width: 55, backgroundColor: 'rgba(255,255,255,0.12)', borderRadius: 12, paddingVertical: 8, paddingHorizontal: 6, alignItems: 'center', marginRight: 8 },
+      weatherHour: { color: 'white', fontSize: 11, marginBottom: 4 },
+      weatherHourTemp: { color: 'white', fontSize: 13, fontWeight: 'bold', marginTop: 2 },
+  
+      // Active/current hour emphasis (lighter card)
+      weatherHourCardActive: {
+        backgroundColor: 'rgba(255,255,255,0.95)',
+        borderWidth: 1,
+        borderColor: '#FFD54F',
+        shadowColor: '#000',
+        shadowOpacity: 0.25,
+        shadowRadius: 8,
+        elevation: 6,
+      },
+      weatherHourActive: { color: '#1c4722', fontSize: 11, fontWeight: '700' },
+      weatherHourTempActive: { color: '#1c4722' },
+      changeLocationBtn: { flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.15)', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 14, marginTop: 6, alignSelf: 'flex-start' },
+      changeLocationText: { color: '#fff', fontSize: 11, marginLeft: 4, fontWeight: '600' },
+      locationModalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', padding: 16 },
+      locationModalContainer: { backgroundColor: '#fff', borderRadius: 12, padding: 16, maxHeight: '80%' },
+      locationModalTitle: { fontSize: 16, fontWeight: '600', marginBottom: 8, color: '#2e4d2f' },
+      locationList: { borderTopWidth: 1, borderColor: '#eee', marginTop: 4 },
+      locationItem: { flexDirection: 'row', alignItems: 'center', paddingVertical: 10, borderBottomWidth: 1, borderColor: '#f1f1f1' },
+      locationItemText: { flex: 1, fontSize: 14, color: '#1c4722', marginLeft: 8 },
+      locationItemCoords: { fontSize: 11, color: '#555' },
+      closeModalBtn: { marginTop: 12, backgroundColor: '#4d7f39', paddingVertical: 10, borderRadius: 8, alignItems: 'center' },
+      closeModalText: { color: '#fff', fontWeight: '600' },
+      provinceChip: { paddingHorizontal: 12, paddingVertical: 6, backgroundColor: '#f0f4f0', borderRadius: 16, marginRight: 8 },
+      provinceChipActive: { backgroundColor: '#4d7f39' },
+      provinceChipText: { fontSize: 12, color: '#2e4d2f' },
+      provinceChipTextActive: { color: '#fff' },
+      inlinePickerBox: { backgroundColor: 'rgba(255,255,255,0.12)', padding: 10, borderRadius: 12, marginTop: 10 },
+      inlinePickerLabel: { color: 'white', fontSize: 12, fontWeight: '600', marginBottom: 4 },
+      inlineProvinceRow: { maxHeight: 40 },
+      inlineProvinceChip: { paddingHorizontal: 10, paddingVertical: 6, backgroundColor: 'rgba(255,255,255,0.15)', borderRadius: 16, marginRight: 8 },
+      inlineProvinceChipActive: { backgroundColor: 'white' },
+      inlineProvinceChipText: { color: 'white', fontSize: 12, fontWeight: '600' },
+      inlineProvinceChipTextActive: { color: '#1c4722' },
+      inlineCityList: { marginTop: 6 },
+      inlineCityItem: { flexDirection: 'row', alignItems: 'center', paddingVertical: 6 },
+      inlineCityName: { color: 'white', fontSize: 12, flex: 1, marginLeft: 6 },
+      inlineCityCoords: { color: 'rgba(255,255,255,0.7)', fontSize: 10 },
+  
+      scrollContent: {
+        paddingHorizontal: 15,
+        paddingTop: 20,
+        paddingBottom: 110,
+      },
+      sectionTitle: {
+        marginBottom: 10,
+        fontSize: 18,
+        fontWeight: "bold",
+        color: "#1c4722",
+      },
+  
+      cropRow: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+      },
+  
+      // New styles for enhanced location selection
+      selectionLabel: { 
+        fontSize: 14, 
+        fontWeight: '600', 
+        marginBottom: 6, 
+        color: '#2e4d2f' 
+      },
+      chipScrollContainer: { 
+        maxHeight: 48, 
+        marginBottom: 8 
+      },
+      selectionChip: { 
+        paddingHorizontal: 12, 
+        paddingVertical: 6, 
+        backgroundColor: '#f0f4f0', 
+        borderRadius: 16, 
+        marginRight: 8 
+      },
+      selectionChipActive: { 
+        backgroundColor: '#4d7f39' 
+      },
+      selectionChipText: { 
+        fontSize: 12, 
+        color: '#2e4d2f' 
+      },
+      selectionChipTextActive: { 
+        color: '#fff' 
+      },
+      inlineSelectionRow: { 
+        maxHeight: 40 
+      },
+      inlineSelectionChip: { 
+        paddingHorizontal: 10, 
+        paddingVertical: 6, 
+        backgroundColor: 'rgba(255,255,255,0.15)', 
+        borderRadius: 16, 
+        marginRight: 8 
+      },
+      inlineSelectionChipActive: { 
+        backgroundColor: 'white' 
+      },
+      inlineSelectionChipText: { 
+        color: 'white', 
+        fontSize: 12, 
+        fontWeight: '600' 
+      },
+      inlineSelectionChipTextActive: { 
+        color: '#1c4722' 
+      },
+      chatbotInner: {
   flexDirection: 'row',
   alignItems: 'center',
 },
@@ -1260,5 +1232,16 @@ chatbotSubtitle: {
   fontSize: 12,
   marginLeft: 12,
 },
-});
+chatbotCard: {
+  backgroundColor: 'rgba(0,0,0,0.6)', // semi-transparent dark bg
+  padding: 12,                        // space inside
+  marginLeft: 12,
+  marginVertical: 9,                  // spacing between cards
+  borderRadius: 8,                    // rounded corners
+  borderWidth: 1,
+  borderColor: 'rgba(255,255,255,0.2)',
+  width: '92%',                       // take 80% width of parent
+ 
+},
+    });
 
