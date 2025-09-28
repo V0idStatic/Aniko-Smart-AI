@@ -1,237 +1,346 @@
-        :root {
-            --primary-green: #1D492C;
-            --accent-green: #84cc16;
-            --pastel-green: #BDE08A;
-            --light-green: #f0fdf4;
-            --dark-green: #143820;
-            --dark-gray: #374151;
-            --light-gray: #f9fafb;
-            --white: #ffffff;
-            --bg-color: #cfc4b2ff;
-            --primary-brown: #8A6440;
-            --dark-brown: #4D2D18;
-            --gradient-primary: linear-gradient(135deg, var(--primary-green), var(--accent-green));
-            --gradient-secondary: linear-gradient(135deg, var(--primary-green), var(--pastel-green));
-        }
+:root {
+    --primary-green: #1D492C;
+    --accent-green: #84cc16;
+    --pastel-green: #BDE08A;
+    --light-green: #f0fdf4;
+    --dark-green: #143820;
+    --dark-gray: #374151;
+    --light-gray: #f9fafb;
+    --white: #ffffff;
+    --bg-color: #cfc4b2ff;
+    --primary-brown: #8A6440;
+    --dark-brown: #4D2D18;
+    --gradient-primary: linear-gradient(135deg, var(--primary-green), var(--accent-green));
+    --gradient-secondary: linear-gradient(135deg, var(--primary-green), var(--pastel-green));
+    --gradient-secondary-light: linear-gradient(135deg, var(--pastel-green), var(--light-green));
+    --gradient-brown: linear-gradient(135deg, var(--primary-brown), var(--dark-brown));
+    --gradient-brown-light: linear-gradient(135deg, var(--primary-brown), #c9b29e);
 
-        body {
-            background: var(--bg-color) !important;
-            margin: 0 !important;
-            font-family: 'Inter', system-ui, sans-serif;
-            min-height: 100vh !important;
-        }
+}
 
-        .testimonial-container {
-            max-width: 1100px !important;
-            margin: 0 auto !important;
-            padding: 20px !important;
-        }
+body {
+    background: var(--bg-color) !important;
+    margin: 0 !important;
+    font-family: 'Inter', system-ui, sans-serif;
+    min-height: 100vh !important;
+}
 
-        .testimonial-card {
-            background: var(--gradient-secondary) !important;
-            padding: 60px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08) !important;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            border-top-right-radius: 150px !important;
-            border-bottom-left-radius: 150px !important;
-            width: 72%;
-            justify-content: center; 
-            align-items: center;
-            margin: 0 auto !important;
-            margin-top: 5rem !important;
-            margin-bottom: 7rem !important;
-            border: none !important;
-        }
+.testimonialCol-container {
+    margin: 0;
+    padding: 0;
+}
 
-        .testimonial-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 32px 80px rgba(0, 0, 0, 0.12);
-        }
+.testimonialCol-row {
+    min-height: 100vh;
+}
 
-        .content-section {
-            padding-right: 40px;
-        }
+/* ======= LEFT SIDE =========== */
+.testDisplay-cta-card {
+    padding: 40px;
+    border-radius: 20px !important;
+    background-color: var(--primary-brown) !important; 
+    background: var(--gradient-brown);
+}
 
-        .testimonial-card h2 {
-            font-weight: 700;
-            font-size: 2.5rem;
-            color: var(--light-green) !important;
-            margin-bottom: 20px;
-            position: relative;
-            text-shadow: 0px 0px 5px var(--accent-green);
-        }
+.testDisplay-ctaHeader {
+    font-weight: bold; 
+    color: var(--pastel-green) !important;
+}
 
-        .subtitle {
-            font-size: 1.125rem;
-            color: var(--light-green);
-            line-height: 1.7;
-            margin-bottom: 30px;
-        }
+.testDisplay-ctaHeader-wrapper {
+  display: flex !important;
+  align-items: center;   
+  gap: 10px;            
+}
 
-        .feature-list {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
+.testDisplay-ctaHeader {
+  font-weight: bold; 
+  color: var(--pastel-green) !important;
+  margin: 0;            
+}
 
-        .feature-list li {
-            display: flex;
-            align-items: center;
-            margin-bottom: 12px;
-            color: var(--light-green);
-            font-size: 0.95rem;
-        }
+.testDisplay-headerLogo {
+  width: 40px !important;
+  height: auto;          
+  display: block;
+}
 
-        .feature-list li i {
-            color: var(--pastel-green);
-            margin-right: 12px;
-            font-size: 1rem;
-        }
+.testDisplay-ctaSubheader {
+    color: var(--bg-color) !important;
+    margin-bottom: 2rem !important;
+}
 
-        .form-section {
-            background: var(--light-green); 
-            border-top-right-radius: 100px !important;
-            border-bottom-left-radius: 100px !important;
-            padding: 40px;
-            color: var(--primary-green) !important;
-            box-shadow: 0px 0px 20px 5px var(--pastel-green);
-        }
+.testDisplay-col {
+    background: var(--bg-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+}
 
-        .form-section label {
-            color: var(--primary-green);
-            font-weight: bold !important;
-        }
+.testSubmit-col {
+    background: var(--gradient-secondary) !important;
+    min-height: 100%; /* stretch to row */
+    margin: 0 !important;
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+}
 
-        .form-label {
-            font-weight: 600;
-            color: var(--c7);
-            margin-bottom: 12px;
-            display: block;
-            font-size: 0.95rem;
-        }
+.testDisplay-ctaBtn {
+    background-color: var(--pastel-green) !important;
+    border: none !important;
+    border-radius: 20px !important;
+    margin-top: 2rem;
+    padding: 10px;
+    transition: background-color 0.3s ease;
+}
 
-        .testimonial-card textarea {
-            width: 100%;
-            border-radius: 16px;
-            padding: 20px;
-            font-size: 1rem;
-            resize: vertical;
-            transition: all 0.3s ease;
-            color: var(--primary-green);
-            font-family: inherit;
-            line-height: 1.6;
-            min-height: 180px;
-        }
+.testDisplay-ctaBtn a {
+    color: var(--dark-brown) !important;
+    text-decoration: none !important;
+    font-weight: 500 !important;
+    transition: color 0.3s ease;
+}
 
-        .testimonial-card textarea:focus {
-            outline: none;
-            border-color: var(--c4);
-            box-shadow: 0 0 0 4px rgba(77, 45, 24, 0.2);
-            background: rgba(207, 196, 178, 0.541);
-            color: var(--primary-brown) !important;
-        }
+.testDisplay-ctaBtn:hover {
+    background-color: var(--primary-green) !important;
+}
 
-        textarea ::placeholder {
-            color: var(--primary-brown) !important;
-        }
+.testDisplay-ctaBtn:hover a {
+    color: var(--light-green) !important;
+}
 
-        .testimonial-card textarea::placeholder {
-            color: #9ca3af;
-            font-style: italic;
-        }
 
-        .submit-btn {
-            background: var(--primary-green) !important; 
-            color: var(--light-green) !important;
-            font-weight: 600 !important;
-            border: none !important;
-            padding: 10px 40px !important;
-            border-radius: 20px !important;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-size: 1rem;
-            display: inline-flex !important;
-            align-items: center !important;
-            gap: 8px;
-            width: 100% !important;
-        }
+/* Headings */
+.testSubmit-col h2 {
+    font-weight: 700;
+    font-size: 2.5rem;
+    color: var(--light-green) !important;
+    margin-bottom: 10px;
+    text-shadow: 0px 0px 5px var(--accent-green);
+    margin-top: 5rem !important;
+}
 
-        .submit-btn:hover {
-            background: var(--dark-green);
-            transform: translateY(-2px);
-        }
+.subtitle {
+    font-size: 1.125rem;
+    color: var(--light-green);
+    line-height: 1.7;
+    margin-bottom: 30px;
+}
 
-        .character-count {
-            font-size: 0.875rem;
-            color: var(--primary-green);
-            text-align: right;
-            margin-top: 8px;
-        }
+/* Feature list */
+.feature-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
 
-        @media (max-width: 992px) {
-            .testimonial-card {
-                padding: 40px;
-            }
-            
-            .content-section {
-                padding-right: 0;
-                margin-bottom: 40px;
-            }
-            
-            .testimonial-card h2 {
-                font-size: 2.25rem;
-            }
-        }
+.feature-list li {
+    display: flex;
+    align-items: center;
+    margin-bottom: 12px;
+    color: var(--bg-color);
+    font-size: 0.95rem;
+}
 
-        @media (max-width: 768px) {
-            .testimonial-card {
-                padding: 30px 20px;
-                margin: 20px;
-            }
-            
-            .form-section {
-                padding: 30px 20px;
-            }
-            
-            .testimonial-card h2 {
-                font-size: 2rem;
-            }
-        }
+.feature-list li i {
+    color: var(--bg-color);
+    margin-right: 12px;
+    font-size: 1rem;
+}
 
-        .form-section {
-            animation: slideInUp 0.6s ease-out;
-        }
+/* Form Section */
+.form-section {
+    background: var(--light-green);
+    border-top-right-radius: 100px !important;
+    border-bottom-left-radius: 100px !important;
+    padding: 40px;
+    color: var(--primary-green) !important;
+    box-shadow: 0px 0px 20px 5px var(--pastel-green);
+    animation: slideInUp 0.6s ease-out;
+}
 
-        @keyframes slideInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        /* MODALLL DESIGNNN */
-        .submit-modal-header h5 {
-            padding: 10px !important;
-            background-color: var(--primary-brown) !important;
-            color: var(--light-green) !important;
-        }
+.form-section label {
+    color: var(--primary-green);
+    font-weight: bold !important;
+}
+.bi-chat-dots {
+    margin-right: 7px !important;
+}
 
-        .submit-modal {
-            border-radius: 20px !important; 
-            border: 5px solid var(--primary-green) !important;
-        }
+/* Textarea */
+.testSubmit-col textarea {
+    width: 100%;
+    border-radius: 16px;
+    padding: 20px;
+    font-size: 1rem;
+    resize: vertical;
+    transition: all 0.3s ease;
+    color: var(--primary-green);
+    font-family: inherit;
+    line-height: 1.6;
+    min-height: 180px;
+}
 
-        .cancel-btn:hover {
-            background-color: var(--primary-brown) !important;
-            color: white !important;
-        }
+.testimonial-card textarea:focus {
+    outline: none;
+    border-color: var(--c4);
+    box-shadow: 0 0 0 4px rgba(77, 45, 24, 0.2);
+    background: rgba(207, 196, 178, 0.541);
+    color: var(--primary-brown) !important;
+}
 
-        .confirm-btn:hover {
-            background-color: var(--primary-green) !important;
-            color: white !important;
-        }
+.testimonial-card textarea::placeholder {
+    color: #9ca3af;
+    font-style: italic;
+}
 
+/* Submit Button */
+.submit-btn {
+    background: var(--primary-green) !important;
+    color: var(--light-green) !important;
+    font-weight: 600 !important;
+    border: none !important;
+    padding: 10px 40px !important;
+    border-radius: 20px !important;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 1rem;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px;
+    width: 100% !important;
+    text-align: center !important;
+    margin-bottom: 1rem;
+}
+
+.submit-btn:hover {
+    background-color: var(--dark-green) !important;
+    transform: translateY(-2px);
+}
+
+.character-count {
+    font-size: 0.875rem;
+    color: var(--primary-green);
+    text-align: right;
+    margin-top: 8px;
+}
+
+/* Animations */
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+
+/* ========== MODAL STYLEEE =========== */
+.submit-mod-dialog {
+  max-width: 500px; 
+}
+
+.submit-mod-content {
+  border-radius: 16px;
+  border: 4px dashed var(--primary-brown) !important;
+  background: var(--gradient-secondary-light); 
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+}
+
+.submit-mod-header {
+  border-bottom: none; 
+  background: var(--primary-green);
+  color: var(--white);
+  border-top-left-radius: 16px;
+  border-top-right-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.submit-mod-title {
+  font-weight: bold;
+  font-size: 1.25rem;
+  margin: 0;
+}
+
+.submit-mod-header .btn-close {
+  filter: invert(1);
+  opacity: 0.8;
+}
+.submit-mod-header .btn-close:hover {
+  opacity: 1;
+}
+
+.submit-mod-content .modal-body {
+  font-size: 0.95rem;
+  color: var(--primary-green);
+  padding: 20px;
+}
+
+/* === FOOTER BUTTONS === */
+.submit-mod-content .modal-footer {
+    border-top: none;
+    gap: 12px;
+}
+
+/* Cancel button */
+.testSub-modalFooter-cancelBtn {
+    background: var(--gradient-brown-light);
+    border: none;
+    border-radius: 20px;
+    padding: 8px 16px;
+    transition: 
+        background 0.4s cubic-bezier(0.4, 0, 0.2, 1), 
+        color 0.2s,
+        transform 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+        box-shadow 0.2s;
+    animation: btnPopIn 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.testSub-modalFooter-cancelBtn:hover {
+    background: var(--gradient-brown);
+    transform: translateY(-2px) scale(1.04);
+    box-shadow: 0 4px 16px rgba(77, 45, 24, 0.15);
+}
+
+/* Confirm button */
+.testSub-modalFooter-confirmBtn {
+    background: var(--gradient-secondary);
+    border: none;
+    border-radius: 20px;
+    padding: 8px 16px;
+    font-weight: bold;
+    transition: 
+        background 0.4s cubic-bezier(0.4, 0, 0.2, 1), 
+        color 0.2s,
+        transform 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+        box-shadow 0.2s;
+    animation: btnPopIn 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.testSub-modalFooter-confirmBtn:hover {
+    background: var(--gradient-primary); 
+    transform: translateY(-2px) scale(1.04);
+    box-shadow: 0 4px 16px rgba(29, 73, 44, 0.15);
+}
+
+/* Button pop-in animation */
+@keyframes btnPopIn {
+    0% {
+        opacity: 0;
+        transform: scale(0.85);
+    }
+    80% {
+        opacity: 1;
+        transform: scale(1.05);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
