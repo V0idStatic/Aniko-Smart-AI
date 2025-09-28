@@ -3,7 +3,6 @@ import supabase from "../CONFIG/supabaseClient";
 import AdminHeader from "../INCLUDE/admin-sidebar";
 import "../CSS/admin_cms.css";
 
-// ----- Types -----
 interface ImageRow {
   id: number;
   uploaded_at: string;
@@ -32,10 +31,8 @@ const AdminCMS: React.FC = () => {
   const [memberName, setMemberName] = useState("");
   const [memberRole, setMemberRole] = useState("");
 
-  // 👉 ref to reset file input after successful upload
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-  // Modal states
   const [showModal, setShowModal] = useState(false);
   const [modalTitle, setModalTitle] = useState("");
   const [modalMessage, setModalMessage] = useState("");
@@ -45,7 +42,6 @@ const AdminCMS: React.FC = () => {
 const [activeSection, setActiveSection] = useState<"why" | "benefits" | "hero" | "team">("why");
 
 
-  // --- helper: robust filename extractor from URL ---
   const extractStorageFileName = (url: string | null | undefined) => {
     if (!url) return "";
     try {
@@ -87,7 +83,6 @@ const [activeSection, setActiveSection] = useState<"why" | "benefits" | "hero" |
     );
 
     return () => subs.forEach((s) => supabase.removeChannel(s));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const uploadToTable = async (file: File, table: string) => {
@@ -202,7 +197,6 @@ const [activeSection, setActiveSection] = useState<"why" | "benefits" | "hero" |
           ]);
           if (dbErr) throw dbErr;
 
-          // ✅ Clear all inputs and file input UI
           setMemberName("");
           setMemberRole("");
           setMemberFile(null);
