@@ -1,0 +1,110 @@
+:root {
+    --primary-green: #1D492C;
+    --accent-green: #84cc16;
+    --pastel-green: #BDE08A;
+    --light-green: #f0fdf4;
+    --dark-green: #143820;
+    --dark-gray: #374151;
+    --light-gray: #f9fafb;
+    --white: #ffffff;
+    --bg-color: #cfc4b2ff;
+    --primary-brown: #8A6440;
+    --dark-brown: #4D2D18;
+    --gradient-primary: linear-gradient(135deg, var(--primary-green), var(--accent-green));
+    --gradient-secondary: linear-gradient(135deg, var(--primary-green), var(--pastel-green));
+    --gradient-secondary-light: linear-gradient(135deg, var(--pastel-green), var(--light-green));
+    --gradient-brown: linear-gradient(135deg, var(--primary-brown), var(--dark-brown));
+    --gradient-brown-light: linear-gradient(135deg, var(--primary-brown), #c9b29e);
+}
+
+.adminHome-header {
+    margin-top: 3rem;
+    text-align: center;
+    font-weight: bold;
+    color: var(--dark-brown);
+}
+
+.adminHome-subheader {
+    margin-bottom: 2rem !important;
+    font-size: 20px;
+    color: var(--primary-brown);
+    text-align: center;
+}
+
+.adminHome-anaCard {
+    background: var(--gradient-secondary);
+    padding: 15px;
+    border-radius: 0;
+    border-top-right-radius: 50px !important;
+    border-bottom-left-radius: 50px !important;
+    border: 2px solid var(--dark-green) !important;
+}
+
+.adminHome-anaCard h5 {
+    color: var(--pastel-green);
+}
+
+.adminHome-anaCard h2 {
+    color: var(--light-green);
+    font-weight: bold; 
+    text-shadow: 0px 0px 5px var(--accent-green);
+    font-size: 40px !important;
+}
+
+.adminHome-regCard {
+    background-color: var(--light-green) !important;
+    border: 2px solid var(--dark-green) !important;
+    border-radius: 20px !important;
+}
+
+.adminHome-regCard h5 {
+    color: var(--primary-green) !important;
+    font-weight: bold;
+    margin-bottom: 1rem;
+}
+
+.adminHome-accCard {
+    background: var(--gradient-secondary-light);
+    border-radius: 20px;
+    border: 2px solid var(--dark-green);
+}
+
+.adminHome-accCard h5 {
+    font-weight: bold;
+    color: var(--primary-green) !important;
+}
+
+/* ========= TABLESSS ====== */
+.adminHome-tableCard {
+    background: var(--gradient-secondary-light) !important;
+    border: 2px solid var(--dark-green);
+    border-radius: 20px;
+    padding: 15px !important;
+}
+
+.adminHome-tableCard h5 {
+    color: var(--primary-green) !important;
+    font-weight: bold !important;
+}
+
+.adminHome-tableCard button {
+    background: var(--gradient-secondary);
+    padding: 10px;
+    width: 10%;
+    border-radius: 20px;
+    color: var(--light-green);
+    font-weight: 500;
+    border: none !important;
+    transition: all 0.3s ease-in-out;
+    cursor: pointer;
+}
+
+.adminHome-tableCard button:hover {
+    background: var(--gradient-primary);
+    transform: scale(1.05); 
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15); 
+}
+
+.adminHome-table th {
+    background-color: var(--primary-green) !important;
+}

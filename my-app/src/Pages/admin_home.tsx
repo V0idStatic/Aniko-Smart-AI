@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import AdminHeader from "../INCLUDE/admin-sidebar";
 import supabase from "../CONFIG/supabaseClient";
+import "../CSS/admin_home.css";
 import {
   LineChart,
   Line,
@@ -32,18 +33,16 @@ const AdminHome: React.FC = () => {
   // 🔴 Hard-coded admin count
   const adminCount = 3;
 
-  const COLORS = ["#4CAF50", "#2E7D32"]; // Users, Admins
+  const COLORS = ["#4CAF50", "#2E7D32"];
 
   const fetchDashboard = async () => {
     try {
-      // Users
       const { count: users, error: usersError } = await supabase
         .from("users")
         .select("*", { count: "exact", head: true });
       if (usersError) throw usersError;
       setUserCount(users || 0);
 
-      // Approved testimonials (count only)
       const { count: testimonials, error: testimonialsError } = await supabase
         .from("testimonials")
         .select("*", { count: "exact", head: true })
@@ -51,7 +50,6 @@ const AdminHome: React.FC = () => {
       if (testimonialsError) throw testimonialsError;
       setTestimonialCount(testimonials || 0);
 
-      // Registrations – past 7 days
       const sevenDaysAgo = new Date();
       sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 6);
       const { data, error } = await supabase
@@ -89,7 +87,6 @@ const AdminHome: React.FC = () => {
     }
   };
 
-  // ✅ Contact Messages – latest 5
   const fetchContactMessages = async () => {
     try {
       const { data, error } = await supabase
@@ -104,7 +101,6 @@ const AdminHome: React.FC = () => {
     }
   };
 
-  // ✅ Pending Testimonials – only user_id, testimonial, status
   const fetchPendingTestimonials = async () => {
     try {
       const { data, error } = await supabase
@@ -130,12 +126,13 @@ const AdminHome: React.FC = () => {
     <div>
       <AdminHeader />
       <div style={{ marginLeft: "290px", padding: "20px" }}>
-        <h1>Welcome, Admin!</h1>
+        <h1 className="adminHome-header">Welcome, Admin!</h1>
+        <h6 className="adminHome-subheader">Steamline Your Operations</h6>
 
         {/* Dashboard Cards */}
         <div className="row mt-4">
           <div className="col-md-4 mb-3">
-            <div className="card shadow text-center">
+            <div className="card shadow text-center adminHome-anaCard">
               <div className="card-body">
                 <h5 className="card-title">Total Users</h5>
                 <h2>{userCount}</h2>
@@ -144,7 +141,7 @@ const AdminHome: React.FC = () => {
           </div>
 
           <div className="col-md-4 mb-3">
-            <div className="card shadow text-center">
+            <div className="card shadow text-center adminHome-anaCard">
               <div className="card-body">
                 <h5 className="card-title">Total Feedback</h5>
                 <h2>{testimonialCount}</h2>
@@ -153,7 +150,7 @@ const AdminHome: React.FC = () => {
           </div>
 
           <div className="col-md-4 mb-3">
-            <div className="card shadow text-center">
+            <div className="card shadow text-center adminHome-anaCard">
               <div className="card-body">
                 <h5 className="card-title">Downloads</h5>
                 <h2>Coming Soon</h2>
@@ -165,8 +162,11 @@ const AdminHome: React.FC = () => {
         {/* Graphs */}
         <div className="row mt-4">
           <div className="col-md-6 mb-3">
-            <div className="card p-3 shadow-sm">
-              <h5>Registrations (Past 7 Days)</h5>
+            <div className="card p-3 shadow-sm adminHome-regCard">
+              <h5>
+                <i className="bi bi-clipboard-data"></i>Registrations (Past 7
+                Days)
+              </h5>
               <ResponsiveContainer width="100%" height={300}>
                 <LineChart data={registrations}>
                   <CartesianGrid strokeDasharray="3 3" />
@@ -186,10 +186,23 @@ const AdminHome: React.FC = () => {
           </div>
 
           <div className="col-md-6 mb-3">
-            <div className="card p-3 shadow-sm">
-              <h5>Accounts Overview</h5>
+            <div className="card p-3 shadow-sm adminHome-accCard">
+              <h5>
+                <i className="bi bi-person-lines-fill"></i>Accounts Overview
+              </h5>
               <ResponsiveContainer width="100%" height={300}>
                 <PieChart>
+                  {/* Glow filter definition */}
+                  <defs>
+                    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+                      <feGaussianBlur stdDeviation="4" result="coloredBlur" />
+                      <feMerge>
+                        <feMergeNode in="coloredBlur" />
+                        <feMergeNode in="SourceGraphic" />
+                      </feMerge>
+                    </filter>
+                  </defs>
+
                   <Pie
                     data={[
                       { name: "Users", value: userCount },
@@ -203,7 +216,11 @@ const AdminHome: React.FC = () => {
                     label
                   >
                     {COLORS.map((color, index) => (
-                      <Cell key={index} fill={color} />
+                      <Cell
+                        key={index}
+                        fill={color}
+                        style={{ filter: "url(#glow)" }}
+                      />
                     ))}
                   </Pie>
                   <Tooltip />
@@ -217,9 +234,9 @@ const AdminHome: React.FC = () => {
         {/* 📬 Contact Messages Table */}
         <div className="row mt-5">
           <div className="col-12">
-            <div className="card p-3 shadow-sm">
+            <div className="card p-3 shadow-sm adminHome-tableCard">
               <div className="d-flex justify-content-between align-items-center mb-3">
-                <h5>Recent Contact Messages</h5>
+                <h5><i className="bi bi-inbox"></i>Recent Contact Messages</h5>
                 <button
                   className="btn btn-sm btn-primary"
                   onClick={() => navigate("/admin_contact")}
@@ -228,7 +245,7 @@ const AdminHome: React.FC = () => {
                 </button>
               </div>
               <div className="table-responsive">
-                <table className="table table-striped table-hover">
+                <table className="table table-striped table-hover adminHome-table">
                   <thead className="table-dark">
                     <tr>
                       <th>Email</th>
@@ -241,8 +258,12 @@ const AdminHome: React.FC = () => {
                       contactMessages.map((msg) => (
                         <tr key={msg.id}>
                           <td>{msg.email}</td>
-                          <td style={{ whiteSpace: "pre-wrap" }}>{msg.message}</td>
-                          <td>{new Date(msg.submitted_at).toLocaleString()}</td>
+                          <td style={{ whiteSpace: "pre-wrap" }}>
+                            {msg.message}
+                          </td>
+                          <td>
+                            {new Date(msg.submitted_at).toLocaleString()}
+                          </td>
                         </tr>
                       ))
                     ) : (
@@ -262,9 +283,9 @@ const AdminHome: React.FC = () => {
         {/* 🟠 Pending Testimonials Table */}
         <div className="row mt-5">
           <div className="col-12">
-            <div className="card p-3 shadow-sm">
+            <div className="card p-3 shadow-sm adminHome-tableCard">
               <div className="d-flex justify-content-between align-items-center mb-3">
-                <h5>Pending Testimonials</h5>
+                <h5><i className="bi bi-chat-dots"></i>Pending Testimonials</h5>
                 <button
                   className="btn btn-sm btn-primary"
                   onClick={() => navigate("/admin_testimonial")}
@@ -273,7 +294,7 @@ const AdminHome: React.FC = () => {
                 </button>
               </div>
               <div className="table-responsive">
-                <table className="table table-striped table-hover">
+                <table className="table table-striped table-hover adminHome-table">
                   <thead className="table-dark">
                     <tr>
                       <th>User ID</th>
@@ -286,7 +307,9 @@ const AdminHome: React.FC = () => {
                       pendingTestimonials.map((item) => (
                         <tr key={item.id}>
                           <td>{item.user_id}</td>
-                          <td style={{ whiteSpace: "pre-wrap" }}>{item.testimonial}</td>
+                          <td style={{ whiteSpace: "pre-wrap" }}>
+                            {item.testimonial}
+                          </td>
                           <td>{item.status}</td>
                         </tr>
                       ))
