@@ -88,9 +88,9 @@ const TestimonialSubmit: React.FC = () => {
                 better
               </li>
             </ul>
-            <button className="testDisplay-ctaBtn">
-              <Link to="/testimonialDisplay">View Testimonials</Link>
-            </button>
+              <Link to="/testimonialDisplay">
+                <button className="testDisplay-ctaBtn">View Testimonials </button>
+              </Link>
           </div>
         </div>
 
