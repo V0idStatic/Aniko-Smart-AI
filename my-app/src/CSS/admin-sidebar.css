@@ -12,6 +12,9 @@
     --dark-brown: #4D2D18;
     --gradient-primary: linear-gradient(135deg, var(--primary-green), var(--accent-green));
     --gradient-secondary: linear-gradient(135deg, var(--primary-green), var(--pastel-green));
+    --gradient-secondary-light: linear-gradient(135deg, var(--pastel-green), var(--light-green));
+    --gradient-brown: linear-gradient(135deg, var(--primary-brown), var(--dark-brown));
+    --gradient-brown-light: linear-gradient(135deg, var(--primary-brown), #c9b29e);
 }
 
 .admin-sidebar {
@@ -99,7 +102,7 @@
 
 .logout-modHeader {
     padding: 10px !important;
-    background-color: var(--primary-brown) !important; 
+    background: var(--gradient-brown) !important; 
     border-top-right-radius:19px;
     border-top-left-radius: 19px;
     color: var(--light-green); 
@@ -114,7 +117,7 @@
 }
 
 .logout-modBody {
-    background-color: var(--light-green) !important;
+    background: var(--light-green) !important;
     color: var(--primary-brown);
     font-weight: 500;
 }
@@ -124,12 +127,11 @@
 }
 
 .logout-cancelBtn {
-    background-color: transparent;
-    color: var(--primary-brown);
-    border: 2px solid var(--primary-brown) !important;
+    background: var(--gradient-brown-light);
+    color: var(--light-green);
+    border: none !important;
 }
 
 .logout-cancelBtn:hover {
-    background-color: var(--bg-color) !important;
-    color: var(--primary-brown) !important;
+    background: var(--gradient-brown) !important;
 }
