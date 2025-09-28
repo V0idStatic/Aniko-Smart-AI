@@ -201,7 +201,7 @@ body {
     color: var(--primary-green);
     font-weight: bold !important;
 }
-.bi-chat-dots {
+.testSubmit-form-label .bi-chat-dots {
     margin-right: 7px !important;
 }
 
