@@ -33,14 +33,21 @@ const AdminCMS: React.FC = () => {
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-  const [showModal, setShowModal] = useState(false);
-  const [modalTitle, setModalTitle] = useState("");
-  const [modalMessage, setModalMessage] = useState("");
-  const [onConfirm, setOnConfirm] = useState<() => Promise<void> | void>(() => () => {});
-  const [modalLoading, setModalLoading] = useState(false);
+  // Upload modal states
+  const [showUploadModal, setShowUploadModal] = useState(false);
+  const [uploadTitle, setUploadTitle] = useState("");
+  const [uploadMessage, setUploadMessage] = useState("");
+  const [onUploadConfirm, setOnUploadConfirm] = useState<() => Promise<void> | void>(() => () => {});
+  const [uploadLoading, setUploadLoading] = useState(false);
 
-const [activeSection, setActiveSection] = useState<"why" | "benefits" | "hero" | "team">("why");
+  // Delete modal states
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteTitle, setDeleteTitle] = useState("");
+  const [deleteMessage, setDeleteMessage] = useState("");
+  const [onDeleteConfirm, setOnDeleteConfirm] = useState<() => Promise<void> | void>(() => () => {});
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
+  const [activeSection, setActiveSection] = useState<"why" | "benefits" | "hero" | "team">("why");
 
   const extractStorageFileName = (url: string | null | undefined) => {
     if (!url) return "";
@@ -100,11 +107,18 @@ const [activeSection, setActiveSection] = useState<"why" | "benefits" | "hero" |
     if (dbErr) throw dbErr;
   };
 
-  const confirmAction = (title: string, message: string, action: () => Promise<void> | void) => {
-    setModalTitle(title);
-    setModalMessage(message);
-    setOnConfirm(() => action);
-    setShowModal(true);
+  const openUploadModal = (title: string, message: string, action: () => Promise<void> | void) => {
+    setUploadTitle(title);
+    setUploadMessage(message);
+    setOnUploadConfirm(() => action);
+    setShowUploadModal(true);
+  };
+
+  const openDeleteModal = (title: string, message: string, action: () => Promise<void> | void) => {
+    setDeleteTitle(title);
+    setDeleteMessage(message);
+    setOnDeleteConfirm(() => action);
+    setShowDeleteModal(true);
   };
 
   const handleUpload = (file: File | null, table: string, refetch: () => void) => {
@@ -113,22 +127,22 @@ const [activeSection, setActiveSection] = useState<"why" | "benefits" | "hero" |
       return;
     }
 
-    confirmAction(
+    openUploadModal(
       "Confirm Upload",
       `Upload this image to ${table}?`,
       async () => {
-        setModalLoading(true);
+        setUploadLoading(true);
         try {
           await uploadToTable(file, table);
           refetch();
-          setModalTitle("Success");
-          setModalMessage(`Image added to ${table} successfully!`);
+          setUploadTitle("Success");
+          setUploadMessage(`Image added to ${table} successfully!`);
         } catch (e) {
           console.error(`Upload to ${table}:`, e);
-          setModalTitle("Error");
-          setModalMessage("Upload failed. Check console for details.");
+          setUploadTitle("Error");
+          setUploadMessage("Upload failed. Check console for details.");
         } finally {
-          setModalLoading(false);
+          setUploadLoading(false);
         }
       }
     );
@@ -140,11 +154,11 @@ const [activeSection, setActiveSection] = useState<"why" | "benefits" | "hero" |
     url: string,
     refetch: () => void
   ) => {
-    confirmAction(
+    openDeleteModal(
       "Confirm Delete",
       `Are you sure you want to delete this image from ${table}?`,
       async () => {
-        setModalLoading(true);
+        setDeleteLoading(true);
         try {
           const fileName = extractStorageFileName(url);
           if (fileName) {
@@ -152,14 +166,14 @@ const [activeSection, setActiveSection] = useState<"why" | "benefits" | "hero" |
           }
           await supabase.from(table).delete().eq("id", id);
           refetch();
-          setModalTitle("Success");
-          setModalMessage(` Deleted from ${table} successfully!`);
+          setDeleteTitle("Success");
+          setDeleteMessage(`Deleted from ${table} successfully!`);
         } catch (err) {
-          console.error(" Delete error:", err);
-          setModalTitle("Error");
-          setModalMessage("Delete failed. Check console for details.");
+          console.error("Delete error:", err);
+          setDeleteTitle("Error");
+          setDeleteMessage("Delete failed. Check console for details.");
         } finally {
-          setModalLoading(false);
+          setDeleteLoading(false);
         }
       }
     );
@@ -169,11 +183,11 @@ const [activeSection, setActiveSection] = useState<"why" | "benefits" | "hero" |
     if (!memberFile || !memberName || !memberRole)
       return alert("Fill all fields");
 
-    confirmAction(
-      "Confirm Upload",
+    openUploadModal(
+      "Confirm Add",
       `Add team member "${memberName}" with role "${memberRole}"?`,
       async () => {
-        setModalLoading(true);
+        setUploadLoading(true);
         try {
           const ext = memberFile.name.split(".").pop();
           const fileName = `${Date.now()}.${ext}`;
@@ -205,14 +219,14 @@ const [activeSection, setActiveSection] = useState<"why" | "benefits" | "hero" |
           }
 
           fetchTable("team_members", setTeamMembers);
-          setModalTitle("Success");
-          setModalMessage("✅ Team member added successfully!");
+          setUploadTitle("Success");
+          setUploadMessage("✅ Team member added successfully!");
         } catch (e) {
           console.error("❌ Upload team member:", e);
-          setModalTitle("Error");
-          setModalMessage("Failed to add team member. Check console.");
+          setUploadTitle("Error");
+          setUploadMessage("Failed to add team member. Check console.");
         } finally {
-          setModalLoading(false);
+          setUploadLoading(false);
         }
       }
     );
@@ -318,89 +332,63 @@ const [activeSection, setActiveSection] = useState<"why" | "benefits" | "hero" |
 
   return (
     <div>
-      {showModal && (
+      {/* Upload Modal */}
+      {showUploadModal && (
         <>
-          {/* Backdrop */}
           <div className="fade show adminCms-modal-backdrop"></div>
-
-          <div
-            className="modal fade show d-block adminCms-modal"
-            tabIndex={-1}
-          >
+          <div className="modal fade show d-block adminCms-modal" tabIndex={-1}>
             <div className="modal-dialog modal-dialog-centered adminCms-modal-dialog">
-              <div
-                className={`modal-content adminCms-modal-content ${
-                  modalTitle.includes("Add") ? "addTeam-modal" :
-                  modalTitle.includes("Delete") ? "delete-modal" : ""
-                }`}
-              >
+              <div className="modal-content adminCms-modal-content addTeam-modal">
                 <div className="modal-header">
-                  <h5
-                    className={`modal-title ${
-                      modalTitle.includes("Add") ? "text-success" :
-                      modalTitle.includes("Delete") ? "text-danger" : ""
-                    }`}
-                  >
-                    {modalTitle.includes("Add") && (
-                      <><i className="bi bi-person-plus-fill"></i> {modalTitle}</>
-                    )}
-                    {modalTitle.includes("Delete") && (
-                      <><i className="bi bi-trash3-fill"></i> {modalTitle}</>
-                    )}
-                    {!modalTitle.includes("Add") && !modalTitle.includes("Delete") && modalTitle}
+                  <h5 className="modal-title text-success">
+                    <i className="bi bi-cloud-upload-fill"></i> {uploadTitle}
                   </h5>
                   <button
                     type="button"
                     className="btn-close"
                     onClick={() => {
-                      if (!modalLoading) setShowModal(false);
+                      if (!uploadLoading) setShowUploadModal(false);
                     }}
                   ></button>
                 </div>
-
                 <div className="modal-body">
-                  <p>{modalMessage}</p>
+                  <p>{uploadMessage}</p>
                 </div>
-
                 <div className="modal-footer">
-                  {modalTitle.startsWith("Confirm") ? (
+                  {uploadTitle.startsWith("Confirm") ? (
                     <>
                       <button
                         type="button"
-                        className="btn addTeam-btn"
+                        className="btn btn-secondary"
                         onClick={() => {
-                          if (!modalLoading) setShowModal(false);
+                          if (!uploadLoading) setShowUploadModal(false);
                         }}
-                        disabled={modalLoading}
+                        disabled={uploadLoading}
                       >
                         Cancel
                       </button>
                       <button
                         type="button"
-                        className={`btn ${
-                          modalTitle.includes("Add") ? "addTeam-btn" : "adminCms-delBtn"
-                        }`}
+                        className="btn btn-success"
                         onClick={() => {
                           try {
-                            onConfirm();
+                            onUploadConfirm();
                           } catch (err) {
-                            console.error("Confirm action error:", err);
-                            setModalTitle("Error");
-                            setModalMessage("An error occurred while running the action.");
+                            console.error("Upload confirm error:", err);
+                            setUploadTitle("Error");
+                            setUploadMessage("An error occurred while running the action.");
                           }
                         }}
-                        disabled={modalLoading}
+                        disabled={uploadLoading}
                       >
-                        {modalLoading ? "Processing..." : "Confirm"}
+                        {uploadLoading ? "Processing..." : "Confirm"}
                       </button>
                     </>
                   ) : (
                     <button
                       type="button"
-                      className="btn addTeam-btn"
-                      onClick={() => {
-                        setShowModal(false);
-                      }}
+                      className="btn btn-success"
+                      onClick={() => setShowUploadModal(false)}
                     >
                       OK
                     </button>
@@ -412,6 +400,75 @@ const [activeSection, setActiveSection] = useState<"why" | "benefits" | "hero" |
         </>
       )}
 
+      {/* Delete Modal */}
+      {showDeleteModal && (
+        <>
+          <div className="fade show adminCms-modal-backdrop"></div>
+          <div className="modal fade show d-block adminCms-modal" tabIndex={-1}>
+            <div className="modal-dialog modal-dialog-centered adminCms-modal-dialog">
+              <div className="modal-content adminCms-modal-content delete-modal">
+                <div className="modal-header">
+                  <h5 className="modal-title text-danger">
+                    <i className="bi bi-trash3-fill"></i> {deleteTitle}
+                  </h5>
+                  <button
+                    type="button"
+                    className="btn-close"
+                    onClick={() => {
+                      if (!deleteLoading) setShowDeleteModal(false);
+                    }}
+                  ></button>
+                </div>
+                <div className="modal-body">
+                  <p>{deleteMessage}</p>
+                </div>
+                <div className="modal-footer">
+                  {deleteTitle.startsWith("Confirm") ? (
+                    <>
+                      <button
+                        type="button"
+                        className="btn btn-secondary"
+                        onClick={() => {
+                          if (!deleteLoading) setShowDeleteModal(false);
+                        }}
+                        disabled={deleteLoading}
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="button"
+                        className="btn btn-danger"
+                        onClick={() => {
+                          try {
+                            onDeleteConfirm();
+                          } catch (err) {
+                            console.error("Delete confirm error:", err);
+                            setDeleteTitle("Error");
+                            setDeleteMessage("An error occurred while running the delete.");
+                          }
+                        }}
+                        disabled={deleteLoading}
+                      >
+                        {deleteLoading ? "Processing..." : "Confirm"}
+                      </button>
+                    </>
+                  ) : (
+                    <button
+                      type="button"
+                      className="btn btn-danger"
+                      onClick={() => setShowDeleteModal(false)}
+                    >
+                      OK
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* Page Content */}
       <AdminHeader />
       <div style={{ marginLeft: "280px", padding: "20px" }}>
         <h1 className="adminCms-header">Content Management</h1>
@@ -420,42 +477,30 @@ const [activeSection, setActiveSection] = useState<"why" | "benefits" | "hero" |
         </h6>
 
         <div className="mb-4 adminCms-navBtn">
-                <button
-          className={`btn me-2 adminCms-whyBtn ${
-            activeSection === "why" ? "btn-primary" : "btn-outline-primary"
-          }`}
-          onClick={() => setActiveSection("why")}
-        >
-          Why Aniko
-        </button>
-
-        <button
-          className={`btn me-2 adminCms-benBtn ${
-            activeSection === "benefits" ? "btn-primary" : "btn-outline-primary"
-          }`}
-          onClick={() => setActiveSection("benefits")}
-        >
-          Benefits
-        </button>
-
-         <button
-          className={`btn me-2 adminCms-heroBtn ${
-            activeSection === "hero" ? "btn-primary" : "btn-outline-primary"
-          }`}
-          onClick={() => setActiveSection("hero")}
-        >
-          Hero
-        </button>
-
-         <button
-          className={`btn adminCms-teamBtn ${
-            activeSection === "team" ? "btn-primary" : "btn-outline-primary"
-          }`}
-          onClick={() => setActiveSection("team")}
-        >
-          Team
-        </button>
-
+          <button
+            className={`btn me-2 adminCms-whyBtn ${activeSection === "why" ? "btn-primary" : "btn-outline-primary"}`}
+            onClick={() => setActiveSection("why")}
+          >
+            Why Aniko
+          </button>
+          <button
+            className={`btn me-2 adminCms-benBtn ${activeSection === "benefits" ? "btn-primary" : "btn-outline-primary"}`}
+            onClick={() => setActiveSection("benefits")}
+          >
+            Benefits
+          </button>
+          <button
+            className={`btn me-2 adminCms-heroBtn ${activeSection === "hero" ? "btn-primary" : "btn-outline-primary"}`}
+            onClick={() => setActiveSection("hero")}
+          >
+            Hero
+          </button>
+          <button
+            className={`btn adminCms-teamBtn ${activeSection === "team" ? "btn-primary" : "btn-outline-primary"}`}
+            onClick={() => setActiveSection("team")}
+          >
+            Team
+          </button>
         </div>
 
         {activeSection === "hero" && (
@@ -514,7 +559,7 @@ const [activeSection, setActiveSection] = useState<"why" | "benefits" | "hero" |
                   type="file"
                   accept="image/*"
                   className="form-control mb-2 adminCms-chooseTeamBtn"
-                  ref={fileInputRef}           // ✅ ref added
+                  ref={fileInputRef}
                   onChange={(e) => setMemberFile(e.target.files?.[0] || null)}
                 />
                 <button
