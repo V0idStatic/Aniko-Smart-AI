@@ -135,6 +135,13 @@ export default function Analysis() {
   // New state variables for chart expansion
   const [expandedChart, setExpandedChart] = useState<string | null>(null);
 
+  // Add these state variables at the top with your other states
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [plantCategories, setPlantCategories] = useState<{[key: string]: PlantRecommendation[]}>({});
+
+  // Add this state for selected plant details
+  const [selectedPlantDetail, setSelectedPlantDetail] = useState<PlantRecommendation | null>(null);
+
   // Initialize with selected plant if available
   useEffect(() => {
     if (selectedCrop?.crop_name) {
@@ -893,14 +900,17 @@ export default function Analysis() {
         return statusPriority[b.currentStatus] - statusPriority[a.currentStatus];
       });
       
-      console.log(`✅ Generated ${recommendations.length} recommendations`);
+      // Categorize the recommendations
+      const categorized = categorizePlants(recommendations);
+      setPlantCategories(categorized);
       setPlantRecommendations(recommendations);
+      
+      console.log(`✅ Generated ${recommendations.length} recommendations in ${Object.keys(categorized).length} categories`);
       
     } catch (error) {
       console.error('Error generating database-based recommendations:', error);
-      
-      // Fallback message for users
       setPlantRecommendations([]);
+      setPlantCategories({});
     } finally {
       setLoadingRecommendations(false);
     }
@@ -1047,6 +1057,79 @@ export default function Analysis() {
       default:
         return { background: '#e0e0e0', text: '#333' };
     }
+  };
+
+  // Function to categorize plants by type
+  const categorizePlants = (recommendations: PlantRecommendation[]): {[key: string]: PlantRecommendation[]} => {
+    const categories: {[key: string]: PlantRecommendation[]} = {
+      all: recommendations,
+      vegetables: [],
+      fruits: [],
+      grains: [],
+      herbs: [],
+      legumes: [],
+      roots: []
+    };
+
+    recommendations.forEach(rec => {
+      const cropName = rec.cropName.toLowerCase();
+      
+      // Categorize based on crop name
+      if (cropName.includes('tomato') || cropName.includes('lettuce') || cropName.includes('cucumber') || 
+          cropName.includes('spinach') || cropName.includes('cabbage') || cropName.includes('carrot') || 
+          cropName.includes('eggplant') || cropName.includes('pepper') || cropName.includes('onion') || 
+          cropName.includes('garlic')) {
+        categories.vegetables.push(rec);
+      } else if (cropName.includes('banana') || cropName.includes('papaya') || cropName.includes('mango')) {
+        categories.fruits.push(rec);
+      } else if (cropName.includes('rice') || cropName.includes('corn') || cropName.includes('wheat')) {
+        categories.grains.push(rec);
+      } else if (cropName.includes('basil') || cropName.includes('mint') || cropName.includes('oregano') || 
+                 cropName.includes('parsley') || cropName.includes('cilantro')) {
+        categories.herbs.push(rec);
+      } else if (cropName.includes('bean') || cropName.includes('peanut') || cropName.includes('soybean') || 
+                 cropName.includes('lentil') || cropName.includes('pea')) {
+        categories.legumes.push(rec);
+      } else if (cropName.includes('potato') || cropName.includes('cassava') || cropName.includes('taro') || 
+                 cropName.includes('yam') || cropName.includes('radish')) {
+        categories.roots.push(rec);
+      } else {
+        // Default to vegetables if not categorized
+        categories.vegetables.push(rec);
+      }
+    });
+
+    // Remove empty categories
+    Object.keys(categories).forEach(key => {
+      if (key !== 'all' && categories[key].length === 0) {
+        delete categories[key];
+      }
+    });
+
+    return categories;
+  };
+
+  // Helper function to get category information
+  const getCategoryInfo = (category: string) => {
+    const categoryMap: {[key: string]: {name: string, icon: string, count: number}} = {
+      all: { name: 'All Plants', icon: 'apps-outline', count: plantRecommendations.length },
+      vegetables: { name: 'Vegetables', icon: 'leaf-outline', count: plantCategories.vegetables?.length || 0 },
+      fruits: { name: 'Fruits', icon: 'nutrition-outline', count: plantCategories.fruits?.length || 0 },
+      grains: { name: 'Grains & Cereals', icon: 'grain-outline', count: plantCategories.grains?.length || 0 },
+      herbs: { name: 'Herbs & Spices', icon: 'flower-outline', count: plantCategories.herbs?.length || 0 },
+      legumes: { name: 'Legumes', icon: 'ellipse-outline', count: plantCategories.legumes?.length || 0 },
+      roots: { name: 'Root Crops', icon: 'fitness-outline', count: plantCategories.roots?.length || 0 }
+    };
+    
+    return categoryMap[category] || { name: 'Unknown', icon: 'help-outline', count: 0 };
+  };
+
+  // Helper function to get current category recommendations
+  const getCurrentCategoryRecommendations = (): PlantRecommendation[] => {
+    if (selectedCategory === 'all') {
+      return plantRecommendations;
+    }
+    return plantCategories[selectedCategory] || [];
   };
   
   const getStatusIcon = (status: 'ideal' | 'good' | 'caution' | 'avoid') => {
@@ -1662,160 +1745,285 @@ export default function Analysis() {
                   </View>
                 )}
 
-                {/* Plant Recommendations List */}
-                {plantRecommendations.map((recommendation, index) => (
-                  <View key={index} style={styles.recommendationCard}>
-                    <View style={styles.cardHeader}>
-                      <View style={styles.plantInfo}>
-                        <Text style={styles.plantName}>{recommendation.cropName}</Text>
-                        <View style={[
-                          styles.statusBadge,
-                          { backgroundColor: getStatusColor(recommendation.currentStatus).background }
-                        ]}>
-                          <Text style={[
-                            styles.statusText,
-                            { color: getStatusColor(recommendation.currentStatus).text }
-                          ]}>
-                            {recommendation.currentStatus.toUpperCase()}
-                          </Text>
-                        </View>
-                      </View>
-                      <Ionicons 
-                        name={getStatusIcon(recommendation.currentStatus)} 
-                        size={24} 
-                        color={getStatusColor(recommendation.currentStatus).text} 
-                      />
-                    </View>
-
-                    {/* Best Planting Months */}
-                    <View style={styles.plantingMonths}>
-                      <Text style={styles.subsectionTitle}>🗓️ Best Planting Months:</Text>
-                      <View style={styles.monthsContainer}>
-                        {recommendation.bestMonths.map((month, idx) => (
-                          <View key={idx} style={styles.monthChip}>
-                            <Text style={styles.monthText}>
-                              {new Date(2024, month - 1, 1).toLocaleString('default', { month: 'short' })}
+                {/* Category Selection */}
+                {Object.keys(plantCategories).length > 0 && (
+                  <View style={styles.categoryContainer}>
+                    <Text style={styles.sectionTitle}>Plant Categories</Text>
+                    <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.categoryScrollView}>
+                      {Object.keys(plantCategories).map((category, index) => {
+                        const categoryInfo = getCategoryInfo(category);
+                        return (
+                          <TouchableOpacity
+                            key={index}
+                            style={[
+                              styles.categoryCard,
+                              selectedCategory === category && styles.activeCategoryCard
+                            ]}
+                            onPress={() => setSelectedCategory(category)}
+                          >
+                            <View style={styles.categoryIconContainer}>
+                              <Ionicons 
+                                name={categoryInfo.icon as any} 
+                                size={32} 
+                                color={selectedCategory === category ? "#1c4722" : "#666"} 
+                              />
+                            </View>
+                            <Text style={[
+                              styles.categoryName,
+                              selectedCategory === category && styles.activeCategoryName
+                            ]}>
+                              {categoryInfo.name}
                             </Text>
-                          </View>
-                        ))}
+                            <Text style={styles.categoryCount}>
+                              {categoryInfo.count} plants
+                            </Text>
+                          </TouchableOpacity>
+                        );
+                      })}
+                    </ScrollView>
+                  </View>
+                )}
+
+                {/* Selected Category Summary */}
+                {selectedCategory && plantCategories[selectedCategory] && (
+                  <View style={styles.categorySummary}>
+                    <Text style={styles.categorySummaryTitle}>
+                      {getCategoryInfo(selectedCategory).name} Recommendations
+                    </Text>
+                    <Text style={styles.categorySummarySubtitle}>
+                      {getCurrentCategoryRecommendations().length} plants available for {selectedLocation?.city || 'your location'}
+                    </Text>
+                    
+                    {/* Status Summary */}
+                    <View style={styles.statusSummary}>
+                      <View style={styles.statusSummaryItem}>
+                        <View style={[styles.statusDot, { backgroundColor: '#00796b' }]} />
+                        <Text style={styles.statusSummaryText}>
+                          {getCurrentCategoryRecommendations().filter(r => r.currentStatus === 'ideal').length} Ideal
+                        </Text>
+                      </View>
+                      <View style={styles.statusSummaryItem}>
+                        <View style={[styles.statusDot, { backgroundColor: '#fbc02d' }]} />
+                        <Text style={styles.statusSummaryText}>
+                          {getCurrentCategoryRecommendations().filter(r => r.currentStatus === 'good').length} Good
+                        </Text>
+                      </View>
+                      <View style={styles.statusSummaryItem}>
+                        <View style={[styles.statusDot, { backgroundColor: '#f57c00' }]} />
+                        <Text style={styles.statusSummaryText}>
+                          {getCurrentCategoryRecommendations().filter(r => r.currentStatus === 'caution').length} Caution
+                        </Text>
+                      </View>
+                      <View style={styles.statusSummaryItem}>
+                        <View style={[styles.statusDot, { backgroundColor: '#d32f2f' }]} />
+                        <Text style={styles.statusSummaryText}>
+                          {getCurrentCategoryRecommendations().filter(r => r.currentStatus === 'avoid').length} Avoid
+                        </Text>
                       </View>
                     </View>
+                  </View>
+                )}
 
-                    {/* Risk Factors */}
-                    {recommendation.riskFactors.length > 0 && (
-                      <View style={styles.riskSection}>
-                        <Text style={styles.subsectionTitle}>⚠️ Current Risk Factors:</Text>
-                        {recommendation.riskFactors.map((risk, idx) => (
-                          <View key={idx} style={styles.riskItem}>
-                            <Ionicons name="warning-outline" size={16} color="#ff5722" />
-                            <Text style={styles.riskText}>{risk}</Text>
+                {/* Plant Recommendations List for Selected Category */}
+                {getCurrentCategoryRecommendations().length > 0 ? (
+                  selectedPlantDetail ? (
+                    // Show detailed view for selected plant
+                    <View style={styles.detailView}>
+                      {/* Back button */}
+                      <TouchableOpacity 
+                        style={styles.backButton}
+                        onPress={() => setSelectedPlantDetail(null)}
+                      >
+                        <Ionicons name="arrow-back-outline" size={20} color="#1c4722" />
+                        <Text style={styles.backButtonText}>Back to {getCategoryInfo(selectedCategory).name}</Text>
+                      </TouchableOpacity>
+
+                      {/* Detailed Plant Card */}
+                      <View style={styles.detailedRecommendationCard}>
+                        <View style={styles.cardHeader}>
+                          <View style={styles.plantInfo}>
+                            <Text style={styles.plantName}>{selectedPlantDetail.cropName}</Text>
+                            <View style={[
+                              styles.statusBadge,
+                              { backgroundColor: getStatusColor(selectedPlantDetail.currentStatus).background }
+                            ]}>
+                              <Text style={[
+                                styles.statusText,
+                                { color: getStatusColor(selectedPlantDetail.currentStatus).text }
+                              ]}>
+                                {selectedPlantDetail.currentStatus.toUpperCase()}
+                              </Text>
+                            </View>
                           </View>
-                        ))}
-                      </View>
-                    )}
-
-                    {/* Recommendations */}
-                    <View style={styles.recommendationsSection}>
-                      <Text style={styles.subsectionTitle}>💡 Recommendations:</Text>
-                      {recommendation.recommendations.map((rec, idx) => (
-                        <View key={idx} style={styles.recommendationItem}>
-                          <Ionicons name="checkmark-circle-outline" size={16} color="#4caf50" />
-                          <Text style={styles.recommendationText}>{rec}</Text>
+                          <Ionicons 
+                            name={getStatusIcon(selectedPlantDetail.currentStatus)} 
+                            size={28} 
+                            color={getStatusColor(selectedPlantDetail.currentStatus).text} 
+                          />
                         </View>
+
+                        {/* Best Planting Months */}
+                        <View style={styles.plantingMonths}>
+                          <Text style={styles.subsectionTitle}>🗓️ Best Planting Months:</Text>
+                          <View style={styles.monthsContainer}>
+                            {selectedPlantDetail.bestMonths.map((month, idx) => (
+                              <View key={idx} style={styles.monthChip}>
+                                <Text style={styles.monthText}>
+                                  {new Date(2024, month - 1, 1).toLocaleString('default', { month: 'short' })}
+                                </Text>
+                              </View>
+                            ))}
+                          </View>
+                        </View>
+
+                        {/* Risk Factors */}
+                        {selectedPlantDetail.riskFactors.length > 0 && (
+                          <View style={styles.riskSection}>
+                            <Text style={styles.subsectionTitle}>⚠️ Current Risk Factors:</Text>
+                            {selectedPlantDetail.riskFactors.map((risk, idx) => (
+                              <View key={idx} style={styles.riskItem}>
+                                <Ionicons name="warning-outline" size={16} color="#ff5722" />
+                                <Text style={styles.riskText}>{risk}</Text>
+                              </View>
+                            ))}
+                          </View>
+                        )}
+
+                        {/* Recommendations */}
+                        <View style={styles.recommendationsSection}>
+                          <Text style={styles.subsectionTitle}>💡 Recommendations:</Text>
+                          {selectedPlantDetail.recommendations.map((rec, idx) => (
+                            <View key={idx} style={styles.recommendationItem}>
+                              <Ionicons name="checkmark-circle-outline" size={16} color="#4caf50" />
+                              <Text style={styles.recommendationText}>{rec}</Text>
+                            </View>
+                          ))}
+                        </View>
+
+                        {/* Alternative Dates */}
+                        {selectedPlantDetail.alternativePlantingDates.length > 0 && (
+                          <View style={styles.alternativesSection}>
+                            <Text style={styles.subsectionTitle}>🔄 Alternative Options:</Text>
+                            {selectedPlantDetail.alternativePlantingDates.map((alt, idx) => (
+                              <View key={idx} style={styles.alternativeItem}>
+                                <Ionicons name="calendar-outline" size={16} color="#2196f3" />
+                                <Text style={styles.alternativeText}>{alt}</Text>
+                              </View>
+                            ))}
+                          </View>
+                        )}
+
+                        {/* Database-specific optimal conditions */}
+                        {selectedPlantDetail.optimalTemp && (
+                          <View style={styles.optimalConditions}>
+                            <Text style={styles.subsectionTitle}>🎯 Optimal Growing Conditions:</Text>
+                            <Text style={styles.conditionText}>
+                              🌡️ Temperature: {selectedPlantDetail.optimalTemp.min}°C - {selectedPlantDetail.optimalTemp.max}°C
+                            </Text>
+                            {selectedPlantDetail.optimalHumidity && (
+                              <Text style={styles.conditionText}>
+                                💧 Humidity: {selectedPlantDetail.optimalHumidity.min}% - {selectedPlantDetail.optimalHumidity.max}%
+                              </Text>
+                            )}
+                            {selectedPlantDetail.optimalPH?.min && selectedPlantDetail.optimalPH?.max && (
+                              <Text style={styles.conditionText}>
+                                ⚗️ pH Level: {selectedPlantDetail.optimalPH.min} - {selectedPlantDetail.optimalPH.max}
+                              </Text>
+                            )}
+                          </View>
+                        )}
+
+                        {/* NPK Requirements from database */}
+                        {selectedPlantDetail.optimalNPK && (
+                          <View style={styles.npkSection}>
+                            <Text style={styles.subsectionTitle}>🧪 Nutrient Requirements:</Text>
+                            {selectedPlantDetail.optimalNPK.nitrogen.min && selectedPlantDetail.optimalNPK.nitrogen.max && (
+                              <Text style={styles.conditionText}>
+                                🟢 Nitrogen: {selectedPlantDetail.optimalNPK.nitrogen.min} - {selectedPlantDetail.optimalNPK.nitrogen.max} ppm
+                              </Text>
+                            )}
+                            {selectedPlantDetail.optimalNPK.phosphorus.min && selectedPlantDetail.optimalNPK.phosphorus.max && (
+                              <Text style={styles.conditionText}>
+                                🟠 Phosphorus: {selectedPlantDetail.optimalNPK.phosphorus.min} - {selectedPlantDetail.optimalNPK.phosphorus.max} ppm
+                              </Text>
+                            )}
+                            {selectedPlantDetail.optimalNPK.potassium.min && selectedPlantDetail.optimalNPK.potassium.max && (
+                              <Text style={styles.conditionText}>
+                                🔵 Potassium: {selectedPlantDetail.optimalNPK.potassium.min} - {selectedPlantDetail.optimalNPK.potassium.max} ppm
+                              </Text>
+                            )}
+                          </View>
+                        )}
+                      </View>
+                    </View>
+                  ) : (
+                    // Show compact plant list
+                    <View style={styles.plantListContainer}>
+                      <Text style={styles.listTitle}>
+                        {getCategoryInfo(selectedCategory).name} Plants
+                      </Text>
+                      <Text style={styles.listSubtitle}>
+                        Tap any plant to view detailed recommendations
+                      </Text>
+                      
+                      {getCurrentCategoryRecommendations().map((recommendation, index) => (
+                        <TouchableOpacity 
+                          key={index} 
+                          style={styles.plantListItem}
+                          onPress={() => setSelectedPlantDetail(recommendation)}
+                        >
+                          <View style={styles.plantListInfo}>
+                            <View style={styles.plantListHeader}>
+                              <Text style={styles.plantListName}>{recommendation.cropName}</Text>
+                              <View style={[
+                                styles.compactStatusBadge,
+                                { backgroundColor: getStatusColor(recommendation.currentStatus).background }
+                              ]}>
+                                <Text style={[
+                                  styles.compactStatusText,
+                                  { color: getStatusColor(recommendation.currentStatus).text }
+                                ]}>
+                                  {recommendation.currentStatus.toUpperCase()}
+                                </Text>
+                              </View>
+                            </View>
+                            
+                            {/* Quick summary */}
+                            <View style={styles.quickSummary}>
+                              <Text style={styles.quickSummaryText}>
+                                🗓️ Best months: {recommendation.bestMonths.slice(0, 3).map(month => 
+                                  new Date(2024, month - 1, 1).toLocaleString('default', { month: 'short' })
+                                ).join(', ')}{recommendation.bestMonths.length > 3 ? '...' : ''}
+                              </Text>
+                              
+                              {recommendation.riskFactors.length > 0 && (
+                                <Text style={styles.quickSummaryText}>
+                                  ⚠️ {recommendation.riskFactors.length} risk factor{recommendation.riskFactors.length > 1 ? 's' : ''} detected
+                                </Text>
+                              )}
+                              
+                              {recommendation.optimalTemp && (
+                                <Text style={styles.quickSummaryText}>
+                                  🌡️ Optimal: {recommendation.optimalTemp.min}°C - {recommendation.optimalTemp.max}°C
+                                </Text>
+                              )}
+                            </View>
+                          </View>
+                          
+                          <Ionicons name="chevron-forward-outline" size={20} color="#666" />
+                        </TouchableOpacity>
                       ))}
                     </View>
-
-                    {/* Alternative Dates */}
-                    {recommendation.alternativePlantingDates.length > 0 && (
-                      <View style={styles.alternativesSection}>
-                        <Text style={styles.subsectionTitle}>🔄 Alternative Options:</Text>
-                        {recommendation.alternativePlantingDates.map((alt, idx) => (
-                          <View key={idx} style={styles.alternativeItem}>
-                            <Ionicons name="calendar-outline" size={16} color="#2196f3" />
-                            <Text style={styles.alternativeText}>{alt}</Text>
-                          </View>
-                        ))}
-                      </View>
-                    )}
-
-                    {/* Database-specific optimal conditions */}
-                    {recommendation.optimalTemp && (
-                      <View style={styles.optimalConditions}>
-                        <Text style={styles.subsectionTitle}>🎯 Optimal Growing Conditions (From Database):</Text>
-                        <Text style={styles.conditionText}>
-                          🌡️ Temperature: {recommendation.optimalTemp.min}°C - {recommendation.optimalTemp.max}°C
-                        </Text>
-                        {recommendation.optimalHumidity && (
-                          <Text style={styles.conditionText}>
-                            💧 Humidity: {recommendation.optimalHumidity.min}% - {recommendation.optimalHumidity.max}%
-                          </Text>
-                        )}
-                        {recommendation.optimalPH?.min && recommendation.optimalPH?.max && (
-                          <Text style={styles.conditionText}>
-                            ⚗️ pH Level: {recommendation.optimalPH.min} - {recommendation.optimalPH.max}
-                          </Text>
-                        )}
-                      </View>
-                    )}
-
-                    {/* NPK Requirements from database */}
-                    {recommendation.optimalNPK && (
-                      <View style={styles.npkSection}>
-                        <Text style={styles.subsectionTitle}>🧪 Nutrient Requirements:</Text>
-                        {recommendation.optimalNPK.nitrogen.min && recommendation.optimalNPK.nitrogen.max && (
-                          <Text style={styles.conditionText}>
-                            🟢 Nitrogen: {recommendation.optimalNPK.nitrogen.min} - {recommendation.optimalNPK.nitrogen.max} ppm
-                          </Text>
-                        )}
-                        {recommendation.optimalNPK.phosphorus.min && recommendation.optimalNPK.phosphorus.max && (
-                          <Text style={styles.conditionText}>
-                            🟠 Phosphorus: {recommendation.optimalNPK.phosphorus.min} - {recommendation.optimalNPK.phosphorus.max} ppm
-                          </Text>
-                        )}
-                        {recommendation.optimalNPK.potassium.min && recommendation.optimalNPK.potassium.max && (
-                          <Text style={styles.conditionText}>
-                            🔵 Potassium: {recommendation.optimalNPK.potassium.min} - {recommendation.optimalNPK.potassium.max} ppm
-                          </Text>
-                        )}
-                      </View>
-                    )}
+                  )
+                ) : (
+                  // No plants message
+                  <View style={styles.noDataContainer}>
+                    <Ionicons name="leaf-outline" size={60} color="#ccc" />
+                    <Text style={styles.noDataText}>
+                      No {getCategoryInfo(selectedCategory).name.toLowerCase()} available for current conditions
+                    </Text>
                   </View>
-                ))}
-
-                {/* General Tips Section */}
-                <View style={styles.tipsContainer}>
-                  <Text style={styles.sectionTitle}>🎯 General Planting Tips</Text>
-                  
-                  <View style={styles.tipCard}>
-                    <Ionicons name="leaf-outline" size={24} color="#4caf50" />
-                    <View style={styles.tipContent}>
-                      <Text style={styles.tipTitle}>Soil Preparation</Text>
-                      <Text style={styles.tipText}>
-                        Test soil pH and add organic matter 2-3 weeks before planting
-                      </Text>
-                    </View>
-                  </View>
-                  
-                  <View style={styles.tipCard}>
-                    <Ionicons name="water-outline" size={24} color="#2196f3" />
-                    <View style={styles.tipContent}>
-                      <Text style={styles.tipTitle}>Water Management</Text>
-                      <Text style={styles.tipText}>
-                        Install drainage systems before rainy season begins
-                      </Text>
-                    </View>
-                  </View>
-                  
-                  <View style={styles.tipCard}>
-                    <Ionicons name="sunny-outline" size={24} color="#ff9800" />
-                    <View style={styles.tipContent}>
-                      <Text style={styles.tipTitle}>Climate Protection</Text>
-                      <Text style={styles.tipText}>
-                        Use shade nets during extreme heat and row covers for cold protection
-                      </Text>
-                    </View>
-                  </View>
-                </View>
+                )}
               </>
             )}
           </>
@@ -2216,8 +2424,8 @@ const styles = StyleSheet.create({
     elevation: 1,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.06,
-    shadowRadius: 1,
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
   },
   cardTitle: {
     fontSize: 15,
@@ -2398,9 +2606,194 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     padding: 12,
   },
+  categoryContainer: {
+    marginBottom: 20,
+  },
+  categoryScrollView: {
+    marginTop: 10,
+  },
+  categoryCard: {
+    width: 120,
+    backgroundColor: 'white',
+    borderRadius: 12,
+    padding: 15,
+    marginRight: 15,
+    alignItems: 'center',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    borderWidth: 2,
+    borderColor: 'transparent',
+  },
+  activeCategoryCard: {
+    borderColor: '#1c4722',
+    backgroundColor: '#f0f8f0',
+  },
+  categoryIconContainer: {
+    marginBottom: 8,
+  },
+  categoryName: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#333',
+    textAlign: 'center',
+    marginBottom: 4,
+  },
+  activeCategoryName: {
+    color: '#1c4722',
+    fontWeight: 'bold',
+  },
+  categoryCount: {
+    fontSize: 12,
+    color: '#666',
+    textAlign: 'center',
+  },
+  categorySummary: {
+    backgroundColor: 'white',
+    borderRadius: 10,
+    padding: 16,
+    marginBottom: 20,
+    elevation: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+  },
+  categorySummaryTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#1c4722',
+    marginBottom: 4,
+  },
+  categorySummarySubtitle: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 12,
+  },
+  statusSummary: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+  },
+  statusSummaryItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 6,
+    flex: 0.48,
+  },
+  statusDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    marginRight: 6,
+  },
+  statusSummaryText: {
+    fontSize: 13,
+    color: '#333',
+    fontWeight: '500',
+  },
   conditionText: {
     fontSize: 13,
     color: '#555',
+    marginVertical: 2,
+    lineHeight: 18,
+  },
+  detailView: {
+    marginBottom: 20,
+  },
+  backButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f0f8f0',
+    borderRadius: 20,
+    paddingHorizontal: 15,
+    paddingVertical: 8,
+    marginBottom: 15,
+    alignSelf: 'flex-start',
+  },
+  backButtonText: {
+    fontSize: 14,
+    color: '#1c4722',
+    fontWeight: '600',
+    marginLeft: 6,
+  },
+  detailedRecommendationCard: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 20,
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+  plantListContainer: {
+    backgroundColor: 'white',
+    borderRadius: 10,
+    padding: 15,
+    marginBottom: 20,
+    elevation: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+  },
+  listTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#1c4722',
     marginBottom: 4,
+  },
+  listSubtitle: {
+    fontSize: 13,
+    color: '#666',
+    marginBottom: 15,
+    fontStyle: 'italic',
+  },
+  plantListItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+    backgroundColor: '#fafafa',
+    borderRadius: 8,
+    marginBottom: 8,
+  },
+  plantListInfo: {
+    flex: 1,
+  },
+  plantListHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 6,
+  },
+  plantListName: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#1c4722',
+    flex: 1,
+  },
+  compactStatusBadge: {
+    borderRadius: 8,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+  },
+  compactStatusText: {
+    fontSize: 10,
+    fontWeight: 'bold',
+    letterSpacing: 0.5,
+  },
+  quickSummary: {
+    marginTop: 4,
+  },
+  quickSummaryText: {
+    fontSize: 12,
+    color: '#666',
+    marginBottom: 2,
   },
 });
