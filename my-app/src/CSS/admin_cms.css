@@ -59,6 +59,10 @@ img.thumb {
     border-bottom-right-radius: 50px !important;
 }
 
+.adminCms-modalTitle {
+    color: var(--light-green) !important;
+}
+
 .adminCms-heroBtn, .adminCms-whyBtn {
     border-top-right-radius: 50px !important;
     border-bottom-left-radius: 50px !important;
@@ -110,7 +114,7 @@ img.thumb {
     border: 2px solid var(--primary-brown) !important;
     color: var(--primary-brown) !important;
     font-weight: 500 !important;
-    border-radius: 20px; 
+    border-radius: 20px !important; 
 }
 
 .adminCms-form button:hover {
@@ -229,7 +233,7 @@ img.thumb {
 
 .btn-danger {
     background-color: #b91c1c;
-    border-radius: 10px;
+    border-radius: 20px !important;
 }
 
 .btn-danger:hover {
@@ -289,13 +293,35 @@ img.thumb {
 .adminCms-delBtn {
     background-color: #a01926;
     color: white;
-    border-radius: 8px;
     padding: 6px 14px;
     border-radius: 20px !important;
     font-weight: 500;
+    border-radius: 20px !important;
 }
 .adminCms-delBtn:hover {
     background-color: #7a1420;
     transform: translateY(-2px);
     color: white;
+}
+
+.adminCms-cancelBtn {
+    background-color: transparent !important;
+    border: 2px solid var(--dark-brown) !important;
+    font-weight: 500 !important;
+    color: var(--dark-brown) !important;
+    border-radius: 20px !important; 
+}
+
+.adminCms-cancelBtn:hover {
+    background-color: var(--bg-color) !important;
+}
+
+.adminCms-confirm-confirmBtn {
+    background: vaR(--gradient-secondary) !important;
+    border-radius: 20px !important;
+    border: none !important;
+}
+
+.adminCms-confirm-confirmBtn:hover {
+    background: var(--gradient-primary) !important;
 }

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { onAuthStateChanged, User } from "firebase/auth";
 import { auth } from "../firebase"; // adjust path if needed
 import supabase from "../CONFIG/supabaseClient";
-
+import "../CSS/testimonialDisplay.css";
 import HeaderLogged from "../INCLUDE/header-logged";
 import HeaderUnlogged from "../INCLUDE/header-unlogged";
 import Footer from "../INCLUDE/footer";
@@ -41,7 +41,6 @@ const TestimonialDisplay: React.FC = () => {
   const [visibleCount, setVisibleCount] = useState(9);
 
   useEffect(() => {
-    // track logged in user for header
     const unsub = onAuthStateChanged(auth, (user) => setAuthUser(user));
     return () => unsub();
   }, []);
@@ -107,79 +106,11 @@ const TestimonialDisplay: React.FC = () => {
   return (
     <>
       {authUser ? <HeaderLogged /> : <HeaderUnlogged />}
-      <main style={{ paddingTop: "90px" }}>
-        <style>{`
-          .testimonial-section {
-            padding: 3rem 1rem;
-            background: #f8f9fa;
-            font-family: system-ui, sans-serif;
-            min-height: 80vh;
-          }
-          .testimonial-section h2 {
-            text-align: center;
-            font-weight: 700;
-            margin-bottom: 2rem;
-          }
-          .testimonial-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 1.5rem;
-            max-width: 1200px;
-            margin: 0 auto;
-          }
-          .testimonial-card {
-            background: #fff;
-            border-radius: 1rem;
-            padding: 1.5rem;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.08);
-            text-align: center;
-            transition: transform 0.2s ease;
-          }
-          .testimonial-card:hover {
-            transform: translateY(-4px);
-          }
-          .testimonial-card img {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            object-fit: cover;
-            margin-bottom: 1rem;
-          }
-          .testimonial-card h5 {
-            margin: 0 0 0.25rem;
-            font-size: 1.1rem;
-          }
-          .testimonial-card small {
-            display: block;
-            color: #6c757d;
-            margin-bottom: 0.75rem;
-          }
-          .testimonial-card p {
-            font-size: 0.95rem;
-            line-height: 1.4;
-            color: #333;
-          }
-          .view-more-container {
-            text-align: center;
-            margin-top: 2rem;
-          }
-          .view-more-btn {
-            background: #1d492c;
-            color: #fff;
-            padding: 0.6rem 1.5rem;
-            border-radius: 0.5rem;
-            cursor: pointer;
-            border: none;
-            font-size: 1rem;
-            transition: background 0.2s;
-          }
-          .view-more-btn:hover {
-            background: #146d3a;
-          }
-        `}</style>
-
-        <section className="testimonial-section">
-          <h2>All Approved Testimonials</h2>
+      <main>
+        <section className="testDisplay-section">
+          <h2>Hear Directly From Our Users</h2>
+          <h6>We don’t just create solutions—we build relationships that last. Discover how our work has <br/> made a difference through the voices of those who matter most.</h6>
+          <a href="/testimonialSubmit" className="testSubmit-link"><button className="testimonialSubmit-headerBtn">Submit Testimonial</button></a>
           {loading && <p style={{ textAlign: "center" }}>Loading…</p>}
           {!loading && !data.length && (
             <p style={{ textAlign: "center" }}>No testimonials yet.</p>
@@ -187,22 +118,28 @@ const TestimonialDisplay: React.FC = () => {
 
           {!loading && data.length > 0 && (
             <>
-              <div className="testimonial-grid">
+              <div className="testDisplay-grid">
                 {data.slice(0, visibleCount).map((t) => (
-                  <div className="testimonial-card" key={t.id}>
-                    <img
-                      src={t.users?.profile_picture || "/PICTURES/default-avatar.png"}
-                      alt={t.users?.username || "User"}
-                    />
-                    <h5>{t.users?.username ?? "Unknown User"}</h5>
-                    <small>{t.users?.email ?? "No email"}</small>
+                  <div className="testDisplay-card" key={t.id}>
+                    <div className="testDisplay-userDetails">
+                      <img
+                        src={t.users?.profile_picture || "/PICTURES/default-avatar.png"}
+                        alt={t.users?.username || "User"}
+                      />
+                      <div>
+                        <h5>{t.users?.username ?? "Unknown User"}</h5>
+                        <small>{t.users?.email ?? "No email"}</small>
+                      </div>
+                    
+                    </div>
+                   
                     <p>“{t.testimonial}”</p>
                   </div>
                 ))}
               </div>
               {data.length > 9 && (
-                <div className="view-more-container">
-                  <button className="view-more-btn" onClick={toggleView}>
+                <div className="testDisplay-view-more-container">
+                  <button className="testDisplay-view-more-btn" onClick={toggleView}>
                     {visibleCount === 9 ? "View More" : "See Less"}
                   </button>
                 </div>

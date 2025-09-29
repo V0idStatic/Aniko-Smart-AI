@@ -158,7 +158,7 @@ const Testimonials: React.FC = () => {
           </div>
 
           <div className="testSection-headerBtn">
-            <button className="testDisplay-btn"><a href="testimonialDisplay.tsx">View Testimonials</a></button>
+            <a href="/testimonialDisplay"><button className="testDisplay-btn">View Testimonials</button></a>
           </div>
         </div>
         
