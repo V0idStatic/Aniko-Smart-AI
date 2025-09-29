@@ -340,7 +340,7 @@ const AdminCMS: React.FC = () => {
             <div className="modal-dialog modal-dialog-centered adminCms-modal-dialog">
               <div className="modal-content adminCms-modal-content addTeam-modal">
                 <div className="modal-header">
-                  <h5 className="modal-title text-success">
+                  <h5 className="modal-title text-success adminCms-modalTitle">
                     <i className="bi bi-cloud-upload-fill"></i> {uploadTitle}
                   </h5>
                   <button
@@ -359,7 +359,7 @@ const AdminCMS: React.FC = () => {
                     <>
                       <button
                         type="button"
-                        className="btn btn-secondary"
+                        className="btn btn-secondary adminCms-cancelBtn"
                         onClick={() => {
                           if (!uploadLoading) setShowUploadModal(false);
                         }}
@@ -369,7 +369,7 @@ const AdminCMS: React.FC = () => {
                       </button>
                       <button
                         type="button"
-                        className="btn btn-success"
+                        className="btn btn-success adminCms-confirm-confirmBtn"
                         onClick={() => {
                           try {
                             onUploadConfirm();
@@ -427,7 +427,7 @@ const AdminCMS: React.FC = () => {
                     <>
                       <button
                         type="button"
-                        className="btn btn-secondary"
+                        className="btn btn-secondary adminCms-cancelBtn"
                         onClick={() => {
                           if (!deleteLoading) setShowDeleteModal(false);
                         }}
@@ -455,7 +455,7 @@ const AdminCMS: React.FC = () => {
                   ) : (
                     <button
                       type="button"
-                      className="btn btn-danger"
+                      className="btn btn-danger adminCms-okBtn"
                       onClick={() => setShowDeleteModal(false)}
                     >
                       OK
