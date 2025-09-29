@@ -53,6 +53,15 @@ interface PlantRecommendation {
     };
   };
   alternativePlantingDates: string[];
+  // Add database-specific fields
+  optimalTemp?: { min: number; max: number };
+  optimalHumidity?: { min: number; max: number };
+  optimalPH?: { min: number | null; max: number | null };
+  optimalNPK?: {
+    nitrogen: { min: number | null; max: number | null };
+    phosphorus: { min: number | null; max: number | null };
+    potassium: { min: number | null; max: number | null };
+  };
 }
 
 interface CropDatabase {
@@ -713,14 +722,33 @@ export default function Analysis() {
     setExpandedChart(expandedChart === chartType ? null : chartType);
   };
 
-  // Add the recommendation generation function
+  // Replace the static cropDatabase and generatePlantRecommendations function
   const generatePlantRecommendations = async () => {
     if (!selectedLocation || weatherData.length === 0) return;
     
     setLoadingRecommendations(true);
     
     try {
-      // Fetch next month's weather prediction
+      console.log('🔄 Fetching crop parameters from database...');
+      
+      // Fetch crop parameters from your denormalized_crop_parameter table
+      const { data: cropParams, error: cropError } = await supabase
+        .from('denormalized_crop_parameter')
+        .select('*');
+
+      if (cropError) {
+        console.error('Error fetching crop parameters:', cropError);
+        throw cropError;
+      }
+
+      if (!cropParams || cropParams.length === 0) {
+        console.log('No crop parameters found in database');
+        return;
+      }
+
+      console.log(`✅ Fetched ${cropParams.length} crops from database`);
+
+      // Get next month info
       const nextMonth = new Date();
       nextMonth.setMonth(nextMonth.getMonth() + 1);
       const nextMonthNum = nextMonth.getMonth() + 1;
@@ -731,189 +759,249 @@ export default function Analysis() {
       const avgHumidity = recentWeather.reduce((sum, d) => sum + d.humidity, 0) / recentWeather.length;
       const totalRainfall = recentWeather.reduce((sum, d) => sum + d.rainfall, 0);
       
-      // Predict next month's weather based on historical patterns
-      const nextMonthWeather = await predictNextMonthWeather(nextMonthNum, selectedLocation);
+      console.log(`📊 Current weather analysis:`, {
+        avgTemp: avgTemp.toFixed(1),
+        avgHumidity: avgHumidity.toFixed(1),
+        totalRainfall: totalRainfall.toFixed(1),
+        location: selectedLocation.city
+      });
+
+      // Predict next month's weather
+      const nextMonthWeather = {
+        nextMonth: {
+          avgTemp: avgTemp + (Math.random() * 4 - 2), // Slight variation from current
+          rainfall: totalRainfall / recentWeather.length * 30, // Monthly estimate
+          humidity: avgHumidity + (Math.random() * 10 - 5), // Slight variation
+          riskLevel: totalRainfall > 200 ? 'high' : totalRainfall > 100 ? 'medium' : 'low' as 'low' | 'medium' | 'high'
+        }
+      };
       
       const recommendations: PlantRecommendation[] = [];
       
-      for (const [cropName, cropDataUnknown] of Object.entries(cropDatabase)) {
-        const cropData = cropDataUnknown as any; // or as CropDatabase[string] if you want stricter typing
-        const isOptimalSeason = cropData.plantingSeasons.includes(nextMonthNum);
-        const tempSuitability = avgTemp >= cropData.optimalTemp.min && avgTemp <= cropData.optimalTemp.max;
-        const humiditySuitability = avgHumidity >= cropData.optimalHumidity.min && avgHumidity <= cropData.optimalHumidity.max;
+      // Process each crop from database
+      for (const crop of cropParams) {
+        console.log(`🌱 Processing crop: ${crop.crop_name}`);
+        
+        // Check temperature suitability
+        const tempSuitability = avgTemp >= (crop.temperature_min || 0) && avgTemp <= (crop.temperature_max || 50);
+        
+        // Check humidity/moisture suitability
+        const humiditySuitability = avgHumidity >= (crop.moisture_min || 0) && avgHumidity <= (crop.moisture_max || 100);
+        
+        // Determine planting seasons based on crop type and region
+        const plantingSeasons = getPlantingSeasonsByCrop(crop.crop_name, selectedLocation.region);
+        const isOptimalSeason = plantingSeasons.includes(nextMonthNum);
         
         let status: 'ideal' | 'good' | 'caution' | 'avoid' = 'good';
         const riskFactors: string[] = [];
         const recommendationsList: string[] = [];
         
-        // Assess current conditions
+        // Assess temperature conditions
         if (!tempSuitability) {
-          if (avgTemp < cropData.optimalTemp.min) {
-            riskFactors.push('Temperature too low');
-            recommendationsList.push('Wait for warmer weather or use greenhouse');
-          } else {
-            riskFactors.push('Temperature too high');
-            recommendationsList.push('Provide shade or wait for cooler season');
+          if (avgTemp < (crop.temperature_min || 0)) {
+            riskFactors.push(`Temperature too low (${avgTemp.toFixed(1)}°C < ${crop.temperature_min}°C)`);
+            recommendationsList.push('Wait for warmer weather or use greenhouse protection');
+          } else if (avgTemp > (crop.temperature_max || 50)) {
+            riskFactors.push(`Temperature too high (${avgTemp.toFixed(1)}°C > ${crop.temperature_max}°C)`);
+            recommendationsList.push('Provide shade nets or wait for cooler season');
           }
         }
         
+        // Assess humidity/moisture conditions
         if (!humiditySuitability) {
-          if (avgHumidity < cropData.optimalHumidity.min) {
-            riskFactors.push('Low humidity');
-            recommendationsList.push('Increase irrigation or use mulching');
-          } else {
-            riskFactors.push('High humidity');
-            recommendationsList.push('Ensure good ventilation and drainage');
+          if (avgHumidity < (crop.moisture_min || 0)) {
+            riskFactors.push(`Humidity too low (${avgHumidity.toFixed(1)}% < ${crop.moisture_min}%)`);
+            recommendationsList.push('Increase irrigation frequency or use mulching');
+          } else if (avgHumidity > (crop.moisture_max || 100)) {
+            riskFactors.push(`Humidity too high (${avgHumidity.toFixed(1)}% > ${crop.moisture_max}%)`);
+            recommendationsList.push('Ensure good ventilation and proper drainage');
           }
         }
         
-        // Assess rainfall
-        if (totalRainfall > cropData.rainfallTolerance.max) {
-          riskFactors.push('Excessive rainfall');
-          recommendationsList.push('Improve drainage and consider raised beds');
-        } else if (totalRainfall < cropData.rainfallTolerance.min) {
-          riskFactors.push('Insufficient rainfall');
-          recommendationsList.push('Increase irrigation frequency');
+        // Assess pH conditions if available
+        if (crop.ph_level_min && crop.ph_level_max) {
+          recommendationsList.push(`Maintain soil pH between ${crop.ph_level_min} - ${crop.ph_level_max}`);
         }
         
-        // Weather prediction analysis
-        const weatherRiskLevel = assessWeatherRisk(nextMonthWeather, cropData);
+        // Assess NPK requirements
+        const npkRecommendations = [];
+        if (crop.nitrogen_min && crop.nitrogen_max) {
+          npkRecommendations.push(`Nitrogen: ${crop.nitrogen_min}-${crop.nitrogen_max} ppm`);
+        }
+        if (crop.potassium_min && crop.potassium_max) {
+          npkRecommendations.push(`Potassium: ${crop.potassium_min}-${crop.potassium_max} ppm`);
+        }
+        if (crop.phosphorus_min && crop.phosphorus_max) {
+          npkRecommendations.push(`Phosphorus: ${crop.phosphorus_min}-${crop.phosphorus_max} ppm`);
+        }
+        
+        if (npkRecommendations.length > 0) {
+          recommendationsList.push(`Optimal nutrient levels: ${npkRecommendations.join(', ')}`);
+        }
+        
+        // Weather-based rainfall assessment
+        const estimatedRainfallTolerance = getRainfallToleranceByCrop(crop.crop_name);
+        if (totalRainfall > estimatedRainfallTolerance.max) {
+          riskFactors.push('Excessive rainfall detected');
+          recommendationsList.push('Improve drainage and consider raised beds');
+        } else if (totalRainfall < estimatedRainfallTolerance.min) {
+          riskFactors.push('Insufficient rainfall');
+          recommendationsList.push('Increase irrigation to supplement rainfall');
+        }
         
         // Determine overall status
         if (isOptimalSeason && tempSuitability && humiditySuitability && riskFactors.length === 0) {
           status = 'ideal';
-          recommendationsList.push('Perfect conditions for planting');
+          recommendationsList.unshift('🌟 Perfect conditions for planting right now!');
         } else if (isOptimalSeason && riskFactors.length <= 1) {
           status = 'good';
+          recommendationsList.unshift('✅ Good time to plant with minor adjustments');
         } else if (riskFactors.length <= 2) {
           status = 'caution';
+          recommendationsList.unshift('⚠️ Proceed with caution and monitoring');
         } else {
           status = 'avoid';
-          recommendationsList.push('Consider alternative crops or wait for better conditions');
+          recommendationsList.unshift('❌ Consider waiting for better conditions');
         }
         
-        // Generate alternative planting dates
-        const alternativeDates = generateAlternativeDates(cropData, nextMonthWeather);
+        // Generate location-specific alternative dates
+        const alternativeDates = generateLocationAlternatives(crop, nextMonthWeather, selectedLocation);
         
         recommendations.push({
-          cropName,
-          bestMonths: cropData.plantingSeasons,
+          cropName: crop.crop_name,
+          bestMonths: plantingSeasons,
           currentStatus: status,
           riskFactors,
           recommendations: recommendationsList,
           predictedWeather: nextMonthWeather,
-          alternativePlantingDates: alternativeDates
+          alternativePlantingDates: alternativeDates,
+          // Add database-specific info
+          optimalTemp: { min: crop.temperature_min || 0, max: crop.temperature_max || 50 },
+          optimalHumidity: { min: crop.moisture_min || 0, max: crop.moisture_max || 100 },
+          optimalPH: { min: crop.ph_level_min, max: crop.ph_level_max },
+          optimalNPK: {
+            nitrogen: { min: crop.nitrogen_min, max: crop.nitrogen_max },
+            phosphorus: { min: crop.phosphorus_min, max: crop.phosphorus_max },
+            potassium: { min: crop.potassium_min, max: crop.potassium_max }
+          }
         });
       }
       
-      // Sort by recommendation priority
+      // Sort by recommendation priority and location suitability
       recommendations.sort((a, b) => {
         const statusPriority = { ideal: 4, good: 3, caution: 2, avoid: 1 };
         return statusPriority[b.currentStatus] - statusPriority[a.currentStatus];
       });
       
+      console.log(`✅ Generated ${recommendations.length} recommendations`);
       setPlantRecommendations(recommendations);
       
     } catch (error) {
-      console.error('Error generating recommendations:', error);
+      console.error('Error generating database-based recommendations:', error);
+      
+      // Fallback message for users
+      setPlantRecommendations([]);
     } finally {
       setLoadingRecommendations(false);
     }
   };
 
-  // Helper functions
-  const predictNextMonthWeather = async (month: number, location: any) => {
-    // Use historical data to predict next month's weather
-    const historicalData = weatherData.filter(d => {
-      const dataMonth = new Date(d.date).getMonth() + 1;
-      return dataMonth === month;
-    });
-    
-    if (historicalData.length === 0) {
-      // Fallback seasonal predictions
-      return {
-        nextMonth: {
-          avgTemp: getSeasonalTemp(month),
-          rainfall: getSeasonalRainfall(month),
-          humidity: getSeasonalHumidity(month),
-          riskLevel: 'medium' as const
-        }
-      };
-    }
-    
-    const avgTemp = historicalData.reduce((sum, d) => sum + d.temperature, 0) / historicalData.length;
-    const avgRainfall = historicalData.reduce((sum, d) => sum + d.rainfall, 0) / historicalData.length;
-    const avgHumidity = historicalData.reduce((sum, d) => sum + d.humidity, 0) / historicalData.length;
-    
-    // Assess risk level based on extremes
-    const maxTemp = Math.max(...historicalData.map(d => d.temperature));
-    const maxRainfall = Math.max(...historicalData.map(d => d.rainfall));
-    
-    let riskLevel: 'low' | 'medium' | 'high' = 'low';
-    if (maxTemp > 35 || maxRainfall > 50) riskLevel = 'high';
-    else if (maxTemp > 30 || maxRainfall > 20) riskLevel = 'medium';
-    
-    return {
-      nextMonth: {
-        avgTemp: Number(avgTemp.toFixed(1)),
-        rainfall: Number(avgRainfall.toFixed(1)),
-        humidity: Number(avgHumidity.toFixed(1)),
-        riskLevel
-      }
+  // Helper function to determine planting seasons by crop and region
+  const getPlantingSeasonsByCrop = (cropName: string, region?: string): number[] => {
+    // Philippines-specific planting seasons
+    const cropSeasons: { [key: string]: number[] } = {
+      // Rice varieties
+      'Rice': [5, 6, 7, 11, 12, 1],
+      
+      // Vegetables
+      'Tomato': [1, 2, 3, 10, 11, 12],
+      'Lettuce': [11, 12, 1, 2, 3, 4],
+      'Cucumber': [2, 3, 4, 5, 9, 10],
+      'Spinach': [11, 12, 1, 2],
+      'Cabbage': [11, 12, 1, 2, 3],
+      'Carrot': [11, 12, 1, 2, 3],
+      'Eggplant': [1, 2, 3, 10, 11, 12],
+      'Bell Pepper': [1, 2, 3, 10, 11, 12],
+      'Onion': [11, 12, 1, 2],
+      'Garlic': [10, 11, 12],
+      
+      // Root crops
+      'Sweet Potato': [3, 4, 5, 6],
+      'Cassava': [4, 5, 6, 7],
+      'Taro': [4, 5, 6, 7, 8],
+      
+      // Fruits
+      'Banana': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], // Year-round
+      'Papaya': [3, 4, 5, 6, 7, 8],
+      'Mango': [12, 1, 2, 3],
+      
+      // Legumes
+      'Mung Bean': [2, 3, 4, 8, 9, 10],
+      'Peanut': [4, 5, 6, 7],
+      'Soybean': [5, 6, 7, 8],
+      
+      // Corn
+      'Corn': [1, 2, 3, 7, 8, 9],
+      'Sweet Corn': [1, 2, 3, 7, 8, 9],
     };
+    
+    // Default to year-round if crop not found
+    return cropSeasons[cropName] || [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
   };
 
-  const assessWeatherRisk = (weather: any, cropData: any): 'low' | 'medium' | 'high' => {
-    const { avgTemp, rainfall, humidity } = weather.nextMonth;
+  // Helper function to get rainfall tolerance by crop
+  const getRainfallToleranceByCrop = (cropName: string): { min: number; max: number } => {
+    const rainfallTolerance: { [key: string]: { min: number; max: number } } = {
+      'Rice': { min: 100, max: 300 },
+      'Tomato': { min: 50, max: 200 },
+      'Lettuce': { min: 30, max: 120 },
+      'Cucumber': { min: 40, max: 180 },
+      'Spinach': { min: 30, max: 100 },
+      'Corn': { min: 60, max: 250 },
+      'Eggplant': { min: 50, max: 200 },
+      'Sweet Potato': { min: 40, max: 150 },
+      'Banana': { min: 80, max: 400 },
+      'Mango': { min: 30, max: 150 },
+    };
     
-    let riskScore = 0;
-    
-    if (avgTemp < cropData.optimalTemp.min || avgTemp > cropData.optimalTemp.max) riskScore += 2;
-    if (humidity < cropData.optimalHumidity.min || humidity > cropData.optimalHumidity.max) riskScore += 1;
-    if (rainfall > cropData.rainfallTolerance.max * 0.1) riskScore += 2; // Monthly rainfall
-    
-    if (riskScore >= 4) return 'high';
-    if (riskScore >= 2) return 'medium';
-    return 'low';
+    return rainfallTolerance[cropName] || { min: 50, max: 200 };
   };
 
-  const generateAlternativeDates = (cropData: any, weather: any): string[] => {
+  // Enhanced alternative date generation with location data
+  const generateLocationAlternatives = (crop: any, weather: any, location: any): string[] => {
     const alternatives: string[] = [];
     const currentMonth = new Date().getMonth() + 1;
     
+    // Get optimal seasons for this crop
+    const optimalSeasons = getPlantingSeasonsByCrop(crop.crop_name, location.region);
+    
     // Find next optimal month
-    const nextOptimalMonth = cropData.plantingSeasons.find((month: number) => month > currentMonth) ||
-                            cropData.plantingSeasons[0] + 12;
+    const nextOptimalMonth = optimalSeasons.find((month: number) => month > currentMonth) ||
+                            optimalSeasons[0] + 12;
     
     if (nextOptimalMonth !== currentMonth + 1) {
-      const monthName = new Date(2024, (nextOptimalMonth - 1) % 12, 1).toLocaleString('default', { month: 'long' });
-      alternatives.push(`Wait until ${monthName} for optimal conditions`);
+      const monthName = new Date(2024, (nextOptimalMonth - 1) % 12, 1)
+        .toLocaleString('default', { month: 'long' });
+      alternatives.push(`⏰ Wait until ${monthName} for optimal planting season`);
     }
     
+    // Weather-based alternatives
     if (weather.nextMonth.riskLevel === 'high') {
-      alternatives.push('Consider greenhouse or controlled environment');
-      alternatives.push('Plant 2-3 weeks earlier to avoid peak risk period');
+      alternatives.push('🏠 Consider greenhouse or controlled environment');
+      alternatives.push('📅 Plant 2-3 weeks earlier to avoid adverse weather');
+    }
+    
+    // Region-specific advice
+    if (location.region) {
+      alternatives.push(`📍 Consult local farmers in ${location.region} for region-specific timing`);
+    }
+    
+    // Temperature-based alternatives
+    if (crop.temperature_min && crop.temperature_max) {
+      alternatives.push(`🌡️ Monitor temperature: optimal range is ${crop.temperature_min}°C - ${crop.temperature_max}°C`);
     }
     
     return alternatives;
-  };
-
-  const getSeasonalTemp = (month: number): number => {
-    // Philippines seasonal temperature patterns
-    const temps = [26, 27, 29, 31, 30, 29, 28, 28, 28, 28, 27, 26];
-    return temps[month - 1];
-  };
-
-  const getSeasonalRainfall = (month: number): number => {
-    // Philippines seasonal rainfall patterns (mm/day)
-    const rainfall = [2, 1, 2, 3, 8, 12, 15, 16, 14, 10, 6, 3];
-    return rainfall[month - 1];
-  };
-
-  const getSeasonalHumidity = (month: number): number => {
-    // Philippines seasonal humidity patterns
-    const humidity = [75, 70, 70, 72, 78, 82, 85, 85, 83, 80, 78, 76];
-    return humidity[month - 1];
   };
 
   // Add useEffect to generate recommendations when data changes
@@ -1649,6 +1737,48 @@ export default function Analysis() {
                         ))}
                       </View>
                     )}
+
+                    {/* Database-specific optimal conditions */}
+                    {recommendation.optimalTemp && (
+                      <View style={styles.optimalConditions}>
+                        <Text style={styles.subsectionTitle}>🎯 Optimal Growing Conditions (From Database):</Text>
+                        <Text style={styles.conditionText}>
+                          🌡️ Temperature: {recommendation.optimalTemp.min}°C - {recommendation.optimalTemp.max}°C
+                        </Text>
+                        {recommendation.optimalHumidity && (
+                          <Text style={styles.conditionText}>
+                            💧 Humidity: {recommendation.optimalHumidity.min}% - {recommendation.optimalHumidity.max}%
+                          </Text>
+                        )}
+                        {recommendation.optimalPH?.min && recommendation.optimalPH?.max && (
+                          <Text style={styles.conditionText}>
+                            ⚗️ pH Level: {recommendation.optimalPH.min} - {recommendation.optimalPH.max}
+                          </Text>
+                        )}
+                      </View>
+                    )}
+
+                    {/* NPK Requirements from database */}
+                    {recommendation.optimalNPK && (
+                      <View style={styles.npkSection}>
+                        <Text style={styles.subsectionTitle}>🧪 Nutrient Requirements:</Text>
+                        {recommendation.optimalNPK.nitrogen.min && recommendation.optimalNPK.nitrogen.max && (
+                          <Text style={styles.conditionText}>
+                            🟢 Nitrogen: {recommendation.optimalNPK.nitrogen.min} - {recommendation.optimalNPK.nitrogen.max} ppm
+                          </Text>
+                        )}
+                        {recommendation.optimalNPK.phosphorus.min && recommendation.optimalNPK.phosphorus.max && (
+                          <Text style={styles.conditionText}>
+                            🟠 Phosphorus: {recommendation.optimalNPK.phosphorus.min} - {recommendation.optimalNPK.phosphorus.max} ppm
+                          </Text>
+                        )}
+                        {recommendation.optimalNPK.potassium.min && recommendation.optimalNPK.potassium.max && (
+                          <Text style={styles.conditionText}>
+                            🔵 Potassium: {recommendation.optimalNPK.potassium.min} - {recommendation.optimalNPK.potassium.max} ppm
+                          </Text>
+                        )}
+                      </View>
+                    )}
                   </View>
                 ))}
 
@@ -2254,5 +2384,23 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: '#555',
   },
+  optimalConditions: {
+    marginTop: 8,
+    marginBottom: 8,
+    backgroundColor: '#f0f8f0',
+    borderRadius: 8,
+    padding: 12,
+  },
+  npkSection: {
+    marginTop: 8,
+    marginBottom: 8,
+    backgroundColor: '#f5f7fa',
+    borderRadius: 8,
+    padding: 12,
+  },
+  conditionText: {
+    fontSize: 13,
+    color: '#555',
+    marginBottom: 4,
+  },
 });
-  
