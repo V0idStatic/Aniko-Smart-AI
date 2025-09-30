@@ -220,7 +220,7 @@
 }
 
 .sendRep-btn:hover {
-    background-color: var(--dark-brown) !important;
+    background: var(--gradient-primary) !important;
     color: white !important;
 }
 

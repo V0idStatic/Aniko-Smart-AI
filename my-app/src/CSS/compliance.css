@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&family=Zalando+Sans+Expanded:ital,wght@0,200..900;1,200..900&display=swap');
+
 :root {
   --primary-green: #1D492C;
   --accent-green: #84cc16;
@@ -47,7 +49,7 @@ html, body {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 0;
-  max-width: 1200px;
+  max-width: 1100px;
   margin: 0 auto;
   position: relative;
 }
@@ -152,6 +154,8 @@ html, body {
   margin-bottom: 5px;
   color: var(--light-green);
   font-weight: 500 !important;
+  align-items: center !important; 
+  margin-top: 10px !important;
 }
 
 .form-floating {
@@ -242,6 +246,7 @@ html, body {
   gap: 15px;
 }
 
+
 .social-links a {
   display: flex;
   align-items: center;
@@ -278,6 +283,9 @@ html, body {
   position: relative;
   z-index: 2;
   font-size: 18px;
+  justify-content: center; 
+  align-items: center; 
+  margin: 0 auto;
 }
 
 .social-links a:hover {
@@ -360,7 +368,44 @@ html, body {
   flex-direction: column;
 }
 
-/* Add spacing at the bottom to avoid footer overlap */
 .contact-section {
   padding-bottom: 100px !important;
 }
+
+/* ========== MODAL STYLEEEE ========================== */
+.comp-modContent {
+  border-radius: 20px;
+  border: 2px solid var(--dark-green);
+}
+
+.comp-modHeader {
+  background: var(--gradient-secondary);
+  color: var(--light-green);
+  border: 0;
+  border-top-right-radius: 20px;
+  border-top-left-radius: 20px;
+}
+
+.comp-modBody {
+  background-color: var(--light-green);
+  color: var(--primary-green);
+  font-weight: 500;
+  padding: 30px;
+}
+
+.comp-modFooter {
+  background-color: var(--light-green);
+  border-bottom-right-radius: 20px;
+  border-bottom-left-radius: 20px;
+}
+
+.comp-modOkBtn {
+  border-radius: 10px;
+  background-color: var(--pastel-green);
+  border: 2px solid var(--primary-green);
+  color: var(--primary-green);
+  font-weight: 500;
+  padding: 5px 20px;
+  margin: 10px;
+}
+
