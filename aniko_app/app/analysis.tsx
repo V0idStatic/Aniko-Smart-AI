@@ -75,41 +75,7 @@ interface CropDatabase {
   };
 }
 
-// Example crop database (add more crops as needed)
-const cropDatabase: CropDatabase = {
-  Tomato: {
-    optimalTemp: { min: 20, max: 30 },
-    optimalHumidity: { min: 60, max: 80 },
-    rainfallTolerance: { min: 50, max: 200 },
-    plantingSeasons: [1, 2, 3, 10, 11, 12],
-    growthDuration: 90,
-    vulnerabilities: ['Fungal diseases', 'Heat stress'],
-  },
-  Lettuce: {
-    optimalTemp: { min: 15, max: 25 },
-    optimalHumidity: { min: 60, max: 80 },
-    rainfallTolerance: { min: 30, max: 120 },
-    plantingSeasons: [1, 2, 3, 4, 11, 12],
-    growthDuration: 60,
-    vulnerabilities: ['Bolting', 'Downy mildew'],
-  },
-  Cucumber: {
-    optimalTemp: { min: 18, max: 32 },
-    optimalHumidity: { min: 60, max: 85 },
-    rainfallTolerance: { min: 40, max: 180 },
-    plantingSeasons: [2, 3, 4, 5, 9, 10],
-    growthDuration: 70,
-    vulnerabilities: ['Powdery mildew', 'Root rot'],
-  },
-  Spinach: {
-    optimalTemp: { min: 10, max: 22 },
-    optimalHumidity: { min: 60, max: 80 },
-    rainfallTolerance: { min: 30, max: 100 },
-    plantingSeasons: [1, 2, 11, 12],
-    growthDuration: 45,
-    vulnerabilities: ['Leaf miners', 'Downy mildew'],
-  },
-};
+
 
 export default function Analysis() {
   const router = useRouter();
@@ -141,6 +107,9 @@ export default function Analysis() {
 
   // Add this state for selected plant details
   const [selectedPlantDetail, setSelectedPlantDetail] = useState<PlantRecommendation | null>(null);
+
+  // Add this state after your existing states (around line 70)
+  const [selectedStatus, setSelectedStatus] = useState<'all' | 'ideal' | 'good' | 'caution' | 'avoid'>('all');
 
   // Initialize with selected plant if available
   useEffect(() => {
@@ -240,7 +209,7 @@ export default function Analysis() {
           signal: controller.signal,
           headers: {
             'Accept': 'application/json',
-            'User-Agent': 'AnikoSmartAI/1.0'
+            'User-Agent': 'SmartAI/1.0'
           }
         });
         
@@ -728,6 +697,427 @@ export default function Analysis() {
   const toggleChartExpansion = (chartType: string) => {
     setExpandedChart(expandedChart === chartType ? null : chartType);
   };
+  // Add these functions after your helper functions (around line 700)
+
+// ==========================================
+// 1. SAVE WEATHER DATA TO DATABASE
+// ==========================================
+const saveWeatherDataToDatabase = async (
+  locationId: string,
+  weatherData: WeatherHistoryData[],
+  isHistorical: boolean = false
+) => {
+  try {
+    const tableName = isHistorical ? 'weather_historical' : 'weather_current';
+    
+    console.log(`💾 Saving ${weatherData.length} records to ${tableName}...`);
+    console.log(`📍 Location ID: ${locationId}`);
+    console.log(`📅 Date range: ${weatherData[0]?.date} to ${weatherData[weatherData.length - 1]?.date}`);
+    
+    const dataToInsert = weatherData.map(data => ({
+      location_id: locationId,
+      date: data.date,
+      temperature_avg: data.temperature,
+      humidity_avg: data.humidity,
+      rainfall_mm: data.rainfall,
+      weather_description: data.description,
+      year: new Date(data.date).getFullYear(),
+      month: new Date(data.date).getMonth() + 1,
+      data_source: 'open-meteo-api',
+      created_at: new Date().toISOString()
+    }));
+
+    console.log(`📝 Sample record to insert:`, JSON.stringify(dataToInsert[0], null, 2));
+
+    // Use upsert to avoid duplicates
+    const { data: insertedData, error } = await supabase
+      .from(tableName)
+      .upsert(dataToInsert, {
+        onConflict: 'location_id,date',
+        ignoreDuplicates: false
+      });
+
+    if (error) {
+      console.error(`❌ Database error saving to ${tableName}:`, error);
+      throw error;
+    }
+    
+    console.log(`✅ Successfully saved ${dataToInsert.length} records to ${tableName}`);
+    
+    // Verify the save by reading back
+    const { data: verifyData, error: verifyError } = await supabase
+      .from(tableName)
+      .select('*')
+      .eq('location_id', locationId)
+      .order('date', { ascending: false })
+      .limit(5);
+    
+    if (!verifyError && verifyData) {
+      console.log(`🔍 Verification: Found ${verifyData.length} records in ${tableName} for location ${locationId}`);
+      console.log(`📊 Latest record:`, verifyData[0]);
+    }
+    
+    // Log the API call
+    await logWeatherAPICall(
+      locationId,
+      isHistorical ? 'archive' : 'forecast',
+      weatherData[0].date,
+      weatherData[weatherData.length - 1].date,
+      weatherData.length,
+      200
+    );
+    
+    return true;
+  } catch (error) {
+    console.error('❌ Error saving weather data to database:', error);
+    return false;
+  }
+};
+
+// ==========================================
+// 2. LOG API USAGE
+// ==========================================
+const logWeatherAPICall = async (
+  locationId: string,
+  endpoint: string,
+  startDate: string,
+  endDate: string,
+  dataPointsFetched: number,
+  responseStatus: number
+) => {
+  try {
+    const { error } = await supabase
+      .from('weather_api_logs')
+      .insert({
+        location_id: locationId,
+        api_endpoint: endpoint,
+        date_range_start: startDate,
+        date_range_end: endDate,
+        data_points_fetched: dataPointsFetched,
+        response_status: responseStatus,
+        fetched_at: new Date().toISOString()
+      });
+
+    if (error) throw error;
+    console.log('📝 API call logged successfully');
+  } catch (error) {
+    console.error('Error logging API call:', error);
+  }
+};
+
+// ==========================================
+// 3. FETCH WEATHER FROM DATABASE FIRST
+// ==========================================
+const fetchWeatherFromDatabase = async (
+  locationId: string,
+  startDate: string,
+  endDate: string,
+  isHistorical: boolean = false
+): Promise<WeatherHistoryData[] | null> => {
+  try {
+    const tableName = isHistorical ? 'weather_historical' : 'weather_current';
+    
+    console.log(`📦 Checking ${tableName} for cached weather data...`);
+    console.log(`📍 Location ID: ${locationId}`);
+    console.log(`📅 Date range: ${startDate} to ${endDate}`);
+    
+    const { data: cachedData, error: dbError } = await supabase
+      .from(tableName)
+      .select('*')
+      .eq('location_id', locationId)
+      .gte('date', startDate)
+      .lte('date', endDate)
+      .order('date', { ascending: true });
+
+    if (dbError) {
+      console.error(`❌ Database error fetching from ${tableName}:`, dbError);
+      throw dbError;
+    }
+    
+    if (!cachedData || cachedData.length === 0) {
+      console.log(`📭 No cached data found in ${tableName} for location ${locationId}`);
+      
+      // Check if there's ANY data for this location
+      const { data: anyData, error: anyError } = await supabase
+        .from(tableName)
+        .select('*')
+        .eq('location_id', locationId)
+        .limit(5);
+      
+      if (!anyError && anyData && anyData.length > 0) {
+        console.log(`ℹ️ Found ${anyData.length} records for this location, but not in the requested date range`);
+        console.log(`📊 Sample dates available:`, anyData.map(d => d.date).join(', '));
+      } else {
+        console.log(`ℹ️ No data exists at all for location ${locationId} in ${tableName}`);
+      }
+      
+      return null;
+    }
+
+    // Calculate cache completeness
+    const expectedDataPoints = Math.ceil(
+      (new Date(endDate).getTime() - new Date(startDate).getTime()) / (1000 * 60 * 60 * 24)
+    );
+    const cacheCompleteness = (cachedData.length / expectedDataPoints) * 100;
+    
+    console.log(`📊 Cache completeness: ${cacheCompleteness.toFixed(1)}% (${cachedData.length}/${expectedDataPoints} days)`);
+    
+    // Check if we have today's data
+    const latestCachedDate = cachedData.length > 0 ? cachedData[cachedData.length - 1].date : null;
+    const todayStr = new Date().toISOString().split('T')[0];
+    const hasTodayData = latestCachedDate === todayStr || latestCachedDate === endDate;
+    
+    console.log(`📅 Latest cached date: ${latestCachedDate}, Today: ${todayStr}, Has today: ${hasTodayData}`);
+    
+    // Only use cache if it's at least 80% complete AND has today's data
+    if (cacheCompleteness < 80) {
+      console.log(`⚠️ Cache incomplete (${cacheCompleteness.toFixed(1)}%), will fetch from API`);
+      return null;
+    }
+    
+    // For short time ranges (7days, 30days), refetch if missing today's data
+    if (!isHistorical && !hasTodayData) {
+      console.log(`⚠️ Cache missing latest data (latest: ${latestCachedDate}), will fetch from API`);
+      return null;
+    }
+
+    // Convert database format to app format
+    const processedData: WeatherHistoryData[] = cachedData.map(d => ({
+      date: d.date,
+      temperature: d.temperature_avg,
+      humidity: d.humidity_avg,
+      rainfall: d.rainfall_mm,
+      description: d.weather_description
+    }));
+    
+    console.log(`✅ Using ${processedData.length} cached weather records from ${tableName}`);
+    return processedData;
+    
+  } catch (error) {
+    console.error('Error fetching from database:', error);
+    return null;
+  }
+};
+
+// ==========================================
+// 4. UPDATE YOUR fetchWeatherHistory TO USE DATABASE
+// ==========================================
+// Replace your existing useEffect for weather fetching with this:
+
+useEffect(() => {
+  const fetchWeatherHistory = async () => {
+    if (!selectedLocation) {
+      console.log('⚠️ No location selected for weather analysis');
+      return;
+    }
+    
+    setLoadingWeather(true);
+    
+    try {
+      const endDate = new Date();
+      const startDate = new Date();
+      
+      // Set start date based on time range
+      switch(timeRange) {
+        case '7days':
+          startDate.setDate(endDate.getDate() - 7);
+          break;
+        case '30days':
+          startDate.setDate(endDate.getDate() - 30);
+          break;
+        case '1year':
+          startDate.setFullYear(endDate.getFullYear() - 1);
+          break;
+        case '5years':
+          startDate.setFullYear(endDate.getFullYear() - 5);
+          break;
+      }
+      
+      const startDateStr = startDate.toISOString().split('T')[0];
+      const endDateStr = endDate.toISOString().split('T')[0];
+      
+      const latitude = selectedLocation.lat;
+      const longitude = selectedLocation.lon;
+      
+      if (!latitude || !longitude) {
+        throw new Error('Invalid location coordinates');
+      }
+      
+      console.log(`🌤️ Fetching weather data for ${selectedLocation.city || 'Selected Location'}`);
+      console.log(`📅 Date range: ${startDateStr} to ${endDateStr}`);
+      
+      // ✅ STEP 1: Try to get data from database first
+      const isHistoricalRange = timeRange === '1year' || timeRange === '5years';
+      
+      // Create a unique location identifier from coordinates
+      const locationId = `${latitude}_${longitude}`.replace(/\./g, '_');
+      
+      const cachedWeatherData = await fetchWeatherFromDatabase(
+        locationId,
+        startDateStr,
+        endDateStr,
+        isHistoricalRange
+      );
+      
+      // If we have good cached data, use it and skip API call
+      if (cachedWeatherData && cachedWeatherData.length > 0) {
+        console.log(`✅ Using ${cachedWeatherData.length} cached records from database`);
+        setWeatherData(cachedWeatherData);
+        setLoadingWeather(false);
+        return; // ✅ CRITICAL: Stop here, don't fetch from API
+      }
+      
+      // ✅ STEP 2: If no cached data, fetch from API
+      console.log(`🌐 Fetching fresh data from Open-Meteo API...`);
+      
+      const baseUrl = isHistoricalRange 
+          ? 'https://archive-api.open-meteo.com/v1/archive'
+          : 'https://api.open-meteo.com/v1/forecast';
+          
+        const params = new URLSearchParams({
+          latitude: latitude.toString(),
+          longitude: longitude.toString(),
+          start_date: startDateStr,
+          end_date: endDateStr,
+          daily: 'temperature_2m_max,temperature_2m_min,temperature_2m_mean,relative_humidity_2m_mean,precipitation_sum,weather_code',
+          timezone: 'auto'
+        });
+        
+        const apiUrl = `${baseUrl}?${params.toString()}`;
+        console.log('🔗 API URL:', apiUrl);
+        
+        const controller = new AbortController();
+        // Increase timeout based on range: 1min for 7days, 2min for 1year, 3min for 5years
+        const timeoutDuration = timeRange === '5years' ? 180000 : timeRange === '1year' ? 120000 : 60000;
+        const timeoutId = setTimeout(() => controller.abort(), timeoutDuration);
+        
+        console.log(`⏱️ API timeout set to ${timeoutDuration/1000} seconds for ${timeRange}`);
+        
+        const response = await fetch(apiUrl, {
+          signal: controller.signal,
+          headers: {
+            'Accept': 'application/json',
+            'User-Agent': 'AnikoSmartAI/1.0'
+          }
+        });
+        
+        clearTimeout(timeoutId);
+        
+        if (!response.ok) {
+          throw new Error(`Weather API error: ${response.status} ${response.statusText}`);
+        }
+        
+        const weatherApiData = await response.json();
+        
+        if (!weatherApiData.daily || !weatherApiData.daily.time) {
+          throw new Error('No daily weather data available');
+        }
+        
+        // Process the API response
+        const processedWeatherData: WeatherHistoryData[] = [];
+        const dailyData = weatherApiData.daily;
+        
+        for (let i = 0; i < dailyData.time.length; i++) {
+          const date = dailyData.time[i];
+          const tempMean = dailyData.temperature_2m_mean?.[i] || 
+                          ((dailyData.temperature_2m_max?.[i] || 0) + (dailyData.temperature_2m_min?.[i] || 0)) / 2;
+          const humidity = dailyData.relative_humidity_2m_mean?.[i] || 0;
+          const rainfall = dailyData.precipitation_sum?.[i] || 0;
+          const weatherCode = dailyData.weather_code?.[i] || 0;
+          
+          const description = getWeatherDescription(weatherCode);
+          
+          processedWeatherData.push({
+            date: date,
+            temperature: Number(tempMean.toFixed(1)),
+            humidity: Number(humidity.toFixed(1)),
+            rainfall: Number(rainfall.toFixed(1)),
+            description: description
+          });
+        }
+        
+        console.log(`✅ Successfully fetched ${processedWeatherData.length} days from API`);
+        
+        // Save to database for future use
+        await saveWeatherDataToDatabase(
+          locationId,
+          processedWeatherData,
+          isHistoricalRange
+        );
+        
+        processedWeatherData.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+        setWeatherData(processedWeatherData);
+      
+    } catch (error) {
+      console.error('❌ Error fetching weather history:', error);
+      
+      // Check if it's a timeout error
+      if (error instanceof Error && error.name === 'AbortError') {
+        console.error('⏱️ Weather API request timed out');
+        console.log('💡 Tip: Try a shorter time range (7 days) or check your internet connection');
+      }
+      
+      // Fallback to mock data
+      console.log('🔄 Generating fallback weather data for selected time range...');
+      const mockWeatherData: WeatherHistoryData[] = [];
+      
+      const endDate = new Date();
+      const startDate = new Date();
+      
+      switch(timeRange) {
+        case '7days':
+          startDate.setDate(endDate.getDate() - 7);
+          break;
+        case '30days':
+          startDate.setDate(endDate.getDate() - 30);
+          break;
+        case '1year':
+          startDate.setFullYear(endDate.getFullYear() - 1);
+          break;
+        case '5years':
+          startDate.setFullYear(endDate.getFullYear() - 5);
+          break;
+      }
+      
+      let currentDate = new Date(startDate);
+      while (currentDate <= endDate) {
+        const dayOfYear = currentDate.getMonth() * 30 + currentDate.getDate();
+        const seasonalTemp = 20 + Math.sin((dayOfYear - 80) * Math.PI / 180) * 10;
+        const dailyVariation = Math.sin(currentDate.getDate() / 3) * 3;
+        const randomVariation = (Math.random() - 0.5) * 6;
+        
+        const temp = seasonalTemp + dailyVariation + randomVariation;
+        const humidity = Math.max(20, Math.min(95, 60 + Math.sin(dayOfYear / 20) * 20 + (Math.random() - 0.5) * 20));
+        const rainfall = Math.max(0, Math.sin(dayOfYear / 15) * 5 + (Math.random() - 0.7) * 10);
+        
+        let description = "Clear sky";
+        if (rainfall > 5) description = "Rainy";
+        else if (rainfall > 1) description = "Drizzle";
+        else if (humidity > 85) description = "Cloudy";
+        else if (humidity > 70) description = "Partly cloudy";
+        else if (temp < 10) description = "Cold";
+        
+        mockWeatherData.push({
+          date: currentDate.toISOString().split('T')[0],
+          temperature: Number(temp.toFixed(1)),
+          humidity: Number(humidity.toFixed(1)),
+          rainfall: Number(rainfall.toFixed(1)),
+          description
+        });
+        
+        currentDate.setDate(currentDate.getDate() + 1);
+      }
+      
+      console.log(`🔄 Generated ${mockWeatherData.length} days of fallback weather data`);
+      setWeatherData(mockWeatherData);
+      
+    } finally {
+      setLoadingWeather(false);
+    }
+  };
+  
+  fetchWeatherHistory();
+}, [timeRange, selectedLocation]);
 
   // Replace the static cropDatabase and generatePlantRecommendations function
   const generatePlantRecommendations = async () => {
@@ -743,146 +1133,118 @@ export default function Analysis() {
         .from('denormalized_crop_parameter')
         .select('*');
 
-      if (cropError) {
-        console.error('Error fetching crop parameters:', cropError);
-        throw cropError;
-      }
+      if (cropError) throw cropError;
+      if (!cropParams || cropParams.length === 0) return;
 
-      if (!cropParams || cropParams.length === 0) {
-        console.log('No crop parameters found in database');
-        return;
-      }
-
-      console.log(`✅ Fetched ${cropParams.length} crops from database`);
-
-      // Get next month info
-      const nextMonth = new Date();
-      nextMonth.setMonth(nextMonth.getMonth() + 1);
-      const nextMonthNum = nextMonth.getMonth() + 1;
-      
-      // Analyze recent weather trends
-      const recentWeather = weatherData.slice(-30); // Last 30 days
+      // ✅ WEATHER-BASED ANALYSIS (No static months)
+      // Analyze recent weather trends (last 30 days)
+      const recentWeather = weatherData.slice(-30);
       const avgTemp = recentWeather.reduce((sum, d) => sum + d.temperature, 0) / recentWeather.length;
       const avgHumidity = recentWeather.reduce((sum, d) => sum + d.humidity, 0) / recentWeather.length;
       const totalRainfall = recentWeather.reduce((sum, d) => sum + d.rainfall, 0);
+      const avgDailyRainfall = totalRainfall / recentWeather.length;
+
+      // Predict next month's weather based on recent trends
+      const nextMonthWeather = {
+        nextMonth: {
+          avgTemp: avgTemp + (Math.random() * 2 - 1), // Slight variation
+          rainfall: avgDailyRainfall * 30, // Monthly estimate
+          humidity: avgHumidity + (Math.random() * 5 - 2.5),
+          riskLevel: determineWeatherRisk(avgTemp, avgHumidity, totalRainfall)
+        }
+      };
       
       console.log(`📊 Current weather analysis:`, {
         avgTemp: avgTemp.toFixed(1),
         avgHumidity: avgHumidity.toFixed(1),
         totalRainfall: totalRainfall.toFixed(1),
-        location: selectedLocation.city
+        avgDailyRainfall: avgDailyRainfall.toFixed(1)
       });
 
-      // Predict next month's weather
-      const nextMonthWeather = {
-        nextMonth: {
-          avgTemp: avgTemp + (Math.random() * 4 - 2), // Slight variation from current
-          rainfall: totalRainfall / recentWeather.length * 30, // Monthly estimate
-          humidity: avgHumidity + (Math.random() * 10 - 5), // Slight variation
-          riskLevel: totalRainfall > 200 ? 'high' : totalRainfall > 100 ? 'medium' : 'low' as 'low' | 'medium' | 'high'
-        }
-      };
-      
       const recommendations: PlantRecommendation[] = [];
       
-      // Process each crop from database
+      // ✅ PROCESS EACH CROP DYNAMICALLY
       for (const crop of cropParams) {
         console.log(`🌱 Processing crop: ${crop.crop_name}`);
         
-        // Check temperature suitability
-        const tempSuitability = avgTemp >= (crop.temperature_min || 0) && avgTemp <= (crop.temperature_max || 50);
+        // ✅ Check if CURRENT weather conditions are suitable
+        const tempSuitability = isTemperatureSuitable(avgTemp, crop);
+        const humiditySuitability = isHumiditySuitable(avgHumidity, crop);
+        const rainfallSuitability = isRainfallSuitable(avgDailyRainfall, crop);
         
-        // Check humidity/moisture suitability
-        const humiditySuitability = avgHumidity >= (crop.moisture_min || 0) && avgHumidity <= (crop.moisture_max || 100);
+        // ✅ Calculate overall suitability score
+        const suitabilityScore = calculateSuitabilityScore(
+          tempSuitability, humiditySuitability, rainfallSuitability
+        );
         
-        // Determine planting seasons based on crop type and region
-        const plantingSeasons = getPlantingSeasonsByCrop(crop.crop_name, selectedLocation.region);
-        const isOptimalSeason = plantingSeasons.includes(nextMonthNum);
-        
-        let status: 'ideal' | 'good' | 'caution' | 'avoid' = 'good';
+        let status: 'ideal' | 'good' | 'caution' | 'avoid' = 'avoid';
         const riskFactors: string[] = [];
         const recommendationsList: string[] = [];
         
-        // Assess temperature conditions
-        if (!tempSuitability) {
+        // ✅ TEMPERATURE ANALYSIS
+        if (!tempSuitability.suitable) {
           if (avgTemp < (crop.temperature_min || 0)) {
-            riskFactors.push(`Temperature too low (${avgTemp.toFixed(1)}°C < ${crop.temperature_min}°C)`);
-            recommendationsList.push('Wait for warmer weather or use greenhouse protection');
-          } else if (avgTemp > (crop.temperature_max || 50)) {
-            riskFactors.push(`Temperature too high (${avgTemp.toFixed(1)}°C > ${crop.temperature_max}°C)`);
-            recommendationsList.push('Provide shade nets or wait for cooler season');
+            riskFactors.push(` Too cold: ${avgTemp.toFixed(1)}°C (needs ${crop.temperature_min}°C+)`);
+            recommendationsList.push(' Use greenhouse or wait for warmer weather');
+          } else {
+            riskFactors.push(` Too hot: ${avgTemp.toFixed(1)}°C (max ${crop.temperature_max}°C)`);
+            recommendationsList.push(' Provide shade or wait for cooler weather');
           }
         }
         
-        // Assess humidity/moisture conditions
-        if (!humiditySuitability) {
+        // ✅ HUMIDITY ANALYSIS
+        if (!humiditySuitability.suitable) {
           if (avgHumidity < (crop.moisture_min || 0)) {
-            riskFactors.push(`Humidity too low (${avgHumidity.toFixed(1)}% < ${crop.moisture_min}%)`);
-            recommendationsList.push('Increase irrigation frequency or use mulching');
-          } else if (avgHumidity > (crop.moisture_max || 100)) {
-            riskFactors.push(`Humidity too high (${avgHumidity.toFixed(1)}% > ${crop.moisture_max}%)`);
-            recommendationsList.push('Ensure good ventilation and proper drainage');
+            riskFactors.push(` Low humidity: ${avgHumidity.toFixed(1)}% (needs ${crop.moisture_min}%+)`);
+            recommendationsList.push(' Increase irrigation or use mulching');
+          } else {
+            riskFactors.push(` High humidity: ${avgHumidity.toFixed(1)}% (max ${crop.moisture_max}%)`);
+            recommendationsList.push(' Improve ventilation and drainage');
           }
         }
         
-        // Assess pH conditions if available
-        if (crop.ph_level_min && crop.ph_level_max) {
-          recommendationsList.push(`Maintain soil pH between ${crop.ph_level_min} - ${crop.ph_level_max}`);
+        // ✅ RAINFALL ANALYSIS
+        if (!rainfallSuitability.suitable) {
+          if (avgDailyRainfall > getRainfallTolerance(crop.crop_name).max) {
+            riskFactors.push(` Excessive rain: ${avgDailyRainfall.toFixed(1)}mm/day`);
+            recommendationsList.push(' Improve drainage, use raised beds');
+          } else {
+            riskFactors.push(` Insufficient rain: ${avgDailyRainfall.toFixed(1)}mm/day`);
+            recommendationsList.push(' Increase irrigation frequency');
+          }
         }
         
-        // Assess NPK requirements
-        const npkRecommendations = [];
-        if (crop.nitrogen_min && crop.nitrogen_max) {
-          npkRecommendations.push(`Nitrogen: ${crop.nitrogen_min}-${crop.nitrogen_max} ppm`);
-        }
-        if (crop.potassium_min && crop.potassium_max) {
-          npkRecommendations.push(`Potassium: ${crop.potassium_min}-${crop.potassium_max} ppm`);
-        }
-        if (crop.phosphorus_min && crop.phosphorus_max) {
-          npkRecommendations.push(`Phosphorus: ${crop.phosphorus_min}-${crop.phosphorus_max} ppm`);
-        }
-        
-        if (npkRecommendations.length > 0) {
-          recommendationsList.push(`Optimal nutrient levels: ${npkRecommendations.join(', ')}`);
-        }
-        
-        // Weather-based rainfall assessment
-        const estimatedRainfallTolerance = getRainfallToleranceByCrop(crop.crop_name);
-        if (totalRainfall > estimatedRainfallTolerance.max) {
-          riskFactors.push('Excessive rainfall detected');
-          recommendationsList.push('Improve drainage and consider raised beds');
-        } else if (totalRainfall < estimatedRainfallTolerance.min) {
-          riskFactors.push('Insufficient rainfall');
-          recommendationsList.push('Increase irrigation to supplement rainfall');
-        }
-        
-        // Determine overall status
-        if (isOptimalSeason && tempSuitability && humiditySuitability && riskFactors.length === 0) {
+        // ✅ DETERMINE STATUS BASED ON WEATHER CONDITIONS ONLY
+        if (suitabilityScore >= 0.9) {
           status = 'ideal';
-          recommendationsList.unshift('🌟 Perfect conditions for planting right now!');
-        } else if (isOptimalSeason && riskFactors.length <= 1) {
+          recommendationsList.unshift('🌟 Perfect weather conditions for planting!');
+        } else if (suitabilityScore >= 0.7) {
           status = 'good';
-          recommendationsList.unshift('✅ Good time to plant with minor adjustments');
-        } else if (riskFactors.length <= 2) {
+          recommendationsList.unshift('✅ Good weather conditions with minor adjustments');
+        } else if (suitabilityScore >= 0.5) {
           status = 'caution';
-          recommendationsList.unshift('⚠️ Proceed with caution and monitoring');
+          recommendationsList.unshift('⚠️ Challenging conditions, monitor closely');
         } else {
           status = 'avoid';
-          recommendationsList.unshift('❌ Consider waiting for better conditions');
+          recommendationsList.unshift('❌ Poor weather conditions, wait for improvement');
         }
         
-        // Generate location-specific alternative dates
-        const alternativeDates = generateLocationAlternatives(crop, nextMonthWeather, selectedLocation);
+        // ✅ GENERATE WEATHER-BASED ALTERNATIVES
+        const alternativeDates = generateWeatherBasedAlternatives(
+          crop, nextMonthWeather, weatherData
+        );
+        
+        // ✅ Calculate best months dynamically based on weather history
+        const bestMonths = calculateBestPlantingMonths(crop, weatherData);
         
         recommendations.push({
           cropName: crop.crop_name,
-          bestMonths: plantingSeasons,
+          bestMonths: bestMonths, // ✅ Now populated with dynamic data
           currentStatus: status,
           riskFactors,
           recommendations: recommendationsList,
           predictedWeather: nextMonthWeather,
           alternativePlantingDates: alternativeDates,
-          // Add database-specific info
           optimalTemp: { min: crop.temperature_min || 0, max: crop.temperature_max || 50 },
           optimalHumidity: { min: crop.moisture_min || 0, max: crop.moisture_max || 100 },
           optimalPH: { min: crop.ph_level_min, max: crop.ph_level_max },
@@ -894,121 +1256,148 @@ export default function Analysis() {
         });
       }
       
-      // Sort by recommendation priority and location suitability
+      // Sort by weather suitability instead of static seasons
       recommendations.sort((a, b) => {
         const statusPriority = { ideal: 4, good: 3, caution: 2, avoid: 1 };
         return statusPriority[b.currentStatus] - statusPriority[a.currentStatus];
       });
       
-      // Categorize the recommendations
       const categorized = categorizePlants(recommendations);
       setPlantCategories(categorized);
       setPlantRecommendations(recommendations);
       
-      console.log(`✅ Generated ${recommendations.length} recommendations in ${Object.keys(categorized).length} categories`);
+      console.log(`✅ Generated ${recommendations.length} weather-based recommendations`);
       
     } catch (error) {
-      console.error('Error generating database-based recommendations:', error);
-      setPlantRecommendations([]);
-      setPlantCategories({});
+      console.error('Error generating weather-based recommendations:', error);
     } finally {
       setLoadingRecommendations(false);
     }
   };
 
-  // Helper function to determine planting seasons by crop and region
-  const getPlantingSeasonsByCrop = (cropName: string, region?: string): number[] => {
-    // Philippines-specific planting seasons
-    const cropSeasons: { [key: string]: number[] } = {
-      // Rice varieties
-      'Rice': [5, 6, 7, 11, 12, 1],
-      
-      // Vegetables
-      'Tomato': [1, 2, 3, 10, 11, 12],
-      'Lettuce': [11, 12, 1, 2, 3, 4],
-      'Cucumber': [2, 3, 4, 5, 9, 10],
-      'Spinach': [11, 12, 1, 2],
-      'Cabbage': [11, 12, 1, 2, 3],
-      'Carrot': [11, 12, 1, 2, 3],
-      'Eggplant': [1, 2, 3, 10, 11, 12],
-      'Bell Pepper': [1, 2, 3, 10, 11, 12],
-      'Onion': [11, 12, 1, 2],
-      'Garlic': [10, 11, 12],
-      
-      // Root crops
-      'Sweet Potato': [3, 4, 5, 6],
-      'Cassava': [4, 5, 6, 7],
-      'Taro': [4, 5, 6, 7, 8],
-      
-      // Fruits
-      'Banana': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], // Year-round
-      'Papaya': [3, 4, 5, 6, 7, 8],
-      'Mango': [12, 1, 2, 3],
-      
-      // Legumes
-      'Mung Bean': [2, 3, 4, 8, 9, 10],
-      'Peanut': [4, 5, 6, 7],
-      'Soybean': [5, 6, 7, 8],
-      
-      // Corn
-      'Corn': [1, 2, 3, 7, 8, 9],
-      'Sweet Corn': [1, 2, 3, 7, 8, 9],
-    };
+  // Add this function to calculate best months dynamically
+  const calculateBestPlantingMonths = (crop: any, weatherHistory: WeatherHistoryData[]): number[] => {
+    const bestMonths: number[] = [];
     
-    // Default to year-round if crop not found
-    return cropSeasons[cropName] || [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+    // Analyze each month (1-12) against crop requirements
+    for (let month = 1; month <= 12; month++) {
+      // Get historical weather data for this month across multiple years
+      const monthData = weatherHistory.filter(d => {
+        const date = new Date(d.date);
+        return date.getMonth() + 1 === month; // getMonth() returns 0-11
+      });
+      
+      if (monthData.length === 0) continue;
+      
+      // Calculate average conditions for this month
+      const avgTemp = monthData.reduce((sum, d) => sum + d.temperature, 0) / monthData.length;
+      const avgHumidity = monthData.reduce((sum, d) => sum + d.humidity, 0) / monthData.length;
+      const avgRainfall = monthData.reduce((sum, d) => sum + d.rainfall, 0) / monthData.length;
+      
+      // Check if month conditions match crop requirements
+      const tempSuitable = avgTemp >= (crop.temperature_min || 0) && avgTemp <= (crop.temperature_max || 50);
+      const humiditySuitable = avgHumidity >= (crop.moisture_min || 0) && avgHumidity <= (crop.moisture_max || 100);
+      const rainfallTolerance = getRainfallTolerance(crop.crop_name);
+      const rainfallSuitable = avgRainfall >= rainfallTolerance.min && avgRainfall <= rainfallTolerance.max;
+      
+      // Calculate suitability score for this month
+      const suitabilityScore = (
+        (tempSuitable ? 1 : 0) * 0.4 +
+        (humiditySuitable ? 1 : 0) * 0.3 +
+        (rainfallSuitable ? 1 : 0) * 0.3
+      );
+      
+      // If month scores above 70%, consider it good for planting
+      if (suitabilityScore >= 0.7) {
+        bestMonths.push(month);
+      }
+    }
+    
+    return bestMonths;
   };
 
-  // Helper function to get rainfall tolerance by crop
-  const getRainfallToleranceByCrop = (cropName: string): { min: number; max: number } => {
-    const rainfallTolerance: { [key: string]: { min: number; max: number } } = {
-      'Rice': { min: 100, max: 300 },
-      'Tomato': { min: 50, max: 200 },
-      'Lettuce': { min: 30, max: 120 },
-      'Cucumber': { min: 40, max: 180 },
-      'Spinach': { min: 30, max: 100 },
-      'Corn': { min: 60, max: 250 },
-      'Eggplant': { min: 50, max: 200 },
-      'Sweet Potato': { min: 40, max: 150 },
-      'Banana': { min: 80, max: 400 },
-      'Mango': { min: 30, max: 150 },
-    };
-    
-    return rainfallTolerance[cropName] || { min: 50, max: 200 };
+  // ✅ HELPER FUNCTIONS FOR WEATHER-BASED ANALYSIS
+
+  const isTemperatureSuitable = (currentTemp: number, crop: any) => {
+    const min = crop.temperature_min || 0;
+    const max = crop.temperature_max || 50;
+    const suitable = currentTemp >= min && currentTemp <= max;
+    const score = suitable ? 1 : Math.max(0, 1 - Math.abs(currentTemp - ((min + max) / 2)) / 10);
+    return { suitable, score };
   };
 
-  // Enhanced alternative date generation with location data
-  const generateLocationAlternatives = (crop: any, weather: any, location: any): string[] => {
+  const isHumiditySuitable = (currentHumidity: number, crop: any) => {
+    const min = crop.moisture_min || 0;
+    const max = crop.moisture_max || 100;
+    const suitable = currentHumidity >= min && currentHumidity <= max;
+    const score = suitable ? 1 : Math.max(0, 1 - Math.abs(currentHumidity - ((min + max) / 2)) / 20);
+    return { suitable, score };
+  };
+
+  const isRainfallSuitable = (dailyRainfall: number, crop: any) => {
+    const tolerance = getRainfallTolerance(crop.crop_name);
+    const suitable = dailyRainfall >= tolerance.min && dailyRainfall <= tolerance.max;
+    const score = suitable ? 1 : Math.max(0, 1 - Math.abs(dailyRainfall - ((tolerance.min + tolerance.max) / 2)) / tolerance.max);
+    return { suitable, score };
+  };
+
+  const calculateSuitabilityScore = (tempSuit: any, humidSuit: any, rainSuit: any) => {
+    return (tempSuit.score * 0.4 + humidSuit.score * 0.3 + rainSuit.score * 0.3);
+  };
+
+  const determineWeatherRisk = (temp: number, humidity: number, rainfall: number): 'low' | 'medium' | 'high' => {
+    let riskScore = 0;
+    
+    // Temperature extremes
+    if (temp < 10 || temp > 40) riskScore += 3;
+    else if (temp < 15 || temp > 35) riskScore += 2;
+    else if (temp < 18 || temp > 32) riskScore += 1;
+    
+    // Humidity extremes
+    if (humidity < 30 || humidity > 90) riskScore += 2;
+    else if (humidity < 40 || humidity > 80) riskScore += 1;
+    
+    // Rainfall extremes
+    if (rainfall > 150) riskScore += 3; // Very wet month
+    else if (rainfall > 100) riskScore += 2;
+    else if (rainfall < 10) riskScore += 2; // Very dry month
+    
+    if (riskScore >= 5) return 'high';
+    if (riskScore >= 3) return 'medium';
+    return 'low';
+  };
+
+  const getRainfallTolerance = (cropName: string): { min: number; max: number } => {
+    // Daily rainfall tolerance in mm/day
+    const rainfallMap: { [key: string]: { min: number; max: number } } = {
+      'Rice': { min: 3, max: 10 },
+      'Tomato': { min: 1, max: 6 },
+      'Lettuce': { min: 1, max: 4 },
+      'Cucumber': { min: 1.5, max: 6 },
+      'Corn': { min: 2, max: 8 },
+      'Spinach': { min: 1, max: 3 },
+    };
+    
+    return rainfallMap[cropName] || { min: 1, max: 5 }; // Default
+  };
+
+  const generateWeatherBasedAlternatives = (crop: any, weather: any, weatherHistory: any[]): string[] => {
     const alternatives: string[] = [];
-    const currentMonth = new Date().getMonth() + 1;
     
-    // Get optimal seasons for this crop
-    const optimalSeasons = getPlantingSeasonsByCrop(crop.crop_name, location.region);
-    
-    // Find next optimal month
-    const nextOptimalMonth = optimalSeasons.find((month: number) => month > currentMonth) ||
-                            optimalSeasons[0] + 12;
-    
-    if (nextOptimalMonth !== currentMonth + 1) {
-      const monthName = new Date(2024, (nextOptimalMonth - 1) % 12, 1)
-        .toLocaleString('default', { month: 'long' });
-      alternatives.push(`⏰ Wait until ${monthName} for optimal planting season`);
-    }
-    
-    // Weather-based alternatives
+    // Analyze weather trends to suggest better timing
     if (weather.nextMonth.riskLevel === 'high') {
-      alternatives.push('🏠 Consider greenhouse or controlled environment');
-      alternatives.push('📅 Plant 2-3 weeks earlier to avoid adverse weather');
+      alternatives.push('⏰ Wait 2-3 weeks for weather conditions to improve');
+      alternatives.push('🏠 Consider controlled environment (greenhouse)');
     }
     
-    // Region-specific advice
-    if (location.region) {
-      alternatives.push(`📍 Consult local farmers in ${location.region} for region-specific timing`);
-    }
+    // Suggest based on historical weather patterns
+    const recentTrend = weatherHistory.slice(-7);
+    const tempTrend = recentTrend[recentTrend.length - 1].temperature - recentTrend[0].temperature;
     
-    // Temperature-based alternatives
-    if (crop.temperature_min && crop.temperature_max) {
-      alternatives.push(`🌡️ Monitor temperature: optimal range is ${crop.temperature_min}°C - ${crop.temperature_max}°C`);
+    if (tempTrend > 2) {
+      alternatives.push('🌡️ Temperature rising - plant heat-tolerant varieties');
+    } else if (tempTrend < -2) {
+      alternatives.push('🌡️ Temperature dropping - plant cold-tolerant varieties');
     }
     
     return alternatives;
@@ -1126,10 +1515,20 @@ export default function Analysis() {
 
   // Helper function to get current category recommendations
   const getCurrentCategoryRecommendations = (): PlantRecommendation[] => {
+    let categoryRecommendations: PlantRecommendation[] = [];
+    
     if (selectedCategory === 'all') {
-      return plantRecommendations;
+      categoryRecommendations = plantRecommendations;
+    } else {
+      categoryRecommendations = plantCategories[selectedCategory] || [];
     }
-    return plantCategories[selectedCategory] || [];
+    
+    // ✅ Filter by selected status
+    if (selectedStatus === 'all') {
+      return categoryRecommendations;
+    } else {
+      return categoryRecommendations.filter(rec => rec.currentStatus === selectedStatus);
+    }
   };
   
   const getStatusIcon = (status: 'ideal' | 'good' | 'caution' | 'avoid') => {
@@ -1147,8 +1546,14 @@ export default function Analysis() {
     }
   };
   
-    return (
-      <View style={styles.container}>
+  // Add this useEffect after your other useEffect hooks (around line 120)
+  // Reset status filter when category changes
+  useEffect(() => {
+    setSelectedStatus('all');
+  }, [selectedCategory]);
+
+  return (
+    <View style={styles.container}>
       {/* Header */}
       <LinearGradient colors={["#1c4722", "#4d7f39"]} style={styles.headerBackground}>
         <View style={styles.headerTop}>
@@ -1784,6 +2189,108 @@ export default function Analysis() {
                   </View>
                 )}
 
+                {/* Status Filter Buttons */}
+                {selectedCategory && plantCategories[selectedCategory] && (
+                  <View style={styles.statusFilterContainer}>
+                    <Text style={styles.statusFilterTitle}>Filter by Status:</Text>
+                    <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.statusFilterScrollView}>
+                      {/* All Status Button */}
+                      <TouchableOpacity
+                        style={[
+                          styles.statusFilterButton,
+                          selectedStatus === 'all' && styles.activeStatusFilterButton
+                        ]}
+                        onPress={() => setSelectedStatus('all')}
+                      >
+                        <View style={[styles.statusFilterDot, { backgroundColor: '#666' }]} />
+                        <Text style={[
+                          styles.statusFilterText,
+                          selectedStatus === 'all' && styles.activeStatusFilterText
+                        ]}>
+                          All ({getCurrentCategoryRecommendations().length})
+                        </Text>
+                      </TouchableOpacity>
+
+                      {/* Ideal Status Button */}
+                      {plantCategories[selectedCategory]?.filter(r => r.currentStatus === 'ideal').length > 0 && (
+                        <TouchableOpacity
+                          style={[
+                            styles.statusFilterButton,
+                            selectedStatus === 'ideal' && styles.activeStatusFilterButton
+                          ]}
+                          onPress={() => setSelectedStatus('ideal')}
+                        >
+                          <View style={[styles.statusFilterDot, { backgroundColor: '#00796b' }]} />
+                          <Text style={[
+                            styles.statusFilterText,
+                            selectedStatus === 'ideal' && styles.activeStatusFilterText
+                          ]}>
+                           
+                            Ideal ({plantCategories[selectedCategory]?.filter(r => r.currentStatus === 'ideal').length})
+                          </Text>
+                        </TouchableOpacity>
+                      )}
+
+                      {/* Good Status Button */}
+                      {plantCategories[selectedCategory]?.filter(r => r.currentStatus === 'good').length > 0 && (
+                        <TouchableOpacity
+                          style={[
+                            styles.statusFilterButton,
+                            selectedStatus === 'good' && styles.activeStatusFilterButton
+                          ]}
+                          onPress={() => setSelectedStatus('good')}
+                        >
+                          <View style={[styles.statusFilterDot, { backgroundColor: '#fbc02d' }]} />
+                          <Text style={[
+                            styles.statusFilterText,
+                            selectedStatus === 'good' && styles.activeStatusFilterText
+                          ]}>
+                            Good ({plantCategories[selectedCategory]?.filter(r => r.currentStatus === 'good').length})
+                          </Text>
+                        </TouchableOpacity>
+                      )}
+
+                      {/* Caution Status Button */}
+                      {plantCategories[selectedCategory]?.filter(r => r.currentStatus === 'caution').length > 0 && (
+                        <TouchableOpacity
+                          style={[
+                            styles.statusFilterButton,
+                            selectedStatus === 'caution' && styles.activeStatusFilterButton
+                          ]}
+                          onPress={() => setSelectedStatus('caution')}
+                        >
+                          <View style={[styles.statusFilterDot, { backgroundColor: '#f57c00' }]} />
+                          <Text style={[
+                            styles.statusFilterText,
+                            selectedStatus === 'caution' && styles.activeStatusFilterText
+                          ]}>
+                            Caution ({plantCategories[selectedCategory]?.filter(r => r.currentStatus === 'caution').length})
+                          </Text>
+                        </TouchableOpacity>
+                      )}
+
+                      {/* Avoid Status Button */}
+                      {plantCategories[selectedCategory]?.filter(r => r.currentStatus === 'avoid').length > 0 && (
+                        <TouchableOpacity
+                          style={[
+                            styles.statusFilterButton,
+                            selectedStatus === 'avoid' && styles.activeStatusFilterButton
+                          ]}
+                          onPress={() => setSelectedStatus('avoid')}
+                        >
+                          <View style={[styles.statusFilterDot, { backgroundColor: '#d32f2f' }]} />
+                          <Text style={[
+                            styles.statusFilterText,
+                            selectedStatus === 'avoid' && styles.activeStatusFilterText
+                          ]}>
+                            Avoid ({plantCategories[selectedCategory]?.filter(r => r.currentStatus === 'avoid').length})
+                          </Text>
+                        </TouchableOpacity>
+                      )}
+                    </ScrollView>
+                  </View>
+                )}
+
                 {/* Selected Category Summary */}
                 {selectedCategory && plantCategories[selectedCategory] && (
                   <View style={styles.categorySummary}>
@@ -1826,6 +2333,7 @@ export default function Analysis() {
 
                 {/* Plant Recommendations List for Selected Category */}
                 {getCurrentCategoryRecommendations().length > 0 ? (
+                 
                   selectedPlantDetail ? (
                     // Show detailed view for selected plant
                     <View style={styles.detailView}>
@@ -1916,18 +2424,18 @@ export default function Analysis() {
                         {/* Database-specific optimal conditions */}
                         {selectedPlantDetail.optimalTemp && (
                           <View style={styles.optimalConditions}>
-                            <Text style={styles.subsectionTitle}>🎯 Optimal Growing Conditions:</Text>
+                            <Text style={styles.subsectionTitle}> Optimal Growing Conditions:</Text>
                             <Text style={styles.conditionText}>
-                              🌡️ Temperature: {selectedPlantDetail.optimalTemp.min}°C - {selectedPlantDetail.optimalTemp.max}°C
+                               Temperature: {selectedPlantDetail.optimalTemp.min}°C - {selectedPlantDetail.optimalTemp.max}°C
                             </Text>
                             {selectedPlantDetail.optimalHumidity && (
                               <Text style={styles.conditionText}>
-                                💧 Humidity: {selectedPlantDetail.optimalHumidity.min}% - {selectedPlantDetail.optimalHumidity.max}%
+                                 Humidity: {selectedPlantDetail.optimalHumidity.min}% - {selectedPlantDetail.optimalHumidity.max}%
                               </Text>
                             )}
                             {selectedPlantDetail.optimalPH?.min && selectedPlantDetail.optimalPH?.max && (
                               <Text style={styles.conditionText}>
-                                ⚗️ pH Level: {selectedPlantDetail.optimalPH.min} - {selectedPlantDetail.optimalPH.max}
+                                 pH Level: {selectedPlantDetail.optimalPH.min} - {selectedPlantDetail.optimalPH.max}
                               </Text>
                             )}
                           </View>
@@ -1936,20 +2444,20 @@ export default function Analysis() {
                         {/* NPK Requirements from database */}
                         {selectedPlantDetail.optimalNPK && (
                           <View style={styles.npkSection}>
-                            <Text style={styles.subsectionTitle}>🧪 Nutrient Requirements:</Text>
+                            <Text style={styles.subsectionTitle}> Nutrient Requirements:</Text>
                             {selectedPlantDetail.optimalNPK.nitrogen.min && selectedPlantDetail.optimalNPK.nitrogen.max && (
                               <Text style={styles.conditionText}>
-                                🟢 Nitrogen: {selectedPlantDetail.optimalNPK.nitrogen.min} - {selectedPlantDetail.optimalNPK.nitrogen.max} ppm
+                                 Nitrogen: {selectedPlantDetail.optimalNPK.nitrogen.min} - {selectedPlantDetail.optimalNPK.nitrogen.max} ppm
                               </Text>
                             )}
                             {selectedPlantDetail.optimalNPK.phosphorus.min && selectedPlantDetail.optimalNPK.phosphorus.max && (
                               <Text style={styles.conditionText}>
-                                🟠 Phosphorus: {selectedPlantDetail.optimalNPK.phosphorus.min} - {selectedPlantDetail.optimalNPK.phosphorus.max} ppm
+                                 Phosphorus: {selectedPlantDetail.optimalNPK.phosphorus.min} - {selectedPlantDetail.optimalNPK.phosphorus.max} ppm
                               </Text>
                             )}
                             {selectedPlantDetail.optimalNPK.potassium.min && selectedPlantDetail.optimalNPK.potassium.max && (
                               <Text style={styles.conditionText}>
-                                🔵 Potassium: {selectedPlantDetail.optimalNPK.potassium.min} - {selectedPlantDetail.optimalNPK.potassium.max} ppm
+                                 Potassium: {selectedPlantDetail.optimalNPK.potassium.min} - {selectedPlantDetail.optimalNPK.potassium.max} ppm
                               </Text>
                             )}
                           </View>
@@ -2796,4 +3304,56 @@ const styles = StyleSheet.create({
     color: '#666',
     marginBottom: 2,
   },
-});
+  statusFilterContainer: {
+    marginBottom: 15,
+  },
+  statusFilterTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 8,
+  },
+  statusFilterScrollView: {
+    marginTop: 5,
+  },
+  statusFilterButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    backgroundColor: '#f5f5f5',
+    marginRight: 10,
+    borderWidth: 1,
+    borderColor: 'transparent',
+  },
+  activeStatusFilterButton: {
+    backgroundColor: '#f0f8f0',
+    borderColor: '#1c4722',
+  },
+  statusFilterDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    marginRight: 6,
+  },
+  statusFilterText: {
+    fontSize: 13,
+    color: '#666',
+    fontWeight: '500',
+  },
+  activeStatusFilterText: {
+    color: '#1c4722',
+    fontWeight: 'bold',
+  },
+  activeStatusSummaryItem: {
+    backgroundColor: '#f0f8f0',
+    borderRadius: 8,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+  },
+  activeStatusSummaryText: {
+    color: '#1c4722',
+    fontWeight: 'bold',
+  },
+}); 
