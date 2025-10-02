@@ -1,18 +1,25 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, Image, StyleSheet, ActivityIndicator } from 'react-native';
+import { View, Text, Image, StyleSheet, ActivityIndicator, ScrollView } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import { diagnosePlant } from './utils/PlantDiagnosis';
 
 export default function DiagnosisScreen() {
   const { imageUri } = useLocalSearchParams();
   const [loading, setLoading] = useState(true);
-  const [diagnosis, setDiagnosis] = useState<string | null>(null);
+  const [diagnosis, setDiagnosis] = useState<null | Awaited<ReturnType<typeof diagnosePlant>>>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const runDiagnosis = async () => {
-      if (imageUri) {
-        const result = await diagnosePlant(imageUri as string);
-        setDiagnosis(result);
+      try {
+        if (imageUri) {
+          const result = await diagnosePlant(imageUri as string);
+          console.log('✅ Diagnosis:', result);
+          setDiagnosis(result);
+        }
+      } catch (err) {
+        setError('Error diagnosing plant');
+      } finally {
         setLoading(false);
       }
     };
@@ -21,29 +28,48 @@ export default function DiagnosisScreen() {
   }, [imageUri]);
 
   return (
-    <View style={styles.container}>
+    <ScrollView contentContainerStyle={styles.container}>
       {imageUri && (
         <Image source={{ uri: imageUri as string }} style={styles.image} />
       )}
 
       {loading ? (
         <ActivityIndicator size="large" color="#1c4722" />
-      ) : (
-        <View style={styles.resultBox}>
-          <Text style={styles.title}>Diagnosis Result</Text>
-          <Text style={styles.result}>{diagnosis}</Text>
-        </View>
-      )}
-    </View>
+      ) : error ? (
+        <Text style={styles.error}>{error}</Text>
+      ) : diagnosis ? (
+        diagnosis.isHealthy ? (
+          <Text style={styles.healthyMessage}>
+            ✅ This plant looks healthy! No issues detected.
+          </Text>
+        ) : diagnosis.diseases.length > 0 ? (
+          <View style={styles.resultBox}>
+            {diagnosis.diseases.map((disease, index) => (
+              <View key={index} style={styles.diseaseCard}>
+                <Text style={styles.diseaseName}>{disease.name}</Text>
+                <Text style={styles.label}>🧬 Description:</Text>
+                <Text style={styles.body}>{disease.description}</Text>
+                <Text style={styles.label}>⚠️ Cause:</Text>
+                <Text style={styles.body}>{disease.cause}</Text>
+                <Text style={styles.label}>🛠️ Treatment:</Text>
+                <Text style={styles.body}>{disease.treatment}</Text>
+              </View>
+            ))}
+          </View>
+        ) : (
+          <Text style={styles.warning}>
+            ⚠️ This plant appears unhealthy, but no specific disease was identified.
+          </Text>
+        )
+      ) : null}
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
     padding: 20,
     backgroundColor: '#fff',
-    justifyContent: 'center',
   },
   image: {
     width: '100%',
@@ -52,18 +78,46 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   resultBox: {
-    backgroundColor: '#e0f2e9',
+    backgroundColor: '#ffeaea',
     padding: 20,
     borderRadius: 10,
   },
-  title: {
-    fontSize: 20,
+  diseaseCard: {
+    marginBottom: 20,
+  },
+  diseaseName: {
+    fontSize: 18,
     fontWeight: 'bold',
-    color: '#1c4722',
+    color: '#b00020',
     marginBottom: 10,
   },
-  result: {
-    fontSize: 18,
-    color: '#333',
+  label: {
+    fontSize: 15,
+    fontWeight: '600',
+    marginTop: 8,
+    color: '#1c4722',
+  },
+  body: {
+    fontSize: 14,
+    color: '#444',
+    marginBottom: 6,
+  },
+  healthyMessage: {
+    fontSize: 16,
+    color: '#1c4722',
+    textAlign: 'center',
+    marginTop: 20,
+  },
+  warning: {
+    fontSize: 15,
+    color: '#b00020',
+    textAlign: 'center',
+    marginTop: 20,
+  },
+  error: {
+    fontSize: 16,
+    color: 'red',
+    textAlign: 'center',
+    marginTop: 20,
   },
 });
