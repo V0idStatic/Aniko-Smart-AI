@@ -1,0 +1,179 @@
+:root {
+    --primary-green: #1D492C;
+    --accent-green: #84cc16;
+    --pastel-green: #BDE08A;
+    --light-green: #f0fdf4;
+    --dark-green: #143820;
+    --dark-gray: #374151;
+    --light-gray: #f9fafb;
+    --white: #ffffff;
+    --bg-color: #cfc4b2ff;
+    --primary-brown: #8A6440;
+    --dark-brown: #4D2D18;
+    --gradient-primary: linear-gradient(135deg, var(--primary-green), var(--accent-green));
+    --gradient-secondary: linear-gradient(135deg, var(--primary-green), var(--pastel-green));
+    --gradient-secondary-light: linear-gradient(135deg, var(--pastel-green), var(--light-green));
+    --gradient-brown: linear-gradient(135deg, var(--primary-brown), var(--dark-brown));
+    --gradient-brown-light: linear-gradient(135deg, var(--primary-brown), #c9b29e);
+
+}
+
+.testDisplay-section {
+    padding: 3rem 1rem;
+    background: var(--gradient-secondary-light) !important;
+    font-family: system-ui, sans-serif;
+    min-height: 100vh;
+    margin: 0 !important;
+}
+.testDisplay-section h2 {
+    text-align: center;
+    font-weight: 700;
+    margin-top: 6rem;
+    color: var(--light-green);
+    text-shadow: 0px 0px 20px var(--accent-green) !important;
+    font-size: 50px !important;
+    font-weight: bold !important;
+}
+
+.testDisplay-section h6 {
+    color: var(--light-green) !important;
+    text-align: center;
+    font-weight: 500;
+    text-shadow: 0px 0px 15px var(--accent-green) !important;
+    font-size: 18px !important;
+    margin-bottom: 2rem; 
+}
+
+.testimonialSubmit-headerBtn {
+    justify-content: center;
+    align-items: center;
+    display: block !important;
+    margin: 0 auto !important; 
+    margin-bottom: 3rem !important;
+    background-color: transparent !important;
+    border: 2px solid var(--accent-green) !important;
+    border-radius: 25px !important; 
+    padding: 10px; 
+    width: 15%;
+    color: var(--accent-green);
+    text-decoration: none !important; 
+    font-weight: 500 !important; 
+    box-shadow: 0px 0px 20px 5px var(--light-green) !important;
+    transition: 
+        background 0.4s ease-in-out,
+        transform 0.3s ease,
+        box-shadow 0.4s ease,
+        color 0.3s ease;
+}
+
+.testimonialSubmit-headerBtn:hover {
+    background: var(--gradient-secondary) !important;
+    color: var(--light-green); 
+    transform: translateY(-5px) scale(1.05);
+    box-shadow: 0px 0px 30px 12px var(--accent-green);
+    border-color: var(--primary-green) !important;
+}
+
+.testSubmit-link {
+    text-decoration: none !important;
+    text-shadow: 0px 0px 10px var(--light-green) !important;
+}
+
+.testDisplay-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+@media (min-width: 768px) {
+    .testDisplay-grid {
+        grid-template-columns: repeat(2, 1fr); 
+    }
+}
+
+@media (min-width: 1024px) {
+    .testDisplay-grid {
+        grid-template-columns: repeat(3, 1fr); 
+    }
+}
+
+
+.testDisplay-card {
+    background-color: var(--light-green);
+    border-radius: 80px;
+    border-bottom-left-radius: 0 !important;
+    padding: 2rem;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+    text-align: center;
+    transition: transform 0.2s ease;
+    margin-bottom: 3rem;
+}
+
+.testDisplay-card:hover {
+    transform: translateY(-4px);
+}
+
+.testDisplay-userDetails {
+    display: flex;
+}
+
+.testDisplay-card img {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 1rem;
+}
+
+.testDisplay-card h5 {
+    margin: 0 0 0.25rem;
+    font-size: 1.1rem;
+    text-align: left !important;
+    margin-left: 1rem;
+}
+
+.testDisplay-card small {
+    display: block;
+    color: #6c757d;
+    margin-bottom: 0.75rem;
+    text-align: left !important;
+    margin-left: 1rem;
+}
+
+.testDisplay-card p {
+    font-size: 0.95rem;
+    line-height: 1.4;
+    color: #333;
+    text-align: left !important;
+    margin-top: 1.55rem;  
+}
+
+.testDisplay-view-more-container {
+    text-align: center;
+    margin-top: 2rem;
+}
+
+.testDisplay-view-more-btn {
+    background: var(--gradient-secondary);
+    color: #fff;
+    padding: 0.6rem 1.5rem;
+    border-radius: 20px;
+    cursor: pointer;
+    border: none;
+    font-size: 1rem;
+    width: 15%;
+    box-shadow: 0px 0px 20px 5px var(--pastel-green);
+    transition: 
+        background 0.4s ease-in-out,
+        transform 0.3s ease,
+        box-shadow 0.4s ease;
+    font-weight: 500; 
+}
+
+.testDisplay-view-more-btn:hover {
+    background: var(--gradient-primary) !important;
+    transform: translateY(-5px) scale(1.05);
+    box-shadow: 0px 0px 30px 12px var(--pastel-green);
+}

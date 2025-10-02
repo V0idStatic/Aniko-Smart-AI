@@ -15,7 +15,7 @@ const FooterNavigation = () => {
 
   return (
     <View style={styles.footer}>
-      <TouchableOpacity onPress={() => router.push('/')}>
+      <TouchableOpacity onPress={() => router.push('/Login')}>
         <Ionicons name="home" size={28} color="#fff" />
       </TouchableOpacity>
 

@@ -46,17 +46,12 @@ const Compliance: React.FC = () => {
   }, [user]);
 
   const handleChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
     const { name, value, type } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]:
-        type === "checkbox"
-          ? (e.target as HTMLInputElement).checked
-          : value,
+      [name]: type === "checkbox" ? (e.target as HTMLInputElement).checked : value,
     }));
   };
 
@@ -65,7 +60,6 @@ const Compliance: React.FC = () => {
     setSubmitting(true);
 
     try {
-      // ✅ insert with correct schema
       const { error } = await supabase.from("contact_messages").insert([
         {
           first_name: formData.firstName,
@@ -74,13 +68,13 @@ const Compliance: React.FC = () => {
           phone: formData.phone,
           subject: formData.subject,
           message: formData.message,
-          newsletter: formData.newsletter ? 1 : 0, // bigint
-          submitted_at: new Date().toISOString(), // ✅ ensure timestamp
+          newsletter: formData.newsletter ? 1 : 0,
+          submitted_at: new Date().toISOString(),
         },
       ]);
 
       if (error) {
-        console.error(" Error inserting message:", error); // full error log
+        console.error(" Error inserting message:", error);
         setModalMessage(" Failed to send message. Please try again.");
       } else {
         setModalMessage(" Your message has been successfully sent!");
@@ -98,7 +92,7 @@ const Compliance: React.FC = () => {
         });
       }
 
-      // ✅ Show modal after submission
+      // ✅ Trigger Bootstrap modal
       const modalEl = document.getElementById("successModal");
       if (modalEl) {
         const modal = new Modal(modalEl);
@@ -121,9 +115,7 @@ const Compliance: React.FC = () => {
               <h3>Get In Touch</h3>
               <div className="contact-item">
                 <i className="bi bi-geo-alt-fill"></i>
-                <div className="contact-item-content">
-                  Olongapo City, Zambales, Philippines
-                </div>
+                <div className="contact-item-content">Olongapo City, Zambales, Philippines</div>
               </div>
               <div className="contact-item">
                 <i className="bi bi-phone"></i>
@@ -131,9 +123,7 @@ const Compliance: React.FC = () => {
               </div>
               <div className="contact-item">
                 <i className="bi bi-envelope"></i>
-                <div className="contact-item-content">
-                  anikosmartcropsystem@gmail.com
-                </div>
+                <div className="contact-item-content">anikosmartcropsystem@gmail.com</div>
               </div>
               <div className="contact-item">
                 <i className="bi bi-clock"></i>
@@ -249,9 +239,7 @@ const Compliance: React.FC = () => {
                     style={{ height: "120px" }}
                     required
                   ></textarea>
-                  <label htmlFor="message">
-                    Tell us how we can help you...
-                  </label>
+                  <label htmlFor="message">Tell us how we can help you...</label>
                 </div>
 
                 <div className="mb-4">
@@ -285,36 +273,19 @@ const Compliance: React.FC = () => {
             </div>
           </div>
         </section>
-
-        {/* Modal */}
+        
         <div
-          className="modal fade"
+          className="modal fade compModal"
           id="successModal"
           tabIndex={-1}
           aria-labelledby="successModalLabel"
           aria-hidden="true"
         >
-          <div className="modal-dialog modal-dialog-centered">
-            <div
-              className="modal-content"
-              style={{
-                borderRadius: "20px",
-                border: "2px solid var(--dark-green)",
-              }}
-            >
-              <div
-                className="modal-header"
-                style={{
-                  background: "var(--gradient-secondary)",
-                  color: "var(--light-green)",
-                  border: "0",
-                  borderTop: "2px solid var(--dark-green)",
-                  borderTopRightRadius: "20px",
-                  borderTopLeftRadius: "20px",
-                }}
-              >
-                <h5 className="modal-title" id="successModalLabel">
-                  <i className="fas fa-check-circle me-2"></i>Message Status
+          <div className="modal-dialog modal-dialog-centered comp-modDialog">
+            <div className="modal-content success-modal comp-modContent">
+              <div className="modal-header success-modal-header comp-modHeader">
+                <h5 className="modal-title" id="successModalLabel comp-modTitle">
+                  <i className="bi bi-check-circle me-2"></i>Message Status
                 </h5>
                 <button
                   type="button"
@@ -323,31 +294,14 @@ const Compliance: React.FC = () => {
                   aria-label="Close"
                 ></button>
               </div>
-              <div
-                className="modal-body text-center"
-                style={{
-                  backgroundColor: "var(--light-green)",
-                  color: "var(--primary-green)",
-                  fontWeight: "500",
-                  padding: "30px",
-                }}
-              >
+              <div className="modal-body text-center success-modal-body comp-modBody">
                 {modalMessage}
               </div>
-              <div className="modal-footer">
+              <div className="modal-footer comp-modFooter">
                 <button
                   type="button"
-                  className="btn btn-success ok-btn"
+                  className="btn btn-success comp-modOkBtn"
                   data-bs-dismiss="modal"
-                  style={{
-                    borderRadius: "10px",
-                    backgroundColor: "var(--pastel-green)",
-                    border: "2px solid var(--primary-green)",
-                    color: "var(--primary-green)",
-                    fontWeight: "500",
-                    padding: "5px 20px",
-                    margin: "10px",
-                  }}
                 >
                   OK
                 </button>

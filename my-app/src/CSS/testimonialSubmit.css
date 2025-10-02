@@ -39,7 +39,7 @@ body {
     padding: 40px;
     border-radius: 20px !important;
     background-color: var(--primary-brown) !important; 
-    background: var(--gradient-brown);
+    background: var(--gradient-brown-light);
 }
 
 .testDisplay-ctaHeader {
@@ -55,7 +55,7 @@ body {
 
 .testDisplay-ctaHeader {
   font-weight: bold; 
-  color: var(--pastel-green) !important;
+  color: var(--dark-brown) !important;
   margin: 0;            
 }
 
@@ -79,7 +79,7 @@ body {
 }
 
 .testSubmit-col {
-    background: var(--gradient-secondary) !important;
+    background: var(--gradient-secondary-light) !important;
     min-height: 100%; /* stretch to row */
     margin: 0 !important;
     padding: 40px;
@@ -89,7 +89,7 @@ body {
 }
 
 .testDisplay-ctaBtn {
-    background: var(--gradient-brown-light) !important;
+    background: var(--gradient-brown) !important;
     border: none !important;
     border-radius: 20px !important;
     margin-top: 2rem;
@@ -150,19 +150,18 @@ body {
 
 /* Headings */
 .testSubmit-col h2 {
-    font-weight: 700;
+    font-weight: bold;
     font-size: 2.5rem;
-    color: var(--light-green) !important;
+    color: var(--dark-brown) !important;
     margin-bottom: 10px;
-    text-shadow: 0px 0px 5px var(--accent-green);
     margin-top: 5rem !important;
 }
 
 .subtitle {
-    font-size: 1.125rem;
-    color: var(--light-green);
+    color: var(--primary-brown);
     line-height: 1.7;
     margin-bottom: 30px;
+    font-weight: 500;
 }
 
 /* Feature list */
@@ -195,10 +194,11 @@ body {
     color: var(--primary-green) !important;
     box-shadow: 0px 0px 20px 5px var(--pastel-green);
     animation: slideInUp 0.6s ease-out;
+    border: 2px dashed var(--primary-brown) !important;
 }
 
 .form-section label {
-    color: var(--primary-green);
+    color: var(--dark-brown);
     font-weight: bold !important;
 }
 .testSubmit-form-label .bi-chat-dots {
@@ -217,14 +217,15 @@ body {
     font-family: inherit;
     line-height: 1.6;
     min-height: 180px;
+    border: 2px dashed var(--primary-brown) !important;
 }
 
 .testimonial-card textarea:focus {
     outline: none;
-    border-color: var(--c4);
     box-shadow: 0 0 0 4px rgba(77, 45, 24, 0.2);
     background: rgba(207, 196, 178, 0.541);
     color: var(--primary-brown) !important;
+    border: 2px solid var(--primary-brown) !important;
 }
 
 .testimonial-card textarea::placeholder {
@@ -234,7 +235,7 @@ body {
 
 /* Submit Button */
 .submit-btn {
-    background: var(--primary-green) !important;
+    background: var(--gradient-secondary) !important;
     color: var(--light-green) !important;
     font-weight: 600 !important;
     border: none !important;
@@ -252,13 +253,13 @@ body {
 }
 
 .submit-btn:hover {
-    background-color: var(--dark-green) !important;
+    background: var(--gradient-primary) !important;
     transform: translateY(-2px);
 }
 
 .character-count {
     font-size: 0.875rem;
-    color: var(--primary-green);
+    color: var(--primary-brown);
     text-align: right;
     margin-top: 8px;
 }
