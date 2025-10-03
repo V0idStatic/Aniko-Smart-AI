@@ -59,9 +59,85 @@ const TestimonialSubmit: React.FC = () => {
       {user ? <HeaderLogged /> : <HeaderUnlogged />}
 
       <div className="row testimonialCol-row align-items-stretch g-0">
-        {/* Left CTA Section */}
-        <div className="col-6 testDisplay-col">
-          <div className="card testDisplay-cta-card">
+        <div className="testSubmit-col">
+          <div className="row">            
+            <div className="col-5 testSubmit-textSide">
+              <h2>Share Your Experience</h2>
+              <p className="subtitle">
+                Your feedback is valuable! Tell us how Aniko has helped improve
+                your farming practices and let others learn from your experience.
+              </p>
+
+              <ul className="feature-list">
+                <li>
+                  <i className="bi bi-check-circle-fill"></i> Help other farmers
+                  learn from your success
+                </li>
+                <li>
+                  <i className="bi bi-people-fill"></i> Build a stronger farming
+                  community
+                </li>
+                <li>
+                  <i className="bi bi-star-fill"></i> Share your authentic
+                  experience
+                </li>
+                <li>
+                  <i className="bi bi-heart-fill"></i> Inspire others to grow
+                  better
+                </li>
+              </ul>
+            </div>
+          
+
+            <div className="col-6 form-section">
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  const modalEl = document.getElementById("confirmModal");
+                  if (modalEl) {
+                    const confirmModal = new Modal(modalEl);
+                    confirmModal.show();
+                  }
+                }}
+              >
+                <label className="form-label testSubmit-form-label" htmlFor="testimonial">
+                  <i className="bi bi-chat-dots"></i> Your Testimonial
+                </label>
+                <textarea
+                  name="testimonial"
+                  id="testimonial"
+                  rows={7}
+                  value={testimonialText}
+                  onChange={(e) => {
+                    setTestimonialText(e.target.value);
+                    setCharCount(e.target.value.length);
+                  }}
+                  placeholder="Share your story... How has Aniko transformed your farming experience? What specific benefits have you seen?"
+                  required
+                  maxLength={1000}
+                />
+                <div className="character-count" id="charCount">
+                  {charCount} / 1000 characters
+                </div>
+
+                <div className="d-flex justify-content-end mt-4">
+                  <button
+                    type="submit"
+                    className="submit-btn d-flex align-items-center justify-content-center"
+                    id="submitBtn"
+                  >
+                    <i className="bi bi-send me-2"></i>
+                    <span>Submit Testimonial</span>
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+
+         {/* Left CTA Section */}
+        <div className="testDisplay-col">
+          <div className="testDisplay-cta-card">
             <div className="testDisplay-ctaHeader-wrapper">
               <img src="PICTURES/Logo-noText.png" alt="Aniko Logo" className="testDisplay-headerLogo" />
               <h2 className="testDisplay-ctaHeader">Trusted by Our Community</h2>
@@ -69,83 +145,12 @@ const TestimonialSubmit: React.FC = () => {
             <h6 className="testDisplay-ctaSubheader">
               Discover how we've helped farmers achieve better harvests and smarter decisions.
             </h6>
-
-            <ul className="feature-list">
-              <li>
-                <i className="bi bi-check-circle-fill"></i> Help other farmers
-                learn from your success
-              </li>
-              <li>
-                <i className="bi bi-people-fill"></i> Build a stronger farming
-                community
-              </li>
-              <li>
-                <i className="bi bi-star-fill"></i> Share your authentic
-                experience
-              </li>
-              <li>
-                <i className="bi bi-heart-fill"></i> Inspire others to grow
-                better
-              </li>
-            </ul>
               <Link to="/testimonialDisplay">
                 <button className="testDisplay-ctaBtn">View Testimonials </button>
               </Link>
           </div>
         </div>
 
-        {/* Right Testimonial Submit Section */}
-        <div className="col-6 testSubmit-col">
-          <h2>Share Your Experience</h2>
-          <p className="subtitle">
-            Your feedback is valuable! Tell us how Aniko has helped improve
-            your farming practices and let others learn from your experience.
-          </p>
-
-          <div className="form-section">
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                const modalEl = document.getElementById("confirmModal");
-                if (modalEl) {
-                  const confirmModal = new Modal(modalEl);
-                  confirmModal.show();
-                }
-              }}
-            >
-              <label className="form-label testSubmit-form-label" htmlFor="testimonial">
-                <i className="bi bi-chat-dots"></i> Your Testimonial
-              </label>
-              <textarea
-                name="testimonial"
-                id="testimonial"
-                rows={7}
-                value={testimonialText}
-                onChange={(e) => {
-                  setTestimonialText(e.target.value);
-                  setCharCount(e.target.value.length);
-                }}
-                placeholder="Share your story... How has Aniko transformed your farming experience? What specific benefits have you seen?"
-                required
-                maxLength={1000}
-              />
-              <div className="character-count" id="charCount">
-                {charCount} / 1000 characters
-              </div>
-
-              <div className="d-flex justify-content-end mt-4">
-                <button
-                  type="submit"
-                  className="submit-btn d-flex align-items-center justify-content-center"
-                  id="submitBtn"
-                >
-                  <i className="bi bi-send me-2"></i>
-                  <span>Submit Testimonial</span>
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
       </div>
 
       {/* Confirmation Modal */}

@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&family=Zalando+Sans+Expanded:ital,wght@0,200..900;1,200..900&display=swap');
+
 :root {
   --primary-green: #1D492C;
   --accent-green: #84cc16;
@@ -78,7 +80,7 @@ body {
 }
 
 .hero h1 {
-  font-family: 'Inter', sans-serif;
+  font-family: 'Zalando Sans Expanded';
   font-size: 4rem;
   font-weight: 800;
   color: var(--light-green) !important;
@@ -93,9 +95,10 @@ body {
   font-size: clamp(1.2rem, 3vw, 1.5rem);
   color: rgba(255, 255, 255, 0.95);
   margin-bottom: 40px;
-  max-width: 650px;
-  font-weight: 400;
+  max-width: 700px;
+  font-weight: 200 !important;
   line-height: 1.7;
+  font-family: "Lexend";
 }
 
 .hero-cta {
@@ -115,6 +118,7 @@ body {
   position: relative;
   overflow: hidden;
   box-shadow: 0px 0px 20px 5px var(--pastel-green);
+  font-family: "Lexend";
 }
 
 .hero-cta::before {
@@ -189,7 +193,8 @@ body {
   padding: 0 20px;
   font-weight: 400;
   position: relative;
-  font-weight: 400;
+  font-weight: 300 !important;
+  font-family: "Lexend" !important; 
 }
 
 .subtext::before {
@@ -212,7 +217,8 @@ body {
 
 .section-heading {
   text-align: center;
-  font-family: 'Inter', sans-serif;
+  font-family: "Zalando Sans Expanded";
+  font-optical-sizing: auto !important;
   font-size: clamp(2.5rem, 5vw, 3.5rem);
   font-weight: 800;
   color: var(--dark-brown);
@@ -241,7 +247,8 @@ body {
   margin: 0 auto 80px;
   line-height: 1.8;
   padding: 0 20px;
-  font-weight: 400;
+  font-weight: 300 !important;
+  font-family: "Lexend";
 }
 
 .stats-section {
@@ -305,7 +312,8 @@ body {
   margin: 0 auto;
   line-height: 1.7;
   max-width: 300px;
-  font-weight: 500;
+  font-weight: 400 !important;
+  font-family: "Lexend" !important; 
 }
 
 .farmer-section {
@@ -326,11 +334,11 @@ body {
 }
 
 .farmer-section h1 {
-  font-family: 'Inter', sans-serif;
+  font-family: "Zalando Sans Expanded";
   color: var(--white);
   font-weight: 800;
-  font-size: clamp(2.5rem, 5vw, 4rem);
   margin-bottom: 80px;
+  font-size: 60px !important;
   text-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   letter-spacing: -0.02em;
   margin-top: 8rem;
@@ -350,7 +358,7 @@ body {
 }
 
 .solution-text-side h3 {
-  font-family: 'Inter', sans-serif;
+  font-family: "Zalando Sans Expanded";
   font-size: 3rem;
   font-weight: 800;
   color: var(--white);
@@ -362,7 +370,8 @@ body {
   font-size: 1.4rem;
   color: rgba(255, 255, 255, 0.85);
   margin-bottom: 50px;
-  font-weight: 400;
+  font-weight: 400 !important;
+  font-family: "Lexend" !important;
 }
 
 .solution-text-side .col-6 {
@@ -371,9 +380,10 @@ body {
 
 .solution-text-side .col-6 p {
   font-size: 1.1rem;
-  font-weight: 600;
+  font-weight: 400 !important;
   color: var(--white);
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  font-family: "Lexend" !important;
 }
 .sol-icon {
   padding: 5px;
@@ -474,7 +484,7 @@ body {
 }
 
 .benefit-card h5 {
-  font-family: 'Inter', sans-serif;
+  font-family: "Lexend";
   font-size: 1.5rem;
   font-weight: 700;
   color: var(--primary-green);
@@ -504,6 +514,7 @@ body {
   font-weight: 400;
   position: relative;
   z-index: 2;
+  Font-family: "Lexend" !important;
 }
 
 /* WHY ANIKOOOOO SECTIONNNNN */
@@ -527,7 +538,7 @@ body {
 }
 
 .whyAniko-text-section h2 {
-  font-family: 'Inter', sans-serif;
+  font-family: 'Zalando Sans Expanded', sans-serif;
   font-size: clamp(2.5rem, 5vw, 3.5rem);
   font-weight: boled;
   color: var(--light-green) !important;
@@ -538,6 +549,8 @@ body {
 
 .whyAniko-text-section p {
   color: var(--light-green) !important;
+  font-family: "Lexend" !important;
+  font-weight: 300 !important;
 }
 
 .whyAniko-card-parent {
@@ -558,15 +571,11 @@ body {
 
 .whyAniko-card-parent .card-body p {
   color: var(--light-green) !important;
+  font-family: "Lexend" !important;
+  font-weight: 300 !important;
 }
 
-
-
-
-
-
-
-/* WHY SECTIONNNNN */
+/* TEAM SECTIONNNNN */
 
 .team-section {
   position: relative;
@@ -596,7 +605,7 @@ body {
 }
 
 .team-overlay h3 {
-  font-family: 'Inter', sans-serif;
+  font-family: 'Zalando Sans Expanded', sans-serif;
   font-weight: 800;
   color: var(--white);
   margin-bottom: 32px;
@@ -608,6 +617,8 @@ body {
   color: rgba(255, 255, 255, 0.95);
   line-height: 1.8;
   text-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  font-family: "Lexend";
+  font-weight: 300 !important;
 }
 
 .team-members {
@@ -646,7 +657,7 @@ body {
 }
 
 .team-members h5 {
-  font-family: 'Inter', sans-serif;
+  font-family: 'Lexend', sans-serif;
   margin-top: 32px;
   font-size: 1.4rem;
   font-weight: 700;
@@ -658,6 +669,7 @@ body {
   font-size: 1.1rem;
   margin-bottom: 0;
   font-weight: 500;
+  Font-family: "Lexend" !important;
 }
 
 .download-img-con {

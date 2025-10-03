@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&family=Zalando+Sans+Expanded:ital,wght@0,200..900;1,200..900&display=swap');
+
 :root {
     --primary-green: #1D492C;
     --accent-green: #84cc16;
@@ -42,21 +44,17 @@ body {
     background: var(--gradient-brown-light);
 }
 
+.testDisplay-ctaHeader-wrapper {
+    display: flex !important;
+    align-items: center;   
+    gap: 10px;            
+}
+
 .testDisplay-ctaHeader {
     font-weight: bold; 
-    color: var(--pastel-green) !important;
-}
-
-.testDisplay-ctaHeader-wrapper {
-  display: flex !important;
-  align-items: center;   
-  gap: 10px;            
-}
-
-.testDisplay-ctaHeader {
-  font-weight: bold; 
-  color: var(--dark-brown) !important;
-  margin: 0;            
+    color: var(--dark-brown) !important;
+    margin: 0; 
+    font-family: "Lexend";
 }
 
 .testDisplay-headerLogo {
@@ -68,6 +66,8 @@ body {
 .testDisplay-ctaSubheader {
     color: var(--bg-color) !important;
     margin-bottom: 2rem !important;
+    font-family: "Lexend";
+    font-weight: 400 !important;
 }
 
 .testDisplay-col {
@@ -80,12 +80,18 @@ body {
 
 .testSubmit-col {
     background: var(--gradient-secondary-light) !important;
-    min-height: 100%; /* stretch to row */
-    margin: 0 !important;
-    padding: 40px;
+    padding: 60px !important;
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
+    width: 70%;
+    justify-content: center !important;
+    align-items: center !important;
+    margin: 0 auto !important; 
+    display: block !important;
+    margin-top: 7.5rem !important;
+    border-top-right-radius: 150px;
+    border-bottom-left-radius: 150px;
 }
 
 .testDisplay-ctaBtn {
@@ -99,13 +105,11 @@ body {
     text-decoration: none !important;
     font-weight: 500 !important;
     cursor: pointer;
-    /* Smooth transitions for background, color, transform, and shadow */
     transition: 
         background 0.4s cubic-bezier(0.4, 0, 0.2, 1), 
         color 0.4s cubic-bezier(0.4, 0, 0.2, 1),
         transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
         box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    /* Pop-in animation on mount */
     animation: btnPopInSmooth 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -116,7 +120,6 @@ body {
     box-shadow: 0 8px 24px rgba(77, 45, 24, 0.18);
 }
 
-/* Smoother pop-in animation */
 @keyframes btnPopInSmooth {
     0% {
         opacity: 0;
@@ -148,13 +151,12 @@ body {
 }
 
 
-/* Headings */
 .testSubmit-col h2 {
     font-weight: bold;
     font-size: 2.5rem;
     color: var(--dark-brown) !important;
     margin-bottom: 10px;
-    margin-top: 5rem !important;
+    font-family: "Lexend";
 }
 
 .subtitle {
@@ -162,6 +164,7 @@ body {
     line-height: 1.7;
     margin-bottom: 30px;
     font-weight: 500;
+    font-family: "Lexend";
 }
 
 /* Feature list */
@@ -175,14 +178,15 @@ body {
     display: flex;
     align-items: center;
     margin-bottom: 12px;
-    color: var(--bg-color);
+    color: var(--primary-brown);
     font-size: 0.95rem;
 }
 
 .feature-list li i {
-    color: var(--bg-color);
+    color: var(--primary-brown);
     margin-right: 12px;
     font-size: 1rem;
+    font-family: "Lexend" !important;
 }
 
 /* Form Section */
@@ -195,26 +199,33 @@ body {
     box-shadow: 0px 0px 20px 5px var(--pastel-green);
     animation: slideInUp 0.6s ease-out;
     border: 2px dashed var(--primary-brown) !important;
+    width: auto !important;
+    justify-content: center !important; 
+    align-items: center !important; 
+    margin: 0 auto !important;
 }
 
 .form-section label {
     color: var(--dark-brown);
     font-weight: bold !important;
+    font-family: "Lexend";
 }
+
 .testSubmit-form-label .bi-chat-dots {
     margin-right: 7px !important;
 }
 
 /* Textarea */
 .testSubmit-col textarea {
-    width: 100%;
+    width: 100% !important;
     border-radius: 16px;
     padding: 20px;
-    font-size: 1rem;
+    font-size: 14px;
     resize: vertical;
     transition: all 0.3s ease;
     color: var(--primary-green);
-    font-family: inherit;
+    font-family: "Lexend";
+    font-weight: 300 !important;
     line-height: 1.6;
     min-height: 180px;
     border: 2px dashed var(--primary-brown) !important;
@@ -250,6 +261,7 @@ body {
     width: 100% !important;
     text-align: center !important;
     margin-bottom: 1rem;
+    font-family: "Lexend";
 }
 
 .submit-btn:hover {
@@ -262,6 +274,7 @@ body {
     color: var(--primary-brown);
     text-align: right;
     margin-top: 8px;
+    font-family: "Lexend"; 
 }
 
 /* Animations */
@@ -283,27 +296,29 @@ body {
 }
 
 .submit-mod-content {
-  border-radius: 16px;
-  border: 4px dashed var(--primary-brown) !important;
-  background: var(--gradient-secondary-light); 
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+    border-radius: 16px;
+    border: 4px dashed var(--primary-brown) !important;
+    background: var(--gradient-secondary-light); 
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
 }
 
 .submit-mod-header {
-  border-bottom: none; 
-  background: var(--primary-green);
-  color: var(--white);
-  border-top-left-radius: 16px;
-  border-top-right-radius: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+    border-bottom: none; 
+    background: var(--primary-green);
+    color: var(--white);
+    border-top-left-radius: 16px;
+    border-top-right-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: "Lexend"; 
 }
 
 .submit-mod-title {
-  font-weight: bold;
-  font-size: 1.25rem;
-  margin: 0;
+    font-weight: bold;
+    font-size: 1.25rem;
+    margin: 0;
+    font-family: "Lexend"; 
 }
 
 .submit-mod-header .btn-close {
@@ -318,6 +333,7 @@ body {
   font-size: 0.95rem;
   color: var(--primary-green);
   padding: 20px;
+  font-family: "Lexend";
 }
 
 /* === FOOTER BUTTONS === */
@@ -338,7 +354,9 @@ body {
         transform 0.2s cubic-bezier(0.4, 0, 0.2, 1),
         box-shadow 0.2s;
     animation: btnPopIn 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    font-family: "Lexend";
 }
+
 .testSub-modalFooter-cancelBtn:hover {
     background: var(--gradient-brown);
     transform: translateY(-2px) scale(1.04);
@@ -358,6 +376,8 @@ body {
         transform 0.2s cubic-bezier(0.4, 0, 0.2, 1),
         box-shadow 0.2s;
     animation: btnPopIn 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    font-family: "Lexend";
+    font-weight: 400 !important;
 }
 .testSub-modalFooter-confirmBtn:hover {
     background: var(--gradient-primary); 

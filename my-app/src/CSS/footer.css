@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&family=Zalando+Sans+Expanded:ital,wght@0,200..900;1,200..900&display=swap');
+
 :root {
   --primary-green: #1D492C;
   --accent-green: #84cc16;
@@ -24,6 +26,8 @@
   width: 100%;
   left: 0 !important;
   right: 0 !important;
+  font-family: "Lexend";
+  font-weight: 300 !important
 }
 
 .footer-social a:hover {
@@ -33,6 +37,10 @@
 .footer-links li {
   margin-bottom: 8px;
   text-decoration: none !important;
+}
+
+.footer li a {
+  font-family: "Lexend" !important;
 }
 
 .footer-links a {

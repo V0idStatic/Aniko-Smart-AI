@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&family=Zalando+Sans+Expanded:ital,wght@0,200..900;1,200..900&display=swap');
+
 :root {
   --primary-green: #1D492C;
   --accent-green: #84cc16;
@@ -15,33 +17,34 @@
 }
 
 .testSection {
-    padding: 5rem 0;
-    background: #f8f9fa;
-    font-family: system-ui, sans-serif;
-    padding: 25px !important;
-    margin-top: 2rem;
-    margin-bottom: 2rem;
-    border-radius: 80px;
-    border-bottom-left-radius: 0px !important;
-    background: var(--gradient-secondary) !important;
-    border: 5px dashed var(--dark-green) !important;
+  padding: 5rem 0;
+  background: #f8f9fa;
+  font-family: system-ui, sans-serif;
+  padding: 25px !important;
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+  border-radius: 80px;
+  border-bottom-left-radius: 0px !important;
+  background: var(--gradient-secondary) !important;
+  border: 5px dashed var(--dark-green) !important;
 }
 
 .testSection-header-wrapper {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
 }
 
 .testSection-headers {
-    flex: 1; 
-    margin-left: 0.5rem !important;
+  flex: 1; 
+  margin-left: 0.5rem !important;
 }
 
 .testSection-headerBtn {
   margin-left: auto; 
   margin-right: 0.5rem !important;
+  font-family: "Lexend";
 }
 
 .testDisplay-btn {
@@ -67,72 +70,74 @@
   animation: sway 1.2s infinite alternate ease-in-out;
 }
 
-
-
 .testSec-header {
-    font-weight: 700;
-    font-size: 50px !important; 
-    color: var(--light-green) !important;
-    text-shadow: 0px 0px 10px var(--accent-green) !important;
+  font-weight: 700;
+  font-size: 50px !important; 
+  color: var(--light-green) !important;
+  text-shadow: 0px 0px 10px var(--accent-green) !important;
+  font-family: "Zalando Sans Expanded"; 
 }
 
 .testSec-subheader {
-    margin-bottom: 1rem;
-    font-size: 20px;
-    color: var(--pastel-green); 
+  margin-bottom: 1rem;
+  font-size: 20px;
+  color: var(--pastel-green); 
+  font-family: "Lexend";
+
 }
 
 .testSec-scroll {
-    display: flex;
-    flex-direction: row;
-    gap: 2rem;
-    padding: 1rem;
-    overflow-x: auto;
-    overflow-y: hidden;  
-    scroll-snap-type: x mandatory;
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-    touch-action: pan-x;  
-    cursor: grab;
+  display: flex;
+  flex-direction: row;
+  gap: 2rem;
+  padding: 1rem;
+  overflow-x: auto;
+  overflow-y: hidden;  
+  scroll-snap-type: x mandatory;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  touch-action: pan-x;  
+  cursor: grab;
 }
 
 .testSec-scroll::-webkit-scrollbar {
-    display: none;
+  display: none;
 }
 
 .testSec-scroll.dragging {
-     cursor: grabbing;
+  cursor: grabbing;
 }
 
 .testSec-card {
-    flex: 0 0 calc(33.333% - 1rem);
-    min-width: 280px;
-    background-color: var(--light-green) !important;
-    border-radius: 0 !important;
-    border-top-right-radius: 50px !important;
-    border-bottom-left-radius: 50px !important;
-    border: 2px solid var(--accent-green) !important;
-    padding: 20px; 
-    text-align: center;
-    scroll-snap-align: start;
-    user-select: none;
-    position: relative;
-    margin-bottom: 0;      
-    overflow: hidden;   
-    box-shadow: 0px 0px 10px 2px var(--pastel-green) !important;   
-    background-image: url('https://www.transparenttextures.com/patterns/diamond-upholstery.png');
-    background-repeat: repeat;
-    background-size: auto;
-    opacity: 0.98;
+  flex: 0 0 calc(33.333% - 1rem);
+  min-width: 280px;
+  background-color: var(--light-green) !important;
+  border-radius: 0 !important;
+  border-top-right-radius: 50px !important;
+  border-bottom-left-radius: 50px !important;
+  border: 2px solid var(--accent-green) !important;
+  padding: 20px; 
+  text-align: center;
+  scroll-snap-align: start;
+  user-select: none;
+  position: relative;
+  margin-bottom: 0;      
+  overflow: hidden;   
+  box-shadow: 0px 0px 10px 2px var(--pastel-green) !important;   
+  background-image: url('https://www.transparenttextures.com/patterns/diamond-upholstery.png');
+  background-repeat: repeat;
+  background-size: auto;
+  opacity: 0.98;
 }
 
 .testSec-userDetails {
-    display: flex !important;
+  display: flex !important;
+  font-family: "Lexend" !important;
 }
 
 .testSec-nameDeets {
-    text-align: left !important;
-    margin-left: 1rem !important; 
+  text-align: left !important;
+  margin-left: 1rem !important; 
 }
 
 .testSec-userProfile {
@@ -165,6 +170,7 @@
   margin-top: 2rem;
   text-align: left !important;
   font-weight: 400!important;
+  font-family: "Lexend" !important;
 }
 
 /* ======== RESPONSIVENESS ======== */

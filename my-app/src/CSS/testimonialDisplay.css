@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&family=Zalando+Sans+Expanded:ital,wght@0,200..900;1,200..900&display=swap');
+
 :root {
     --primary-green: #1D492C;
     --accent-green: #84cc16;
@@ -29,19 +31,20 @@
     text-align: center;
     font-weight: 700;
     margin-top: 6rem;
-    color: var(--light-green);
-    text-shadow: 0px 0px 20px var(--accent-green) !important;
+    color: var(--primary-green);
     font-size: 50px !important;
     font-weight: bold !important;
+    font-family: "Zalando Sans Expanded";
 }
 
 .testDisplay-section h6 {
-    color: var(--light-green) !important;
+    color: var(--dark-gray) !important;
+    opacity: 70% !important;
     text-align: center;
     font-weight: 500;
-    text-shadow: 0px 0px 15px var(--accent-green) !important;
     font-size: 18px !important;
-    margin-bottom: 2rem; 
+    margin-bottom: 3rem; 
+    font-family: "Lexend";
 }
 
 .testimonialSubmit-headerBtn {
@@ -51,11 +54,11 @@
     margin: 0 auto !important; 
     margin-bottom: 3rem !important;
     background-color: transparent !important;
-    border: 2px solid var(--accent-green) !important;
+    border: 2px solid var(--primary-brown) !important;
     border-radius: 25px !important; 
     padding: 10px; 
     width: 15%;
-    color: var(--accent-green);
+    color: var(--primary-brown);
     text-decoration: none !important; 
     font-weight: 500 !important; 
     box-shadow: 0px 0px 20px 5px var(--light-green) !important;
@@ -64,14 +67,15 @@
         transform 0.3s ease,
         box-shadow 0.4s ease,
         color 0.3s ease;
+    font-family: "Lexend";
 }
 
 .testimonialSubmit-headerBtn:hover {
-    background: var(--gradient-secondary) !important;
+    background: var(--gradient-brown) !important;
     color: var(--light-green); 
     transform: translateY(-5px) scale(1.05);
     box-shadow: 0px 0px 30px 12px var(--accent-green);
-    border-color: var(--primary-green) !important;
+    border-color: var(--dark-brown) !important;
 }
 
 .testSubmit-link {
@@ -117,6 +121,7 @@
 
 .testDisplay-userDetails {
     display: flex;
+    font-family: "Lexend"; 
 }
 
 .testDisplay-card img {
@@ -132,11 +137,14 @@
     font-size: 1.1rem;
     text-align: left !important;
     margin-left: 1rem;
+    color: var(--dark-brown);
+    font-weight: bold !important; 
 }
 
 .testDisplay-card small {
     display: block;
-    color: #6c757d;
+    color: var(--primary-brown);
+    font-family: "Lexend";
     margin-bottom: 0.75rem;
     text-align: left !important;
     margin-left: 1rem;
@@ -145,7 +153,8 @@
 .testDisplay-card p {
     font-size: 0.95rem;
     line-height: 1.4;
-    color: #333;
+    color: var(--primary-green);
+    font-family: "Lexend";
     text-align: left !important;
     margin-top: 1.55rem;  
 }
@@ -170,6 +179,7 @@
         transform 0.3s ease,
         box-shadow 0.4s ease;
     font-weight: 500; 
+    font-family: "Lexend";
 }
 
 .testDisplay-view-more-btn:hover {
