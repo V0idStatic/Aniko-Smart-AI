@@ -487,485 +487,438 @@ const analysis = StyleSheet.create({
     color: '#00796b',
   },
 
-  statusDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    marginRight: 6,
-  },
+  // ===== STATUS SUMMARY HORIZONTAL SCROLL STYLES =====
+statusSummaryScroll: {
+  marginTop: 15,
+  maxHeight: 100, // Prevent vertical expansion
+},
 
-  // ===== PLANT & NPK STYLES =====
-  plantSelectionContainer: {
-    marginBottom: 20,
-  },
-  
-  plantSelectBtn: {
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: 20,
-    backgroundColor: '#e0e0e0',
-    marginRight: 10,
-  },
-  
-  activePlantBtn: {
-    backgroundColor: '#1c4722',
-  },
-  
-  plantSelectText: {
-    fontSize: 14,
-    color: '#333',
-  },
-  
-  activePlantText: {
-    color: 'white',
-    fontWeight: 'bold',
-  },
+statusSummaryScrollContent: {
+  paddingRight: 15, // Add padding to last item
+  paddingVertical: 5, // Breathing room
+  gap: 12, // Space between cards
+},
 
-  npkContainer: {
-    backgroundColor: 'white',
-    borderRadius: 10,
-    padding: 15,
-    marginBottom: 20,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-  },
-  
-  npkChart: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    height: 200,
-    marginTop: 20,
-    paddingBottom: 30,
-    alignItems: 'flex-end',
-  },
-  
-  npkBar: {
-    width: 60,
-    height: 150,
-    backgroundColor: '#f0f0f0',
-    borderRadius: 5,
-    justifyContent: 'flex-end',
-    alignItems: 'center',
-    position: 'relative',
-  },
-  
-  npkFill: {
-    width: '100%',
-    borderRadius: 5,
-    position: 'absolute',
-    bottom: 0,
-  },
-  
-  npkValue: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginBottom: 8,
-    zIndex: 1,
-    color: 'white',
-    textShadowColor: 'rgba(0, 0, 0, 0.5)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 2,
-  },
-  
-  npkLabel: {
-    position: 'absolute',
-    bottom: -25,
-    fontSize: 12,
-    fontWeight: 'bold',
-  },
+statusSummaryItemCard: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  paddingHorizontal: 16,
+  paddingVertical: 12,
+  backgroundColor: '#f5f5f5',
+  borderRadius: 12,
+  borderWidth: 2,
+  borderColor: 'transparent',
+  minWidth: 130, // Ensure consistent card width
+  shadowColor: '#000',
+  shadowOffset: { width: 0, height: 2 },
+  shadowOpacity: 0.1,
+  shadowRadius: 3,
+  elevation: 3,
+},
 
-  optimalConditions: {
-    marginTop: 8,
-    marginBottom: 8,
-    backgroundColor: '#f0f8f0',
-    borderRadius: 8,
-    padding: 12,
-  },
-  
-  npkSection: {
-    marginTop: 8,
-    marginBottom: 8,
-    backgroundColor: '#f5f7fa',
-    borderRadius: 8,
-    padding: 12,
-  },
+activeStatusItemCard: {
+  backgroundColor: '#e8f5e9',
+  borderColor: '#1c4722',
+  borderWidth: 2,
+  shadowOpacity: 0.15,
+  shadowRadius: 4,
+  elevation: 5,
+},
 
-  // ===== RECOMMENDATION STYLES =====
-  recommendationHeader: {
-    backgroundColor: 'white',
-    borderRadius: 10,
-    padding: 20,
-    marginBottom: 20,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-  },
+statusDot: {
+  width: 12,        // ← Changed from 8 to 12
+  height: 12,       // ← Changed from 8 to 12
+  borderRadius: 6,  // ← Changed from 4 to 6
+  marginRight: 10,  // ← Changed from 6 to 10
+},
 
-  cardHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  
-  plantInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
+statusTextContainer: {
+  flex: 1,
+},
 
-  plantingMonths: {
-    marginVertical: 8,
-  },
-  
-  monthsContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    marginTop: 2,
-  },
+statusSummaryText: {
+  fontSize: 14,
+  fontWeight: '600',
+  color: '#333',
+  marginBottom: 2,
+},
 
-  riskSection: {
-    marginTop: 5,
-    marginBottom: 5,
-  },
-  
-  riskItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 2,
-  },
+statusCount: {
+  fontSize: 12,
+  color: '#666',
+  fontWeight: '500',
+},
 
-  recommendationsSection: {
-    marginTop: 5,
-    marginBottom: 5,
-  },
-  
-  recommendationItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 2,
-  },
-  
-  recommendationText: {
-    fontSize: 13,
-    color: '#333',
-    marginLeft: 5,
-  },
+activeStatusText: {
+  color: '#1c4722',
+  fontWeight: 'bold',
+},
 
-  alternativesSection: {
-    marginTop: 5,
-    marginBottom: 5,
-  },
-  
-  alternativeItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 2,
-  },
-  
-  alternativeText: {
-    fontSize: 13,
-    color: '#333',
-    marginLeft: 5,
-  },
+checkmark: {
+  marginLeft: 8,
+},
 
-  conditionText: {
-    fontSize: 13,
-    color: '#555',
-    marginVertical: 2,
-    lineHeight: 18,
-  },
 
-  // ===== TIPS & CATEGORY STYLES =====
-  tipsContainer: {
-    marginTop: 15,
-    marginBottom: 25,
-    backgroundColor: '#f5f7fa',
-    borderRadius: 10,
-    padding: 15,
-  },
-  
-  tipCard: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    marginBottom: 10,
-  },
-  
-  tipContent: {
-    marginLeft: 12,
-    flex: 1,
-  },
-  
-  tipTitle: {
-    fontWeight: 'bold',
-    fontSize: 14,
-    marginBottom: 2,
-    color: '#333',
-  },
-  
-  tipText: {
-    fontSize: 13,
-    color: '#555',
-  },
 
-  categoryContainer: {
-    marginBottom: 20,
-  },
-  
-  categoryScrollView: {
-    marginTop: 10,
-  },
-  
-  categoryIconContainer: {
-    marginBottom: 8,
-  },
-  
-  categoryName: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#333',
-    textAlign: 'center',
-    marginBottom: 4,
-  },
-  
-  activeCategoryName: {
-    color: '#1c4722',
-    fontWeight: 'bold',
-  },
-  
-  categoryCount: {
-    fontSize: 12,
-    color: '#666',
-    textAlign: 'center',
-  },
+// New category summary styles:
+categorySummary: {
+  backgroundColor: '#fff',
+  padding: 15,
+  borderRadius: 12,
+  marginVertical: 10,
+  marginHorizontal: 15,
+  shadowColor: '#000',
+  shadowOffset: { width: 0, height: 2 },
+  shadowOpacity: 0.1,
+  shadowRadius: 4,
+  elevation: 3,
+},
 
-  categorySummary: {
-    backgroundColor: 'white',
-    borderRadius: 10,
-    padding: 16,
-    marginBottom: 20,
-    elevation: 1,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-  },
-  
-  categorySummaryTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#1c4722',
-    marginBottom: 4,
-  },
-  
-  categorySummarySubtitle: {
-    fontSize: 14,
-    color: '#666',
-    marginBottom: 12,
-  },
+categorySummaryTitle: {
+  fontSize: 18,
+  fontWeight: 'bold',
+  color: '#1c4722',
+  marginBottom: 5,
+},
 
-  statusSummary: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-  },
-  
-  statusSummaryItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 6,
-    flex: 0.48,
-  },
-  
-  statusSummaryText: {
-    fontSize: 13,
-    color: '#333',
-    fontWeight: '500',
-  },
+categorySummarySubtitle: {
+  fontSize: 14,
+  color: '#666',
+},
 
-  activeStatusSummaryItem: {
-    backgroundColor: '#f0f8f0',
-    borderRadius: 8,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-  },
-  
-  activeStatusSummaryText: {
-    color: '#1c4722',
-    fontWeight: 'bold',
-  },
+// ===== ADD THESE MISSING STYLES =====
 
-  // ===== LIST & FILTER STYLES =====
-  plantListContainer: {
-    backgroundColor: 'white',
-    borderRadius: 10,
-    padding: 15,
-    marginBottom: 20,
-    elevation: 1,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-  },
-  
-  listTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#1c4722',
-    marginBottom: 4,
-  },
-  
-  listSubtitle: {
-    fontSize: 13,
-    color: '#666',
-    marginBottom: 15,
-    fontStyle: 'italic',
-  },
+// Time Range Styles
+timeRangeContainer: {
+  marginBottom: 20,
+},
 
-  plantListItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 12,
-    paddingHorizontal: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
-    backgroundColor: '#fafafa',
-    borderRadius: 8,
-    marginBottom: 8,
-  },
-  
-  plantListInfo: {
-    flex: 1,
-  },
-  
-  plantListHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 6,
-  },
-  
-  plantListName: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#1c4722',
-    flex: 1,
-  },
+timeRangeLabel: {
+  fontSize: 14,
+  fontWeight: '600',
+  color: '#333',
+  marginBottom: 10,
+},
 
-  quickSummary: {
-    marginTop: 4,
-  },
-  
-  quickSummaryText: {
-    fontSize: 12,
-    color: '#666',
-    marginBottom: 2,
-  },
+sectionHeader: {
+  flexDirection: 'row',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  marginBottom: 15,
+},
 
-  statusFilterContainer: {
-    marginBottom: 15,
-  },
-  
-  statusFilterTitle: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#333',
-    marginBottom: 8,
-  },
-  
-  statusFilterScrollView: {
-    marginTop: 5,
-  },
-  
-  statusFilterButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 20,
-    backgroundColor: '#f5f5f5',
-    marginRight: 10,
-    borderWidth: 1,
-    borderColor: 'transparent',
-  },
-  
-  activeStatusFilterButton: {
-    backgroundColor: '#f0f8f0',
-    borderColor: '#1c4722',
-  },
-  
-  statusFilterDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    marginRight: 6,
-  },
-  
-  statusFilterText: {
-    fontSize: 13,
-    color: '#666',
-    fontWeight: '500',
-  },
-  
-  activeStatusFilterText: {
-    color: '#1c4722',
-    fontWeight: 'bold',
-  },
+// Container Styles
+noDataContainer: {
+  alignItems: 'center',
+  justifyContent: 'center',
+  paddingVertical: 40,
+},
 
-  // ===== DETAIL VIEW STYLES =====
-  detailView: {
-    marginBottom: 20,
-  },
+loadingContainer: {
+  alignItems: 'center',
+  justifyContent: 'center',
+  paddingVertical: 40,
+},
 
-  detailedRecommendationCard: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 20,
-    elevation: 3,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-  },
+recommendationHeader: {
+  marginBottom: 20,
+},
 
-  // ===== LAYOUT HELPERS =====
-  timeRangeContainer: {
-    marginBottom: 20,
-  },
+// Category Styles
+categoryContainer: {
+  marginBottom: 20,
+},
 
-  timeRangeLabel: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: '#666',
-    marginBottom: 10,
-  },
+categoryScrollView: {
+  marginTop: 10,
+},
 
-  sectionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 5,
-  },
+categoryIconContainer: {
+  marginBottom: 8,
+},
 
-  noDataContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 30,
-  },
+categoryName: {
+  fontSize: 13,
+  fontWeight: '600',
+  color: '#333',
+  textAlign: 'center',
+  marginTop: 5,
+},
 
-  loadingContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 50,
-  },
+activeCategoryName: {
+  color: '#1c4722',
+},
 
-  footerSpace: {
-    height: 80,
-  },
+categoryCount: {
+  fontSize: 11,
+  color: '#666',
+  marginTop: 2,
+},
+
+// Plant Detail Styles
+detailView: {
+  marginTop: 10,
+},
+
+detailedRecommendationCard: {
+  backgroundColor: '#fff',
+  borderRadius: 12,
+  padding: 18,
+  marginBottom: 18,
+  elevation: 3,
+  shadowColor: '#000',
+  shadowOffset: { width: 0, height: 2 },
+  shadowOpacity: 0.1,
+  shadowRadius: 4,
+},
+
+cardHeader: {
+  flexDirection: 'row',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  marginBottom: 15,
+},
+
+plantInfo: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  flex: 1,
+},
+
+plantingMonths: {
+  marginTop: 10,
+  marginBottom: 15,
+},
+
+monthsContainer: {
+  flexDirection: 'row',
+  flexWrap: 'wrap',
+  marginTop: 8,
+},
+
+riskSection: {
+  marginTop: 15,
+  padding: 12,
+  backgroundColor: '#fff3e0',
+  borderRadius: 8,
+  borderLeftWidth: 4,
+  borderLeftColor: '#ff5722',
+},
+
+riskItem: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  marginTop: 6,
+},
+
+recommendationsSection: {
+  marginTop: 15,
+  padding: 12,
+  backgroundColor: '#e8f5e9',
+  borderRadius: 8,
+  borderLeftWidth: 4,
+  borderLeftColor: '#4caf50',
+},
+
+recommendationItem: {
+  flexDirection: 'row',
+  alignItems: 'flex-start',
+  marginTop: 6,
+},
+
+recommendationText: {
+  fontSize: 13,
+  color: '#333',
+  marginLeft: 8,
+  flex: 1,
+},
+
+alternativesSection: {
+  marginTop: 15,
+  padding: 12,
+  backgroundColor: '#e3f2fd',
+  borderRadius: 8,
+  borderLeftWidth: 4,
+  borderLeftColor: '#2196f3',
+},
+
+alternativeItem: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  marginTop: 6,
+},
+
+alternativeText: {
+  fontSize: 13,
+  color: '#333',
+  marginLeft: 8,
+  flex: 1,
+},
+
+optimalConditions: {
+  marginTop: 15,
+  padding: 12,
+  backgroundColor: '#f5f5f5',
+  borderRadius: 8,
+},
+
+conditionText: {
+  fontSize: 13,
+  color: '#555',
+  marginTop: 4,
+},
+
+npkSection: {
+  marginTop: 15,
+  padding: 12,
+  backgroundColor: '#fff8e1',
+  borderRadius: 8,
+  borderLeftWidth: 4,
+  borderLeftColor: '#fbc02d',
+},
+
+// Plant List Styles
+plantListContainer: {
+  marginTop: 10,
+},
+
+listTitle: {
+  fontSize: 18,
+  fontWeight: 'bold',
+  color: '#1c4722',
+  marginBottom: 5,
+},
+
+listSubtitle: {
+  fontSize: 13,
+  color: '#666',
+  marginBottom: 15,
+},
+
+plantListItem: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  backgroundColor: '#fff',
+  borderRadius: 10,
+  padding: 15,
+  marginBottom: 10,
+  elevation: 2,
+  shadowColor: '#000',
+  shadowOffset: { width: 0, height: 1 },
+  shadowOpacity: 0.1,
+  shadowRadius: 2,
+},
+
+plantListInfo: {
+  flex: 1,
+  marginRight: 10,
+},
+
+plantListHeader: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  marginBottom: 8,
+},
+
+plantListName: {
+  fontSize: 16,
+  fontWeight: 'bold',
+  color: '#1c4722',
+  flex: 1,
+},
+
+quickSummary: {
+  marginTop: 5,
+},
+
+quickSummaryText: {
+  fontSize: 12,
+  color: '#666',
+  marginTop: 3,
+},
+
+// NPK Chart Styles
+npkContainer: {
+  backgroundColor: 'white',
+  borderRadius: 10,
+  padding: 15,
+  marginBottom: 20,
+  elevation: 2,
+  shadowColor: '#000',
+  shadowOffset: { width: 0, height: 1 },
+  shadowOpacity: 0.1,
+  shadowRadius: 2,
+},
+
+npkChart: {
+  flexDirection: 'row',
+  justifyContent: 'space-around',
+  alignItems: 'flex-end',
+  height: 200,
+  marginTop: 15,
+},
+
+npkBar: {
+  width: 80,
+  alignItems: 'center',
+},
+
+npkFill: {
+  width: '100%',
+  borderTopLeftRadius: 8,
+  borderTopRightRadius: 8,
+  minHeight: 20,
+},
+
+npkValue: {
+  fontSize: 16,
+  fontWeight: 'bold',
+  color: '#333',
+  marginTop: 8,
+},
+
+npkLabel: {
+  fontSize: 12,
+  color: '#666',
+  marginTop: 4,
+  textAlign: 'center',
+},
+
+// Footer Styles
+footerSpace: {
+  height: 80,
+},
+
+plantSelectionContainer: {
+  marginVertical: 15,
+  paddingHorizontal: 20,
+},
+plantSelectBtn: {
+  paddingHorizontal: 20,
+  paddingVertical: 10,
+  marginRight: 10,
+  borderRadius: 20,
+  backgroundColor: '#f0f0f0',
+  borderWidth: 1,
+  borderColor: '#ddd',
+},
+activePlantBtn: {
+  backgroundColor: '#e0f7e0',
+  borderColor: '#1c4722',
+},
+plantSelectText: {
+  fontSize: 14,
+  color: '#666',
+},
+activePlantText: {
+  color: '#1c4722',
+  fontWeight: 'bold',
+},
+
+// ===== END OF MISSING STYLES =====
+
 });
 
 export default analysis;

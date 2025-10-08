@@ -1,125 +1,31 @@
-import { useEffect, useState, useRef } from "react";
-import supabase from "./CONFIG/supaBase"; // Import Supabase client
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, ScrollView } from "react-native";
+import { useEffect, useState } from "react";
+import supabase from "./CONFIG/supaBase";
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image } from "react-native";
 import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import styles from "./styles/Login.style";
-
+import { Ionicons } from '@expo/vector-icons';
 
 export default function Login() {
-  const [username, setUsername] = useState(""); // Username state
-  const [error, setError] = useState(""); // Error state for login failures
-  const [isDatabaseConnected, setIsDatabaseConnected] = useState(false); // State to track DB connection
-  const [debugInfo, setDebugInfo] = useState(""); // Debug information
-  const [realtimeStatus, setRealtimeStatus] = useState<string>('');
-  const lastRealtimeTs = useRef<number>(Date.now());
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [isDatabaseConnected, setIsDatabaseConnected] = useState<boolean | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
 
-  interface User {
-    id: string; // stored as string from supabase, but is integer in DB
-    username: string;
-    last_login: string | null;
-  }
-
-  // Lazy import (avoid circular) for setting session
   const { setCurrentUser } = require('./CONFIG/currentUser');
-
-interface RealtimePayload {
-  eventType: 'INSERT' | 'UPDATE' | 'DELETE';
-  new: User | null;
-  old: User | null;
-}
-
-interface RealtimeUpdate {
-  type: string;
-  timestamp: string;
-  data: User | null;
-}
-
-const [allUsers, setAllUsers] = useState<User[]>([]);
-const [realtimeUpdates, setRealtimeUpdates] = useState<RealtimeUpdate[]>([]);
-
-  // Helper to parse ISO or null safely
-  const parseDate = (d: string | null) => d ? new Date(d).getTime() : 0;
-
-  // Merge or insert user, then resort descending by last_login
-  const upsertAndSortUsers = (incoming: User, mode: 'insert' | 'update') => {
-    setAllUsers(prev => {
-      let next: User[];
-      const idx = prev.findIndex(u => u.id === incoming.id);
-      if (idx === -1) {
-        next = [...prev, incoming];
-      } else {
-        next = prev.map(u => u.id === incoming.id ? { ...u, ...incoming } : u);
-      }
-      next.sort((a,b) => parseDate(b.last_login) - parseDate(a.last_login));
-      return next;
-    });
-  };
-
-  // Remove user helper
-  const removeUserAndSort = (id: string) => {
-    setAllUsers(prev => prev.filter(u => u.id !== id));
-  };
-
-  // Real-time listener for changes in the users table
-  useEffect(() => {
-    let channel: ReturnType<typeof supabase.channel> | null = null;
-    const setupRealtime = async () => {
-      try {
-        // Test if realtime is available
-        const { error } = await supabase.from('users').select('id').limit(1);
-        if (error) {
-         setRealtimeStatus('Realtime unavailable');
-         setDebugInfo(prev => prev + '\nRealtime unavailable: ' + error.message);
-         return; 
-        }
-        channel = supabase
-          .channel('public:users')
-          .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'users' }, (payload: any) => {
-            const newUser = payload.new as User | null;
-            if (newUser?.id) upsertAndSortUsers(newUser,'insert');
-            lastRealtimeTs.current = Date.now();
-            setRealtimeStatus('Last event: INSERT ' + new Date().toLocaleTimeString());
-          })
-          .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'users' }, (payload: any) => {
-            const newUser = payload.new as User | null;
-            if (newUser?.id) upsertAndSortUsers(newUser,'update');
-            lastRealtimeTs.current = Date.now();
-            setRealtimeStatus('Last event: UPDATE ' + new Date().toLocaleTimeString());
-          })
-          .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'users' }, (payload: any) => {
-            const oldUser = payload.old as User | null;
-            if (oldUser?.id) removeUserAndSort(oldUser.id);
-            lastRealtimeTs.current = Date.now();
-            setRealtimeStatus('Last event: DELETE ' + new Date().toLocaleTimeString());
-          })
-          .subscribe((status, err) => {
-            if (status === 'SUBSCRIBED') setRealtimeStatus('Realtime connected');
-            if (status === 'CHANNEL_ERROR') setRealtimeStatus('Realtime error');
-            if (status === 'CLOSED') setRealtimeStatus('Realtime closed');
-          });
-      } catch (e) {
-        setRealtimeStatus('Realtime setup failed');
-      }
-    };
-    const timer = setTimeout(setupRealtime, 120);
-    return () => { clearTimeout(timer); if (channel) supabase.removeChannel(channel); };
-  }, []); // Empty dependency array to run only once
-
 
   // Test database connection
   const testDatabaseConnection = async () => {
     try {
-      const { data, error } = await supabase.from("users").select("count").limit(1);
+      const { error } = await supabase.from("users").select("count").limit(1);
       if (error) {
         console.error("Database connection failed:", error);
         setIsDatabaseConnected(false);
-        setDebugInfo("DB connection failed: " + error.message);
       } else {
         console.log("Database connected successfully");
         setIsDatabaseConnected(true);
-        setDebugInfo("DB connected successfully");
       }
     } catch (err) {
       console.error("Error during database connection test:", err);
@@ -127,63 +33,46 @@ const [realtimeUpdates, setRealtimeUpdates] = useState<RealtimeUpdate[]>([]);
     }
   };
 
-  // Function to show all users in database
-  const debugAllUsers = async () => {
-    try {
-      const { data, error } = await supabase.from("users").select("*").order('last_login', { ascending: false });
-      if (error) {
-        console.error("Error fetching all users:", error);
-        setDebugInfo(prev => prev + "\nError fetching users: " + error.message);
-      } else {
-        console.log("All users in database:", data);
-        setAllUsers(data);
-        setDebugInfo(prev => prev + `\nFound ${data.length} users in database`);
-      }
-    } catch (err) {
-      console.error("Error in debugAllUsers:", err);
-    }
-  };
-
-  // Handle login logic for username
+  // Handle login logic
   const handleLogin = async () => {
     try {
       const searchUsername = username.trim();
 
-      // NEW: Guard against empty input so it doesn't match everyone with '%%'
       if (!searchUsername) {
         setError("Please enter your username.");
         return;
       }
 
-      setError(""); // clear previous error
-      setDebugInfo(`Searching for: ${searchUsername}`);
+      if (!password) {
+        setError("Please enter your password.");
+        return;
+      }
+
+      setError("");
       console.log("Searching for username:", searchUsername);
 
-      // Query users table – keep ilike but WITHOUT wildcards for exact (case-insensitive) match
       const { data, error } = await supabase
         .from("users")
         .select("*")
-        .ilike("username", searchUsername) // exact case-insensitive (no % to avoid broad match)
+        .ilike("username", searchUsername)
+        .eq("password_hash", password) // Use hashed password comparison
         .limit(1);
 
       if (error) {
         setError("Database error: " + error.message);
         console.error("Login Error:", error);
-        setDebugInfo(prev => prev + "\nQuery error: " + error.message);
         return;
       }
 
       if (!data || data.length === 0) {
-        setError("Username not found. Please check your username or sign up.");
-        setDebugInfo(prev => prev + "\nNo user found with that username");
+        setError("Username or password incorrect. Please try again.");
         return;
       }
 
-  const user = data[0];
+      const user = data[0];
       console.log("User logged in:", user);
-      setDebugInfo(prev => prev + "\nUser found: " + JSON.stringify(user));
 
-  const newLastLogin = new Date().toISOString();
+      const newLastLogin = new Date().toISOString();
       const { error: updateError } = await supabase
         .from("users")
         .update({ last_login: newLastLogin })
@@ -191,21 +80,21 @@ const [realtimeUpdates, setRealtimeUpdates] = useState<RealtimeUpdate[]>([]);
 
       if (updateError) {
         console.error("Error updating last login:", updateError);
-        setDebugInfo(prev => prev + "\nUpdate error: " + updateError.message);
       } else {
-        console.log("Last login updated successfully to:", newLastLogin);
-        setDebugInfo(prev => prev + "\nLast login updated successfully");
-        setAllUsers(prevUsers => prevUsers.map(u => u.id === user.id ? { ...u, last_login: newLastLogin } : u));
-        // Store current user session (convert id to number for consistency)
+        console.log("Last login updated successfully");
+        
         try {
           const numericId = parseInt(user.id, 10);
           if (!Number.isNaN(numericId)) {
-            setCurrentUser({ id: numericId, username: user.username, last_login: newLastLogin });
+            setCurrentUser({ 
+              id: numericId, 
+              username: user.username, 
+              last_login: newLastLogin 
+            });
           }
         } catch {}
-        // Immediate refresh to reflect any order change if realtime lags
-        debugAllUsers();
-        setTimeout(() => { router.push("/OnBoardingScreen"); }, 500);
+        
+        router.push("/OnBoardingScreen");
       }
     } catch (err) {
       console.error("Unexpected Error:", err);
@@ -213,33 +102,41 @@ const [realtimeUpdates, setRealtimeUpdates] = useState<RealtimeUpdate[]>([]);
     }
   };
 
-  // Call the database connection test on component mount
   useEffect(() => {
     testDatabaseConnection();
-    debugAllUsers();
-  }, []);
-
-  // Fallback polling: if no realtime event in last 45s, fetch again
-  useEffect(() => {
-    const interval = setInterval(async () => {
-      const age = Date.now() - lastRealtimeTs.current;
-      if (age > 45000) { // stale
-        try {
-          const { data, error } = await supabase.from('users').select('*').order('last_login', { ascending: false });
-          if (!error && data) {
-            setAllUsers(data);
-            setRealtimeStatus(prev => prev.includes('Realtime') ? prev + ' • polled' : 'Polled (no realtime)');
-            lastRealtimeTs.current = Date.now();
-          }
-        } catch {}
-      }
-    }, 15000); // check every 15s
-    return () => clearInterval(interval);
   }, []);
 
   return (
     <View style={styles.container}>
       <View style={styles.arc}>
+        {/* Database Status Indicator (like messenger) */}
+        <View style={[
+          styles.statusBar,
+          { backgroundColor: isDatabaseConnected === null 
+              ? '#FFA500' 
+              : isDatabaseConnected 
+                ? '#4CAF50' 
+                : '#F44336' 
+          }
+        ]}>
+          <View style={[
+            styles.statusDot,
+            { backgroundColor: isDatabaseConnected === null 
+                ? '#FFD700' 
+                : isDatabaseConnected 
+                  ? '#8BC34A' 
+                  : '#EF5350' 
+            }
+          ]} />
+          <Text style={styles.statusText}>
+            {isDatabaseConnected === null 
+              ? 'Connecting...' 
+              : isDatabaseConnected 
+                ? 'Database Connected' 
+                : 'Database Offline'}
+          </Text>
+        </View>
+
         <Image source={require("../assets/logo.png")} style={styles.logo} />
         <Text style={styles.title}>LOG-IN YOUR ACCOUNT</Text>
 
@@ -247,7 +144,7 @@ const [realtimeUpdates, setRealtimeUpdates] = useState<RealtimeUpdate[]>([]);
         <View style={styles.inputGroup}>
           <Text style={styles.label}>Username</Text>
           <TextInput
-            placeholder="Enter your username (case insensitive)"
+            placeholder="Enter your username"
             style={styles.input}
             placeholderTextColor="#6b4226"
             value={username}
@@ -255,49 +152,45 @@ const [realtimeUpdates, setRealtimeUpdates] = useState<RealtimeUpdate[]>([]);
           />
         </View>
 
+        {/* Password Input */}
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>Password</Text>
+          <View style={styles.passwordContainer}>
+            <TextInput
+              placeholder="Enter your password"
+              style={styles.passwordInput}
+              placeholderTextColor="#6b4226"
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry={!showPassword}
+            />
+            <TouchableOpacity 
+              style={styles.eyeIcon}
+              onPress={() => setShowPassword(!showPassword)}
+            >
+              <Ionicons 
+                name={showPassword ? "eye-off-outline" : "eye-outline"} 
+                size={20} 
+                color="#6b4226" 
+              />
+            </TouchableOpacity>
+          </View>
+        </View>
+
         {/* Error message */}
         {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
-        {/* Database connection status */}
-        {!isDatabaseConnected && <Text style={styles.errorText}>Failed to connect to the database</Text>}
-        {isDatabaseConnected && <Text style={styles.successText}>Database connected successfully!</Text>}
-
         {/* Login Button */}
-        <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
+        <TouchableOpacity 
+          style={[
+            styles.loginButton,
+            !isDatabaseConnected && styles.disabledButton
+          ]} 
+          onPress={handleLogin}
+          disabled={!isDatabaseConnected}
+        >
           <Text style={styles.loginText}>Log-in</Text>
         </TouchableOpacity>
-
-        {/* Debug buttons */}
-        <View style={styles.debugButtons}>
-          <TouchableOpacity style={styles.debugButton} onPress={debugAllUsers}>
-            <Text style={styles.debugText}>Show All Users</Text>
-          </TouchableOpacity>
-          
-          <TouchableOpacity style={styles.debugButton} onPress={testDatabaseConnection}>
-            <Text style={styles.debugText}>Test Connection</Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* Users list for debugging */}
-        <ScrollView style={styles.debugContainer}>
-          <Text style={styles.debugTitle}>Users in Database (sorted by last login):</Text>
-          {allUsers.map(user => (
-            <Text key={user.id} style={styles.userInfo}>
-              {user.username} - Last login: {user.last_login ? new Date(user.last_login).toLocaleString() : 'Never'}
-            </Text>
-          ))}
-          {!!realtimeStatus && <Text style={{fontSize:10,color:'#555',marginTop:6}}>Status: {realtimeStatus}</Text>}
-        </ScrollView>
-
-        {/* Real-time updates */}
-        <ScrollView style={styles.realtimeContainer}>
-          <Text style={styles.debugTitle}>Real-time Updates:</Text>
-          {realtimeUpdates.slice(-5).map((update, index) => (
-            <Text key={index} style={styles.realtimeInfo}>
-              [{update.timestamp}] {update.type}: {update.data?.username} - {update.data?.last_login ? new Date(update.data.last_login).toLocaleTimeString() : 'No login'}
-            </Text>
-          ))}
-        </ScrollView>
 
         {/* Sign-up link */}
         <TouchableOpacity onPress={() => router.push("/signup")}>
@@ -311,7 +204,7 @@ const [realtimeUpdates, setRealtimeUpdates] = useState<RealtimeUpdate[]>([]);
           <View style={styles.divider} />
         </View>
 
-         {/* Google Login Button */}
+        {/* Google Login Button */}
         <TouchableOpacity style={styles.googleButton}>
           <Image
             source={{ uri: "https://img.icons8.com/color/48/000000/google-logo.png" }}
@@ -320,7 +213,6 @@ const [realtimeUpdates, setRealtimeUpdates] = useState<RealtimeUpdate[]>([]);
           <Text style={styles.googleText}>Log-in with Google</Text>
         </TouchableOpacity>
       </View>
-      
 
       <StatusBar style="auto" />
     </View>

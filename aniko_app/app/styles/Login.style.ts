@@ -160,6 +160,53 @@ const styles = StyleSheet.create({
     color: "brown",
     fontWeight: "500",
   },
+  statusBar: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 20,
+    marginBottom: 20,
+    alignSelf: "center",
+    minWidth: 200,
+    justifyContent: "center",
+  },
+  statusDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    marginRight: 8,
+  },
+  statusText: {
+    color: "#fff",
+    fontSize: 13,
+    fontWeight: "600",
+  },
+  disabledButton: {
+    opacity: 0.5,
+  },
+  passwordContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#f2e8d5",
+    borderRadius: 10,
+    paddingHorizontal: 15,
+    borderWidth: 1,
+    borderColor: "#6b4226",
+    width: "100%",
+  },
+  passwordInput: {
+    flex: 1,
+    fontSize: 16,
+    color: "#333",
+    paddingVertical: 12, // Changed from 10 to 12 to match username input
+  },
+  eyeIcon: {
+    padding: 5,
+    justifyContent: "center",
+    alignItems: "center",
+    marginLeft: 5, // Added spacing from input
+  },
 });
 
 export default styles;

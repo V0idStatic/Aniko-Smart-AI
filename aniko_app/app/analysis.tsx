@@ -2230,21 +2230,21 @@ useEffect(() => {
                       <View style={styles.predictionStat}>
                         <Ionicons name="thermometer-outline" size={24} color="#e53935" />
                         <Text style={styles.predictionValue}>
-                          {plantRecommendations[0]?.predictedWeather.nextMonth.avgTemp}°C
+                          {plantRecommendations[0]?.predictedWeather.nextMonth.avgTemp.toFixed(1)}°C
                         </Text>
                         <Text style={styles.predictionLabel}>Avg Temp</Text>
                       </View>
                       <View style={styles.predictionStat}>
                         <Ionicons name="rainy-outline" size={24} color="#2196f3" />
                         <Text style={styles.predictionValue}>
-                          {plantRecommendations[0]?.predictedWeather.nextMonth.rainfall} mm
+                          {plantRecommendations[0]?.predictedWeather.nextMonth.rainfall.toFixed(1)} mm
                         </Text>
                         <Text style={styles.predictionLabel}>Rainfall</Text>
                       </View>
                       <View style={styles.predictionStat}>
                         <Ionicons name="water-outline" size={24} color="#1976d2" />
                         <Text style={styles.predictionValue}>
-                          {plantRecommendations[0]?.predictedWeather.nextMonth.humidity}%
+                          {plantRecommendations[0]?.predictedWeather.nextMonth.humidity.toFixed(1)}%
                         </Text>
                         <Text style={styles.predictionLabel}>Humidity</Text>
                       </View>
@@ -2303,145 +2303,161 @@ useEffect(() => {
                   </View>
                 )}
 
-                {/* Status Filter Buttons */}
-                {selectedCategory && plantCategories[selectedCategory] && (
-                  <View style={styles.statusFilterContainer}>
-                    <Text style={styles.statusFilterTitle}>Filter by Status:</Text>
-                    <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.statusFilterScrollView}>
-                      {/* All Status Button */}
-                      <TouchableOpacity
-                        style={[
-                          styles.statusFilterButton,
-                          selectedStatus === 'all' && styles.activeStatusFilterButton
-                        ]}
-                        onPress={() => setSelectedStatus('all')}
-                      >
-                        <View style={[styles.statusFilterDot, { backgroundColor: '#666' }]} />
-                        <Text style={[
-                          styles.statusFilterText,
-                          selectedStatus === 'all' && styles.activeStatusFilterText
-                        ]}>
-                          All ({getCurrentCategoryRecommendations().length})
-                        </Text>
-                      </TouchableOpacity>
-
-                      {/* Ideal Status Button */}
-                      {plantCategories[selectedCategory]?.filter(r => r.currentStatus === 'ideal').length > 0 && (
-                        <TouchableOpacity
-                          style={[
-                            styles.statusFilterButton,
-                            selectedStatus === 'ideal' && styles.activeStatusFilterButton
-                          ]}
-                          onPress={() => setSelectedStatus('ideal')}
-                        >
-                          <View style={[styles.statusFilterDot, { backgroundColor: '#00796b' }]} />
-                          <Text style={[
-                            styles.statusFilterText,
-                            selectedStatus === 'ideal' && styles.activeStatusFilterText
-                          ]}>
-                           
-                            Ideal ({plantCategories[selectedCategory]?.filter(r => r.currentStatus === 'ideal').length})
-                          </Text>
-                        </TouchableOpacity>
-                      )}
-
-                      {/* Good Status Button */}
-                      {plantCategories[selectedCategory]?.filter(r => r.currentStatus === 'good').length > 0 && (
-                        <TouchableOpacity
-                          style={[
-                            styles.statusFilterButton,
-                            selectedStatus === 'good' && styles.activeStatusFilterButton
-                          ]}
-                          onPress={() => setSelectedStatus('good')}
-                        >
-                          <View style={[styles.statusFilterDot, { backgroundColor: '#fbc02d' }]} />
-                          <Text style={[
-                            styles.statusFilterText,
-                            selectedStatus === 'good' && styles.activeStatusFilterText
-                          ]}>
-                            Good ({plantCategories[selectedCategory]?.filter(r => r.currentStatus === 'good').length})
-                          </Text>
-                        </TouchableOpacity>
-                      )}
-
-                      {/* Caution Status Button */}
-                      {plantCategories[selectedCategory]?.filter(r => r.currentStatus === 'caution').length > 0 && (
-                        <TouchableOpacity
-                          style={[
-                            styles.statusFilterButton,
-                            selectedStatus === 'caution' && styles.activeStatusFilterButton
-                          ]}
-                          onPress={() => setSelectedStatus('caution')}
-                        >
-                          <View style={[styles.statusFilterDot, { backgroundColor: '#f57c00' }]} />
-                          <Text style={[
-                            styles.statusFilterText,
-                            selectedStatus === 'caution' && styles.activeStatusFilterText
-                          ]}>
-                            Caution ({plantCategories[selectedCategory]?.filter(r => r.currentStatus === 'caution').length})
-                          </Text>
-                        </TouchableOpacity>
-                      )}
-
-                      {/* Avoid Status Button */}
-                      {plantCategories[selectedCategory]?.filter(r => r.currentStatus === 'avoid').length > 0 && (
-                        <TouchableOpacity
-                          style={[
-                            styles.statusFilterButton,
-                            selectedStatus === 'avoid' && styles.activeStatusFilterButton
-                          ]}
-                          onPress={() => setSelectedStatus('avoid')}
-                        >
-                          <View style={[styles.statusFilterDot, { backgroundColor: '#d32f2f' }]} />
-                          <Text style={[
-                            styles.statusFilterText,
-                            selectedStatus === 'avoid' && styles.activeStatusFilterText
-                          ]}>
-                            Avoid ({plantCategories[selectedCategory]?.filter(r => r.currentStatus === 'avoid').length})
-                          </Text>
-                        </TouchableOpacity>
-                      )}
-                    </ScrollView>
-                  </View>
-                )}
-
-                {/* Selected Category Summary */}
+                {/* Enhanced Clickable Status Summary - HORIZONTAL SCROLL VERSION */}
                 {selectedCategory && plantCategories[selectedCategory] && (
                   <View style={styles.categorySummary}>
                     <Text style={styles.categorySummaryTitle}>
                       {getCategoryInfo(selectedCategory).name} Recommendations
                     </Text>
                     <Text style={styles.categorySummarySubtitle}>
-                      {getCurrentCategoryRecommendations().length} plants available for {selectedLocation?.city || 'your location'}
+                      {plantCategories[selectedCategory].length} plants available for {selectedLocation?.city || 'your location'}
                     </Text>
                     
-                    {/* Status Summary */}
-                    <View style={styles.statusSummary}>
-                      <View style={styles.statusSummaryItem}>
-                        <View style={[styles.statusDot, { backgroundColor: '#00796b' }]} />
-                        <Text style={styles.statusSummaryText}>
-                          {getCurrentCategoryRecommendations().filter(r => r.currentStatus === 'ideal').length} Ideal
-                        </Text>
-                      </View>
-                      <View style={styles.statusSummaryItem}>
-                        <View style={[styles.statusDot, { backgroundColor: '#fbc02d' }]} />
-                        <Text style={styles.statusSummaryText}>
-                          {getCurrentCategoryRecommendations().filter(r => r.currentStatus === 'good').length} Good
-                        </Text>
-                      </View>
-                      <View style={styles.statusSummaryItem}>
-                        <View style={[styles.statusDot, { backgroundColor: '#f57c00' }]} />
-                        <Text style={styles.statusSummaryText}>
-                          {getCurrentCategoryRecommendations().filter(r => r.currentStatus === 'caution').length} Caution
-                        </Text>
-                      </View>
-                      <View style={styles.statusSummaryItem}>
-                        <View style={[styles.statusDot, { backgroundColor: '#d32f2f' }]} />
-                        <Text style={styles.statusSummaryText}>
-                          {getCurrentCategoryRecommendations().filter(r => r.currentStatus === 'avoid').length} Avoid
-                        </Text>
-                      </View>
-                    </View>
+                    {/* ✅ HORIZONTAL SCROLLABLE Status Summary */}
+                    <ScrollView 
+                      horizontal 
+                      showsHorizontalScrollIndicator={false}
+                      contentContainerStyle={styles.statusSummaryScrollContent}
+                      style={styles.statusSummaryScroll}
+                    >
+                      {/* All Status */}
+                      <TouchableOpacity
+                        style={[
+                          styles.statusSummaryItemCard,
+                          selectedStatus === 'all' && styles.activeStatusItemCard
+                        ]}
+                        onPress={() => setSelectedStatus('all')}
+                        activeOpacity={0.7}
+                      >
+                        <View style={[styles.statusDot, { backgroundColor: '#666' }]} />
+                        <View style={styles.statusTextContainer}>
+                          <Text style={[
+                            styles.statusSummaryText,
+                            selectedStatus === 'all' && styles.activeStatusText
+                          ]}>
+                            All Plants
+                          </Text>
+                          <Text style={styles.statusCount}>
+                            {plantCategories[selectedCategory].length}
+                          </Text>
+                        </View>
+                        {selectedStatus === 'all' && (
+                          <Ionicons name="checkmark-circle" size={18} color="#1c4722" style={styles.checkmark} />
+                        )}
+                      </TouchableOpacity>
+
+                      {/* Ideal Status */}
+                      {plantCategories[selectedCategory].filter(r => r.currentStatus === 'ideal').length > 0 && (
+                        <TouchableOpacity
+                          style={[
+                            styles.statusSummaryItemCard,
+                            selectedStatus === 'ideal' && styles.activeStatusItemCard
+                          ]}
+                          onPress={() => setSelectedStatus('ideal')}
+                          activeOpacity={0.7}
+                        >
+                          <View style={[styles.statusDot, { backgroundColor: '#00796b' }]} />
+                          <View style={styles.statusTextContainer}>
+                            <Text style={[
+                              styles.statusSummaryText,
+                              selectedStatus === 'ideal' && styles.activeStatusText
+                            ]}>
+                              Ideal
+                            </Text>
+                            <Text style={styles.statusCount}>
+                              {plantCategories[selectedCategory].filter(r => r.currentStatus === 'ideal').length}
+                            </Text>
+                          </View>
+                          {selectedStatus === 'ideal' && (
+                            <Ionicons name="checkmark-circle" size={18} color="#00796b" style={styles.checkmark} />
+                          )}
+                        </TouchableOpacity>
+                      )}
+
+                      {/* Good Status */}
+                      {plantCategories[selectedCategory].filter(r => r.currentStatus === 'good').length > 0 && (
+                        <TouchableOpacity
+                          style={[
+                            styles.statusSummaryItemCard,
+                            selectedStatus === 'good' && styles.activeStatusItemCard
+                          ]}
+                          onPress={() => setSelectedStatus('good')}
+                          activeOpacity={0.7}
+                        >
+                          <View style={[styles.statusDot, { backgroundColor: '#fbc02d' }]} />
+                          <View style={styles.statusTextContainer}>
+                            <Text style={[
+                              styles.statusSummaryText,
+                              selectedStatus === 'good' && styles.activeStatusText
+                            ]}>
+                              Good
+                            </Text>
+                            <Text style={styles.statusCount}>
+                              {plantCategories[selectedCategory].filter(r => r.currentStatus === 'good').length}
+                            </Text>
+                          </View>
+                          {selectedStatus === 'good' && (
+                            <Ionicons name="checkmark-circle" size={18} color="#fbc02d" style={styles.checkmark} />
+                          )}
+                        </TouchableOpacity>
+                      )}
+
+                      {/* Caution Status */}
+                      {plantCategories[selectedCategory].filter(r => r.currentStatus === 'caution').length > 0 && (
+                        <TouchableOpacity
+                          style={[
+                            styles.statusSummaryItemCard,
+                            selectedStatus === 'caution' && styles.activeStatusItemCard
+                          ]}
+                          onPress={() => setSelectedStatus('caution')}
+                          activeOpacity={0.7}
+                        >
+                          <View style={[styles.statusDot, { backgroundColor: '#f57c00' }]} />
+                          <View style={styles.statusTextContainer}>
+                            <Text style={[
+                              styles.statusSummaryText,
+                              selectedStatus === 'caution' && styles.activeStatusText
+                            ]}>
+                              Caution
+                            </Text>
+                            <Text style={styles.statusCount}>
+                              {plantCategories[selectedCategory].filter(r => r.currentStatus === 'caution').length}
+                            </Text>
+                          </View>
+                          {selectedStatus === 'caution' && (
+                            <Ionicons name="checkmark-circle" size={18} color="#f57c00" style={styles.checkmark} />
+                          )}
+                        </TouchableOpacity>
+                      )}
+
+                      {/* Avoid Status */}
+                      {plantCategories[selectedCategory].filter(r => r.currentStatus === 'avoid').length > 0 && (
+                        <TouchableOpacity
+                          style={[
+                            styles.statusSummaryItemCard,
+                            selectedStatus === 'avoid' && styles.activeStatusItemCard
+                          ]}
+                          onPress={() => setSelectedStatus('avoid')}
+                          activeOpacity={0.7}
+                        >
+                          <View style={[styles.statusDot, { backgroundColor: '#d32f2f' }]} />
+                          <View style={styles.statusTextContainer}>
+                            <Text style={[
+                              styles.statusSummaryText,
+                              selectedStatus === 'avoid' && styles.activeStatusText
+                            ]}>
+                              Avoid
+                            </Text>
+                            <Text style={styles.statusCount}>
+                              {plantCategories[selectedCategory].filter(r => r.currentStatus === 'avoid').length}
+                            </Text>
+                          </View>
+                          {selectedStatus === 'avoid' && (
+                            <Ionicons name="checkmark-circle" size={18} color="#d32f2f" style={styles.checkmark} />
+                          )}
+                        </TouchableOpacity>
+                      )}
+                    </ScrollView>
                   </View>
                 )}
 
