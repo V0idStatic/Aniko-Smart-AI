@@ -28,14 +28,23 @@ export default function Chatbot() {
     setLoading(true);
 
     try {
+      // Direct access to environment variable
+      const apiKey = process.env.EXPO_PUBLIC_OPENROUTER_API_KEY;
+      
+      console.log("API Key found:", apiKey ? "Yes" : "No");
+      
+      if (!apiKey) {
+        throw new Error("API key not found. Please check your .env file is in the correct location.");
+      }
+
       const resp = await fetch("https://openrouter.ai/api/v1/chat/completions", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: "Bearer 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", // 🔑 Replace with your actual OpenRouter API key
+          Authorization: `Bearer ${apiKey}`,
         },
         body: JSON.stringify({
-          model: "openai/gpt-3.5-turbo", // ✅ Stable model
+          model: "openai/gpt-3.5-turbo",
           messages: [
             {
               role: "system",
@@ -49,9 +58,12 @@ export default function Chatbot() {
       const data = await resp.json();
       console.log("OpenRouter raw response:", data);
 
+      if (!resp.ok) {
+        throw new Error(data.error?.message || `HTTP ${resp.status}`);
+      }
+
       const reply =
         data?.choices?.[0]?.message?.content ||
-        data?.error?.message ||
         "No response from Aniko.";
       setMessages((prev) => [...prev, { role: "assistant", text: reply }]);
     } catch (err: any) {
