@@ -103,8 +103,9 @@ const greetingsKeywords = [
 
 const OPENROUTER_ENDPOINT = "https://openrouter.ai/api/v1/chat/completions";
 // Hardcoded temporarily for testing
-const OPENROUTER_KEY =
-  "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";
+const OPENROUTER_KEY = process.env.EXPO_PUBLIC_OPENROUTER_API_KEY;
+
+
 
 const TITLE_GENERATION_MODEL = "gpt-3.5-turbo";
 const RESPONSE_MODEL = "gpt-3.5-turbo";

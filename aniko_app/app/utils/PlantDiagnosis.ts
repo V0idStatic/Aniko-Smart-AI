@@ -14,7 +14,7 @@ export const diagnosePlant = async (
   }[];
 }> => {
   const apiKey = "zB45Repg0x5h5w3sLlZP3IyCnyisgdhJRj9lyUOD1hyizNCMT0"; // Plant.id key
-  const aiApiKey = ""; // OpenRouter key
+ 
 
   try {
     // Resize/compress image
@@ -70,7 +70,7 @@ export const diagnosePlant = async (
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${aiApiKey}`,
+      Authorization: `Bearer ${process.env.EXPO_PUBLIC_DIAGNOSIS_API_KEY}`,
       },
       body: JSON.stringify({
         model: "openai/gpt-3.5-turbo",

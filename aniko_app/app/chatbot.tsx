@@ -114,21 +114,22 @@ export default function Chatbot() {
       ${cropContext}
       `;
 
-      const resp = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: "Bearer ", // Add your API key
-        },
-        body: JSON.stringify({
-          model: "openai/gpt-3.5-turbo",
-          messages: [
-            { role: "system", content: systemPrompt },
-            { role: "user", content: userMessage.text },
-          ],
-          max_tokens: 1000,
-        }),
-      });
+  const resp = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${process.env.EXPO_PUBLIC_OPENROUTER_API_KEY}`,
+  },
+  body: JSON.stringify({
+    model: "openai/gpt-3.5-turbo",
+    messages: [
+      { role: "system", content: systemPrompt },
+      { role: "user", content: userMessage.text },
+    ],
+    max_tokens: 1000,
+  }),
+});
+
 
       const data = await resp.json();
       const reply =
@@ -256,14 +257,7 @@ How can I help you today?`,
                 m.role === "user" ? styles.userMsg : styles.botMsg,
               ]}
             >
-              {m.role === "assistant" && (
-                <MaterialCommunityIcons
-                  name="robot-outline"
-                  size={18}
-                  color="#2E7D32"
-                  style={{ marginRight: 6 }}
-                />
-              )}
+             
               <Text
                 style={[
                   styles.msgText,
