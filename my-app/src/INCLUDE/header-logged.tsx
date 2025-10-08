@@ -15,8 +15,11 @@ const Header: React.FC = () => {
   }, []);
 
   const handleLogout = async () => {
-    await signOut(auth);
-    setUser(null);
+    const confirmed = window.confirm("Are you sure you want to logout?");
+    if (confirmed) {
+      await signOut(auth);
+      setUser(null);
+    }
   };
 
   return (

@@ -19,10 +19,13 @@ const AdminTestimonial: React.FC = () => {
     id: number | null;
   }>({ type: null, id: null });
 
-  // Fetch data once and set up polling every 5 seconds
+  // New state: track which table is visible
+  const [activeTab, setActiveTab] = useState<"pending" | "approved">("pending");
+
+  // Fetch data once and refresh every 5 seconds
   useEffect(() => {
     fetchTestimonials();
-    const interval = setInterval(fetchTestimonials, 5000); // auto-refresh
+    const interval = setInterval(fetchTestimonials, 5000);
     return () => clearInterval(interval);
   }, []);
 
@@ -78,105 +81,128 @@ const AdminTestimonial: React.FC = () => {
           Review and approve customer stories before publishing.
         </h6>
 
+        {/* Toggle Buttons */}
+        <div className="d-flex mb-3">
+          <button
+            className={`btn me-2 ${
+              activeTab === "pending" ? "btn-warning" : "btn-outline-warning"
+            }`}
+            onClick={() => setActiveTab("pending")}
+          >
+            <i className="bi bi-clock"></i> Pending
+          </button>
+          <button
+            className={`btn ${
+              activeTab === "approved" ? "btn-success" : "btn-outline-success"
+            }`}
+            onClick={() => setActiveTab("approved")}
+          >
+            <i className="bi bi-check2-circle"></i> Approved
+          </button>
+        </div>
+
         {/* Pending Table */}
-        <div className="card adminTest-card">
-          <h5>
-            <i className="bi bi-clock"></i> Pending Testimonials
-          </h5>
-          <table className="table table-bordered table-hover adminTest-pending-table">
-            <thead className="table-warning">
-              <tr>
-                <th>ID</th>
-                <th>User ID</th>
-                <th>Testimonial</th>
-                <th>Date</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {pendingTestimonials.length > 0 ? (
-                pendingTestimonials.map((t) => (
-                  <tr key={t.id}>
-                    <td>{t.id}</td>
-                    <td>{t.user_id}</td>
-                    <td>{t.testimonial}</td>
-                    <td>{new Date(t.created_at).toLocaleString()}</td>
-                    <td>
-                      <button
-                        className="btn btn-success btn-sm me-2"
-                        onClick={() => setModalAction({ type: "approve", id: t.id })}
-                      >
-                        <i className="bi bi-check-circle-fill"></i> Approve
-                      </button>
-                      <button
-                        className="btn btn-danger btn-sm"
-                        onClick={() => setModalAction({ type: "delete", id: t.id })}
-                      >
-                        <i className="bi bi-trash3-fill"></i> Delete
-                      </button>
+        {activeTab === "pending" && (
+          <div className="card adminTest-card">
+            <h5>
+              <i className="bi bi-clock"></i> Pending Testimonials
+            </h5>
+            <table className="table table-bordered table-hover adminTest-pending-table">
+              <thead className="table-warning">
+                <tr>
+                  <th>ID</th>
+                  <th>User ID</th>
+                  <th>Testimonial</th>
+                  <th>Date</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {pendingTestimonials.length > 0 ? (
+                  pendingTestimonials.map((t) => (
+                    <tr key={t.id}>
+                      <td>{t.id}</td>
+                      <td>{t.user_id}</td>
+                      <td>{t.testimonial}</td>
+                      <td>{new Date(t.created_at).toLocaleString()}</td>
+                      <td>
+                        <button
+                          className="btn btn-success btn-sm me-2"
+                          onClick={() => setModalAction({ type: "approve", id: t.id })}
+                        >
+                          <i className="bi bi-check-circle-fill"></i> Approve
+                        </button>
+                        <button
+                          className="btn btn-danger btn-sm"
+                          onClick={() => setModalAction({ type: "delete", id: t.id })}
+                        >
+                          <i className="bi bi-trash3-fill"></i> Delete
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={5} className="text-center">
+                      No pending testimonials
                     </td>
                   </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={5} className="text-center">
-                    No pending testimonials
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+                )}
+              </tbody>
+            </table>
+          </div>
+        )}
 
         {/* Approved Table */}
-        <div className="card adminTest-card">
-          <h5>
-            <i className="bi bi-check2-circle"></i> Approved Testimonials
-          </h5>
-          <table className="table table-bordered table-hover adminTest-approved-table">
-            <thead className="table-success">
-              <tr>
-                <th>ID</th>
-                <th>User ID</th>
-                <th>Testimonial</th>
-                <th>Date</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {approvedTestimonials.length > 0 ? (
-                approvedTestimonials.map((t) => (
-                  <tr key={t.id}>
-                    <td>{t.id}</td>
-                    <td>{t.user_id}</td>
-                    <td>{t.testimonial}</td>
-                    <td>{new Date(t.created_at).toLocaleString()}</td>
-                    <td>
-                      <button
-                        className="btn btn-danger btn-sm"
-                        onClick={() => setModalAction({ type: "delete", id: t.id })}
-                      >
-                        <i className="bi bi-trash3-fill"></i> Delete
-                      </button>
+        {activeTab === "approved" && (
+          <div className="card adminTest-card">
+            <h5>
+              <i className="bi bi-check2-circle"></i> Approved Testimonials
+            </h5>
+            <table className="table table-bordered table-hover adminTest-approved-table">
+              <thead className="table-success">
+                <tr>
+                  <th>ID</th>
+                  <th>User ID</th>
+                  <th>Testimonial</th>
+                  <th>Date</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {approvedTestimonials.length > 0 ? (
+                  approvedTestimonials.map((t) => (
+                    <tr key={t.id}>
+                      <td>{t.id}</td>
+                      <td>{t.user_id}</td>
+                      <td>{t.testimonial}</td>
+                      <td>{new Date(t.created_at).toLocaleString()}</td>
+                      <td>
+                        <button
+                          className="btn btn-danger btn-sm"
+                          onClick={() => setModalAction({ type: "delete", id: t.id })}
+                        >
+                          <i className="bi bi-trash3-fill"></i> Delete
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={5} className="text-center">
+                      No approved testimonials
                     </td>
                   </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={5} className="text-center">
-                    No approved testimonials
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+                )}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
 
-     {/* Confirmation Modal */}
+      {/* Confirmation Modal */}
       {modalAction.type && (
         <>
-          {/* Backdrop */}
           <div className="fade show adminTest-backdrop"></div>
 
           <div className="modal fade show d-block adminTest-modals" tabIndex={-1}>
@@ -194,11 +220,11 @@ const AdminTestimonial: React.FC = () => {
                   >
                     {modalAction.type === "approve" ? (
                       <>
-                      <i className="bi bi-check-circle"></i> Approve Testimonial
+                        <i className="bi bi-check-circle"></i> Approve Testimonial
                       </>
                     ) : (
                       <>
-                      <i className="bi bi-trash3-fill"></i> Delete Testimonial
+                        <i className="bi bi-trash3-fill"></i> Delete Testimonial
                       </>
                     )}
                   </h6>

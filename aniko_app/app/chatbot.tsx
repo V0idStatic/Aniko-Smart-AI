@@ -76,20 +76,6 @@ export default function Chatbot() {
     setLoading(true);
 
     try {
-      // Get API key from environment variables
-      const apiKey = process.env.EXPO_PUBLIC_OPENROUTER_API_KEY;
-      
-      console.log("API Key found:", apiKey ? "Yes" : "No");
-      
-      if (!apiKey) {
-        throw new Error("API key not found. Please check your .env file configuration.");
-      }
-
-      // Check if API key format is correct
-      if (!apiKey.startsWith('sk-or-v1-')) {
-        throw new Error("Invalid API key format. Should start with 'sk-or-v1-'");
-      }
-
       // Check if user is asking about a specific crop
       const cropInfo = await detectCropQuery(userMessage.text);
       
@@ -132,71 +118,38 @@ Always answer in a friendly, helpful manner. Use emojis to make responses engagi
 
 ${cropContext}`;
 
-      const requestBody = {
-        model: "openai/gpt-3.5-turbo",
-        messages: [
-          {
-            role: "system",
-            content: systemPrompt,
-          },
-          { role: "user", content: userMessage.text },
-        ],
-        max_tokens: 1000,
-        temperature: 0.7
-      };
-
-      console.log("Sending request to OpenRouter...");
-
       const resp = await fetch("https://openrouter.ai/api/v1/chat/completions", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${apiKey}`,
-          "HTTP-Referer": "http://localhost:8081",
-          "X-Title": "Aniko Smart AI"
+          Authorization: "Bearer ",
         },
-        body: JSON.stringify(requestBody),
+        body: JSON.stringify({
+          model: "openai/gpt-3.5-turbo",
+          messages: [
+            {
+              role: "system",
+              content: systemPrompt,
+            },
+            { role: "user", content: userMessage.text },
+          ],
+          max_tokens: 1000, // Increase token limit for detailed responses
+        }),
       });
-
-      console.log("Response status:", resp.status);
-
-      if (!resp.ok) {
-        const errorData = await resp.json();
-        console.log("Error response:", errorData);
-        throw new Error(errorData.error?.message || `HTTP ${resp.status}: ${resp.statusText}`);
-      }
 
       const data = await resp.json();
       console.log("OpenRouter response:", data);
 
-      if (!data.choices || !data.choices[0] || !data.choices[0].message) {
-        throw new Error("Invalid response format from OpenRouter");
-      }
-
-      const reply = data.choices[0].message.content || "I apologize, but I couldn't generate a response. Please try again.";
-      
+      const reply =
+        data?.choices?.[0]?.message?.content ||
+        data?.error?.message ||
+        "No response from Aniko.";
       setMessages((prev) => [...prev, { role: "assistant", text: reply }]);
-
     } catch (err: any) {
       console.error("Fetch error:", err);
-      
-      let errorMessage = "Sorry, I encountered an error. ";
-      
-      if (err.message.includes("User not found") || err.message.includes("401")) {
-        errorMessage += "API key seems to be invalid. Please check your OpenRouter account and generate a new key.";
-      } else if (err.message.includes("Invalid API key")) {
-        errorMessage += "API key format is incorrect.";
-      } else if (err.message.includes("rate limit") || err.message.includes("quota")) {
-        errorMessage += "Rate limit exceeded. Please try again in a moment.";
-      } else if (err.message.includes("network") || err.message.includes("fetch")) {
-        errorMessage += "Network connection issue. Please check your internet.";
-      } else {
-        errorMessage += err.message || "Unknown error occurred.";
-      }
-      
       setMessages((prev) => [
         ...prev,
-        { role: "assistant", text: `⚠️ ${errorMessage}` },
+        { role: "assistant", text: `⚠️ Error: ${err.message || err}` },
       ]);
     } finally {
       setLoading(false);
@@ -255,21 +208,13 @@ ${cropContext}`;
           onChangeText={setInput}
           onSubmitEditing={sendMessage}
           multiline
-          returnKeyType="send"
         />
         <TouchableOpacity 
           onPress={sendMessage} 
-          style={[
-            styles.sendBtn,
-            (loading || !dataLoaded) && styles.sendBtnDisabled
-          ]}
+          style={styles.sendBtn}
           disabled={loading || !dataLoaded}
         >
-          <Ionicons 
-            name="send" 
-            size={20} 
-            color={(loading || !dataLoaded) ? "#ccc" : "white"} 
-          />
+          <Ionicons name="send" size={20} color="white" />
         </TouchableOpacity>
       </View>
     </View>
@@ -324,9 +269,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#4d7f39",
     padding: 10,
     borderRadius: 20,
-  },
-  sendBtnDisabled: {
-    backgroundColor: "#ccc",
   },
   loading: { 
     alignSelf: "center", 
