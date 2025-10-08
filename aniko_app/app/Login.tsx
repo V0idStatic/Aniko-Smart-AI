@@ -108,35 +108,36 @@ export default function Login() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.arc}>
-        {/* Database Status Indicator (like messenger) */}
-        <View style={[
-          styles.statusBar,
-          { backgroundColor: isDatabaseConnected === null 
-              ? '#FFA500' 
-              : isDatabaseConnected 
-                ? '#4CAF50' 
-                : '#F44336' 
-          }
-        ]}>
-          <View style={[
-            styles.statusDot,
-            { backgroundColor: isDatabaseConnected === null 
-                ? '#FFD700' 
-                : isDatabaseConnected 
-                  ? '#8BC34A' 
-                  : '#EF5350' 
-            }
-          ]} />
+      {/* Database Status Indicator (like messenger) */}
+       <View
+          style={[
+            styles.statusBar,
+            isDatabaseConnected === null
+              ? styles.statusConnecting
+              : isDatabaseConnected
+              ? styles.statusConnected
+              : styles.statusOffline,
+          ]}
+        >
+          <View
+            style={[
+              styles.statusDot,
+              isDatabaseConnected === null
+                ? styles.dotConnecting
+                : isDatabaseConnected
+                ? styles.dotConnected
+                : styles.dotOffline,
+            ]}
+          />
           <Text style={styles.statusText}>
-            {isDatabaseConnected === null 
-              ? 'Connecting...' 
-              : isDatabaseConnected 
-                ? 'Database Connected' 
-                : 'Database Offline'}
+            {isDatabaseConnected === null
+              ? "Connecting..."
+              : isDatabaseConnected
+              ? "Database Connected"
+              : "Database Offline"}
           </Text>
         </View>
-
+      <View style={styles.arc}>
         <Image source={require("../assets/logo.png")} style={styles.logo} />
         <Text style={styles.title}>LOG-IN YOUR ACCOUNT</Text>
 
@@ -172,6 +173,7 @@ export default function Login() {
                 name={showPassword ? "eye-off-outline" : "eye-outline"} 
                 size={20} 
                 color="#6b4226" 
+                opacity={0.6}
               />
             </TouchableOpacity>
           </View>
