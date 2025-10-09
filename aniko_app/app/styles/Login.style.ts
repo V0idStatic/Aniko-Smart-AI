@@ -10,110 +10,89 @@ const styles = StyleSheet.create({
   arc: {
     marginTop: 100,
     width: "100%",
-    height: 850,
+    height: 600,
     backgroundColor: "#EDE1CF",
-    borderTopLeftRadius: 200,
-    borderTopRightRadius: 200,
+    borderTopLeftRadius: 210,
+    borderTopRightRadius: 210,
     alignItems: "center",
     paddingTop: 30,
   },
   logo: {
-    height: 120,
-    width: 120,
+    height: 80,
+    width: 80,
     resizeMode: "contain",
-    marginBottom: 20,
+    marginBottom: 15,
+    marginTop: 20,
   },
   title: {
     fontWeight: "bold",
     fontSize: 18,
-    color: "brown",
-    marginBottom: 20,
+    color: "#4D2D18",
+    marginBottom: 30,
+    fontFamily: "Zalando",
   },
   inputGroup: {
     width: "90%",
     marginBottom: 15,
   },
   label: {
-    color: "black",
-    fontWeight: "600",
+    color: "#4C4B2C",
+    fontWeight: "bold",
     marginBottom: 5,
   },
   input: {
-    padding: 15,
+    paddingHorizontal: 15,
     borderRadius: 25,
     borderWidth: 1,
-    borderColor: "black",
+    borderColor: "#756C65",
     color: "black",
-    backgroundColor: "white",
+    backgroundColor: "#f2e8d5",
+    fontSize: 16,
+  },
+  passwordContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#f2e8d5",
+    borderRadius: 20,
+    paddingHorizontal: 15,
+    borderWidth: 1,
+    borderColor: "#756C65",
+    width: "100%",
+  },
+  passwordInput: {
+    flex: 1,
+    fontSize: 16,
+    color: "#333",
+    paddingVertical: 12,
+    borderRadius: 25,
+  },
+  eyeIcon: {
+    padding: 5,
+    justifyContent: "center",
+    alignItems: "center",
+    marginLeft: 5,
   },
   loginButton: {
-    backgroundColor: "green",
+    backgroundColor: "#4C6444",
     width: "90%",
-    padding: 15,
+    padding: 13,
     borderRadius: 25,
     alignItems: "center",
     marginTop: 15,
     marginBottom: 10,
+  },
+  disabledButton: {
+    opacity: 0.5,
   },
   loginText: {
     color: "#fff",
     fontSize: 16,
     fontWeight: "600",
   },
-  debugButtons: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    width: "90%",
-    marginBottom: 10,
-  },
-  debugButton: {
-    backgroundColor: "blue",
-    padding: 10,
-    borderRadius: 15,
-    alignItems: "center",
-    flex: 1,
-    marginHorizontal: 5,
-  },
-  debugText: {
-    color: "#fff",
-    fontSize: 12,
-  },
-  debugContainer: {
-    width: "90%",
-    maxHeight: 100,
-    backgroundColor: "#f5f5f5",
-    padding: 10,
-    borderRadius: 10,
-    marginBottom: 10,
-  },
-  realtimeContainer: {
-    width: "90%",
-    maxHeight: 100,
-    backgroundColor: "#e6f7ff",
-    padding: 10,
-    borderRadius: 10,
-    marginBottom: 10,
-  },
-  debugTitle: {
-    fontWeight: "bold",
-    marginBottom: 5,
-    color: "#333",
-    fontSize: 12,
-  },
-  userInfo: {
-    fontSize: 10,
-    color: "green",
-    marginBottom: 2,
-  },
-  realtimeInfo: {
-    fontSize: 10,
-    color: "blue",
-    marginBottom: 2,
-    fontStyle: "italic",
-  },
   signupText: {
-    color: "brown",
+    color: "#6A7D4F",
     marginBottom: 20,
+    textAlign:"left"
   },
   dividerContainer: {
     flexDirection: "row",
@@ -124,11 +103,11 @@ const styles = StyleSheet.create({
   divider: {
     flex: 1,
     height: 1,
-    backgroundColor: "#000",
+    backgroundColor: "#756C65",
   },
   orText: {
     marginHorizontal: 10,
-    color: "#000",
+    color: "#756C65",
     fontWeight: "500",
   },
   errorText: {
@@ -136,18 +115,13 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     textAlign: "center",
   },
-  successText: {
-    color: "green",
-    marginBottom: 10,
-    textAlign: "center",
-  },
   googleButton: {
     flexDirection: "row",
     alignItems: "center",
-    borderColor: "brown",
+    borderColor: "#5D3B2F",
     borderWidth: 1,
     borderRadius: 25,
-    padding: 15,
+    padding: 10,
     width: "90%",
     justifyContent: "center",
   },
@@ -157,7 +131,7 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   googleText: {
-    color: "brown",
+    color: "#5D3B2F",
     fontWeight: "500",
   },
   statusBar: {
@@ -166,7 +140,6 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     paddingHorizontal: 12,
     borderRadius: 20,
-    marginBottom: 20,
     alignSelf: "center",
     minWidth: 200,
     justifyContent: "center",
@@ -182,30 +155,24 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: "600",
   },
-  disabledButton: {
-    opacity: 0.5,
+  // Color Variants
+  statusConnecting: {
+    backgroundColor: "#FFA500",
   },
-  passwordContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#f2e8d5",
-    borderRadius: 10,
-    paddingHorizontal: 15,
-    borderWidth: 1,
-    borderColor: "#6b4226",
-    width: "100%",
+  statusConnected: {
+    backgroundColor: "#4CAF50",
   },
-  passwordInput: {
-    flex: 1,
-    fontSize: 16,
-    color: "#333",
-    paddingVertical: 12, // Changed from 10 to 12 to match username input
+  statusOffline: {
+    backgroundColor: "#F44336",
   },
-  eyeIcon: {
-    padding: 5,
-    justifyContent: "center",
-    alignItems: "center",
-    marginLeft: 5, // Added spacing from input
+  dotConnecting: {
+    backgroundColor: "#FFD700",
+  },
+  dotConnected: {
+    backgroundColor: "#8BC34A",
+  },
+  dotOffline: {
+    backgroundColor: "#EF5350",
   },
 });
 
