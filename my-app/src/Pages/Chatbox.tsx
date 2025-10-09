@@ -103,8 +103,7 @@ const greetingsKeywords = [
 
 const OPENROUTER_ENDPOINT = "https://openrouter.ai/api/v1/chat/completions";
 // Hardcoded temporarily for testing
-const OPENROUTER_KEY = process.env.EXPO_PUBLIC_OPENROUTER_API_KEY;
-
+const OPENROUTER_KEY = process.env.REACT_APP_OPENROUTER_KEY;
 
 
 const TITLE_GENERATION_MODEL = "gpt-3.5-turbo";
@@ -323,7 +322,7 @@ const Chatbox: React.FC = () => {
           n: 1,
         };
 
-        const res = await fetch(OPENROUTER_ENDPOINT, {
+            const res = await fetch(OPENROUTER_ENDPOINT, {
           method: "POST",
           headers: {
             Authorization: `Bearer ${OPENROUTER_KEY}`,
