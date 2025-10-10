@@ -1,0 +1,15 @@
+@media (min-width: 769px) and (max-width: 991.75px) {
+  .mainImg {
+    width: 200% !important; 
+  }
+}
+@media (min-width: 576px) and (max-width: 767.75px) {
+  .mainImg {
+    width: 250% !important; 
+  }
+}
+@media (min-width: 320px) and (max-width: 575.75px) {
+  .mainImg {
+    margin-top: 2rem !important;
+  }
+}

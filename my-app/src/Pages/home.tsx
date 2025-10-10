@@ -7,10 +7,16 @@ import TeamMembers from "./team";
 import Hero from "./hero";
 import Feature from "./feature";
 import WhyAniko from "./whyaniko";
+import WhyAnikoMobile from "../INCLUDE/whyAniko-mobile";
+import TeamMobile from "../INCLUDE/team-mobile";
+import StatsSlider from "../INCLUDE/statBox-mobile";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.bundle.min.js";
 import Testimonials from "./testimonial";
+import ListFeatures from "../INCLUDE/mobile-features";
+import BenefitsSlider from "../INCLUDE/mobile-benefits";
 import Chatbox from "./Chatbox"; // adjust path as needed
+
 
 import { auth } from "../firebase";
 import { onAuthStateChanged, User } from "firebase/auth";
@@ -62,7 +68,7 @@ const Home: React.FC = () => {
       >
         <div className="container hero-container">
           <div className="row align-items-center hero-text-content">
-            <div className="col-lg-8 text-center text-lg-start text-white">
+            <div className="col-lg-8 text-center text-lg-start text-white download-col">
               <h1>Smart Soil Monitoring for Modern Farmers</h1>
               <p>
                 Transform your farming with real-time soil insights,
@@ -135,6 +141,9 @@ const Home: React.FC = () => {
             </div>
           </div>
         </div>
+        <div className="mobile-stats-section">
+          <StatsSlider />
+        </div>
       </div>
 
       {/* SOLUTION / BENEFITS SECTION */}
@@ -144,14 +153,14 @@ const Home: React.FC = () => {
         style={{ zIndex: 1, backgroundColor: "#1D492C" }}
       >
         <div className="container-fluid">
-          <h1>Precision Agriculture Made Simple</h1>
+          <h1 className="featBen-header">Precision Agriculture Made Simple</h1>
           <div className="solutionBenefits-con mt-5">
             <div className="row align-items-center solutions-row">
               <div className="col-lg-6 solution-text-side">
-                <h3>Aniko</h3>
-                <p>Advanced Features for Smart Farming</p>
-                <div className="row g-4">
-                  <div className="col-6 d-flex align-items-center">
+                <h3>ANIKO</h3>
+                <p className="solText-subheader">Advanced Features for Smart Farming</p>
+                <div className="row g-4 list-features-row">
+                  <div className="col-6  d-flex list-features">
                     <img
                       src="PICTURES/fc1.png"
                       alt="Climate Analysis"
@@ -160,7 +169,7 @@ const Home: React.FC = () => {
                     />
                     <p className="mb-0">Climate Pattern Analysis</p>
                   </div>
-                  <div className="col-6 d-flex align-items-center">
+                  <div className="col-6 d-flex list-features">
                     <img
                       src="PICTURES/fc2.png"
                       alt="Plant Diagnosis"
@@ -169,7 +178,7 @@ const Home: React.FC = () => {
                     />
                     <p className="mb-0">AI-Powered Plant Diagnosis</p>
                   </div>
-                  <div className="col-6 d-flex align-items-center">
+                  <div className="col-6  d-flex list-features">
                     <img
                       src="PICTURES/fc3.png"
                       alt="Soil Health"
@@ -178,7 +187,7 @@ const Home: React.FC = () => {
                     />
                     <p className="mb-0">Real-Time Soil Monitoring</p>
                   </div>
-                  <div className="col-6 d-flex align-items-center">
+                  <div className="col-6 d-flex list-features">
                     <img
                       src="PICTURES/fc4.png"
                       alt="Health Check"
@@ -188,15 +197,18 @@ const Home: React.FC = () => {
                     <p className="mb-0">Intelligent Health Analytics</p>
                   </div>
                 </div>
+                <div className="mobile-list-features">
+                  <ListFeatures />
+                </div>
               </div>
               <Feature />
             </div>
             <hr className="custom-line" />
             <div className="row mb-4 benefits-row">
               <div className="col-lg-10 solution-text-side">
-                <h3>Aniko</h3>
-                <p>Proven Benefits for Your Farm</p>
-                <div className="row g-4">
+                <h3 className="benHeader">ANIKO</h3>
+                <p className="benSubheader">Proven Benefits for Your Farm</p>
+                <div className="row g-4 desktop-benefit-cards">
                   <div className="col-md-4 col-12">
                     <div className="benefit-card">
                       <h5>Monitor & Protect</h5>
@@ -218,7 +230,7 @@ const Home: React.FC = () => {
                     </div>
                   </div>
                   <div className="col-md-4 col-12">
-                    <div className="benefit-card">
+                    <div className="benefit-card last-ben-card">
                       <h5>Optimize & Grow</h5>
                       <img src="PICTURES/benefits-icon3.png" alt="AI Features" />
                       <p>
@@ -227,6 +239,9 @@ const Home: React.FC = () => {
                       </p>
                     </div>
                   </div>
+                </div>
+                <div className="mobile-benefit-cards">
+                  <BenefitsSlider />
                 </div>
               </div>
             </div>
@@ -294,8 +309,9 @@ const Home: React.FC = () => {
                   <img
                     src="/PICTURES/why-icon.png"
                     alt="Icon 3"
-                    className="mb-3"
+                    className="mb-3 last-whyIcon"
                     width="60"
+                    style={{ marginTop: "13px" }}
                   />
                   <p className="mb-0 text-muted">
                     Over 40% of crop loss stem from poor plant disease
@@ -304,6 +320,10 @@ const Home: React.FC = () => {
                 </div>
               </div>
             </div>
+          </div>
+
+          <div className="mobile-whyAniko-card-parent">
+            <WhyAnikoMobile />
           </div>
         </div>
       </section>
@@ -325,9 +345,24 @@ const Home: React.FC = () => {
             </p>
           </div>
         </div>
+
+        <div className="mobile-team-text">
+            <h3 className="fw-bold">Meet the Team</h3>
+            <p className="lead">
+              We are five 3rd-year IT students who share a passion for
+              technology and innovation, each bringing unique skills and
+              perspectives to create impactful, real-world solutions together.
+            </p>
+        </div>
       </section>
 
-      <TeamMembers />
+      <div className="desktop-team-section">
+        <TeamMembers />
+      </div>
+
+      <div className="team-mobile-section">
+        <TeamMobile />
+      </div>
      {/* ✅ Floating Circle Button */}
       <div
         style={{

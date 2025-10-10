@@ -255,6 +255,10 @@ body {
   margin: -17rem;
 }
 
+.mobile-stats-section {
+  display: none !important;
+}
+
 .stat-box {
   text-align: center;
   padding: 50px 30px;
@@ -443,6 +447,14 @@ body {
   overflow: hidden;
 }
 
+.mobile-benefit-cards {
+  display: none !important;
+}
+
+.last-ben-card p{
+  margin-bottom: 5px !important;
+}
+
 .benefit-card::before {
   content: '';
   position: absolute;
@@ -524,6 +536,10 @@ body {
   box-shadow: none !important;
 }
 
+.mobile-whyAniko-card-parent {
+  display: none !important;
+}
+
 .whyAniko-section {
   background-color: var(--primary-green) !important;
 }
@@ -583,6 +599,10 @@ body {
   background-color: var(--accent-g) !important;
 }
 
+.mobile-team-section {
+  display: none !important;
+}
+
 .team-img {
   width: 100%;
   height: 600px;
@@ -602,6 +622,10 @@ body {
   border-radius: 24px;
   backdrop-filter: blur(10px);
   border: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.mobile-team-text {
+  display: none !important;
 }
 
 .team-overlay h3 {
@@ -1118,4 +1142,704 @@ html {
   border-top: 1px solid #ddd;
 }
 
+/* additionals */
+.mobile-list-features {
+  display: none !important;
+}
 
+/* ================== RESPONSIVENESS ==================== */
+@media (min-width: 1200px) and (max-width: 1400px) {
+  .team-overlay {
+    max-width: 1000px !important;
+  }
+
+  .lead {
+    font-size: 14px !important;
+    margin-top: 5px !important;
+  }
+
+  .benefit-card p {
+    font-size: 14px !important;
+  }
+
+  .benefit-card h5 {
+    font-size: 20px !important;
+  }
+
+  .solutionBenefits-con {
+    justify-content: center !important;
+    align-items: center !important;
+    margin: 0 auto !important;
+    display: block !important;
+  }
+
+  .whyAniko-text-section p {
+    font-size: 18px !important;
+  }
+}
+
+@media (min-width: 992px) and (max-width: 1199.75px) {
+  .download-col h1 
+  {
+    font-size: 40px !important;
+    margin-bottom: 1rem !important;
+  }
+
+  .download-col p 
+  {
+    font-size: 16px !important;
+  }
+
+  .hero-cta {
+    padding: 16px 32px !important;
+    font-size: 1rem !important;
+  }
+
+  .aboutStats-container p {
+    font-size: 18px !important;
+    width: 90% !important;
+  }
+
+  .section-heading {
+    font-size: 2.5rem !important;
+  }
+
+  .stat-box p {
+    font-size: 14px !important;
+  }
+
+  .farmer-section h1 {
+    font-size: 3rem !important;
+    margin-bottom: 2rem !important;
+  }
+
+  .solution-text-side h3 {
+    font-size: 2.3rem !important;
+  }
+
+  .solution-text-side > p {
+    font-size: 1.2rem !important;
+    margin-bottom: 2rem !important;
+  }
+
+  .benefit-card h5 {
+    font-size: 1.3rem !important;
+  }
+
+  .benefit-card p {
+    font-size: 14px;
+  }
+
+  .whyAniko-text-section h2 {
+    font-size: 2.5rem !important;
+  }
+
+  .whyAniko-text-section p {
+    font-size: 16px !important;
+  }
+
+  .whyAniko-card-parent {
+    padding: 15px !important;
+    margin-top: -9rem !important;
+    margin-bottom: 5rem;
+  }
+
+  .last-whyIcon {
+    margin-top: 20px;
+  }
+
+  .whyAniko-card-parent p{
+    font-size: 14px !important;
+  }
+
+  .team-overlay h3 {
+    font-size: 2rem !important;
+    margin-bottom: 1rem !important;
+  }
+
+  .lead {
+    font-size: 12px !important;
+    padding: 0 10px !important;
+  }
+}
+
+@media (min-width: 992px) and (max-width: 1189.75px) {
+  .benefit-card h5 {
+    font-size: 1rem !important;
+  }
+
+  .benefit-card img {
+    width: 60px !important;
+    height: 60px !important;
+  }
+
+  .benefit-card p {
+    font-size: 10px !important;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 991.75px) {
+  .hero h1 {
+    font-size: 3rem !important;
+    margin-bottom: 1.5rem !important;
+    margin-top: 3rem !important;
+  }
+
+  .hero p {
+    font-size: 1.1rem !important;
+    margin-bottom: 2rem !important;
+    width: 90% !important;
+    margin: 0 auto !important;
+  }
+
+  .hero-cta {
+    padding: 14px 28px !important;
+    font-size: 1rem !important;
+    margin-top: 2rem;
+  }
+
+  .aboutStats-container .subtext {
+    font-size: 16px !important;
+    width: 90% !important;
+    margin: 0 auto !important;
+    margin-top: -3rem !important;
+    margin-bottom: 1.5rem !important;
+  }
+
+  .custom-line {
+    margin-bottom: -3rem !important;
+  }
+
+  .section-heading {
+    font-size: 2.2rem !important;
+  }
+
+  .section-subtext {
+    font-size: 1rem !important;
+    width: 90% !important;
+    margin: 0 auto !important;
+  }
+
+  .stat-box {
+    padding: 30px 20px !important;
+  }
+  
+  .stat-box img {
+    width: 50% !important;
+  }
+
+  .stat-box p {
+    font-size: 12px !important;
+    margin-bottom: 10px !important;
+  }
+
+  .farmer-section h1 {
+    font-size: 2.5rem !important;
+    margin-bottom: 1.5rem !important;
+  }
+
+  .solution-text-side h3 {
+    font-size: 2rem !important;
+    text-align:center;
+    text-shadow: 0px 0px 5px var(--accent-green) !important;
+    color: var(--light-green);
+  }
+
+  .solution-text-side > p {
+    font-size: 1.2rem !important;
+    margin-bottom: 1.8rem !important;
+    text-align: center !important;
+  }
+
+  .list-features {
+    justify-content: center !important;
+    align-items: center !important;
+  }
+
+  .list-features p {
+    font-size: 1rem !important;
+  }
+
+  .solution-text-side .benHeader {
+    margin-top: 5rem !important;
+  }
+
+  .benefit-card {
+    padding: 30px 20px !important;
+  }
+
+  .benefit-card h5 {
+    font-size: 1.2rem !important;
+  }
+
+  .benefit-card img {
+    width: 60px !important;
+    height: 60px !important;
+  }
+
+  .benefit-card p {
+    font-size: 14px !important;
+  }
+
+  .whyAniko-card-parent {
+    padding: 20px 20px !important;
+    margin-top: -7rem !important;
+    margin-bottom: 3rem !important;
+  }
+
+  .whyAniko-card-parent p {
+    font-size: 12px !important;
+  }
+
+  .team-overlay {
+    max-width: 600px !important;
+    padding: 20px 30px !important;
+  }
+
+  .team-overlay h3 {
+    font-size: 1rem !important;
+    margin-bottom: 1rem !important;
+  }
+
+  .team-overlay p {
+    font-size: 12px !important;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 830.75px) {
+  .benefit-card h5 {
+    font-size: 1rem !important;
+  }
+
+  .benefit-card img {
+    width: 60px !important;
+    height: 60px !important;
+  }
+
+  .benefit-card p {
+    font-size: 10px !important;
+  }
+
+  .team-overlay p {
+    font-size: 10px !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero {
+    padding: 60px 20px 40px !important;
+  }
+
+  .hero h1 {
+    font-size: 2.5rem !important;
+    margin-bottom: 1.5rem !important;
+    margin-top: 8rem !important;
+  }
+
+  .hero p {
+    font-size: 1rem !important;
+    margin-bottom: 1.5rem !important;
+    width: 90% !important;
+    margin: 0 auto !important;
+  }
+
+  .hero-cta {
+    padding: 12px 24px !important;
+    font-size: 0.9rem !important;
+    margin-top: 1.5rem !important;
+  }
+
+  .hero-img {
+    width: 100% !important;
+    height: auto !important;
+    max-width: 400px !important;
+    margin: 0 auto !important;
+    display: block !important;
+    margin-top: 1rem !important;
+    margin-bottom: 3rem !important;
+  }
+
+  .aboutStats-container .subtext {
+    font-size: 16px !important;
+    width: 90% !important;
+    margin: 0 auto !important;
+    margin-top: -3rem !important;
+    margin-bottom: 1.5rem !important;
+  }
+
+  .custom-line {
+    margin-bottom: -3rem !important;
+  }
+
+  .section-heading {
+    font-size: 2rem !important;
+  } 
+
+  .section-subtext {
+    font-size: 16px !important;
+    width: 90% !important;
+  }
+
+  .stat-box {
+    padding: 25px 10px !important;
+  }
+
+  .stat-box p {
+    font-size: 12px !important;
+    margin-bottom: 10px !important;
+  }
+
+  .farmer-section {
+    margin-top: 7rem !important;
+  }
+
+  .farmer-section h1 {
+    font-size: 2.5rem !important;
+    margin-bottom: 1.5rem !important;
+  }
+
+  .solution-text-side h3 {
+    font-size: 1.8rem !important;
+    text-align:center;
+    text-shadow: 0px 0px 5px var(--accent-green) !important;
+    color: var(--light-green);
+  }
+
+  .solution-text-side > p {
+    font-size: 1rem !important;
+    margin-bottom: 1.5rem !important;
+    text-align: center !important;
+  }
+
+  .list-features-row {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem 3rem !important;
+    margin-top: 1rem !important;
+  }
+
+  .list-features {
+    justify-content: center !important;
+    align-items: center !important;
+    margin: auto !important;
+  }
+
+  .list-features p {
+    font-size: 14px !important;
+    white-space: nowrap !important;
+  }
+
+  .solution-text-side .benHeader {
+    margin-top: 4rem !important;
+  }
+
+  .benefit-card {
+    padding: 25px 15px !important;
+  }
+
+  .benefit-card h5 {
+    font-size: 1.1rem !important;
+  }
+
+  .benefit-card img {
+    width: 50px !important;
+    height: 50px !important;
+  }
+
+  .benefit-card p {
+    font-size: 12px !important;
+  }
+
+  .whyAniko-text-section h2 {
+    font-size: 2.5rem !important;
+  }
+
+  .whyAniko-text-section p {
+    font-size: 16px !important;
+  }
+
+  .whyAniko-card-parent {
+    margin-top: -2rem !important;
+    padding: 15px 15px !important;
+    margin-bottom: 3rem !important;
+  }
+
+  .whyAniko-card-parent p {
+    font-size: 12px !important;
+  }
+
+  .team-overlay {
+    max-width: 90% !important;
+    padding: 15px 20px !important;
+  }
+
+  .team-overlay h3 {
+    font-size: 1rem !important;
+    margin-bottom: 1rem !important;
+  }
+
+  .team-overlay p {
+    font-size: 10px !important;
+  }
+}
+
+@media (min-width: 576px) and (max-width: 767.75px) {
+  .benefit-card h5 {
+    font-size: 1rem !important;
+  }
+
+  .benefit-card img {
+    width: 50px !important;
+    height: 50px !important;
+  }
+
+  .benefit-card p {
+    font-size: 10px !important;
+  }
+
+  .team-overlay p {
+    font-size: 10px !important;
+  }
+
+  .stats-section {
+    display: none !important;
+  }
+
+  .mobile-stats-section {
+    display: block !important;
+    z-index: 1000 !important;
+    position: relative;
+
+  }
+
+  .farmer-section {
+    margin-top: -9rem !important;
+    z-index: 1 !important; 
+  }
+
+  .farmer-section h1 {
+    font-size: 2.2rem !important;
+    margin-bottom: 1.5rem !important;
+  }
+
+  .desktop-benefit-cards {
+    display: none !important;
+  }
+
+  .mobile-benefit-cards {
+    display: block !important;
+    z-index: 1000 !important;
+    position: relative;
+  }
+
+  .whyAniko-card-parent {
+    display: none !important;
+  }
+
+  .mobile-whyAniko-card-parent {
+    display: block !important;
+    z-index: 1000 !important;
+    position: relative;
+    margin-top: -7rem !important;
+    margin-bottom: 3rem !important;
+    padding: 15px 15px !important;
+  }
+
+  .desktop-team-section {
+    display: none !important;
+  }
+
+  .mobile-team-section {
+    display: block !important;
+  }
+
+  .hero-container h1 {
+    font-size: 2.2rem !important;
+    margin-bottom: 1.5rem !important;
+    margin-top: 8rem !important;
+  }
+
+  .hero-container p {
+    font-size: 1rem !important;
+    margin-bottom: 1.5rem !important;
+    width: 100% !important;
+    margin: 0 auto !important;
+  }
+
+  .hero-img {
+    max-width: 500px !important;
+    margin-top: 1rem !important;
+    margin-bottom: 2rem !important;
+  }
+
+  .aboutStats-container .subtext {
+    font-size: 16px !important;
+    width: 100% !important;
+    margin: 0 auto !important;
+    margin-top: -3rem !important;
+    margin-bottom: 1.5rem !important;
+  }
+
+  .section-heading {
+    font-size: 1.8rem !important;
+    width: 100% !important;
+  }
+
+  .section-subtext {
+    width: 100% !important;
+    font-size: 16px !important;
+  }
+
+  .whyAniko-container {
+    max-width: 90% !important; 
+    width: 90% !important;
+  }
+}
+
+@media (min-width: 654px) and (max-width: 673.75px) {
+  .team-overlay {
+    max-width: 90% !important;
+    padding: 10px 15px !important;
+  }
+}
+
+@media (min-width: 576px) and (max-width: 653.75px) {
+  .team-overlay {
+    max-width: 70% !important;
+    width: 70% !important;
+    padding: 5px 10px !important;
+  }
+
+  .team-overlay h3 {
+    font-size: 0.9rem !important;
+    margin-bottom: 0.5rem !important;
+  }
+
+  .lead {
+    font-size: 2px !important;
+  }
+}
+
+@media (min-width: 576px) and (max-width: 644.75px) {
+  .list-features-row {
+    display: none !important;
+  }
+
+  .mobile-list-features {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    gap: 1.5rem !important;
+    margin-top: 1rem !important;
+    flex-wrap: wrap !important;
+  }
+}
+@media (min-width: 320px) and (max-width: 575.75px) {
+  .download-col h1 {
+    font-size: 18px !important;
+  }
+
+  .download-col p {
+    font-size: 10px !important;
+    width: 100% !important;
+    margin-top: -10px !important;
+  }
+
+  .hero-cta {
+    padding: 5px 20px !important;
+    font-size: 10px !important;
+    margin-bottom: 2rem !important;
+  }
+
+  .hero-img {
+    display: none !important;
+  }
+
+  .aboutStats-container .subtext {
+    font-size: 10px !important;
+    width: 100% !important;
+  }
+
+  .section-heading {
+    font-size: 16px !important;
+  }
+
+  .section-subtext {
+    font-size: 10px !important;
+    margin-top: -1rem !important;
+  }
+
+  .stats-section {
+    display: none !important;
+  }
+
+  .mobile-stats-section {
+    display: block !important; 
+  }
+
+  .farmer-section { 
+    margin-top: -8rem !important; 
+  }
+
+  .farmer-section h1 {
+    font-size: 20px !important;
+    margin-top: 10px !important;
+  } 
+
+  .solution-text-side h3{
+    font-size: 18px !important;
+  }
+
+  .solution-text-side p {
+    font-size: 14px !important;
+  }
+
+  .list-features-row {
+    display: none !important;
+  }
+
+  .mobile-list-features {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    gap: 1.5rem !important;
+    margin-top: 1rem !important;
+    flex-wrap: wrap !important;
+  }
+
+  .desktop-benefit-cards {
+    display: none !important;
+  }
+
+  .mobile-benefit-cards {
+    display: block !important;
+  }
+
+  .whyAniko-text-section {
+    margin-top: -3rem !important;
+  }
+
+  .whyAniko-text-section h2 {
+    font-size: 25px !important;
+  }
+
+  .whyAniko-text-section p {
+    font-size: 12px !important;
+  }
+
+  .whyAniko-card-parent {
+    display: none !important;
+  }
+
+  .mobile-whyAniko-card-parent {
+    display: block !important;
+  }
+
+  .desktop-team-section {
+    display: none !important;
+  }
+
+  .team-mobile-section {
+    display: block !important;
+  }
+}

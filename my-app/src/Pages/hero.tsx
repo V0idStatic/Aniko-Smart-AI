@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import supabase from "../CONFIG/supabaseClient";
+import "../CSS/hero.css";
 
 interface HeroImage {
   id: number;
@@ -51,7 +52,7 @@ const Hero: React.FC = () => {
         <img
           src={heroImage.image_url}
           alt="Hero"
-          className="img-fluid"
+          className="img-fluid mainImg"
           style={{ maxWidth: "600px" }}
         />
     

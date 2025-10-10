@@ -124,7 +124,7 @@ const Header: React.FC = () => {
           top: 10px;
           left: 50%;
           transform: translateX(-50%);
-          z-index: 1000;
+          z-index: 2000;
         }
         .floating-header .nav-link {
           color: #fff !important;

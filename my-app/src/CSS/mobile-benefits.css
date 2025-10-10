@@ -1,0 +1,129 @@
+.mobile-benefits-section {
+  width: 100%;
+  position: relative;
+  margin-top: -1rem !important; 
+}
+
+.mobile-benefit-card {
+    border-radius: 0 !important;  
+    border-top-right-radius: 80px !important; 
+    border-bottom-left-radius: 80px !important;
+    background-color: var(--light-green) !important;
+    border: 2px solid var(--pastel-green) !important;
+    box-shadow: 0px 0px 10px 2px var(--light-green) !important;
+}
+
+.mobile-benefit-card img {
+  width: 65px;
+  height: 65px;
+  object-fit: contain;
+  margin: 15px 0;
+}
+
+.mobile-benefit-card h5 {
+  font-size: 1.2rem;
+  margin-bottom: 10px;
+  color: #3c2e1f;
+  font-weight: 700;
+}
+
+.mobile-benefit-card p {
+  font-size: 0.95rem;
+  color: #4a4a4a;
+  font-family: "Lexend", sans-serif;
+}
+
+@media (min-width: 576px) and (max-width: 767.75px) {
+  .mobile-benefits-slider {
+    display: flex;
+    overflow-x: auto;
+    gap: 1rem;
+    padding: 1rem;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .mobile-benefit-card {
+    flex: 0 0 40%;
+    min-width: 40%;
+    scroll-snap-align: start;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    padding: 20px;
+    text-align: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .mobile-benefit-card p{
+    font-size: 12px !important;
+  }
+
+  .mobile-benefits-slider::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@media (min-width: 576px) and (max-width: 644.75px) {
+  .mobile-benefit-card {
+    flex: 0 0 60%;
+    min-width: 60%;
+    scroll-snap-align: start;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    padding: 10px;
+    text-align: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .mobile-benefit-card img {
+    width: 45px !important; 
+    height: 45px !important; 
+  }
+}
+
+@media (min-width: 320px) and (max-width: 575.75px) {
+  .mobile-benefits-slider {
+    display: flex;
+    overflow-x: auto;
+    gap: 1rem;
+    padding: 1rem;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .mobile-benefit-card {
+    flex: 0 0 80%;
+    min-width: 80%;
+    scroll-snap-align: start;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    padding: 20px;
+    text-align: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border-top-right-radius: 50px !important;
+    border-bottom-left-radius: 50px !important;
+  }
+
+  .mobile-benefit-card img {
+    width: 50px !important;
+    height: 50px !important;
+  }
+
+  .mobile-benefit-card h5 {
+    font-size: 14px !important; 
+  }
+
+  .mobile-benefit-card p{
+    font-size: 10px !important;
+    width: 100% !important;
+  }
+
+  .mobile-benefits-slider::-webkit-scrollbar {
+    display: none;
+  }
+}

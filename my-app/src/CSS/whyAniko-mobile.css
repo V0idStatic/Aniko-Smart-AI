@@ -1,0 +1,94 @@
+.why-aniko-section {
+  padding: 2rem 1rem;
+  text-align: center;
+  background-color: var(--dark-green) !important;
+  border-radius: 20px !important;
+  box-shadow:0px 0px 20px 5px var(--pastel-green);
+  margin-top: 1rem !important;
+}
+
+.why-aniko-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  color: var(--light-green);
+  text-shadow: 0px 0px 10px var(--pastel-green) !important;
+}
+
+.why-aniko-slider {
+  display: flex;
+  gap: 1rem;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 1rem;
+}
+
+.why-aniko-slider::-webkit-scrollbar {
+  display: none;
+}
+
+.why-aniko-card {
+  flex: 0 0 80%;
+  background: var(--gradient-secondary-light) !important;
+  border-radius: 15px;
+  padding: 1.5rem;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  scroll-snap-align: center;
+}
+.why-aniko-icon {
+  margin-bottom: 1rem;
+  background-color: var(--pastel-green) !important;
+  padding: 5px;
+  border-radius: 50px; 
+}
+
+.why-aniko-text {
+  color: #6c757d;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  margin: 0;
+  color: var(--dark-green);
+  font-family: "Lexend", sans-serif;
+  font-size: 14px !important;
+}
+
+@media (min-width: 768px) {
+  .why-aniko-card {
+    flex: 0 0 30%;
+  }
+  .why-aniko-slider {
+    justify-content: center;
+    overflow-x: hidden;
+  }
+}
+@media (min-width: 576px) and (max-width: 767.95px) {
+  .why-aniko-title {
+    color: var(--light-green);
+    font-family: "Zalando Sans Expanded", sans-serif;
+  }
+  .why-aniko-card {
+    flex: 0 0 45%;
+  }
+}
+@media (min-width: 320px) and (max-width: 575.95px) {
+  .why-aniko-title {
+    color: var(--light-green);
+    font-family: "Zalando Sans Expanded", sans-serif;
+    font-size: 20px !important;
+  }
+  .why-aniko-card {
+    flex: 0 0 60%;
+    padding: 10px;
+  }
+  .why-aniko-card p {
+    font-size: 10px !important;
+    width: 100% !important;
+  }
+  
+  .why-aniko-section {
+    box-shadow:0px 0px 10px 2px var(--pastel-green);
+  }
+}

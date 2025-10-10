@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import supabase from "../CONFIG/supabaseClient";
+import "../CSS/feature.css";
 
 interface FeatureImage {
   id: number;
@@ -43,14 +44,14 @@ const Feature: React.FC = () => {
 
   if (loading) return <p className="text-center">Loading feature image...</p>;
   if (err) return <p className="text-center text-danger">Error: {err}</p>;
-  if (!featureImage) return null; // nothing if no record
+  if (!featureImage) return null; 
 
   return (
     <div className="col-lg-4 text-center mt-4 mt-lg-0 solution-img-side">
       <img
         src={featureImage.image_url}
         alt="Aniko App Interface"
-        className="img-fluid"
+        className="img-fluid phoneImg"
         style={{ maxWidth: "380px" }}
       />
     </div>

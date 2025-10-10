@@ -1,0 +1,147 @@
+@import url('https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&family=Zalando+Sans+Expanded:ital,wght@0,200..900;1,200..900&display=swap');
+
+.mobile-stats-section {
+  margin-top: 1.5rem;
+  width: 100%;
+  z-index: 1000;
+  position: relative; 
+}
+
+.mobile-stats-slider {
+  display: flex;
+  gap: 1.5rem;
+  justify-content: center;
+}
+
+.mobile-stat-box {
+  background: #fff;
+  border-radius: 0;
+  border-top-right-radius: 100px !important;
+  border-bottom-left-radius: 100px !important;
+  border: 2px solid var(--primary-green) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  text-align: center;
+  width: 100px !important;
+  transition: transform 0.3s ease;
+  flex-shrink: 0;
+}
+
+.mobile-stat-box img {
+  width: 60px;
+  height: 60px;
+  object-fit: contain;
+  margin-bottom: 12px;
+}
+
+.mobile-stat-box p {
+  font-family: "Lexend", sans-serif;
+  width: 90%;
+  justify-content: center !important;
+  align-items: center !important;
+  margin: 0 auto !important;  
+}
+
+@media (min-width: 645px) and (max-width: 767.75px) {
+  .mobile-stats-slider-wrapper {
+    overflow-x: hidden;
+    width: 100%;
+  }
+
+  .mobile-stats-slider {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-padding: 0;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    gap: 1rem;
+    scroll-behavior: smooth;
+    justify-content: flex-start; 
+  }
+
+  .mobile-stat-box {
+    flex: 0 0 70%;
+    min-width: 70%;
+    scroll-snap-align: start; 
+  }
+
+  .mobile-stats-slider::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@media (min-width: 576px) and (max-width: 644.75px) {
+  .mobile-stats-slider-wrapper {
+    overflow-x: hidden;
+    width: 100%;
+  }
+
+  .mobile-stats-slider {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-padding: 0;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    gap: 1rem;
+    scroll-behavior: smooth;
+    justify-content: flex-start; 
+  }
+
+  .mobile-stat-box {
+    flex: 0 0 50%;
+    min-width: 50%;
+    scroll-snap-align: start; 
+  }
+
+  .mobile-stats-slider::-webkit-scrollbar {
+    display: none;
+  }
+}
+@media (min-width: 320px) and (max-width: 575.75px) {
+  .mobile-stats-section {
+    margin-top: -2.5rem !important;
+  }
+
+  .mobile-stats-slider-wrapper {
+    overflow-x: hidden;
+    width: 100%;
+  }
+
+  .mobile-stats-slider {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-padding: 0;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    gap: 1rem;
+    scroll-behavior: smooth;
+    justify-content: flex-start; 
+  }
+
+  .mobile-stat-box {
+    flex: 0 0 50%;
+    min-width: 50%;
+    scroll-snap-align: start; 
+    border-top-right-radius: 50px !important;
+    border-bottom-left-radius: 50px !important;
+    padding: 10px 5px !important;
+  }
+
+  .mobile-stat-box p {
+    font-size: 10px !important;
+    width: 100% !important;
+    margin-bottom: 5px !important;
+  }
+
+  .mobile-stats-slider::-webkit-scrollbar {
+    display: none;
+  }
+
+  .mobile-stat-box img {
+    width: 50px !important;
+    height: 50px !important;
+  }
+}

@@ -183,6 +183,9 @@ const Testimonials: React.FC = () => {
             </div>
           ))}
         </div>
+        <div className="mobile-testSec-btn">
+          <a href="/testimonialDisplay"><button className="testDisplay-btn">View Testimonials</button></a>
+        </div>
       </section>
     </>
   );

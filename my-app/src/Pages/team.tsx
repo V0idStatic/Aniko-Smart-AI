@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import supabase from "../CONFIG/supabaseClient";
+import "../CSS/teamSec.css";
 
 interface TeamMember {
   id: number;
@@ -65,8 +66,8 @@ const TeamMembers: React.FC = () => {
 				  }}
 				/>
 			  )}
-			  <h5 className="fw-bold">{m.name}</h5>
-			  <p className="text-muted">{m.role}</p>
+			  <h5 className="fw-bold teamSec-header">{m.name}</h5>
+			  <p className="text-muted teamSec-subheader">{m.role}</p>
 		
 			</div>
 		  ))}

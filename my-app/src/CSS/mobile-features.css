@@ -1,0 +1,28 @@
+.list-features-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.list-feature-item {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.sol-icon {
+  margin-right: 12px;
+  width: 45px;
+  height: 45px;
+}
+
+.list-feature-text {
+  margin: 0;
+}
+
+.mobile-list-feature-text {
+  font-family: "Lexend", sans-serif;
+  color: var(--light-green) !important;
+  align-items: center !important;
+  margin-top: 10px !important;
+}

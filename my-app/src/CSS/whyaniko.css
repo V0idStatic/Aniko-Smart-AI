@@ -1,0 +1,29 @@
+.laptopImg {
+    box-shadow: none !important;
+}
+@media (min-width: 1200px) and (max-width:1400.75px) {
+    .laptopImg {
+        width: 400px !important;
+    }
+}
+
+@media (min-width: 769px) and (max-width: 991.75px) {
+    .laptopImg {
+        width: 400px !important;
+        margin-top: -3rem !important;
+        margin-bottom: -5rem !important; 
+    }
+}
+
+@media (max-width: 768.75px) {
+    .laptopImg {
+        width: 400px !important;
+        margin-top: -3rem !important;
+        margin-bottom: -5rem !important; 
+    }
+}
+@media (min-width: 576px) and (max-width: 767.75px) {
+    .laptopImg {
+        display: none !important;
+    }
+}

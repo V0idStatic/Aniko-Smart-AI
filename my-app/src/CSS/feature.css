@@ -1,0 +1,26 @@
+.phoneImg {
+    justify-content: center !important;
+    align-items: center !important;
+    margin: auto !important; 
+    display: block !important;
+}
+@media (min-width: 992px) and (max-width: 1199.75px) {
+    .phoneImg {
+        width: 350px !important;
+    }
+}
+@media (min-width: 769px) and (max-width: 991.75px) {
+    .phoneImg {
+        width: 300px !important;
+    }
+}
+@media (max-width: 768px) {
+    .phoneImg {
+        width: 250px !important;
+    }
+}
+@media (min-width: 576px) and (max-width: 767.75px) {
+    .phoneImg {
+        display: none !important;
+    }
+}

@@ -1,0 +1,37 @@
+.teamSec-header {
+    margin-top: 5px !important;
+}
+
+@media (min-width: 992px) and (max-width: 1199.75px) {
+    .teamSec-header {
+        font-size: 20px !important; 
+    }
+    .teamSec-subheader {
+        font-size: 16px;
+    }
+}
+
+@media (min-width: 769px) and (max-width: 991.75px) {
+    .team-member-img {
+        width: 120px !important;
+        height: 120px !important;
+    }
+    .teamSec-header {
+        font-size: 16px !important; 
+    }
+    .teamSec-subheader {
+        font-size: 14px !important;
+    }
+}
+@media (max-width: 768px) {
+    .team-member-img {
+        width: 100px !important;
+        height: 100px !important;
+    }
+    .teamSec-header {
+        font-size: 14px !important; 
+    }
+    .teamSec-subheader {
+        font-size: 12px !important;
+    }
+}

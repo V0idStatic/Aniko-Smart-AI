@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import supabase from "../CONFIG/supabaseClient";
+import "../CSS/whyaniko.css";
 
 interface WhyAnikoImage {
   id: number;
@@ -47,7 +48,7 @@ const WhyAniko: React.FC = () => {
       <img
         src={image.image_url}
         alt="Why Aniko"
-        className="img-fluid rounded shadow-sm"
+        className="img-fluid rounded shadow-sm laptopImg"
       />
   
     </div>
