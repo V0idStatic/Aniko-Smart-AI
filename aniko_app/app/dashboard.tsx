@@ -1305,7 +1305,7 @@ chatbotSubtitle: {
   marginLeft: 12,
 },
 chatbotCard: {
-  backgroundColor: 'rgba(0,0,0,0.6)', // semi-transparent dark bg
+  backgroundColor: '#1c4722', // semi-transparent dark bg
   padding: 12,                        // space inside
   marginLeft: 12,
   marginVertical: 9,                  // spacing between cards

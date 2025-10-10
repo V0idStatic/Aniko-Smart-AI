@@ -1,3 +1,5 @@
+// chatbot.tsx - Enhanced Professional Version
+
 import React, { useState, useEffect, useRef } from "react";
 import {
   View,
@@ -5,14 +7,16 @@ import {
   TextInput,
   TouchableOpacity,
   ScrollView,
-  StyleSheet,
   ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
-  Animated,
-  Dimensions,
-  TouchableWithoutFeedback,
+  SafeAreaView,
+  Modal,
+  FlatList,
+  Alert,
+  StyleSheet,
 } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import {
   fetchAllCropParameters,
@@ -20,43 +24,91 @@ import {
   CropParameter,
   formatSingleCropForAI,
 } from "../services/cropDataService";
-
-const { width } = Dimensions.get("window");
+import { Stack } from "expo-router";
 
 type ChatMessage = {
   role: "user" | "assistant";
   text: string;
 };
 
-export default function Chatbot() {
+type ChatSession = {
+  id: string;
+  title: string;
+  messages: ChatMessage[];
+  timestamp: string;
+};
+
+interface ChatbotProps {
+  userId: string;
+}
+
+export default function Chatbot({ userId }: ChatbotProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [cropData, setCropData] = useState<CropParameter[]>([]);
   const [dataLoaded, setDataLoaded] = useState(false);
-  const [isPanelVisible, setPanelVisible] = useState(false);
-  const [chatHistory, setChatHistory] = useState<string[]>([]);
+  const [chatHistory, setChatHistory] = useState<ChatSession[]>([]);
+  const [activeChatId, setActiveChatId] = useState<string | null>(null);
+  const [sidePanelVisible, setSidePanelVisible] = useState(false);
+  const [suggestions, setSuggestions] = useState<string[]>([]);
   const scrollViewRef = useRef<ScrollView>(null);
-  const slideAnim = useRef(new Animated.Value(-width * 0.7)).current;
 
-  // Load crop data
+  const STORAGE_KEY = `chatHistory_${userId}`;
+
+  const agricultureQuestions = [
+    "What are the ideal conditions for growing tomatoes?",
+    "How often should I water my rice crops?",
+    "What is the best soil pH for corn?",
+    "What fertilizer should I use for eggplant?",
+    "How can I prevent pests on my lettuce farm?",
+    "When is the best season to plant sugarcane?",
+    "What is the NPK requirement for cabbage?",
+    "How can I improve soil fertility naturally?",
+    "What crops grow best in dry climate areas?",
+    "How do I manage irrigation for peanut farming?",
+  ];
+
   useEffect(() => {
     loadCropData();
-  }, []);
+    loadChatHistory();
+    refreshSuggestions();
+  }, [userId]);
+
+  const refreshSuggestions = () => {
+    const shuffled = [...agricultureQuestions].sort(() => 0.5 - Math.random());
+    setSuggestions(shuffled.slice(0, 4));
+  };
 
   const loadCropData = async () => {
     try {
-      console.log("📦 Loading crop parameters...");
       const data = await fetchAllCropParameters();
       setCropData(data);
       setDataLoaded(true);
-      console.log(`✅ Loaded ${data.length} crop parameters`);
     } catch (err) {
+      setDataLoaded(false);
       console.error("Failed to load crop data:", err);
     }
   };
 
-  // Detect specific crop
+  const loadChatHistory = async () => {
+    try {
+      const stored = await AsyncStorage.getItem(STORAGE_KEY);
+      if (stored) setChatHistory(JSON.parse(stored));
+    } catch (err) {
+      console.error("Failed to load chat history:", err);
+    }
+  };
+
+  const saveChatHistory = async (updatedHistory: ChatSession[]) => {
+    try {
+      setChatHistory(updatedHistory);
+      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updatedHistory));
+    } catch (err) {
+      console.error("Failed to save chat history:", err);
+    }
+  };
+
   const detectCropQuery = async (userMessage: string): Promise<string | null> => {
     const lowerMsg = userMessage.toLowerCase();
     const cropKeywords = [
@@ -84,6 +136,56 @@ export default function Chatbot() {
     return null;
   };
 
+  const detectSmallTalk = (userMessage: string): string | null => {
+    const msg = userMessage.toLowerCase();
+    if (/^(hi|hello|hey)\b/.test(msg))
+      return "Hello there! I'm Aniko, your friendly Smart Agriculture Assistant. How can I help you with crops or farming today?";
+    if (msg.includes("my name is")) {
+      const name = msg.split("my name is")[1]?.trim().split(" ")[0];
+      if (name)
+        return `Nice to meet you, ${name.charAt(0).toUpperCase() + name.slice(1)}! What crop would you like to know about?`;
+      return "Nice to meet you! What crop would you like to learn about?";
+    }
+    if (msg.includes("thank") || msg.includes("thanks"))
+      return "You're welcome! Always happy to help!";
+    if (msg.includes("how are you"))
+      return "I'm just a bot, but I'm feeling productive today!";
+    if (msg.includes("who are you"))
+      return "I'm Aniko, an AI agriculture assistant for Filipino farmers.";
+    return null;
+  };
+
+  const isAgricultureRelated = (userMessage: string): boolean => {
+    const msg = userMessage.toLowerCase();
+    const agriWords = [
+      "crop",
+      "soil",
+      "fertilizer",
+      "farming",
+      "plant",
+      "seed",
+      "harvest",
+      "climate",
+      "weather",
+      "irrigation",
+      "ph",
+      "temperature",
+      "fruit",
+      "vegetable",
+      "field",
+      "water",
+      "grow",
+      "agriculture",
+      "farm",
+      "compost",
+      "organic",
+      "npk",
+      "pesticide",
+      "disease",
+    ];
+    return agriWords.some((word) => msg.includes(word));
+  };
+
   const sendMessage = async () => {
     if (!input.trim()) return;
     const userMessage: ChatMessage = { role: "user", text: input.trim() };
@@ -91,375 +193,723 @@ export default function Chatbot() {
     setInput("");
     setLoading(true);
 
-    // Save to history preview
-    setChatHistory((prev) => [
-      ...prev,
-      userMessage.text.length > 30
-        ? userMessage.text.slice(0, 30) + "..."
-        : userMessage.text,
-    ]);
-
     try {
+      const smallTalk = detectSmallTalk(userMessage.text);
+      if (smallTalk) {
+        addBotReply(smallTalk);
+        return;
+      }
+
+      if (!isAgricultureRelated(userMessage.text)) {
+        addBotReply(
+          "Hmm... That doesn't sound related to agriculture. I can help you with crop requirements, soil nutrients, or farming tips! 🌾"
+        );
+        return;
+      }
+
       const cropInfo = await detectCropQuery(userMessage.text);
       if (cropInfo) {
-        setMessages((prev) => [...prev, { role: "assistant", text: cropInfo }]);
-        setLoading(false);
+        addBotReply(cropInfo);
         return;
       }
 
       const cropContext = formatCropDataForAI(cropData);
       const systemPrompt = `
-      You are Aniko, an AI assistant specialized in agriculture in the Philippines.
-      Use this data to answer accurately about crops, climate, and soil conditions.
-      ${cropContext}
+        You are Aniko, an AI assistant specialized in agriculture in the Philippines.
+        Use this data to answer accurately about crops, climate, and soil conditions.
+        ${cropContext}
       `;
 
-  const resp = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json",
-    Authorization: `Bearer ${process.env.EXPO_PUBLIC_OPENROUTER_API_KEY}`,
-  },
-  body: JSON.stringify({
-    model: "openai/gpt-3.5-turbo",
-    messages: [
-      { role: "system", content: systemPrompt },
-      { role: "user", content: userMessage.text },
-    ],
-    max_tokens: 1000,
-  }),
-});
-
+      const resp = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${process.env.EXPO_PUBLIC_OPENROUTER_API_KEY}`,
+        },
+        body: JSON.stringify({
+          model: "gpt-3.5-turbo",
+          messages: [
+            { role: "system", content: systemPrompt },
+            { role: "user", content: userMessage.text },
+          ],
+          max_tokens: 1000,
+        }),
+      });
 
       const data = await resp.json();
       const reply =
         data?.choices?.[0]?.message?.content ||
         data?.error?.message ||
         "No response from Aniko.";
-      setMessages((prev) => [...prev, { role: "assistant", text: reply }]);
+      addBotReply(reply);
     } catch (err: any) {
-      console.error("Fetch error:", err);
-      setMessages((prev) => [
-        ...prev,
-        { role: "assistant", text: `⚠️ Error: ${err.message || err}` },
-      ]);
-    } finally {
-      setLoading(false);
+      addBotReply(`Error: ${err.message || err}`);
     }
   };
 
-  // Welcome message
-  useEffect(() => {
-    if (dataLoaded && messages.length === 0) {
-      setMessages([
-        {
-          role: "assistant",
-          text: `Hello! I'm Aniko 🌱 your Smart Agriculture Assistant.
+  const addBotReply = async (reply: string) => {
+    setMessages((prev) => [...prev, { role: "assistant", text: reply }]);
+    setLoading(false);
+    await saveSessionMessages([...messages, { role: "assistant", text: reply }]);
+  };
 
-I have information on ${cropData.length} different crops including vegetables, fruits, and rice varieties.
-
-Ask me things like:
-• What are the requirements for tomato?
-• NPK levels for eggplant?
-• Best temperature for mango?
-
-How can I help you today?`,
-        },
-      ]);
+  const saveSessionMessages = async (newMessages: ChatMessage[]) => {
+    let updatedHistory = [...chatHistory];
+    if (activeChatId) {
+      updatedHistory = updatedHistory.map((s) =>
+        s.id === activeChatId ? { ...s, messages: newMessages } : s
+      );
+    } else {
+      const newId = Date.now().toString();
+      const newSession: ChatSession = {
+        id: newId,
+        title: await generateChatTitle(newMessages[0].text),
+        messages: newMessages,
+        timestamp: new Date().toLocaleString(),
+      };
+      updatedHistory.unshift(newSession);
+      setActiveChatId(newId);
     }
-  }, [dataLoaded]);
+    await saveChatHistory(updatedHistory);
+  };
+
+  const generateChatTitle = async (prompt: string): Promise<string> => {
+    try {
+      const resp = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${process.env.EXPO_PUBLIC_OPENROUTER_API_KEY}`,
+        },
+        body: JSON.stringify({
+          model: "gpt-3.5-turbo",
+          messages: [
+            {
+              role: "system",
+              content:
+                "Generate a short, descriptive title (max 5 words) summarizing this user's message about agriculture.",
+            },
+            { role: "user", content: prompt },
+          ],
+          max_tokens: 20,
+        }),
+      });
+      const data = await resp.json();
+      return data?.choices?.[0]?.message?.content?.trim() || "New Chat";
+    } catch {
+      return "New Chat";
+    }
+  };
+
+  const reopenChat = (session: ChatSession) => {
+    setActiveChatId(session.id);
+    setMessages(session.messages);
+    setSidePanelVisible(false);
+  };
+
+  const deleteChat = async (index: number) => {
+    Alert.alert("Delete Chat", "Are you sure you want to delete this chat?", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Delete",
+        style: "destructive",
+        onPress: async () => {
+          const updated = chatHistory.filter((_, i) => i !== index);
+          await saveChatHistory(updated);
+          if (chatHistory[index].id === activeChatId) {
+            setMessages([]);
+            setActiveChatId(null);
+          }
+        },
+      },
+    ]);
+  };
 
   useEffect(() => {
     scrollViewRef.current?.scrollToEnd({ animated: true });
   }, [messages]);
 
-  // Toggle panel animation
-  const togglePanel = () => {
-    Animated.timing(slideAnim, {
-      toValue: isPanelVisible ? -width * 0.7 : 0,
-      duration: 300,
-      useNativeDriver: true,
-    }).start(() => setPanelVisible(!isPanelVisible));
-  };
-
-  const clearHistory = () => setChatHistory([]);
-
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
-      style={styles.container}
-    >
-      {/* Overlay when panel is open */}
-      {isPanelVisible && (
-        <TouchableWithoutFeedback onPress={togglePanel}>
-          <View style={styles.overlay} />
-        </TouchableWithoutFeedback>
-      )}
-
-      {/* Side Panel */}
-      <Animated.View
-        style={[
-          styles.sidePanel,
-          { transform: [{ translateX: slideAnim }] },
-        ]}
-      >
-        <Text style={styles.panelTitle}>Chat History</Text>
-        <ScrollView style={{ marginTop: 10 }}>
-          {chatHistory.length > 0 ? (
-            chatHistory.map((item, index) => (
-              <View key={index} style={styles.historyItem}>
-                <Ionicons name="chatbox-ellipses-outline" size={20} color="#2E7D32" />
-                <Text style={styles.historyText}>{item}</Text>
-                
-              </View>
-            ))
-          ) : (
-            <Text style={styles.noHistory}>No chats yet</Text>
-          )}
-        </ScrollView>
-
-        {chatHistory.length > 0 && (
-          <TouchableOpacity style={styles.clearBtn} onPress={clearHistory}>
-            <MaterialCommunityIcons name="delete-outline" size={18} color="#fff" />
-            <Text style={styles.clearBtnText}>Clear History</Text>
-          </TouchableOpacity>
-        )}
-      </Animated.View>
-
-      {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={togglePanel} style={styles.burgerBtn}>
-          <Ionicons name="menu" size={26} color="#f5f5f0" />
-        </TouchableOpacity>
-        <View style={styles.headerLeft}>
-       
-          <Text style={styles.headerTitle}>Aniko Smart AI</Text>
-        
-        </View>
-      </View>
-
-      {!dataLoaded ? (
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#2c9332ff" />
-          <Text style={styles.loadingText}>Loading crop database...</Text>
-        </View>
-      ) : (
-        <ScrollView
-          ref={scrollViewRef}
-          style={styles.messages}
-          contentContainerStyle={{ paddingVertical: 10 }}
+    <>
+      <Stack.Screen options={{ headerShown: false }} />
+      <SafeAreaView style={styles.safeContainer}>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : undefined}
+          style={styles.container}
         >
-          {messages.map((m, i) => (
-            <View
-              key={i}
-              style={[
-                styles.msg,
-                m.role === "user" ? styles.userMsg : styles.botMsg,
-              ]}
-            >
-             
-              <Text
-                style={[
-                  styles.msgText,
-                  m.role === "assistant" && { color: "#1b1b1b" },
-                ]}
-              >
-                {m.text}
+          {/* HEADER */}
+          <View style={styles.header}>
+            <TouchableOpacity onPress={() => setSidePanelVisible(true)} style={styles.burgerBtn}>
+              <Ionicons name="menu" size={26} color="#FFFFFF" />
+            </TouchableOpacity>
+            <View style={styles.headerContent}>
+           
+              <Text style={styles.headerTitle}>AniKo Chatbot</Text>
+            </View>
+            <View style={{ width: 40 }} />
+          </View>
+
+          {/* INTRODUCTORY VIEW */}
+          {messages.length === 0 && (
+            <View style={introStyles.container}>
+              <Text style={introStyles.title}>Welcome to Aniko</Text>
+              <Text style={introStyles.subtitle}>
+                Your intelligent agriculture companion. Get expert advice on crops, soil health, and sustainable farming practices.
               </Text>
-            </View>
-          ))}
-          {loading && (
-            <View style={styles.typingContainer}>
-              <MaterialCommunityIcons
-                name="dots-horizontal"
-                size={24}
-                color="#4d7f39"
-              />
-              <Text style={styles.typingText}>Aniko is thinking...</Text>
+
+              {/* Recommended Questions */}
+              <View style={introStyles.suggestionContainer}>
+                <View style={introStyles.suggestionHeader}>
+                  <Text style={introStyles.suggestionTitle}>Suggested Questions</Text>
+                  <TouchableOpacity onPress={refreshSuggestions} style={introStyles.refreshBtn}>
+                    <Ionicons name="refresh-outline" size={20} color="#2D6A4F" />
+                  </TouchableOpacity>
+                </View>
+
+                {suggestions.map((q, i) => (
+                  <TouchableOpacity
+                    key={i}
+                    onPress={() => setInput(q)}
+                    style={introStyles.suggestionBtn}
+                    activeOpacity={0.7}
+                  >
+                    <MaterialCommunityIcons name="lightbulb-on-outline" size={18} color="#40916C" />
+                    <Text style={introStyles.suggestionText}>{q}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
             </View>
           )}
-        </ScrollView>
-      )}
 
-      {/* Input Section */}
-      <View style={styles.inputRow}>
-        <TextInput
-          style={styles.input}
-          placeholder="Ask about crops, soil, or farming tips..."
-          placeholderTextColor="#888"
-          value={input}
-          onChangeText={setInput}
-          onSubmitEditing={sendMessage}
-          multiline
-        />
-        <TouchableOpacity
-          onPress={sendMessage}
-          style={[styles.sendBtn, !dataLoaded && { opacity: 0.5 }]}
-          disabled={loading || !dataLoaded}
-        >
-          <Ionicons name="send" size={20} color="white" />
-        </TouchableOpacity>
-      </View>
-    </KeyboardAvoidingView>
+          {/* MESSAGES */}
+          {messages.length > 0 && (
+            !dataLoaded ? (
+              <View style={styles.loadingContainer}>
+                <ActivityIndicator size="large" color="#2D6A4F" />
+                <Text style={styles.loadingText}>Loading crop database...</Text>
+              </View>
+            ) : (
+              <ScrollView
+                ref={scrollViewRef}
+                style={styles.messages}
+                contentContainerStyle={{ paddingVertical: 16, paddingHorizontal: 16 }}
+                showsVerticalScrollIndicator={false}
+              >
+                {messages.map((m, i) => (
+                  <View
+                    key={i}
+                    style={[
+                      styles.messageWrapper,
+                      m.role === "user" ? styles.userMessageWrapper : styles.botMessageWrapper,
+                    ]}
+                  >
+                    {m.role === "assistant" && (
+                      <View style={styles.botAvatar}>
+                        <MaterialCommunityIcons name="sprout" size={16} color="#FFFFFF" />
+                      </View>
+                    )}
+                    <View
+                      style={[
+                        styles.msg,
+                        m.role === "user" ? styles.userMsg : styles.botMsg,
+                      ]}
+                    >
+                      <Text style={[styles.msgText, m.role === "user" && styles.userMsgText]}>
+                        {m.text}
+                      </Text>
+                    </View>
+                    {m.role === "user" && <View style={{ width: 8 }} />}
+                  </View>
+                ))}
+                {loading && (
+                  <View style={styles.typingContainer}>
+                    <View style={styles.botAvatar}>
+                      <MaterialCommunityIcons name="sprout" size={16} color="#FFFFFF" />
+                    </View>
+                    <View style={styles.typingBubble}>
+                      <View style={styles.typingDots}>
+                        <View style={[styles.dot, styles.dot1]} />
+                        <View style={[styles.dot, styles.dot2]} />
+                        <View style={[styles.dot, styles.dot3]} />
+                      </View>
+                    </View>
+                  </View>
+                )}
+              </ScrollView>
+            )
+          )}
+
+          {/* INPUT */}
+          <View style={styles.inputWrapper}>
+            <View style={styles.inputRow}>
+              <TextInput
+                style={styles.input}
+                placeholder="Ask about crops, soil, or farming..."
+                placeholderTextColor="#95A5A6"
+                value={input}
+                onChangeText={setInput}
+                onSubmitEditing={sendMessage}
+                multiline
+                maxLength={500}
+              />
+              <TouchableOpacity
+                onPress={sendMessage}
+                style={[styles.sendBtn, (!dataLoaded || !input.trim()) && styles.sendBtnDisabled]}
+                disabled={loading || !dataLoaded || !input.trim()}
+                activeOpacity={0.8}
+              >
+                <Ionicons name="send" size={20} color="white" />
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          {/* SIDE PANEL */}
+          <Modal
+            animationType="slide"
+            transparent={true}
+            visible={sidePanelVisible}
+            onRequestClose={() => setSidePanelVisible(false)}
+          >
+            <View style={modalStyles.overlay}>
+              <TouchableOpacity
+                style={modalStyles.overlayTouchable}
+                activeOpacity={1}
+                onPress={() => setSidePanelVisible(false)}
+              />
+              <View style={modalStyles.sidePanel}>
+                <View style={modalStyles.panelHeader}>
+                  <View>
+                    <Text style={modalStyles.historyTitle}>Chat History</Text>
+                    <Text style={modalStyles.historySubtitle}>{chatHistory.length} conversations</Text>
+                  </View>
+                  <TouchableOpacity
+                    onPress={() => setSidePanelVisible(false)}
+                    style={modalStyles.closeBtn}
+                  >
+                    <Ionicons name="close" size={24} color="#2C3E50" />
+                  </TouchableOpacity>
+                </View>
+
+                <FlatList
+                  data={chatHistory}
+                  keyExtractor={(_, index) => index.toString()}
+                  renderItem={({ item, index }) => (
+                    <TouchableOpacity
+                      onLongPress={() => deleteChat(index)}
+                      onPress={() => reopenChat(item)}
+                      activeOpacity={0.7}
+                    >
+                      <View style={[
+                        modalStyles.historyCard,
+                        item.id === activeChatId && modalStyles.activeHistoryCard
+                      ]}>
+                        <View style={modalStyles.historyCardHeader}>
+                          <MaterialCommunityIcons
+                            name="message-text-outline"
+                            size={18}
+                            color={item.id === activeChatId ? "#2D6A4F" : "#7F8C8D"}
+                          />
+                          <Text style={modalStyles.historyDate}>{item.timestamp}</Text>
+                        </View>
+                        <Text style={[
+                          modalStyles.historyTitleText,
+                          item.id === activeChatId && modalStyles.activeHistoryTitle
+                        ]} numberOfLines={2}>
+                          {item.title}
+                        </Text>
+                        <Text style={modalStyles.messageCount}>
+                          {item.messages.length} messages
+                        </Text>
+                      </View>
+                    </TouchableOpacity>
+                  )}
+                  ListEmptyComponent={
+                    <View style={modalStyles.emptyState}>
+                      <MaterialCommunityIcons name="chat-outline" size={48} color="#BDC3C7" />
+                      <Text style={modalStyles.noHistory}>No conversations yet</Text>
+                      <Text style={modalStyles.noHistorySubtext}>Start chatting to see your history here</Text>
+                    </View>
+                  }
+                  showsVerticalScrollIndicator={false}
+                />
+              </View>
+            </View>
+          </Modal>
+        </KeyboardAvoidingView>
+      </SafeAreaView>
+    </>
   );
 }
 
 const styles = StyleSheet.create({
+  safeContainer: {
+    flex: 1,
+    backgroundColor: "#F8F9FA",
+  },
   container: {
     flex: 1,
-    backgroundColor: "#f5f5f0",
+    backgroundColor: "#F8F9FA",
   },
-  overlay: {
-    position: "absolute",
-    width: "100%",
-    height: "100%",
-    backgroundColor: "rgba(0,0,0,0.4)",
-    zIndex: 10,
-  },
-  sidePanel: {
-    position: "absolute",
-    left: 0,
-    top: 0,
-    bottom: 0,
-    width: width * 0.7,
-    backgroundColor: "#fff",
-    padding: 16,
-    zIndex: 20,
-    elevation: 5,
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+    backgroundColor: "#1c4722",
+    borderBottomLeftRadius: 24,
+    borderBottomRightRadius: 24,
     shadowColor: "#000",
-    shadowOpacity: 0.2,
-    shadowRadius: 5,
-  },
-  panelTitle: {
-    fontSize: 20,
-    fontWeight: "700",
-    color: "#2E7D32",
-  },
-  historyItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingVertical: 8,
-  },
-  historyText: {
-    marginLeft: 10,
-    color: "#333",
-  },
-  noHistory: {
-    marginTop: 20,
-    textAlign: "center",
-    color: "#777",
-  },
-  clearBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "#2E7D32",
-    padding: 10,
-    borderRadius: 20,
-    marginTop: 20,
-  },
-  clearBtnText: {
-    color: "#fff",
-    fontWeight: "600",
-    marginLeft: 6,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 8,
   },
   burgerBtn: {
-    marginRight: 10,
+    padding: 8,
+     marginTop: 20, 
   },
-header: {
+headerContent: {
   flexDirection: "row",
   alignItems: "center",
-  paddingTop: 20,
-  paddingHorizontal: 16,
-  paddingBottom: 12,
-  backgroundColor: "#1b5e20",
-  borderBottomWidth: 1,
-  borderColor: "#C8E6C9",
-  elevation: 3,
-},
-headerLeft: {
-  flexDirection: "row",
-  alignItems: "center",
-  gap: 8,
-  flex: 1,
+  gap: 10,
+  marginTop: 20, 
 },
 
   headerTitle: {
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: "700",
-    color: "#f5f5f0",
+    color: "#FFFFFF",
+    letterSpacing: 0.5,
   },
   loadingContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    gap: 16,
   },
   loadingText: {
-    marginTop: 10,
-    color: "#1c4722",
+    fontSize: 16,
+    color: "#7F8C8D",
+    fontWeight: "500",
   },
   messages: {
     flex: 1,
-    paddingHorizontal: 15,
+    backgroundColor: "#F8F9FA",
+  },
+  messageWrapper: {
+    flexDirection: "row",
+    marginBottom: 16,
+    alignItems: "flex-end",
+  },
+  userMessageWrapper: {
+    justifyContent: "flex-end",
+  },
+  botMessageWrapper: {
+    justifyContent: "flex-start",
+  },
+  botAvatar: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: "#1c4722",
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 8,
   },
   msg: {
-    flexDirection: "row",
-    padding: 12,
-    borderRadius: 14,
-    marginVertical: 6,
-    maxWidth: "85%",
-    alignItems: "center",
+    maxWidth: "75%",
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 20,
   },
   userMsg: {
-    alignSelf: "flex-end",
-    backgroundColor: "#4d7f39",
-    borderBottomRightRadius: 2,
+    backgroundColor: "#1c4722",
+    borderBottomRightRadius: 4,
+    shadowColor: "#1c4722",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
   },
   botMsg: {
-    alignSelf: "flex-start",
-    backgroundColor: "#fff",
-    borderWidth: 1,
-    borderColor: "#dfe6e0",
-    borderBottomLeftRadius: 2,
+    backgroundColor: "#FFFFFF",
+    borderBottomLeftRadius: 4,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 2,
   },
   msgText: {
-    color: "white",
     fontSize: 15,
-    lineHeight: 20,
+    lineHeight: 22,
+    color: "#2C3E50",
+  },
+  userMsgText: {
+    color: "#FFFFFF",
   },
   typingContainer: {
     flexDirection: "row",
-    alignItems: "center",
-    alignSelf: "flex-start",
-    paddingHorizontal: 15,
-    marginVertical: 6,
+    alignItems: "flex-end",
+    marginBottom: 16,
   },
-  typingText: {
-    color: "#4d7f39",
-    fontStyle: "italic",
-    marginLeft: 4,
+  typingBubble: {
+    backgroundColor: "#FFFFFF",
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 20,
+    borderBottomLeftRadius: 4,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 2,
+  },
+  typingDots: {
+    flexDirection: "row",
+    gap: 6,
+  },
+  dot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: "#95A5A6",
+  },
+  dot1: {},
+  dot2: {},
+  dot3: {},
+  inputWrapper: {
+    backgroundColor: "#FFFFFF",
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderTopWidth: 1,
+    borderTopColor: "#E8ECEF",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 8,
   },
   inputRow: {
     flexDirection: "row",
-    padding: 10,
-    backgroundColor: "#fff",
-    alignItems: "center",
-    borderTopWidth: 1,
-    borderTopColor: "#ddd",
+    alignItems: "flex-end",
+    gap: 12,
   },
   input: {
     flex: 1,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    backgroundColor: "#f0f0f0",
-    borderRadius: 20,
-    color: "#000",
+    backgroundColor: "#F8F9FA",
+    borderRadius: 24,
+    paddingHorizontal: 18,
+    paddingVertical: 12,
+    fontSize: 15,
+    color: "#2C3E50",
     maxHeight: 100,
+    borderWidth: 1,
+    borderColor: "#E8ECEF",
   },
   sendBtn: {
-    marginLeft: 8,
-    backgroundColor: "#2E7D32",
-    padding: 10,
-    borderRadius: 25,
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: "#1c4722",
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: "#1c4722",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  sendBtnDisabled: {
+    backgroundColor: "#BDC3C7",
+    shadowOpacity: 0,
+    elevation: 0,
+  },
+});
+
+const introStyles = StyleSheet.create({
+  container: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 24,
+    backgroundColor: "#F8F9FA",
+  },
+  iconContainer: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    backgroundColor: "#D8F3DC",
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 24,
+    shadowColor: "#1c4722",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 6,
+  },
+  title: {
+    fontSize: 32,
+    fontWeight: "800",
+    color: "#2D6A4F",
+    marginBottom: 12,
+    letterSpacing: 0.5,
+  },
+  subtitle: {
+    textAlign: "center",
+    color: "#7F8C8D",
+    fontSize: 16,
+    lineHeight: 24,
+    marginBottom: 40,
+    paddingHorizontal: 16,
+  },
+  suggestionContainer: {
+    width: "100%",
+  },
+  suggestionHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 16,
+    paddingHorizontal: 4,
+  },
+  suggestionTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#2C3E50",
+  },
+  refreshBtn: {
+    padding: 8,
+    borderRadius: 20,
+    backgroundColor: "#D8F3DC",
+  },
+  suggestionBtn: {
+    width: "100%",
+    backgroundColor: "#FFFFFF",
+    padding: 16,
+    borderRadius: 16,
+    marginBottom: 12,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: "#E8ECEF",
+  },
+  suggestionText: {
+    color: "#2C3E50",
+    fontSize: 14,
+    lineHeight: 20,
+    flex: 1,
+    fontWeight: "500",
+  },
+});
+
+const modalStyles = StyleSheet.create({
+  overlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    flexDirection: "row",
+    justifyContent: "flex-start",
+  },
+  overlayTouchable: {
+    flex: 1,
+  },
+  sidePanel: {
+    width: "80%",
+    backgroundColor: "#FFFFFF",
+    paddingTop: 60,
+    paddingHorizontal: 20,
+    paddingBottom: 20,
+    shadowColor: "#000",
+    shadowOffset: { width: 4, height: 0 },
+    shadowOpacity: 0.3,
+    shadowRadius: 12,
+    elevation: 16,
+  },
+  panelHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+    marginBottom: 24,
+    paddingBottom: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: "#E8ECEF",
+  },
+  historyTitle: {
+    fontSize: 24,
+    fontWeight: "800",
+    color: "#2C3E50",
+    marginBottom: 4,
+  },
+  historySubtitle: {
+    fontSize: 14,
+    color: "#7F8C8D",
+    fontWeight: "500",
+  },
+  closeBtn: {
+    padding: 4,
+  },
+  historyCard: {
+    marginBottom: 12,
+    padding: 16,
+    borderRadius: 16,
+    backgroundColor: "#F8F9FA",
+    borderWidth: 2,
+    borderColor: "transparent",
+  },
+  activeHistoryCard: {
+    backgroundColor: "#D8F3DC",
+    borderColor: "#2D6A4F",
+  },
+  historyCardHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginBottom: 8,
+  },
+  historyDate: {
+    fontSize: 12,
+    color: "#95A5A6",
+    fontWeight: "500",
+  },
+  historyTitleText: {
+    fontSize: 16,
+    color: "#2C3E50",
+    fontWeight: "600",
+    marginBottom: 6,
+    lineHeight: 22,
+  },
+  activeHistoryTitle: {
+    color: "#1c4722",
+  },
+  messageCount: {
+    fontSize: 12,
+    color: "#7F8C8D",
+    fontWeight: "500",
+  },
+  emptyState: {
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 60,
+  },
+  noHistory: {
+    textAlign: "center",
+    color: "#7F8C8D",
+    marginTop: 16,
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  noHistorySubtext: {
+    textAlign: "center",
+    color: "#95A5A6",
+    marginTop: 8,
+    fontSize: 14,
   },
 });

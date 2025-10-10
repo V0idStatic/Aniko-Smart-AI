@@ -4,6 +4,8 @@ export const diagnosePlant = async (
   imageUri: string
 ): Promise<{
   isHealthy: boolean;
+  isPlant: boolean;
+  message?: string;
   diseases: {
     id: string;
     name: string;
@@ -14,7 +16,6 @@ export const diagnosePlant = async (
   }[];
 }> => {
   const apiKey = "zB45Repg0x5h5w3sLlZP3IyCnyisgdhJRj9lyUOD1hyizNCMT0"; // Plant.id key
- 
 
   try {
     // Resize/compress image
@@ -31,18 +32,46 @@ export const diagnosePlant = async (
       type: "image/jpeg",
     } as any);
 
-    formData.append("health", "auto");
+    // 🟢 Step 1: Identify if it's a plant
+    const identifyResponse = await fetch("https://plant.id/api/v3/identification", {
+      method: "POST",
+      headers: {
+        "Api-Key": apiKey,
+      },
+      body: formData,
+    });
 
-    const response = await fetch(
-      "https://plant.id/api/v3/health_assessment",
-      {
-        method: "POST",
-        headers: {
-          "Api-Key": apiKey,
-        },
-        body: formData,
-      }
-    );
+    const identifyData = await identifyResponse.json();
+    console.log("Identify response:", JSON.stringify(identifyData, null, 2));
+
+    const isPlant = identifyData?.result?.is_plant?.binary ?? false;
+
+    if (!isPlant) {
+      // ❌ Not a plant — stop here
+      return {
+        isPlant: false,
+        isHealthy: false,
+        message: "This image does not appear to contain a plant. Please try again with a clear plant photo.",
+        diseases: [],
+      };
+    }
+
+    // 🟢 Step 2: Proceed with health diagnosis
+    const healthForm = new FormData();
+    healthForm.append("images", {
+      uri: manipulated.uri,
+      name: "plant.jpg",
+      type: "image/jpeg",
+    } as any);
+    healthForm.append("health", "auto");
+
+    const response = await fetch("https://plant.id/api/v3/health_assessment", {
+      method: "POST",
+      headers: {
+        "Api-Key": apiKey,
+      },
+      body: healthForm,
+    });
 
     const rawText = await response.text();
     const contentType = response.headers.get("content-type") || "";
@@ -53,24 +82,23 @@ export const diagnosePlant = async (
     }
 
     const data = JSON.parse(rawText);
-    console.log("Plant.id API response:", JSON.stringify(data, null, 2));
+    console.log("Plant.id Health API response:", JSON.stringify(data, null, 2));
 
-    // ✅ Only take the first disease
     const suggestions = data?.result?.disease?.suggestions ?? [];
     const firstSuggestion = suggestions.length > 0 ? suggestions[0] : null;
 
     if (!firstSuggestion) {
-      return { isHealthy: data?.result?.is_healthy?.binary ?? false, diseases: [] };
+      return { isPlant: true, isHealthy: data?.result?.is_healthy?.binary ?? false, diseases: [] };
     }
 
     const diseaseName = firstSuggestion.name || "Unknown disease";
 
-    // ✅ Call AI to enrich the disease info
+    // 🧠 Enrich disease info via OpenRouter AI
     const aiResp = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-      Authorization: `Bearer ${process.env.EXPO_PUBLIC_DIAGNOSIS_API_KEY}`,
+        Authorization: `Bearer ${process.env.EXPO_PUBLIC_DIAGNOSIS_API_KEY}`,
       },
       body: JSON.stringify({
         model: "openai/gpt-3.5-turbo",
@@ -81,11 +109,10 @@ export const diagnosePlant = async (
           },
           {
             role: "user",
-            content: `Give a short structured response about the plant disease "${diseaseName}". 
-                      Include:
+            content: `Give a short structured response about the plant disease "${diseaseName}". Include:
                       1. Description
                       2. Cause
-                      3. Treatment`,
+                      3. Treatment.`,
           },
         ],
       }),
@@ -100,14 +127,13 @@ export const diagnosePlant = async (
 
     if (aiData?.choices?.[0]?.message?.content) {
       const aiText = aiData.choices[0].message.content;
-
-      // Basic parsing (could be improved with regex/JSON format)
       description = aiText.match(/Description[:\-]?\s*(.*)/i)?.[1] || description;
       cause = aiText.match(/Cause[:\-]?\s*(.*)/i)?.[1] || cause;
       treatment = aiText.match(/Treatment[:\-]?\s*(.*)/i)?.[1] || treatment;
     }
 
     return {
+      isPlant: true,
       isHealthy: data?.result?.is_healthy?.binary ?? false,
       diseases: [
         {

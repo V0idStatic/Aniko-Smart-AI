@@ -11,7 +11,7 @@ import {
   FlatList,
   Alert,
 } from 'react-native';
-import { useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams, Stack } from 'expo-router'; 
 import { diagnosePlant } from './utils/PlantDiagnosis';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -96,58 +96,96 @@ export default function DiagnosisScreen() {
   };
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1, backgroundColor: '#f8faf9' }}>
+      {/* ✅ Hide default Expo Router header */}
+      <Stack.Screen options={{ headerShown: false }} />
+
       {/* Top Bar with Burger Menu */}
       <View style={styles.topBar}>
-        <TouchableOpacity onPress={() => setSidePanelVisible(true)}>
-          <MaterialCommunityIcons name="menu" size={28} color="#333" />
+        <TouchableOpacity 
+          onPress={() => setSidePanelVisible(true)}
+          style={styles.menuButton}
+        >
+          <MaterialCommunityIcons name="menu" size={26} color="#ffffff" />
         </TouchableOpacity>
+        
         <Text style={styles.topBarTitle}>Plant Diagnosis</Text>
+        <View style={{ width: 40 }} />
       </View>
 
       <ScrollView contentContainerStyle={styles.container}>
         {currentImage && (
-          <Image source={{ uri: currentImage }} style={styles.image} />
+          <View style={styles.imageContainer}>
+            <Image source={{ uri: currentImage }} style={styles.image} />
+          </View>
         )}
 
         {loading ? (
-          <ActivityIndicator size="large" color="#1c4722" />
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color="#1c4722" />
+            <Text style={styles.loadingText}>Analyzing plant health...</Text>
+          </View>
         ) : error ? (
-          <Text style={styles.error}>
-            <MaterialCommunityIcons name="alert-circle-outline" size={18} /> {error}
-          </Text>
+          <View style={styles.messageCard}>
+            <MaterialCommunityIcons name="alert-circle" size={48} color="#c62828" />
+            <Text style={styles.errorText}>{error}</Text>
+          </View>
         ) : diagnosis ? (
           diagnosis.isHealthy ? (
-            <Text style={styles.healthyMessage}>
-              <MaterialCommunityIcons name="leaf-circle-outline" size={18} /> This plant looks healthy! No issues detected.
-            </Text>
+            <View style={styles.healthyCard}>
+              <MaterialCommunityIcons name="check-circle" size={56} color="#1c4722" />
+              <Text style={styles.healthyTitle}>Plant is Healthy!</Text>
+              <Text style={styles.healthySubtitle}>No issues detected</Text>
+            </View>
           ) : diagnosis.diseases.length > 0 ? (
-            <View style={styles.resultBox}>
+            <View style={styles.resultsContainer}>
+              <View style={styles.resultsHeader}>
+                <MaterialCommunityIcons name="alert-circle-outline" size={24} color="#c62828" />
+                <Text style={styles.resultsTitle}>Issues Detected</Text>
+              </View>
+              
               {diagnosis.diseases.map((disease, index) => (
                 <View key={index} style={styles.diseaseCard}>
-                  <View style={styles.cardHeader}>
-                    <MaterialCommunityIcons name="virus-outline" size={20} color="#b00020" style={styles.cardIcon} />
+                  <View style={styles.diseaseHeader}>
+                    <View style={styles.diseaseIconContainer}>
+                      <MaterialCommunityIcons name="virus" size={24} color="#c62828" />
+                    </View>
                     <Text style={styles.diseaseName}>{disease.name}</Text>
                   </View>
-                  <Text style={styles.label}>
-                    <MaterialCommunityIcons name="text-box-outline" size={16} /> Description:
-                  </Text>
-                  <Text style={styles.body}>{disease.description}</Text>
-                  <Text style={styles.label}>
-                    <MaterialCommunityIcons name="alert-circle-outline" size={16} /> Cause:
-                  </Text>
-                  <Text style={styles.body}>{disease.cause}</Text>
-                  <Text style={styles.label}>
-                    <MaterialCommunityIcons name="medical-bag" size={16} /> Treatment:
-                  </Text>
-                  <Text style={styles.body}>{disease.treatment}</Text>
+                  
+                  <View style={styles.diseaseSection}>
+                    <View style={styles.sectionHeader}>
+                      <MaterialCommunityIcons name="information" size={18} color="#1c4722" />
+                      <Text style={styles.sectionTitle}>Description</Text>
+                    </View>
+                    <Text style={styles.sectionBody}>{disease.description}</Text>
+                  </View>
+
+                  <View style={styles.diseaseSection}>
+                    <View style={styles.sectionHeader}>
+                      <MaterialCommunityIcons name="alert-circle-outline" size={18} color="#1c4722" />
+                      <Text style={styles.sectionTitle}>Cause</Text>
+                    </View>
+                    <Text style={styles.sectionBody}>{disease.cause}</Text>
+                  </View>
+
+                  <View style={styles.diseaseSection}>
+                    <View style={styles.sectionHeader}>
+                      <MaterialCommunityIcons name="medical-bag" size={18} color="#1c4722" />
+                      <Text style={styles.sectionTitle}>Treatment</Text>
+                    </View>
+                    <Text style={styles.sectionBody}>{disease.treatment}</Text>
+                  </View>
                 </View>
               ))}
             </View>
           ) : (
-            <Text style={styles.warning}>
-              <MaterialCommunityIcons name="alert-decagram-outline" size={18} /> This plant appears unhealthy, but no specific disease was identified.
-            </Text>
+            <View style={styles.messageCard}>
+              <MaterialCommunityIcons name="image-off" size={48} color="#f57c00" />
+              <Text style={styles.warningText}>
+                This image does not appear to contain a plant. Please try again with a clear plant photo.
+              </Text>
+            </View>
           )
         ) : null}
       </ScrollView>
@@ -160,11 +198,22 @@ export default function DiagnosisScreen() {
         onRequestClose={() => setSidePanelVisible(false)}
       >
         <View style={styles.overlay}>
+          <TouchableOpacity 
+            style={styles.overlayTouchable} 
+            activeOpacity={1} 
+            onPress={() => setSidePanelVisible(false)}
+          />
           <View style={styles.sidePanel}>
-            <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
-              <Text style={styles.historyTitle}>Diagnosis History</Text>
-              <TouchableOpacity onPress={() => setSidePanelVisible(false)}>
-                <MaterialCommunityIcons name="close" size={24} color="#333" />
+            <View style={styles.sidePanelHeader}>
+              <View>
+                <Text style={styles.historyTitle}>History</Text>
+                <Text style={styles.historySubtitle}>Past diagnoses</Text>
+              </View>
+              <TouchableOpacity 
+                onPress={() => setSidePanelVisible(false)}
+                style={styles.closeButton}
+              >
+                <MaterialCommunityIcons name="close" size={24} color="#1c4722" />
               </TouchableOpacity>
             </View>
 
@@ -173,23 +222,53 @@ export default function DiagnosisScreen() {
               keyExtractor={(_, index) => index.toString()}
               renderItem={({ item, index }) => (
                 <TouchableOpacity
-                  onLongPress={() => deleteHistoryItem(index)} // 👈 long press delete
-                  onPress={() => loadHistoryItem(item)}        // 👈 tap to load history
+                  onLongPress={() => deleteHistoryItem(index)} 
+                  onPress={() => loadHistoryItem(item)}
+                  activeOpacity={0.7}
                 >
                   <View style={styles.historyCard}>
-                    <Text style={styles.historyDate}>{item.date}</Text>
+                    <View style={styles.historyCardHeader}>
+                      <MaterialCommunityIcons 
+                        name="clock-outline" 
+                        size={16} 
+                        color="#5f6368" 
+                      />
+                      <Text style={styles.historyDate}>{item.date}</Text>
+                    </View>
+                    
                     {item.result.isHealthy ? (
-                      <Text style={styles.historyHealthy}>Healthy</Text>
+                      <View style={styles.historyStatusContainer}>
+                        <View style={styles.healthyBadge}>
+                          <MaterialCommunityIcons name="check" size={14} color="#1c4722" />
+                          <Text style={styles.historyHealthy}>Healthy</Text>
+                        </View>
+                      </View>
                     ) : item.result.diseases.length > 0 ? (
-                      <Text style={styles.historyDiseased}>
-                        Diseases: {item.result.diseases.map((d: any) => d.name).join(', ')}
-                      </Text>
+                      <View style={styles.historyStatusContainer}>
+                        <View style={styles.diseasedBadge}>
+                          <MaterialCommunityIcons name="alert" size={14} color="#c62828" />
+                          <Text style={styles.historyDiseased}>
+                            {item.result.diseases.map((d: any) => d.name).join(', ')}
+                          </Text>
+                        </View>
+                      </View>
                     ) : (
-                      <Text style={styles.historyWarning}>Unhealthy (No disease identified)</Text>
+                      <View style={styles.historyStatusContainer}>
+                        <View style={styles.warningBadge}>
+                          <MaterialCommunityIcons name="help" size={14} color="#f57c00" />
+                          <Text style={styles.historyWarning}>Unhealthy</Text>
+                        </View>
+                      </View>
                     )}
                   </View>
                 </TouchableOpacity>
               )}
+              ListEmptyComponent={
+                <View style={styles.emptyHistory}>
+                  <MaterialCommunityIcons name="history" size={48} color="#c0c0c0" />
+                  <Text style={styles.emptyHistoryText}>No history yet</Text>
+                </View>
+              }
             />
           </View>
         </View>
@@ -202,134 +281,301 @@ const styles = StyleSheet.create({
   topBar: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 16,
-    backgroundColor: '#f1f1f1',
-    borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+    paddingTop: 48,
+    backgroundColor: '#1c4722',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 4,
+  },
+  menuButton: {
+    padding: 8,
+    borderRadius: 8,
   },
   topBarTitle: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: '700',
-    marginLeft: 12,
+    color: '#ffffff',
+    letterSpacing: 0.3,
   },
   container: {
-    padding: 24,
-    backgroundColor: '#f9f9f9',
+    padding: 20,
+    backgroundColor: '#f8faf9',
     flexGrow: 1,
+  },
+  imageContainer: {
+    marginBottom: 24,
+    borderRadius: 16,
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 6,
   },
   image: {
     width: '100%',
-    height: 280,
-    borderRadius: 12,
-    marginBottom: 24,
+    height: 300,
     resizeMode: 'cover',
+  },
+  loadingContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 60,
+  },
+  loadingText: {
+    marginTop: 16,
+    fontSize: 16,
+    color: '#5f6368',
+    fontWeight: '500',
+  },
+  messageCard: {
+    backgroundColor: '#ffffff',
+    padding: 32,
+    borderRadius: 16,
+    alignItems: 'center',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
     elevation: 3,
   },
-  resultBox: {
-    backgroundColor: '#fff',
-    padding: 20,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: '#e0e0e0',
-    marginBottom: 20,
+  errorText: {
+    fontSize: 16,
+    color: '#c62828',
+    textAlign: 'center',
+    marginTop: 16,
+    fontWeight: '600',
+    lineHeight: 24,
   },
-  diseaseCard: {
-    marginBottom: 24,
+  warningText: {
+    fontSize: 16,
+    color: '#f57c00',
+    textAlign: 'center',
+    marginTop: 16,
+    fontWeight: '500',
+    lineHeight: 24,
   },
-  cardHeader: {
+  healthyCard: {
+    backgroundColor: '#ffffff',
+    padding: 40,
+    borderRadius: 16,
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: '#1c4722',
+    shadowColor: '#1c4722',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  healthyTitle: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#1c4722',
+    marginTop: 16,
+    letterSpacing: 0.3,
+  },
+  healthySubtitle: {
+    fontSize: 16,
+    color: '#5f6368',
+    marginTop: 8,
+    fontWeight: '500',
+  },
+  resultsContainer: {
+    gap: 16,
+  },
+  resultsHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 10,
+    gap: 12,
+    marginBottom: 8,
   },
-  cardIcon: {
-    marginRight: 8,
+  resultsTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#202124',
+    letterSpacing: 0.3,
+  },
+  diseaseCard: {
+    backgroundColor: '#ffffff',
+    padding: 20,
+    borderRadius: 16,
+    borderLeftWidth: 4,
+    borderLeftColor: '#c62828',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 3,
+    marginBottom: 16,
+  },
+  diseaseHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 20,
+    gap: 12,
+  },
+  diseaseIconContainer: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: '#ffebee',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   diseaseName: {
     fontSize: 20,
     fontWeight: '700',
-    color: '#b00020',
+    color: '#c62828',
+    flex: 1,
+    letterSpacing: 0.2,
   },
-  label: {
+  diseaseSection: {
+    marginBottom: 16,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 8,
+  },
+  sectionTitle: {
     fontSize: 15,
-    fontWeight: '600',
-    marginTop: 10,
+    fontWeight: '700',
     color: '#1c4722',
+    letterSpacing: 0.3,
   },
-  body: {
-    fontSize: 14,
-    color: '#333',
-    lineHeight: 20,
-  },
-  healthyMessage: {
-    fontSize: 17,
-    color: '#2e7d32',
-    textAlign: 'center',
-    marginVertical: 20,
-    fontWeight: '600',
-  },
-  warning: {
-    fontSize: 16,
-    color: '#d32f2f',
-    textAlign: 'center',
-    marginVertical: 20,
-    fontWeight: '500',
-  },
-  error: {
-    fontSize: 16,
-    color: '#d32f2f',
-    textAlign: 'center',
-    marginVertical: 20,
-    fontWeight: '500',
+  sectionBody: {
+    fontSize: 15,
+    color: '#3c4043',
+    lineHeight: 22,
+    paddingLeft: 26,
   },
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.4)',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
     flexDirection: 'row',
     justifyContent: 'flex-start',
   },
+  overlayTouchable: {
+    flex: 1,
+  },
   sidePanel: {
-    width: '75%',
-    backgroundColor: '#fff',
-    padding: 20,
+    width: '80%',
+    backgroundColor: '#ffffff',
+    paddingTop: 48,
+    paddingHorizontal: 20,
+    paddingBottom: 20,
     shadowColor: '#000',
-    shadowOffset: { width: 2, height: 0 },
-    shadowOpacity: 0.3,
-    shadowRadius: 5,
-    elevation: 5,
+    shadowOffset: { width: -2, height: 0 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  sidePanelHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 24,
+    paddingBottom: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e8eaed',
   },
   historyTitle: {
-    fontSize: 18,
+    fontSize: 24,
     fontWeight: '700',
-    marginBottom: 16,
+    color: '#1c4722',
+    letterSpacing: 0.3,
+  },
+  historySubtitle: {
+    fontSize: 14,
+    color: '#5f6368',
+    marginTop: 4,
+  },
+  closeButton: {
+    padding: 4,
   },
   historyCard: {
-    marginBottom: 14,
-    padding: 12,
-    borderRadius: 8,
-    backgroundColor: '#f5f5f5',
+    marginBottom: 12,
+    padding: 16,
+    borderRadius: 12,
+    backgroundColor: '#f8faf9',
+    borderWidth: 1,
+    borderColor: '#e8eaed',
+  },
+  historyCardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginBottom: 10,
   },
   historyDate: {
     fontSize: 13,
-    color: '#666',
-    marginBottom: 4,
+    color: '#5f6368',
+    fontWeight: '500',
+  },
+  historyStatusContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+  },
+  healthyBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: '#e8f5e9',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
   },
   historyHealthy: {
-    fontSize: 15,
-    color: '#2e7d32',
+    fontSize: 14,
+    color: '#1c4722',
     fontWeight: '600',
+  },
+  diseasedBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: '#ffebee',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    flex: 1,
   },
   historyDiseased: {
-    fontSize: 15,
-    color: '#b00020',
+    fontSize: 14,
+    color: '#c62828',
     fontWeight: '600',
+    flex: 1,
+  },
+  warningBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: '#fff3e0',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
   },
   historyWarning: {
-    fontSize: 15,
-    color: '#d32f2f',
+    fontSize: 14,
+    color: '#f57c00',
     fontWeight: '600',
+  },
+  emptyHistory: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 60,
+  },
+  emptyHistoryText: {
+    fontSize: 16,
+    color: '#9aa0a6',
+    marginTop: 12,
+    fontWeight: '500',
   },
 });
