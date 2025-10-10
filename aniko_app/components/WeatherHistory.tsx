@@ -1,247 +1,153 @@
-import React, { useState } from "react";
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  Modal,
-} from "react-native";
+import { View, Text, StyleSheet, ScrollView } from "react-native"
+import { Ionicons } from "@expo/vector-icons"
 
-// Types
-interface WeatherDay {
-  day: string;
-  color: string;
-  status: string;
-  temp: string | number;
-  humidity: string | number;
+interface DayWeatherData {
+  day: string
+  status: string
+  temp: string
+  humidity: string
+  color: string
 }
 
 interface WeatherHistoryProps {
-  weeklyWeather: WeatherDay[];
+  weeklyWeather: DayWeatherData[]
 }
 
-// ---- Legend Item ----
-const LegendItem = ({ label, color }: { label: string; color: string }) => (
-  <View style={styles.legendItem}>
-    <View style={[styles.legendColor, { backgroundColor: color }]} />
-    <Text style={styles.legendText}>{label}</Text>
-  </View>
-);
-
-// ---- Day Item ----
-const DayItem = ({
-  item,
-  onPress,
-}: {
-  item: WeatherDay;
-  onPress: () => void;
-}) => (
-  <TouchableOpacity
-    style={styles.historyDayWrapper}
-    onPress={onPress}
-    activeOpacity={0.8}
-  >
-    <View style={[styles.dayBox, { backgroundColor: item.color }]}>
-      <Text style={styles.historyDayText}>{item.day}</Text>
-    </View>
-  </TouchableOpacity>
-);
-
-// ---- Main Component ----
-const WeatherHistory: React.FC<WeatherHistoryProps> = ({ weeklyWeather }) => {
-  const [selectedDay, setSelectedDay] = useState<WeatherDay | null>(null);
-  const [showDayModal, setShowDayModal] = useState(false);
-
-  const legendLabels = [
-    { label: "Very Good", color: "#4CAF50" },
-    { label: "Good", color: "#8BC34A" },
-    { label: "Warning", color: "#FFC107" },
-    { label: "Bad", color: "#F44336" },
-  ];
+export default function WeatherHistory({ weeklyWeather }: WeatherHistoryProps) {
+  const getWeatherIcon = (status: string) => {
+    const statusLower = status.toLowerCase()
+    if (statusLower.includes("rain")) return "rainy"
+    if (statusLower.includes("hot")) return "sunny"
+    if (statusLower.includes("fair")) return "partly-sunny"
+    if (statusLower.includes("cloud")) return "cloudy"
+    return "partly-sunny"
+  }
 
   return (
-    <View style={styles.historyCard}>
-      {/* Header */}
-      <View style={styles.historyHeader}>
-        <View style={styles.historyHeaderRow}>
-          <Text style={styles.historyTitle}>Weather History: This Week</Text>
-          <View style={styles.legendRow}>
-            {legendLabels.map((l, i) => (
-              <LegendItem key={i} label={l.label} color={l.color} />
-            ))}
-          </View>
-        </View>
+    <View style={styles.container}>
+      <View style={styles.header}>
+        <Text style={styles.title}>7-Day Weather Forecast</Text>
+        <Ionicons name="calendar-outline" size={20} color="#2E7D32" />
       </View>
 
-      {/* Days */}
-      <View style={styles.historyRow}>
-        {weeklyWeather.map((item, i) => (
-          <DayItem
-            key={i}
-            item={item}
-            onPress={() => {
-              setSelectedDay(item);
-              setShowDayModal(true);
-            }}
-          />
-        ))}
-      </View>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+        {weeklyWeather.map((day, index) => (
+          <View key={index} style={styles.dayCard}>
+            <View style={styles.dayHeader}>
+              <Text style={styles.dayName}>{day.day}</Text>
+            </View>
 
-      {/* Day Analysis Modal */}
-      <Modal visible={showDayModal} transparent animationType="fade">
-        <View style={styles.locationModalOverlay}>
-          <View style={styles.locationModalContainer}>
-            <Text style={styles.locationModalTitle}>
-              {selectedDay ? `${selectedDay.day} — Analysis` : "Day Analysis"}
-            </Text>
+            <View style={[styles.iconContainer, { backgroundColor: `${day.color}15` }]}>
+              <Ionicons name={getWeatherIcon(day.status)} size={32} color={day.color} />
+            </View>
 
-            {selectedDay && (
-              <View>
-                <View style={styles.statusRow}>
-                  <View
-                    style={[
-                      styles.legendColor,
-                      { backgroundColor: selectedDay.color },
-                    ]}
-                  />
-                  <Text style={styles.statusText}>{selectedDay.status}</Text>
-                </View>
+            <View style={styles.dayInfo}>
+              <Text style={styles.temperature}>{day.temp}</Text>
+              <Text style={styles.status}>{day.status}</Text>
 
-                <View style={styles.detailSection}>
-                  <Text style={styles.detailText}>
-                    Temperature (max): {selectedDay.temp}
-                  </Text>
-                  <Text style={styles.detailText}>
-                    Humidity (avg): {selectedDay.humidity}
-                  </Text>
-                </View>
+              <View style={styles.humidityRow}>
+                <Ionicons name="water" size={14} color="#6B7280" />
+                <Text style={styles.humidity}>{day.humidity}</Text>
               </View>
-            )}
+            </View>
 
-            <TouchableOpacity
-              style={[styles.closeModalBtn, { marginTop: 16 }]}
-              onPress={() => setShowDayModal(false)}
-            >
-              <Text style={styles.closeModalText}>Close</Text>
-            </TouchableOpacity>
+            <View style={[styles.statusIndicator, { backgroundColor: day.color }]} />
           </View>
-        </View>
-      </Modal>
+        ))}
+      </ScrollView>
     </View>
-  );
-};
+  )
+}
 
-export default WeatherHistory;
-
-//
-// ---- Styles ----
-//
 const styles = StyleSheet.create({
-  historyCard: {
-    marginTop: 15,
-    backgroundColor: "#1c4722",
+  container: {
+    backgroundColor: "#fff",
     borderRadius: 20,
-    padding: 15,
-  },
-  historyHeaderRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: 10,
-  },
-  historyHeader: {
-    marginBottom: 4,
-  },
-  legendRow: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  legendItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginLeft: 8,
-  },
-  legendColor: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    marginRight: 4,
-  },
-  historyTitle: {
-    color: "white",
-    fontWeight: "bold",
-    fontSize: 10,
-  },
-  legendText: {
-    color: "white",
-    fontSize: 8,
-  },
-  historyRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    flexWrap: "wrap",
-    marginTop: 10,
-  },
-  historyDayWrapper: {
-    flexBasis: "13%",
-    marginBottom: 8,
-  },
-  dayBox: {
-    width: 45,
-    height: 45,
-    borderRadius: 10,
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 5,
-  },
-  historyDayText: {
-    color: "white",
-    fontWeight: "bold",
-  },
-  // ---- Modal ----
-  locationModalOverlay: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.4)",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  locationModalContainer: {
-    backgroundColor: "white",
-    borderRadius: 16,
     padding: 20,
-    width: "80%",
+    marginBottom: 24,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    elevation: 3,
   },
-  locationModalTitle: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: "#1c4722",
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: "700",
+    color: "#1A1A1A",
+  },
+  scrollContent: {
+    gap: 12,
+    paddingRight: 8,
+  },
+  dayCard: {
+    width: 120,
+    backgroundColor: "#F9FAFB",
+    borderRadius: 16,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
+    position: "relative",
+    overflow: "hidden",
+  },
+  dayHeader: {
     marginBottom: 12,
+  },
+  dayName: {
+    fontSize: 15,
+    fontWeight: "700",
+    color: "#1A1A1A",
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+  },
+  iconContainer: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    justifyContent: "center",
+    alignItems: "center",
+    alignSelf: "center",
+    marginBottom: 12,
+  },
+  dayInfo: {
+    alignItems: "center",
+    gap: 6,
+  },
+  temperature: {
+    fontSize: 22,
+    fontWeight: "800",
+    color: "#1A1A1A",
+  },
+  status: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: "#6B7280",
     textAlign: "center",
   },
-  statusRow: {
+  humidityRow: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 10,
+    gap: 4,
+    marginTop: 4,
   },
-  statusText: {
-    color: "#2e4d2f",
+  humidity: {
+    fontSize: 12,
     fontWeight: "600",
+    color: "#6B7280",
   },
-  detailSection: {
-    paddingVertical: 6,
+  statusIndicator: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: 4,
+    borderBottomLeftRadius: 16,
+    borderBottomRightRadius: 16,
   },
-  detailText: {
-    color: "#1c4722",
-    marginBottom: 4,
-  },
-  closeModalBtn: {
-    backgroundColor: "#1c4722",
-    paddingVertical: 8,
-    borderRadius: 10,
-  },
-  closeModalText: {
-    color: "white",
-    textAlign: "center",
-    fontWeight: "bold",
-  },
-});
+})

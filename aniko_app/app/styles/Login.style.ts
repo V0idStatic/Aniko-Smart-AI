@@ -1,217 +1,228 @@
-import { StyleSheet, Dimensions } from "react-native";
+import { StyleSheet } from "react-native"
 
-const { width, height } = Dimensions.get("window");
-
-// Responsive multipliers
-const wp = (percentage: number) => (width * percentage) / 100;
-const hp = (percentage: number) => (height * percentage) / 100;
-
-const styles = StyleSheet.create({
+export default StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#D9C6A5",
-    alignItems: "center",
-    justifyContent: "flex-start",
-    position: "relative",
-  },
-
-  arc: {
-    position: "absolute",
-    bottom: 0,
-    width: "100%",
-    height: hp(70), 
-    backgroundColor: "#EDE1CF",
-    borderTopLeftRadius: wp(60), 
-    borderTopRightRadius: wp(60),
-    alignItems: "center",
-    paddingTop: hp(4),
-  },
-
-  logo: {
-    height: hp(10),
-    width: hp(10),
-    resizeMode: "contain",
-    marginBottom: hp(2),
-    marginTop: hp(2),
-  },
-
-  title: {
-    fontWeight: "bold",
-    fontSize: wp(4.5),
-    color: "#4D2D18",
-    marginBottom: hp(4),
-    fontFamily: "Zalando",
-    textAlign: "center",
-  },
-
-  inputGroup: {
-    width: "90%",
-    marginBottom: hp(2),
-  },
-
-  label: {
-    color: "#4C4B2C",
-    fontWeight: "bold",
-    marginBottom: hp(0.6),
-    fontSize: wp(3.8),
-  },
-
-  input: {
-    paddingHorizontal: wp(4),
-    borderRadius: wp(6),
-    borderWidth: 1,
-    borderColor: "#756C65",
-    color: "black",
-    backgroundColor: "#f2e8d5",
-    fontSize: wp(4),
-    paddingVertical: hp(1.5),
-  },
-
-  passwordContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#f2e8d5",
-    borderRadius: wp(6),
-    paddingHorizontal: wp(4),
-    borderWidth: 1,
-    borderColor: "#756C65",
-    width: "100%",
-  },
-
-  passwordInput: {
-    flex: 1,
-    fontSize: wp(4),
-    color: "#333",
-    paddingVertical: hp(1.5),
-  },
-
-  eyeIcon: {
-    padding: wp(2),
+    backgroundColor: "#f8f9fa",
     justifyContent: "center",
     alignItems: "center",
-    marginLeft: wp(1),
+    padding: 20,
   },
 
-  loginButton: {
-    backgroundColor: "#4C6444",
-    width: "90%",
-    paddingVertical: hp(1.8),
-    borderRadius: wp(6),
+  // Status Bar Styles
+  statusBar: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    flexDirection: "row",
     alignItems: "center",
-    marginTop: hp(2),
-    marginBottom: hp(1.2),
+    justifyContent: "center",
+    paddingVertical: 12,
+    paddingTop: 50,
+    zIndex: 10,
+  },
+  statusConnecting: {
+    backgroundColor: "#fbbf24",
+  },
+  statusConnected: {
+    backgroundColor: "#10b981",
+  },
+  statusOffline: {
+    backgroundColor: "#ef4444",
+  },
+  statusDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    marginRight: 8,
+  },
+  dotConnecting: {
+    backgroundColor: "#fff",
+  },
+  dotConnected: {
+    backgroundColor: "#fff",
+  },
+  dotOffline: {
+    backgroundColor: "#fff",
+  },
+  statusText: {
+    color: "#fff",
+    fontSize: 13,
+    fontWeight: "600",
+    letterSpacing: 0.3,
   },
 
+  // Content Card
+  contentCard: {
+    width: "100%",
+    maxWidth: 400,
+    backgroundColor: "#fff",
+    borderRadius: 24,
+    padding: 32,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 5,
+  },
+
+  // Logo
+  logoContainer: {
+    alignItems: "center",
+    marginBottom: 24,
+  },
+  logo: {
+    width: 80,
+    height: 80,
+    resizeMode: "contain",
+  },
+
+  // Title
+  title: {
+    fontSize: 28,
+    fontWeight: "700",
+    color: "#1f2937",
+    textAlign: "center",
+    marginBottom: 8,
+    letterSpacing: -0.5,
+  },
+  subtitle: {
+    fontSize: 15,
+    color: "#6b7280",
+    textAlign: "center",
+    marginBottom: 32,
+    letterSpacing: 0.2,
+  },
+
+  // Input Group
+  inputGroup: {
+    marginBottom: 20,
+  },
+  label: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#374151",
+    marginBottom: 8,
+    letterSpacing: 0.2,
+  },
+  inputContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#f9fafb",
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#e5e7eb",
+    paddingHorizontal: 16,
+    height: 52,
+  },
+  inputIcon: {
+    marginRight: 12,
+  },
+  input: {
+    flex: 1,
+    fontSize: 15,
+    color: "#1f2937",
+    height: "100%",
+  },
+  eyeIcon: {
+    padding: 4,
+  },
+
+  // Error
+  errorContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#fef2f2",
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 16,
+    gap: 8,
+  },
+  errorText: {
+    flex: 1,
+    fontSize: 13,
+    color: "#ef4444",
+    fontWeight: "500",
+  },
+
+  // Login Button
+  loginButton: {
+    backgroundColor: "#10b981",
+    borderRadius: 12,
+    paddingVertical: 16,
+    alignItems: "center",
+    marginTop: 8,
+    shadowColor: "#10b981",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
+  },
   disabledButton: {
-    opacity: 0.5,
+    backgroundColor: "#d1d5db",
+    shadowOpacity: 0,
   },
-
   loginText: {
     color: "#fff",
-    fontSize: wp(4),
+    fontSize: 16,
+    fontWeight: "700",
+    letterSpacing: 0.5,
+  },
+
+  // Sign-up
+  signupContainer: {
+    marginTop: 20,
+    alignItems: "center",
+  },
+  signupText: {
+    fontSize: 14,
+    color: "#6b7280",
+  },
+  signupLink: {
+    color: "#10b981",
     fontWeight: "600",
   },
 
-  signupText: {
-    color: "#6A7D4F",
-    marginBottom: hp(2),
-    textAlign: "center",
-    fontSize: wp(3.6),
-  },
-
+  // Divider
   dividerContainer: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: hp(2.5),
-    width: "85%",
+    marginVertical: 24,
   },
-
   divider: {
     flex: 1,
     height: 1,
-    backgroundColor: "#756C65",
+    backgroundColor: "#e5e7eb",
   },
-
   orText: {
-    marginHorizontal: wp(2),
-    color: "#756C65",
-    fontWeight: "500",
-    fontSize: wp(3.6),
+    marginHorizontal: 16,
+    fontSize: 13,
+    color: "#9ca3af",
+    fontWeight: "600",
+    letterSpacing: 0.5,
   },
 
-  errorText: {
-    color: "red",
-    marginBottom: hp(1.5),
-    textAlign: "center",
-    fontSize: wp(3.6),
-  },
-
+  // Google Button
   googleButton: {
     flexDirection: "row",
     alignItems: "center",
-    borderColor: "#5D3B2F",
-    borderWidth: 1,
-    borderRadius: wp(6),
-    paddingVertical: hp(1.4),
-    width: "90%",
     justifyContent: "center",
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    paddingVertical: 14,
+    borderWidth: 1.5,
+    borderColor: "#e5e7eb",
   },
-
   googleIcon: {
-    width: wp(5),
-    height: wp(5),
-    marginRight: wp(2),
+    width: 20,
+    height: 20,
+    marginRight: 12,
   },
-
   googleText: {
-    color: "#5D3B2F",
-    fontWeight: "500",
-    fontSize: wp(3.8),
-  },
-
-  statusBar: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingVertical: hp(0.8),
-    paddingHorizontal: wp(4),
-    borderRadius: wp(6),
-    alignSelf: "center",
-    minWidth: wp(50),
-    justifyContent: "center",
-  },
-
-  statusDot: {
-    width: wp(2.5),
-    height: wp(2.5),
-    borderRadius: wp(1.2),
-    marginRight: wp(2),
-  },
-
-  statusText: {
-    color: "#fff",
-    fontSize: wp(3.4),
+    fontSize: 15,
+    color: "#374151",
     fontWeight: "600",
+    letterSpacing: 0.3,
   },
-
-  // Color Variants
-  statusConnecting: {
-    backgroundColor: "#FFA500",
-  },
-  statusConnected: {
-    backgroundColor: "#4CAF50",
-  },
-  statusOffline: {
-    backgroundColor: "#F44336",
-  },
-  dotConnecting: {
-    backgroundColor: "#FFD700",
-  },
-  dotConnected: {
-    backgroundColor: "#8BC34A",
-  },
-  dotOffline: {
-    backgroundColor: "#EF5350",
-  },
-});
-
-export default styles;
+})
