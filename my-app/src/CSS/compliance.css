@@ -317,48 +317,6 @@ html, body {
   font-family: "Lexend" !important;
 }
 
-@media (max-width: 992px) {
-  .contact-wrapper {
-    grid-template-columns: 1fr;
-    gap: 0;
-  }
-  
-  .contact-info-section {
-    clip-path: none;
-    padding: 40px 30px;
-    border-top-right-radius: 20px !important;
-  }
-  
-  .contact-form-section {
-    margin-left: 0;
-    padding: 40px 30px;
-    border-top-left-radius: 20px;
-  }
-  
-  .section-title h2 {
-    font-size: 2.5rem;
-  }
-}
-
-@media (max-width: 768px) {
-  .contact-section {
-    padding: 60px 0;
-  }
-  
-  .section-title {
-    margin-bottom: 50px;
-  }
-  
-  .section-title h2 {
-    font-size: 2rem;
-  }
-  
-  .contact-info-section,
-  .contact-form-section {
-    padding: 30px 20px;
-  }
-} 
-
 .ok-btn:hover {
   background-color: var(--primary-green) !important;
   border: 2px solid var(--dark-green) !important;
@@ -423,3 +381,45 @@ html, body {
   font-family: "Lexend" !important;
 }
 
+/* ========== RESPONSIVENESS ============ */
+@media (max-width: 992px) {
+  .contact-wrapper {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+  
+  .contact-info-section {
+    clip-path: none;
+    padding: 40px 30px;
+    border-top-right-radius: 20px !important;
+  }
+  
+  .contact-form-section {
+    margin-left: 0;
+    padding: 40px 30px;
+    border-top-left-radius: 20px;
+  }
+  
+  .section-title h2 {
+    font-size: 2.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .contact-section {
+    padding: 60px 0;
+  }
+  
+  .section-title {
+    margin-bottom: 50px;
+  }
+  
+  .section-title h2 {
+    font-size: 2rem;
+  }
+  
+  .contact-info-section,
+  .contact-form-section {
+    padding: 30px 20px;
+  }
+} 
