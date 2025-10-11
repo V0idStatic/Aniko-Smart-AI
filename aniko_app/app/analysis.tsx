@@ -77,7 +77,7 @@ interface CropDatabase {
 
 export default function Analysis() {
   const router = useRouter()
-  const { selectedCrop, selectedLocation } = useAppContext()
+  const { selectedLocation } = useAppContext()
   const [user, setUser] = useState<any>(null)
 
   // Tab selection state
@@ -114,10 +114,12 @@ export default function Analysis() {
 
   // Initialize with selected plant if available
   useEffect(() => {
-    if (selectedCrop?.crop_name) {
-      setSelectedPlant(selectedCrop.crop_name)
-    }
-  }, [selectedCrop])
+    // Note: `selectedCrop` was removed from useAppContext, so this needs adjustment if `selectedCrop` is intended to be used.
+    // For now, assuming it's no longer relevant or needs to be passed differently.
+    // if (selectedCrop?.crop_name) {
+    //   setSelectedPlant(selectedCrop.crop_name)
+    // }
+  }, []) // Removed `selectedCrop` dependency
 
   // Get current user
   useEffect(() => {
@@ -1505,6 +1507,13 @@ export default function Analysis() {
   useEffect(() => {
     setSelectedStatus("all")
   }, [selectedCategory])
+
+  // This ensures the list refreshes when clicking status filters
+  useEffect(() => {
+    if (selectedPlantDetail) {
+      setSelectedPlantDetail(null)
+    }
+  }, [selectedStatus])
 
   return (
     <View style={styles.container}>

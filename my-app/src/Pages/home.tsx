@@ -17,7 +17,7 @@ import ListFeatures from "../INCLUDE/mobile-features";
 import BenefitsSlider from "../INCLUDE/mobile-benefits";
 import Chatbox from "./Chatbox"; // adjust path as needed
 
-
+ // YENYEN GUARIN
 import { auth } from "../firebase";
 import { onAuthStateChanged, User } from "firebase/auth";
 
