@@ -1835,11 +1835,33 @@ html {
     display: block !important;
   }
 
+  .team-img { 
+    height: 150px !important;
+  }
+
+  .team-overlay {
+    width: 80% !important;
+    max-width: 80% !important; 
+    padding: 5px !important;
+  }
+
+  .team-overlay h3 {
+    font-size: 14px !important;
+    margin-top: 1rem !important; 
+  }
+
+  .team-overlay .lead {
+    font-size: 8px !important;
+  }
+
   .desktop-team-section {
     display: none !important;
   }
 
-  .team-mobile-section {
+  .team-mobile-section,
+  .mobile-team-section {
     display: block !important;
+    position: relative !important;
+    z-index: 1000 !important;
   }
 }
