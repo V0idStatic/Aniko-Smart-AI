@@ -2,12 +2,13 @@
 
 import { useEffect, useState } from "react"
 import supabase from "./CONFIG/supaBase"
-import { View, Text, TextInput, TouchableOpacity, Image } from "react-native"
+import { View, Text, TextInput, TouchableOpacity, Image, Alert } from "react-native"
 import { useRouter } from "expo-router"
 import { StatusBar } from "expo-status-bar"
 import { Stack } from "expo-router"
 import styles from "./styles/Login.style"
 import { Ionicons } from "@expo/vector-icons"
+import * as Crypto from 'expo-crypto' // ← ADD THIS IMPORT
 
 export default function Login() {
   const [username, setUsername] = useState("")
@@ -15,9 +16,22 @@ export default function Login() {
   const [error, setError] = useState("")
   const [isDatabaseConnected, setIsDatabaseConnected] = useState<boolean | null>(null)
   const [showPassword, setShowPassword] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
 
   const { setCurrentUser } = require("./CONFIG/currentUser")
+
+  // ==========================================
+  // PASSWORD HASHING FUNCTION (ADD THIS)
+  // ==========================================
+  const hashPassword = async (password: string): Promise<string> => {
+    const salt = 'ANIKO_SALT_2024' // MUST MATCH signup.tsx!
+    const digest = await Crypto.digestStringAsync(
+      Crypto.CryptoDigestAlgorithm.SHA256,
+      password + salt
+    )
+    return digest
+  }
 
   // Test database connection
   const testDatabaseConnection = async () => {
@@ -36,69 +50,92 @@ export default function Login() {
     }
   }
 
-  // Handle login logic
+  // ==========================================
+  // UPDATED LOGIN HANDLER
+  // ==========================================
   const handleLogin = async () => {
     try {
-      const searchUsername = username.trim()
-
-      if (!searchUsername) {
-        setError("Please enter your username.")
-        return
-      }
-
-      if (!password) {
-        setError("Please enter your password.")
-        return
-      }
-
+      setIsLoading(true)
       setError("")
-      console.log("Searching for username:", searchUsername)
 
-      const { data, error } = await supabase
-        .from("users")
-        .select("*")
-        .ilike("username", searchUsername)
-        .eq("password_hash", password)
-        .limit(1)
-
-      if (error) {
-        setError("Database error: " + error.message)
-        console.error("Login Error:", error)
+      if (!username || !password) {
+        setError("Please enter both username and password")
+        setIsLoading(false)
         return
       }
 
-      if (!data || data.length === 0) {
-        setError("Username or password incorrect. Please try again.")
+      console.log("🔍 Looking up username in public.users...")
+
+      // ==========================================
+      // FIND USER BY USERNAME IN PUBLIC.USERS TABLE
+      // ==========================================
+      const { data: userData, error: userError } = await supabase
+        .from('users')
+        .select('email, auth_id, username')
+        .ilike('username', username.trim())
+        .single()
+
+      if (userError || !userData) {
+        setError("Invalid username or password")
+        setIsLoading(false)
         return
       }
 
-      const user = data[0]
-      console.log("User logged in:", user)
+      console.log("✅ User found:", userData.username)
 
-      const newLastLogin = new Date().toISOString()
-      const { error: updateError } = await supabase.from("users").update({ last_login: newLastLogin }).eq("id", user.id)
+      // ==========================================
+      // LOGIN WITH EMAIL & PASSWORD
+      // ==========================================
+      const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+        email: userData.email,
+        password: password,
+      })
 
-      if (updateError) {
-        console.error("Error updating last login:", updateError)
-      } else {
-        console.log("Last login updated successfully")
-
-        try {
-          const numericId = Number.parseInt(user.id, 10)
-          if (!Number.isNaN(numericId)) {
-            setCurrentUser({
-              id: numericId,
-              username: user.username,
-              last_login: newLastLogin,
-            })
-          }
-        } catch {}
-
-        router.push("/OnBoardingScreen")
+      if (authError) {
+        console.error("❌ Login error:", authError)
+        
+        if (authError.message.includes("Email not confirmed")) {
+          Alert.alert(
+            "Email Not Verified ✉️",
+            `Please verify your email first.\n\nEmail sent to: ${userData.email}`,
+            [
+              {
+                text: "Resend Email",
+                onPress: async () => {
+                  const { error } = await supabase.auth.resend({
+                    type: 'signup',
+                    email: userData.email,
+                  })
+                  if (!error) {
+                    Alert.alert("Success", "Verification email sent!")
+                  }
+                }
+              },
+              { text: "OK" }
+            ]
+          )
+        } else {
+          setError("Invalid username or password")
+        }
+        setIsLoading(false)
+        return
       }
+
+      console.log("✅ Login successful!")
+
+      // Set user session
+      setCurrentUser({
+        id: authData.user.id,
+        username: userData.username,
+        email: userData.email,
+      })
+
+      router.push("/OnBoardingScreen")
+
     } catch (err) {
-      console.error("Unexpected Error:", err)
-      setError("An unexpected error occurred.")
+      console.error("❌ Login error:", err)
+      setError("An unexpected error occurred")
+      setIsLoading(false)
     }
   }
 
@@ -115,10 +152,10 @@ export default function Login() {
           style={[
             styles.statusBar,
             isDatabaseConnected === null
-              ? styles.statusConnecting
+              ? styles.statusBarConnecting
               : isDatabaseConnected
-                ? styles.statusConnected
-                : styles.statusOffline,
+                ? styles.statusBarConnected
+                : styles.statusBarOffline,
           ]}
         >
           <View

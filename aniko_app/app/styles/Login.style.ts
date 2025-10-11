@@ -18,18 +18,31 @@ export default StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: 12,
-    paddingTop: 50,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: "#e5e7eb",
     zIndex: 10,
   },
-  statusConnecting: {
-    backgroundColor: "#fbbf24",
+  statusBarChecking: {
+    backgroundColor: "#f59e0b", // Orange
   },
-  statusConnected: {
-    backgroundColor: "#10b981",
+  statusBarConnected: {
+    backgroundColor: "#10b981", // Green
   },
-  statusOffline: {
-    backgroundColor: "#ef4444",
+  statusBarDisconnected: {
+    backgroundColor: "#ef4444", // Red
+  },
+  statusContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+  },
+  statusText: {
+    color: "#fff",
+    fontSize: 12,
+    fontWeight: "600",
   },
   statusDot: {
     width: 8,
@@ -45,12 +58,6 @@ export default StyleSheet.create({
   },
   dotOffline: {
     backgroundColor: "#fff",
-  },
-  statusText: {
-    color: "#fff",
-    fontSize: 13,
-    fontWeight: "600",
-    letterSpacing: 0.3,
   },
 
   // Content Card
@@ -160,8 +167,8 @@ export default StyleSheet.create({
     elevation: 4,
   },
   disabledButton: {
-    backgroundColor: "#d1d5db",
-    shadowOpacity: 0,
+    backgroundColor: "#9ca3af",
+    opacity: 0.6,
   },
   loginText: {
     color: "#fff",
@@ -224,5 +231,28 @@ export default StyleSheet.create({
     color: "#374151",
     fontWeight: "600",
     letterSpacing: 0.3,
+  },
+
+  retryButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginLeft: 12,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    borderRadius: 4,
+  },
+  retryText: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: '600',
+    marginLeft: 4,
+  },
+
+  statusBarConnecting: {
+    backgroundColor: "#f59e0b", // Orange/Amber
+  },
+  statusBarOffline: {
+    backgroundColor: "#ef4444", // Red
   },
 })
