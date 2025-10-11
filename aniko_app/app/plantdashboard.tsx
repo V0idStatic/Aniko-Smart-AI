@@ -1232,9 +1232,6 @@ export default function Dashboard() {
         <View style={styles.soilMoistureCard}>
           <View style={styles.soilMoistureHeader}>
             <Text style={styles.soilMoistureTitle}>Soil Moisture Monitoring</Text>
-            <TouchableOpacity style={styles.soilViewButton} onPress={() => router.push("/waterdashboard")}>
-              <Text style={styles.soilViewText}>View Details</Text>
-            </TouchableOpacity>
           </View>
 
           {/* Main Moisture Display */}
