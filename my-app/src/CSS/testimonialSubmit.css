@@ -20,20 +20,8 @@
 
 }
 
-body {
-    background: var(--bg-color) !important;
-    margin: 0 !important;
-    font-family: 'Inter', system-ui, sans-serif;
-    min-height: 100vh !important;
-}
-
 .testimonialCol-container {
-    margin: 0;
     padding: 0;
-}
-
-.testimonialCol-row {
-    min-height: 100vh;
 }
 
 /* ======= LEFT SIDE =========== */
@@ -89,9 +77,10 @@ body {
     align-items: center !important;
     margin: 0 auto !important; 
     display: block !important;
-    margin-top: 7.5rem !important;
+    margin-top: 12rem !important;
     border-top-right-radius: 150px;
     border-bottom-left-radius: 150px;
+    margin-bottom: 6rem !important;
 }
 
 .testDisplay-ctaBtn {
@@ -150,7 +139,6 @@ body {
     }
 }
 
-
 .testSubmit-col h2 {
     font-weight: bold;
     font-size: 2.5rem;
@@ -167,7 +155,6 @@ body {
     font-family: "Lexend";
 }
 
-/* Feature list */
 .feature-list {
     list-style: none;
     padding: 0;
@@ -189,7 +176,6 @@ body {
     font-family: "Lexend" !important;
 }
 
-/* Form Section */
 .form-section {
     background: var(--light-green);
     border-top-right-radius: 100px !important;
@@ -215,7 +201,6 @@ body {
     margin-right: 7px !important;
 }
 
-/* Textarea */
 .testSubmit-col textarea {
     width: 100% !important;
     border-radius: 16px;
@@ -244,7 +229,6 @@ body {
     font-style: italic;
 }
 
-/* Submit Button */
 .submit-btn {
     background: var(--gradient-secondary) !important;
     color: var(--light-green) !important;
@@ -288,7 +272,6 @@ body {
         transform: translateY(0);
     }
 }
-
 
 /* ========== MODAL STYLEEE =========== */
 .submit-mod-dialog {
@@ -336,13 +319,11 @@ body {
   font-family: "Lexend";
 }
 
-/* === FOOTER BUTTONS === */
 .submit-mod-content .modal-footer {
     border-top: none;
     gap: 12px;
 }
 
-/* Cancel button */
 .testSub-modalFooter-cancelBtn {
     background: var(--gradient-brown-light);
     border: none;
@@ -363,7 +344,6 @@ body {
     box-shadow: 0 4px 16px rgba(77, 45, 24, 0.15);
 }
 
-/* Confirm button */
 .testSub-modalFooter-confirmBtn {
     background: var(--gradient-secondary);
     border: none;
@@ -385,7 +365,6 @@ body {
     box-shadow: 0 4px 16px rgba(29, 73, 44, 0.15);
 }
 
-/* Button pop-in animation */
 @keyframes btnPopIn {
     0% {
         opacity: 0;
@@ -398,5 +377,179 @@ body {
     100% {
         opacity: 1;
         transform: scale(1);
+    }
+}
+
+/* ============= RESPONSIVENESS ============= */
+@media (min-width: 585px) and (max-width: 1229.98px) {
+    .testSubmit-textSide {
+        width: 100% !important; 
+        max-width: 100% !important;
+    }
+
+    .testSubmit-col {
+        border-top-right-radius: 100px !important;
+        border-bottom-left-radius: 100px !important;
+        margin-top: 9rem !important;
+    }
+
+    .testSubmit-textSide h2 {
+        font-size: 25px !important; 
+        width: 100% !important;
+
+    }
+
+    .testSubmit-textSide .subtitle {
+        font-size: 15px !important;
+        width: 100% !important; 
+        max-width: 100% !important;
+    }
+
+    .feature-list {
+        margin-bottom: 2rem !important;
+        margin-left: 1rem !important;
+    }
+
+    .feature-list li {
+        font-size: 14px !important;
+    }
+
+    .form-section {
+        padding: 20px !important;
+        border-top-right-radius: 50px !important;
+        border-bottom-left-radius: 50px !important;
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+
+    .form-section textarea::placeholder{
+        font-size: 12px !important;
+    }
+
+    .submit-btn {
+        padding: 10px !important; 
+        font-size: 12px !important; 
+    }
+}
+
+@media (min-width: 358px) and (max-width: 584.98px) {
+    .testSubmit-textSide {
+        width: 100% !important; 
+        max-width: 100% !important;
+    }
+
+    .testSubmit-col {
+        border-radius: 0 !important;
+        margin-top: 9rem !important;
+        background-color: none !important;
+        background: none !important;
+        padding: 0 !important;
+        width: 85% !important;
+        max-width: 85% !important; 
+        margin-top: 7rem !important;
+    }
+
+    .testSubmit-textSide h2 {
+        font-size: 25px !important; 
+        width: 100% !important;
+
+    }
+
+    .testSubmit-textSide .subtitle {
+        font-size: 15px !important;
+        width: 100% !important; 
+        max-width: 100% !important;
+    }
+
+    .feature-list {
+        margin-bottom: 3rem !important;
+        margin-left: 1rem !important;
+    }
+
+    .feature-list li {
+        font-size: 14px !important;
+    }
+
+    .form-section {
+        padding: 20px !important;
+        border-top-right-radius: 50px !important;
+        border-bottom-left-radius: 50px !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        box-shadow: none !important;
+    }
+
+    .form-section textarea::placeholder {
+        font-size: 14px !important;
+    }
+
+    .submit-btn {
+        padding: 10px !important; 
+        font-size: 12px !important; 
+    }
+}
+
+@media (min-width: 320px) and (max-width: 357.98px) {
+     .testSubmit-textSide {
+        width: 100% !important; 
+        max-width: 100% !important;
+    }
+
+    .testSubmit-col {
+        border-radius: 0 !important;
+        margin-top: 9rem !important;
+        background-color: none !important;
+        background: none !important;
+        padding: 0 !important;
+        width: 85% !important;
+        max-width: 85% !important; 
+        margin-top: 7rem !important;
+    }
+
+    .testSubmit-textSide h2 {
+        font-size: 20px !important; 
+        width: 100% !important;
+
+    }
+
+    .testSubmit-textSide .subtitle {
+        font-size: 12px !important;
+        width: 100% !important; 
+        max-width: 100% !important;
+    }
+
+    .feature-list {
+        margin-bottom: 2rem !important;
+        margin-left: 1rem !important;
+    }
+
+    .feature-list li {
+        font-size: 12px !important;
+    }
+
+    .form-section {
+        padding: 20px !important;
+        border-top-right-radius: 50px !important;
+        border-bottom-left-radius: 50px !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        box-shadow: none !important;
+    }
+
+    .form-section textarea::placeholder {
+        font-size: 12px !important;
+    }
+
+    .submit-btn {
+        padding: 10px !important; 
+        font-size: 12px !important; 
+    }
+
+    .testSubmit-form-label {
+        font-size: 12px !important;
+    }
+
+    .character-count {
+        font-size: 12px !important;
     }
 }
