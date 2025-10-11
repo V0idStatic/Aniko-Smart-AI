@@ -134,23 +134,6 @@ const TestimonialSubmit: React.FC = () => {
             </div>
           </div>
         </div>
-
-         {/* Left CTA Section */}
-        <div className="testDisplay-col">
-          <div className="testDisplay-cta-card">
-            <div className="testDisplay-ctaHeader-wrapper">
-              <img src="PICTURES/Logo-noText.png" alt="Aniko Logo" className="testDisplay-headerLogo" />
-              <h2 className="testDisplay-ctaHeader">Trusted by Our Community</h2>
-            </div>
-            <h6 className="testDisplay-ctaSubheader">
-              Discover how we've helped farmers achieve better harvests and smarter decisions.
-            </h6>
-              <Link to="/testimonialDisplay">
-                <button className="testDisplay-ctaBtn">View Testimonials </button>
-              </Link>
-          </div>
-        </div>
-
       </div>
 
       {/* Confirmation Modal */}

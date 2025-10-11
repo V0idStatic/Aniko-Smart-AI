@@ -64,6 +64,11 @@ export default StyleSheet.create({
     paddingHorizontal: 15,
     height: 50,
   },
+  inputContainerError: {
+    borderColor: "#F44336",
+    borderWidth: 2,
+    backgroundColor: "#FFF5F5",
+  },
   inputIcon: {
     marginRight: 10,
   },
@@ -81,6 +86,34 @@ export default StyleSheet.create({
     marginTop: 6,
     marginLeft: 4,
   },
+  errorText: {
+    fontSize: 12,
+    color: "#F44336",
+    marginTop: 6,
+    marginLeft: 4,
+    fontWeight: "500",
+  },
+  // Password Strength Indicator
+  strengthContainer: {
+    marginTop: 8,
+    marginLeft: 4,
+  },
+  strengthBarContainer: {
+    height: 4,
+    backgroundColor: "#e0e0e0",
+    borderRadius: 2,
+    overflow: "hidden",
+    marginBottom: 6,
+  },
+  strengthBar: {
+    height: "100%",
+    borderRadius: 2,
+  },
+  strengthText: {
+    fontSize: 12,
+    fontWeight: "600",
+  },
+  // Buttons
   signUpButton: {
     backgroundColor: "#4CAF50",
     borderRadius: 12,
@@ -96,6 +129,10 @@ export default StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 8,
     elevation: 5,
+  },
+  signUpButtonDisabled: {
+    backgroundColor: "#A5D6A7",
+    opacity: 0.6,
   },
   signUpButtonText: {
     color: "#ffffff",
