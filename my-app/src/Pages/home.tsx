@@ -69,7 +69,7 @@ const Home: React.FC = () => {
         <div className="container hero-container">
           <div className="row align-items-center hero-text-content">
             <div className="col-lg-8 text-center text-lg-start text-white download-col">
-              <h1>Smart Soil Monitoring for Modern Farmers</h1>
+              <h1>Nigga Soil Monitoring for Modern Farmers</h1>
               <p>
                 Transform your farming with real-time soil insights,
                 AI-powered plant diagnosis, and climate pattern analysis.
