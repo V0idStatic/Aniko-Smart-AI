@@ -260,7 +260,7 @@ const analysis = StyleSheet.create({
 
   // ===== TEXT STYLES =====
   sectionTitle: {
-    fontSize: 20, // Better hierarchy
+    fontSize: 18, // Better hierarchy
     fontWeight: "700",
     color: "#1E293B", // Professional dark color
     marginBottom: 16, // Consistent spacing
@@ -473,7 +473,7 @@ const analysis = StyleSheet.create({
   },
 
   weatherMetricValue: {
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: "700",
     color: "#1E293B",
     marginTop: 2,

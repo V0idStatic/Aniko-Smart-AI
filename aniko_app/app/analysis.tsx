@@ -9,8 +9,6 @@ import supabase from "./CONFIG/supaBase"
 import { useAppContext } from "./CONFIG/GlobalContext"
 import FooterNavigation from "../components/FooterNavigation"
 
-import { Stack } from "expo-router"
-
 // For charts
 import { LineChart } from "react-native-chart-kit"
 
@@ -18,7 +16,7 @@ import { LineChart } from "react-native-chart-kit"
 import SharedStyles from "./styles/analysis.style"
 
 // Import Lucide icons
-import { AlertTriangle, Calendar, Lightbulb } from "lucide-react-native"
+import { AlertTriangle, Calendar, Lightbulb, Thermometer } from "lucide-react-native"
 
 // Types
 interface WeatherHistoryData {
@@ -111,8 +109,8 @@ export default function Analysis() {
   // Add this state after your existing states (around line 70)
   const [selectedStatus, setSelectedStatus] = useState<"all" | "ideal" | "good" | "caution" | "avoid">("all")
 
-  // New state for showing all weather records
-  const [showAllWeatherRecords, setShowAllWeatherRecords] = useState<boolean>(false)
+  const [showAllRecords, setShowAllRecords] = useState(false)
+  const [expandedRecordIndex, setExpandedRecordIndex] = useState<number | null>(null)
 
   // Initialize with selected plant if available
   useEffect(() => {
@@ -162,6 +160,19 @@ export default function Analysis() {
     if (weatherCode >= 70 && weatherCode <= 90) return "Snowy"
 
     return "Variable"
+  }
+
+  const getTempColor = (temp: number) => {
+    if (temp < 15) return styles.tempCold
+    if (temp < 25) return styles.tempMild
+    if (temp < 30) return styles.tempWarm
+    return styles.tempHot
+  }
+
+  const getRainfallColor = (rainfall: number) => {
+    if (rainfall > 50) return styles.rainfallHigh
+    if (rainfall > 10) return styles.rainfallMedium
+    return styles.rainfallLow
   }
 
   // Fetch plant history data
@@ -1496,1097 +1507,1122 @@ export default function Analysis() {
   }, [selectedCategory])
 
   return (
-    <>
-      <Stack.Screen options={{ headerShown: false }} />
+    <View style={styles.container}>
+      {/* Header */}
+      <LinearGradient colors={["#1c4722", "#4d7f39"]} style={styles.headerBackground}>
+        <View style={styles.headerTop}>
+          <View>
+            <Text style={styles.headerTitle}>Analysis Dashboard</Text>
+            <Text style={styles.headerSubtitle}>
+              {activeTab === "weather"
+                ? `Weather Data for ${selectedLocation?.city || "Your Location"}`
+                : activeTab === "plants"
+                  ? `Plant History & Trends`
+                  : `Smart Planting Recommendations`}
+            </Text>
+          </View>
 
-      <View style={styles.container}>
-        {/* Header */}
-        <LinearGradient colors={["#1c4722", "#4d7f39"]} style={styles.headerBackground}>
-          <View style={styles.headerTop}>
-            <View>
-              <Text style={styles.headerTitle}>Analysis Dashboard</Text>
-              <Text style={styles.headerSubtitle}>
-                {activeTab === "weather"
-                  ? `Weather Data for ${selectedLocation?.city || "Your Location"}`
-                  : activeTab === "plants"
-                    ? `Plant History & Trends`
-                    : `Smart Planting Recommendations`}
-              </Text>
+          <TouchableOpacity onPress={() => router.back()}>
+            <Ionicons name="arrow-back-circle-outline" size={28} color="white" />
+          </TouchableOpacity>
+        </View>
+      </LinearGradient>
+
+      {/* Tab Navigation */}
+      <View style={styles.tabContainer}>
+        <TouchableOpacity
+          style={[styles.tab, activeTab === "weather" && styles.activeTab]}
+          onPress={() => setActiveTab("weather")}
+        >
+          <Ionicons name="cloud" size={18} color={activeTab === "weather" ? "#1c4722" : "#666"} />
+          <Text style={[styles.tabText, activeTab === "weather" && styles.activeTabText]}>Weather</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[styles.tab, activeTab === "plants" && styles.activeTab]}
+          onPress={() => setActiveTab("plants")}
+        >
+          <Ionicons name="leaf" size={18} color={activeTab === "plants" ? "#1c4722" : "#666"} />
+          <Text style={[styles.tabText, activeTab === "plants" && styles.activeTabText]}>Plants</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[styles.tab, activeTab === "recommendations" && styles.activeTab]}
+          onPress={() => setActiveTab("recommendations")}
+        >
+          <Ionicons name="bulb" size={18} color={activeTab === "recommendations" ? "#1c4722" : "#666"} />
+          <Text style={[styles.tabText, activeTab === "recommendations" && styles.activeTabText]}>Suggestion</Text>
+        </TouchableOpacity>
+      </View>
+
+      <ScrollView contentContainerStyle={styles.scrollContent}>
+        {/* Weather Analysis Tab */}
+        {activeTab === "weather" && (
+          <>
+            {/* Time Range Selection */}
+            <View style={styles.timeRangeContainer}>
+              <View style={styles.sectionHeader}>
+                <Text style={styles.sectionTitle}>Weather for {selectedLocation?.city || "Unknown Location"}</Text>
+                <TouchableOpacity
+                  style={styles.refreshButton}
+                  onPress={handleRefreshWeatherData}
+                  disabled={loadingWeather}
+                >
+                  <Ionicons name="refresh-outline" size={20} color={loadingWeather ? "#ccc" : "#1c4722"} />
+                </TouchableOpacity>
+              </View>
+
+              <Text style={styles.timeRangeLabel}>Select Time Range:</Text>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                <TouchableOpacity
+                  style={[styles.timeRangeBtn, timeRange === "7days" && styles.activeTimeRange]}
+                  onPress={() => setTimeRange("7days")}
+                >
+                  <Text style={[styles.timeRangeText, timeRange === "7days" && styles.activeTimeRangeText]}>
+                    7 Days
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[styles.timeRangeBtn, timeRange === "30days" && styles.activeTimeRange]}
+                  onPress={() => setTimeRange("30days")}
+                >
+                  <Text style={[styles.timeRangeText, timeRange === "30days" && styles.activeTimeRangeText]}>
+                    30 Days
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[styles.timeRangeBtn, timeRange === "1year" && styles.activeTimeRange]}
+                  onPress={() => setTimeRange("1year")}
+                >
+                  <Text style={[styles.timeRangeText, timeRange === "1year" && styles.activeTimeRangeText]}>
+                    1 Year
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[styles.timeRangeBtn, timeRange === "5years" && styles.activeTimeRange]}
+                  onPress={() => setTimeRange("5years")}
+                >
+                  <Text style={[styles.timeRangeText, timeRange === "5years" && styles.activeTimeRangeText]}>
+                    5 Years
+                  </Text>
+                </TouchableOpacity>
+              </ScrollView>
             </View>
 
-            <TouchableOpacity onPress={() => router.back()}>
-              <Ionicons name="arrow-back-circle-outline" size={28} color="white" />
-            </TouchableOpacity>
-          </View>
-        </LinearGradient>
-
-        <FooterNavigation />
-
-        <ScrollView contentContainerStyle={styles.scrollContent}>
-          {/* Weather Analysis Tab */}
-          {activeTab === "weather" && (
-            <>
-              {/* Time Range Selection */}
-              <View style={styles.timeRangeContainer}>
-                <View style={styles.sectionHeader}>
-                  <Text style={styles.sectionTitle}>Weather for {selectedLocation?.city || "Unknown Location"}</Text>
-                  <TouchableOpacity
-                    style={styles.refreshButton}
-                    onPress={handleRefreshWeatherData}
-                    disabled={loadingWeather}
-                  >
-                    <Ionicons name="refresh-outline" size={20} color={loadingWeather ? "#ccc" : "#1c4722"} />
-                  </TouchableOpacity>
-                </View>
-
-                <Text style={styles.timeRangeLabel}>Select Time Range:</Text>
-                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                  <TouchableOpacity
-                    style={[styles.timeRangeBtn, timeRange === "7days" && styles.activeTimeRange]}
-                    onPress={() => setTimeRange("7days")}
-                  >
-                    <Text style={[styles.timeRangeText, timeRange === "7days" && styles.activeTimeRangeText]}>
-                      7 Days
-                    </Text>
-                  </TouchableOpacity>
-
-                  <TouchableOpacity
-                    style={[styles.timeRangeBtn, timeRange === "30days" && styles.activeTimeRange]}
-                    onPress={() => setTimeRange("30days")}
-                  >
-                    <Text style={[styles.timeRangeText, timeRange === "30days" && styles.activeTimeRangeText]}>
-                      30 Days
-                    </Text>
-                  </TouchableOpacity>
-
-                  <TouchableOpacity
-                    style={[styles.timeRangeBtn, timeRange === "1year" && styles.activeTimeRange]}
-                    onPress={() => setTimeRange("1year")}
-                  >
-                    <Text style={[styles.timeRangeText, timeRange === "1year" && styles.activeTimeRangeText]}>
-                      1 Year
-                    </Text>
-                  </TouchableOpacity>
-
-                  <TouchableOpacity
-                    style={[styles.timeRangeBtn, timeRange === "5years" && styles.activeTimeRange]}
-                    onPress={() => setTimeRange("5years")}
-                  >
-                    <Text style={[styles.timeRangeText, timeRange === "5years" && styles.activeTimeRangeText]}>
-                      5 Years
-                    </Text>
-                  </TouchableOpacity>
-                </ScrollView>
+            {/* Weather Charts */}
+            <View style={styles.chartContainer}>
+              <View style={styles.chartHeader}>
+                <Text style={styles.chartTitle}>Temperature Trends</Text>
+                <TouchableOpacity style={styles.expandButton} onPress={() => toggleChartExpansion("weather")}>
+                  <Ionicons
+                    name={expandedChart === "weather" ? "contract-outline" : "expand-outline"}
+                    size={20}
+                    color="#1c4722"
+                  />
+                  <Text style={styles.expandButtonText}>{expandedChart === "weather" ? "Shrink" : "Expand"}</Text>
+                </TouchableOpacity>
               </View>
 
-              {/* Weather Charts */}
-              <View style={styles.chartContainer}>
-                <View style={styles.chartHeader}>
-                  <Text style={styles.chartTitle}>Temperature Trends</Text>
-                  <TouchableOpacity style={styles.expandButton} onPress={() => toggleChartExpansion("weather")}>
-                    <Ionicons
-                      name={expandedChart === "weather" ? "contract-outline" : "expand-outline"}
-                      size={20}
-                      color="#1c4722"
-                    />
-                    <Text style={styles.expandButtonText}>{expandedChart === "weather" ? "Shrink" : "Expand"}</Text>
-                  </TouchableOpacity>
-                </View>
+              {(timeRange === "1year" || timeRange === "5years") && (
+                <Text style={styles.chartSubtitle}> Swipe horizontally to view all data points</Text>
+              )}
 
-                {(timeRange === "1year" || timeRange === "5years") && (
-                  <Text style={styles.chartSubtitle}>Swipe horizontally to view all data points</Text>
-                )}
-
-                {loadingWeather ? (
-                  <ActivityIndicator size="large" color="#1c4722" />
-                ) : weatherData.length > 0 ? (
-                  <ScrollView
-                    horizontal
-                    showsHorizontalScrollIndicator={true}
-                    style={[styles.chartScrollView, expandedChart === "weather" && styles.expandedChartScrollView]}
-                    contentContainerStyle={styles.chartScrollContent}
-                  >
-                    <LineChart
-                      data={weatherChartData}
-                      width={weatherChartWidth}
-                      height={expandedChart === "weather" ? 300 : 220}
-                      chartConfig={{
-                        ...chartConfig,
-                        propsForLabels: {
-                          fontSize: expandedChart === "weather" ? 12 : 10,
-                        },
-                      }}
-                      bezier
-                      style={styles.chart}
-                    />
-                  </ScrollView>
-                ) : (
-                  <View style={styles.noDataContainer}>
-                    <Ionicons name="cloud-offline-outline" size={60} color="#ccc" />
-                    <Text style={styles.noDataText}>No weather data available</Text>
-                  </View>
-                )}
-
-                {/* Data points indicator */}
-                {weatherData.length > 0 && (
-                  <View
-                    style={{
-                      flexDirection: "row",
-                      alignItems: "center",
-                      justifyContent: "center", // ✅ centers horizontally
-                      flexWrap: "wrap",
-                      marginTop: 8, // optional small spacing from top
+              {loadingWeather ? (
+                <ActivityIndicator size="large" color="#1c4722" />
+              ) : weatherData.length > 0 ? (
+                <ScrollView
+                  horizontal
+                  showsHorizontalScrollIndicator={true}
+                  style={[styles.chartScrollView, expandedChart === "weather" && styles.expandedChartScrollView]}
+                  contentContainerStyle={styles.chartScrollContent}
+                >
+                  <LineChart
+                    data={weatherChartData}
+                    width={weatherChartWidth}
+                    height={expandedChart === "weather" ? 300 : 220}
+                    chartConfig={{
+                      ...chartConfig,
+                      propsForLabels: {
+                        fontSize: expandedChart === "weather" ? 12 : 10,
+                      },
                     }}
-                  >
-                    <Ionicons name="stats-chart-outline" size={14} color="#94A3B8" style={{ marginRight: 6 }} />
-                    <Text style={styles.dataPointsIndicator}>
-                      Showing {weatherChartDataPoints.length} data points out of {weatherData.length} total
-                      {expandedChart === "weather" && " • Expanded View"}
-                    </Text>
-                  </View>
-                )}
-              </View>
-
-              {/* Weather Statistics */}
-              <View style={styles.statsContainer}>
-                <Text style={styles.sectionTitle}>
-                  Weather Statistics (
-                  {timeRange.replace("days", " Days").replace("year", " Year").replace("years", " Years")})
-                </Text>
-
-                {weatherData.length > 0 && (
-                  <>
-                    <View style={styles.statsRow}>
-                      <View style={styles.statCard}>
-                        <Ionicons name="thermometer-outline" size={28} color="#e53935" />
-                        <Text style={styles.statTitle}>Avg. Temperature</Text>
-                        <Text style={styles.statValue}>
-                          {(weatherData.reduce((sum, d) => sum + d.temperature, 0) / weatherData.length).toFixed(1)}°C
-                        </Text>
-                      </View>
-
-                      <View style={styles.statCard}>
-                        <Ionicons name="thermometer" size={28} color="#ff5722" />
-                        <Text style={styles.statTitle}>Max Temperature</Text>
-                        <Text style={styles.statValue}>
-                          {Math.max(...weatherData.map((d) => d.temperature)).toFixed(1)}°C
-                        </Text>
-                      </View>
-                    </View>
-
-                    <View style={styles.statsRow}>
-                      <View style={styles.statCard}>
-                        <Ionicons name="water-outline" size={28} color="#1976d2" />
-                        <Text style={styles.statTitle}>Avg. Humidity</Text>
-                        <Text style={styles.statValue}>
-                          {(weatherData.reduce((sum, d) => sum + d.humidity, 0) / weatherData.length).toFixed(1)}%
-                        </Text>
-                      </View>
-
-                      <View style={styles.statCard}>
-                        <Ionicons name="rainy-outline" size={28} color="#29b6f6" />
-                        <Text style={styles.statTitle}>Total Rainfall</Text>
-                        <Text style={styles.statValue}>
-                          {weatherData.reduce((sum, d) => sum + d.rainfall, 0).toFixed(1)} mm
-                        </Text>
-                      </View>
-                    </View>
-
-                    <View style={styles.statsRow}>
-                      <View style={styles.statCard}>
-                        <Ionicons name="sunny-outline" size={28} color="#ffa000" />
-                        <Text style={styles.statTitle}>Clear Days</Text>
-                        <Text style={styles.statValue}>
-                          {
-                            weatherData.filter(
-                              (d) => d.description.includes("Clear") || d.description.includes("Sunny"),
-                            ).length
-                          }
-                        </Text>
-                      </View>
-
-                      <View style={styles.statCard}>
-                        <Ionicons name="rainy" size={28} color="#2196f3" />
-                        <Text style={styles.statTitle}>Rainy Days</Text>
-                        <Text style={styles.statValue}>
-                          {
-                            weatherData.filter(
-                              (d) => d.description.includes("Rain") || d.description.includes("Drizzle"),
-                            ).length
-                          }
-                        </Text>
-                      </View>
-                    </View>
-                  </>
-                )}
-              </View>
-
-              {/* Daily Weather Table */}
-              <View style={styles.tableContainer}>
-                <Text style={styles.sectionTitle}>Daily Weather Record</Text>
-                <Text style={styles.subtitle}>
-                  Showing last {Math.min(weatherData.length, showAllWeatherRecords ? weatherData.length : 5)} days
-                </Text>
-
-                {weatherData
-                  .slice(-(showAllWeatherRecords ? weatherData.length : 5))
-                  .reverse()
-                  .map((day, index) => {
-                    // Format date
-                    const date = new Date(day.date)
-                    const dayName = date.toLocaleDateString("en-US", { weekday: "short" })
-                    const formattedDate = date.toLocaleDateString("en-US", {
-                      month: "short",
-                      day: "numeric",
-                      year: "numeric",
-                    })
-
-                    // Determine temperature color
-                    let tempColor = styles.tempMild
-                    if (day.temperature < 15) tempColor = styles.tempCold
-                    else if (day.temperature >= 15 && day.temperature < 25) tempColor = styles.tempMild
-                    else if (day.temperature >= 25 && day.temperature < 32) tempColor = styles.tempWarm
-                    else tempColor = styles.tempHot
-
-                    // Determine rainfall color
-                    let rainfallColor = styles.rainfallLow
-                    if (day.rainfall > 10) rainfallColor = styles.rainfallHigh
-                    else if (day.rainfall > 5) rainfallColor = styles.rainfallMedium
-
-                    // Weather icon
-                    let weatherIcon = "partly-sunny-outline"
-                    if (day.description.includes("Clear") || day.description.includes("Sunny"))
-                      weatherIcon = "sunny-outline"
-                    else if (day.description.includes("Rain")) weatherIcon = "rainy-outline"
-                    else if (day.description.includes("Cloud")) weatherIcon = "cloudy-outline"
-                    else if (day.description.includes("Storm")) weatherIcon = "thunderstorm-outline"
-
-                    return (
-                      <View key={index} style={styles.weatherRecordCard}>
-                        {/* Header with Date and Weather */}
-                        <View style={styles.weatherRecordHeader}>
-                          <View>
-                            <Text style={styles.weatherRecordDate}>{formattedDate}</Text>
-                            <Text style={styles.weatherRecordDay}>{dayName}</Text>
-                          </View>
-                          <View style={styles.weatherDescriptionBadge}>
-                            <Ionicons name={weatherIcon as any} size={16} color="#1c4722" />
-                            <Text style={styles.weatherDescriptionText}>{day.description}</Text>
-                          </View>
-                        </View>
-
-                        {/* Metrics Row */}
-                        <View style={styles.weatherMetricsRow}>
-                          {/* Temperature */}
-                          <View style={styles.weatherMetricItem}>
-                            <Ionicons name="thermometer-outline" size={20} color={tempColor.color} />
-                            <View style={styles.weatherMetricContent}>
-                              <Text style={styles.weatherMetricLabel}>Temp</Text>
-                              <Text style={[styles.weatherMetricValue, tempColor]}>{day.temperature}°C</Text>
-                            </View>
-                          </View>
-
-                          {/* Humidity */}
-                          <View style={styles.weatherMetricItem}>
-                            <Ionicons name="water-outline" size={20} color="#3B82F6" />
-                            <View style={styles.weatherMetricContent}>
-                              <Text style={styles.weatherMetricLabel}>Humidity</Text>
-                              <Text style={styles.weatherMetricValue}>{day.humidity}%</Text>
-                            </View>
-                          </View>
-
-                          {/* Rainfall */}
-                          <View style={styles.weatherMetricItem}>
-                            <Ionicons name="rainy-outline" size={20} color={rainfallColor.color} />
-                            <View style={styles.weatherMetricContent}>
-                              <Text style={styles.weatherMetricLabel}>Rain</Text>
-                              <Text style={[styles.weatherMetricValue, rainfallColor]}>{day.rainfall} mm</Text>
-                            </View>
-                          </View>
-                        </View>
-                      </View>
-                    )
-                  })}
-
-                {/* Show More/Less Button */}
-                {weatherData.length > 5 && (
-                  <TouchableOpacity
-                    style={styles.showMoreButton}
-                    onPress={() => setShowAllWeatherRecords(!showAllWeatherRecords)}
-                  >
-                    <Text style={styles.showMoreText}>
-                      {showAllWeatherRecords ? "Show Less" : `Show All ${weatherData.length} Days`}
-                    </Text>
-                    <Ionicons name={showAllWeatherRecords ? "chevron-up" : "chevron-down"} size={18} color="#1c4722" />
-                  </TouchableOpacity>
-                )}
-              </View>
-            </>
-          )}
-
-          {/* Plant Analysis Tab */}
-          {activeTab === "plants" && (
-            <>
-              {/* Plant Selection */}
-              {Object.keys(plantHistory).length > 0 && (
-                <View style={styles.plantSelectionContainer}>
-                  <Text style={styles.sectionTitle}>Select Plant:</Text>
-                  <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                    {Object.keys(plantHistory).map((plantName, index) => (
-                      <TouchableOpacity
-                        key={index}
-                        style={[styles.plantSelectBtn, selectedPlant === plantName && styles.activePlantBtn]}
-                        onPress={() => handlePlantSelect(plantName)}
-                      >
-                        <Text style={[styles.plantSelectText, selectedPlant === plantName && styles.activePlantText]}>
-                          {plantName}
-                        </Text>
-                      </TouchableOpacity>
-                    ))}
-                  </ScrollView>
+                    bezier
+                    style={styles.chart}
+                  />
+                </ScrollView>
+              ) : (
+                <View style={styles.noDataContainer}>
+                  <Ionicons name="cloud-offline-outline" size={60} color="#ccc" />
+                  <Text style={styles.noDataText}>No weather data available</Text>
                 </View>
               )}
 
-              {/* Plant Temperature Chart */}
-              <View style={styles.chartContainer}>
-                <Text style={styles.chartTitle}>
-                  {selectedPlant ? `${selectedPlant} - Temperature Trends` : "Temperature Trends"}
+              {/* Data points indicator */}
+              {weatherData.length > 0 && (
+                <Text style={styles.dataPointsIndicator}>
+                  Showing {weatherChartDataPoints.length} data points out of {weatherData.length} total
+                  {expandedChart === "weather" && " • Expanded View"}
                 </Text>
-
-                {loadingPlant ? (
-                  <ActivityIndicator size="large" color="#1c4722" />
-                ) : plantData.length > 0 ? (
-                  <ScrollView
-                    horizontal
-                    showsHorizontalScrollIndicator={true}
-                    style={styles.chartScrollView}
-                    contentContainerStyle={styles.chartScrollContent}
-                  >
-                    <LineChart
-                      data={plantTempChartData}
-                      width={plantTempChartWidth}
-                      height={220}
-                      chartConfig={{
-                        ...chartConfig,
-                        backgroundGradientFrom: "#1a237e",
-                        backgroundGradientTo: "#303f9f",
-                      }}
-                      bezier
-                      style={styles.chart}
-                    />
-                  </ScrollView>
-                ) : (
-                  <View style={styles.noDataContainer}>
-                    <Ionicons name="leaf-outline" size={60} color="#ccc" />
-                    <Text style={styles.noDataText}>No plant data available</Text>
-                  </View>
-                )}
-              </View>
-
-              {/* Plant Moisture Chart */}
-              {plantData.length > 0 && (
-                <View style={styles.chartContainer}>
-                  <Text style={styles.chartTitle}>
-                    {selectedPlant ? `${selectedPlant} - Moisture Trends` : "Moisture Trends"}
-                  </Text>
-
-                  <ScrollView
-                    horizontal
-                    showsHorizontalScrollIndicator={true}
-                    style={styles.chartScrollView}
-                    contentContainerStyle={styles.chartScrollContent}
-                  >
-                    <LineChart
-                      data={plantMoistureChartData}
-                      width={plantMoistureChartWidth}
-                      height={220}
-                      chartConfig={{
-                        ...chartConfig,
-                        backgroundGradientFrom: "#004d40",
-                        backgroundGradientTo: "#00796b",
-                      }}
-                      bezier
-                      style={styles.chart}
-                    />
-                  </ScrollView>
-                </View>
               )}
+            </View>
 
-              {/* Plant Statistics */}
-              {plantData.length > 0 && (
-                <View style={styles.statsContainer}>
-                  <Text style={styles.sectionTitle}>Plant Growth Statistics</Text>
+            {/* Weather Statistics */}
+            <View style={styles.statsContainer}>
+              <Text style={styles.sectionTitle}>
+                Weather Statistics (
+                {timeRange.replace("days", " Days").replace("year", " Year").replace("years", " Years")})
+              </Text>
 
+              {weatherData.length > 0 && (
+                <>
                   <View style={styles.statsRow}>
                     <View style={styles.statCard}>
                       <Ionicons name="thermometer-outline" size={28} color="#e53935" />
                       <Text style={styles.statTitle}>Avg. Temperature</Text>
                       <Text style={styles.statValue}>
-                        {(plantData.reduce((sum, d) => sum + d.temperature, 0) / plantData.length).toFixed(1)}°C
+                        {(weatherData.reduce((sum, d) => sum + d.temperature, 0) / weatherData.length).toFixed(1)}°C
                       </Text>
                     </View>
 
                     <View style={styles.statCard}>
-                      <Ionicons name="water-outline" size={28} color="#1976d2" />
-                      <Text style={styles.statTitle}>Avg. Moisture</Text>
+                      <Ionicons name="thermometer" size={28} color="#ff5722" />
+                      <Text style={styles.statTitle}>Max Temperature</Text>
                       <Text style={styles.statValue}>
-                        {(plantData.reduce((sum, d) => sum + d.moisture, 0) / plantData.length).toFixed(1)}%
+                        {Math.max(...weatherData.map((d) => d.temperature)).toFixed(1)}°C
                       </Text>
                     </View>
                   </View>
 
                   <View style={styles.statsRow}>
                     <View style={styles.statCard}>
-                      <Ionicons name="flask-outline" size={28} color="#9c27b0" />
-                      <Text style={styles.statTitle}>Avg. pH Level</Text>
+                      <Ionicons name="water-outline" size={28} color="#1976d2" />
+                      <Text style={styles.statTitle}>Avg. Humidity</Text>
                       <Text style={styles.statValue}>
-                        {(plantData.reduce((sum, d) => sum + d.ph, 0) / plantData.length).toFixed(1)}
+                        {(weatherData.reduce((sum, d) => sum + d.humidity, 0) / weatherData.length).toFixed(1)}%
                       </Text>
                     </View>
 
                     <View style={styles.statCard}>
-                      <Ionicons name="leaf-outline" size={28} color="#4caf50" />
-                      <Text style={styles.statTitle}>Days Tracked</Text>
-                      <Text style={styles.statValue}>{plantData.length}</Text>
+                      <Ionicons name="rainy-outline" size={28} color="#29b6f6" />
+                      <Text style={styles.statTitle}>Total Rainfall</Text>
+                      <Text style={styles.statValue}>
+                        {weatherData.reduce((sum, d) => sum + d.rainfall, 0).toFixed(1)} mm
+                      </Text>
                     </View>
                   </View>
-                </View>
-              )}
 
-              {/* NPK Levels */}
-              {plantData.length > 0 && (
-                <View style={styles.npkContainer}>
-                  <Text style={styles.sectionTitle}>Average NPK Levels</Text>
-
-                  <View style={styles.npkChart}>
-                    <View style={styles.npkBar}>
-                      <View
-                        style={[
-                          styles.npkFill,
-                          {
-                            height: `${Math.min(100, plantData.reduce((sum, d) => sum + d.nitrogen, 0) / plantData.length / 1.5)}%`,
-                            backgroundColor: "#4CAF50",
-                          },
-                        ]}
-                      />
-                      <Text style={styles.npkValue}>
-                        {(plantData.reduce((sum, d) => sum + d.nitrogen, 0) / plantData.length).toFixed(0)}
+                  <View style={styles.statsRow}>
+                    <View style={styles.statCard}>
+                      <Ionicons name="sunny-outline" size={28} color="#ffa000" />
+                      <Text style={styles.statTitle}>Clear Days</Text>
+                      <Text style={styles.statValue}>
+                        {
+                          weatherData.filter((d) => d.description.includes("Clear") || d.description.includes("Sunny"))
+                            .length
+                        }
                       </Text>
-                      <Text style={styles.npkLabel}>Nitrogen</Text>
                     </View>
 
-                    <View style={styles.npkBar}>
-                      <View
-                        style={[
-                          styles.npkFill,
-                          {
-                            height: `${Math.min(100, plantData.reduce((sum, d) => sum + d.phosphorus, 0) / plantData.length / 0.8)}%`,
-                            backgroundColor: "#FF9800",
-                          },
-                        ]}
-                      />
-                      <Text style={styles.npkValue}>
-                        {(plantData.reduce((sum, d) => sum + d.phosphorus, 0) / plantData.length).toFixed(0)}
+                    <View style={styles.statCard}>
+                      <Ionicons name="rainy" size={28} color="#2196f3" />
+                      <Text style={styles.statTitle}>Rainy Days</Text>
+                      <Text style={styles.statValue}>
+                        {
+                          weatherData.filter((d) => d.description.includes("Rain") || d.description.includes("Drizzle"))
+                            .length
+                        }
                       </Text>
-                      <Text style={styles.npkLabel}>Phosphorus</Text>
-                    </View>
-
-                    <View style={styles.npkBar}>
-                      <View
-                        style={[
-                          styles.npkFill,
-                          {
-                            height: `${Math.min(100, plantData.reduce((sum, d) => sum + d.potassium, 0) / plantData.length / 1.2)}%`,
-                            backgroundColor: "#2196F3",
-                          },
-                        ]}
-                      />
-                      <Text style={styles.npkValue}>
-                        {(plantData.reduce((sum, d) => sum + d.potassium, 0) / plantData.length).toFixed(0)}
-                      </Text>
-                      <Text style={styles.npkLabel}>Potassium</Text>
                     </View>
                   </View>
-                </View>
+                </>
               )}
+            </View>
 
-              {/* Daily Plant Data Table */}
-              {plantData.length > 0 && (
-                <View style={styles.tableContainer}>
-                  <Text style={styles.sectionTitle}>Daily Plant Readings</Text>
-
-                  {/* Table Header */}
-                  <View style={styles.tableHeader}>
-                    <Text style={[styles.tableHeaderCell, { flex: 1.5 }]}>Date</Text>
-                    <Text style={styles.tableHeaderCell}>Temp</Text>
-                    <Text style={styles.tableHeaderCell}>Moisture</Text>
-                    <Text style={styles.tableHeaderCell}>pH</Text>
-                  </View>
-
-                  {/* Table Body */}
-                  {plantData.slice(-10).map((day, index) => (
-                    <View
-                      key={index}
-                      style={[styles.tableRow, index % 2 === 0 ? styles.tableRowEven : styles.tableRowOdd]}
-                    >
-                      <Text style={[styles.tableCell, { flex: 1.5 }]}>{day.date}</Text>
-                      <Text style={styles.tableCell}>{day.temperature}°C</Text>
-                      <Text style={styles.tableCell}>{day.moisture}%</Text>
-                      <Text style={styles.tableCell}>{day.ph}</Text>
-                    </View>
-                  ))}
-                </View>
-              )}
-            </>
-          )}
-
-          {/* Plant Recommendations Tab */}
-          {activeTab === "recommendations" && (
-            <>
-              {/* Header Section */}
-              <View style={styles.recommendationHeader}>
-                <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-                  <Text style={styles.sectionTitle}>Smart Planting Recommendations</Text>
-                </View>
-
-                <Text style={styles.subtitle}>
-                  Based on weather analysis for {selectedLocation?.city || "your location"}
-                </Text>
-
-                <TouchableOpacity
-                  style={styles.refreshButton}
-                  onPress={generatePlantRecommendations}
-                  disabled={loadingRecommendations}
-                >
-                  <Ionicons name="refresh-outline" size={20} color={loadingRecommendations ? "#ccc" : "#1c4722"} />
-                  <Text style={styles.refreshButtonText}>Refresh Recommendations</Text>
+            <View style={styles.tableContainer}>
+              <View style={styles.sectionHeader}>
+                <Text style={styles.sectionTitle}>Daily Weather Record</Text>
+                <TouchableOpacity style={styles.expandButton} onPress={() => setShowAllRecords(!showAllRecords)}>
+                  <Ionicons name={showAllRecords ? "chevron-up" : "chevron-down"} size={16} color="#1c4722" />
+                  <Text style={styles.expandButtonText}>{showAllRecords ? "Show Less" : "Show All"}</Text>
                 </TouchableOpacity>
               </View>
 
-              {loadingRecommendations ? (
-                <View style={styles.loadingContainer}>
-                  <ActivityIndicator size="large" color="#1c4722" />
-                  <Text style={styles.loadingText}>Analyzing weather patterns...</Text>
-                </View>
-              ) : (
-                <>
-                  {/* Next Month Weather Prediction */}
-                  {plantRecommendations.length > 0 && (
-                    <View style={styles.weatherPredictionCard}>
-                      <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 10 }}>
-                        <Ionicons
-                          name="calendar-outline"
-                          size={20}
-                          color="#1c4722"
-                          style={{ marginRight: 6, marginBottom: 10 }}
-                        />
-                        <Text style={styles.cardTitle}>Next Month Weather Forecast</Text>
-                      </View>
-                      <View style={styles.predictionStats}>
-                        <View style={styles.predictionStat}>
-                          <Ionicons name="thermometer-outline" size={24} color="#e53935" />
-                          <Text style={styles.predictionValue}>
-                            {plantRecommendations[0]?.predictedWeather.nextMonth.avgTemp.toFixed(1)}°C
-                          </Text>
-                          <Text style={styles.predictionLabel}>Avg Temp</Text>
-                        </View>
-                        <View style={styles.predictionStat}>
-                          <Ionicons name="rainy-outline" size={24} color="#2196f3" />
-                          <Text style={styles.predictionValue}>
-                            {plantRecommendations[0]?.predictedWeather.nextMonth.rainfall.toFixed(1)} mm
-                          </Text>
-                          <Text style={styles.predictionLabel}>Rainfall</Text>
-                        </View>
-                        <View style={styles.predictionStat}>
-                          <Ionicons name="water-outline" size={24} color="#1976d2" />
-                          <Text style={styles.predictionValue}>
-                            {plantRecommendations[0]?.predictedWeather.nextMonth.humidity.toFixed(1)}%
-                          </Text>
-                          <Text style={styles.predictionLabel}>Humidity</Text>
-                        </View>
-                      </View>
+              <Text style={styles.subtitle}>
+                {showAllRecords ? `Showing all ${weatherData.length} records` : "Showing last 5 records"}
+              </Text>
 
-                      <View
-                        style={[
-                          styles.riskIndicator,
-                          {
-                            backgroundColor: getRiskColor(plantRecommendations[0]?.predictedWeather.nextMonth.riskLevel)
-                              .background,
-                          },
-                        ]}
-                      >
-                        <Text
-                          style={[
-                            styles.riskText,
-                            { color: getRiskColor(plantRecommendations[0]?.predictedWeather.nextMonth.riskLevel).text },
-                          ]}
-                        >
-                          Risk Level: {plantRecommendations[0]?.predictedWeather.nextMonth.riskLevel.toUpperCase()}
+              {/* Weather Record Cards */}
+              {(showAllRecords ? weatherData : weatherData.slice(-5)).reverse().map((day, index) => {
+                const isExpanded = expandedRecordIndex === index
+                return (
+                  <TouchableOpacity
+                    key={index}
+                    style={styles.weatherRecordCard}
+                    onPress={() => setExpandedRecordIndex(isExpanded ? null : index)}
+                    activeOpacity={0.7}
+                  >
+                    {/* Card Header */}
+                    <View style={styles.weatherRecordHeader}>
+                      <View>
+                        <Text style={styles.weatherRecordDate}>{day.date}</Text>
+                        <Text style={styles.weatherRecordDay}>
+                          {new Date(day.date).toLocaleDateString("en-US", {
+                            weekday: "long",
+                          })}
                         </Text>
                       </View>
+                      <View style={styles.weatherDescriptionBadge}>
+                        <Ionicons
+                          name={
+                            day.description.toLowerCase().includes("rain")
+                              ? "rainy"
+                              : day.description.toLowerCase().includes("cloud")
+                                ? "cloudy"
+                                : day.description.toLowerCase().includes("sun")
+                                  ? "sunny"
+                                  : "partly-sunny"
+                          }
+                          size={14}
+                          color="#1c4722"
+                        />
+                        <Text style={styles.weatherDescriptionText}>{day.description}</Text>
+                      </View>
                     </View>
-                  )}
 
-                  {/* Category Selection */}
-                  {Object.keys(plantCategories).length > 0 && (
-                    <View style={styles.categoryContainer}>
-                      <Text style={styles.sectionTitle}>Plant Categories</Text>
-                      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.categoryScrollView}>
-                        {Object.keys(plantCategories).map((category, index) => {
-                          const categoryInfo = getCategoryInfo(category)
-                          return (
-                            <TouchableOpacity
-                              key={index}
-                              style={[styles.categoryCard, selectedCategory === category && styles.activeCategoryCard]}
-                              onPress={() => setSelectedCategory(category)}
-                            >
-                              <View style={styles.categoryIconContainer}>
-                                <Ionicons
-                                  name={categoryInfo.icon as any}
-                                  size={32}
-                                  color={selectedCategory === category ? "#1c4722" : "#666"}
-                                />
-                              </View>
-                              <Text
-                                style={[
-                                  styles.categoryName,
-                                  selectedCategory === category && styles.activeCategoryName,
-                                ]}
-                              >
-                                {categoryInfo.name}
-                              </Text>
-                              <Text style={styles.categoryCount}>{categoryInfo.count} plants</Text>
-                            </TouchableOpacity>
-                          )
-                        })}
-                      </ScrollView>
+                    {/* Weather Metrics */}
+                    <View style={styles.weatherMetricsRow}>
+                      {/* Temperature */}
+                      <View style={styles.weatherMetricItem}>
+                        <Ionicons
+                          name="thermometer"
+                          size={20}
+                          color={
+                            day.temperature < 15
+                              ? "#3B82F6"
+                              : day.temperature < 25
+                                ? "#10B981"
+                                : day.temperature < 30
+                                  ? "#F59E0B"
+                                  : "#EF4444"
+                          }
+                        />
+                        <View style={styles.weatherMetricContent}>
+                          <Text style={styles.weatherMetricLabel}>TEMP</Text>
+                          <Text style={[styles.weatherMetricValue, getTempColor(day.temperature)]}>
+                            {day.temperature}°C
+                          </Text>
+                        </View>
+                      </View>
+
+                      {/* Humidity */}
+                      <View style={styles.weatherMetricItem}>
+                        <Ionicons name="water" size={20} color="#3B82F6" />
+                        <View style={styles.weatherMetricContent}>
+                          <Text style={styles.weatherMetricLabel}>WIND</Text>
+                          <Text style={styles.weatherMetricValue}>{day.humidity}%</Text>
+                        </View>
+                      </View>
+
+                      {/* Rainfall */}
+                      <View style={styles.weatherMetricItem}>
+                        <Ionicons
+                          name="rainy"
+                          size={20}
+                          color={day.rainfall > 50 ? "#2563EB" : day.rainfall > 10 ? "#3B82F6" : "#60A5FA"}
+                        />
+                        <View style={styles.weatherMetricContent}>
+                          <Text style={styles.weatherMetricLabel}>RAIN</Text>
+                          <Text style={[styles.weatherMetricValue, getRainfallColor(day.rainfall)]}>
+                            {day.rainfall} mm
+                          </Text>
+                        </View>
+                      </View>
                     </View>
-                  )}
 
-                  {/* Enhanced Clickable Status Summary - HORIZONTAL SCROLL VERSION */}
-                  {selectedCategory && plantCategories[selectedCategory] && (
-                    <View style={styles.categorySummary}>
-                      <Text style={styles.categorySummaryTitle}>
-                        {getCategoryInfo(selectedCategory).name} Recommendations
-                      </Text>
-                      <Text style={styles.categorySummarySubtitle}>
-                        {plantCategories[selectedCategory].length} plants available for{" "}
-                        {selectedLocation?.city || "your location"}
-                      </Text>
+                    {/* Expanded Details */}
+                    {isExpanded && (
+                      <View style={{ marginTop: 12, paddingTop: 12, borderTopWidth: 1, borderTopColor: "#E2E8F0" }}>
+                        <Text style={styles.subsectionTitle}>Additional Details</Text>
+                        <View style={{ flexDirection: "row", justifyContent: "space-between", marginTop: 8 }}>
+                          <View>
+                            <Text style={styles.weatherMetricLabel}>FEELS LIKE</Text>
+                            <Text style={styles.weatherMetricValue}>
+                              {(day.temperature + (day.humidity > 70 ? 2 : -1)).toFixed(1)}°C
+                            </Text>
+                          </View>
+                          <View>
+                            <Text style={styles.weatherMetricLabel}>CONDITION</Text>
+                            <Text style={styles.weatherMetricValue}>{day.rainfall > 10 ? "Wet" : "Dry"}</Text>
+                          </View>
+                          <View>
+                            <Text style={styles.weatherMetricLabel}>COMFORT</Text>
+                            <Text style={styles.weatherMetricValue}>
+                              {day.temperature >= 20 && day.temperature <= 28 && day.humidity < 70 ? "Good" : "Fair"}
+                            </Text>
+                          </View>
+                        </View>
+                      </View>
+                    )}
 
-                      {/* ✅ HORIZONTAL SCROLLABLE Status Summary */}
-                      <ScrollView
-                        horizontal
-                        showsHorizontalScrollIndicator={false}
-                        contentContainerStyle={styles.statusSummaryScrollContent}
-                        style={styles.statusSummaryScroll}
+                    {/* Tap to expand indicator */}
+                    <View style={{ alignItems: "center", marginTop: 8 }}>
+                      <Ionicons name={isExpanded ? "chevron-up" : "chevron-down"} size={16} color="#94A3B8" />
+                    </View>
+                  </TouchableOpacity>
+                )
+              })}
+
+              {/* Show More Button */}
+              {!showAllRecords && weatherData.length > 5 && (
+                <TouchableOpacity style={styles.showMoreButton} onPress={() => setShowAllRecords(true)}>
+                  <Ionicons name="chevron-down-circle" size={18} color="#1c4722" />
+                  <Text style={styles.showMoreText}>Show {weatherData.length - 5} More Records</Text>
+                </TouchableOpacity>
+              )}
+            </View>
+          </>
+        )}
+
+        {/* Plant Analysis Tab */}
+        {activeTab === "plants" && (
+          <>
+            {/* Plant Selection */}
+            {Object.keys(plantHistory).length > 0 && (
+              <View style={styles.plantSelectionContainer}>
+                <Text style={styles.sectionTitle}>Select Plant:</Text>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                  {Object.keys(plantHistory).map((plantName, index) => (
+                    <TouchableOpacity
+                      key={index}
+                      style={[styles.plantSelectBtn, selectedPlant === plantName && styles.activePlantBtn]}
+                      onPress={() => handlePlantSelect(plantName)}
+                    >
+                      <Text style={[styles.plantSelectText, selectedPlant === plantName && styles.activePlantText]}>
+                        {plantName}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
+              </View>
+            )}
+
+            {/* Plant Temperature Chart */}
+            <View style={styles.chartContainer}>
+              <Text style={styles.chartTitle}>
+                {selectedPlant ? `${selectedPlant} - Temperature Trends` : "Temperature Trends"}
+              </Text>
+
+              {loadingPlant ? (
+                <ActivityIndicator size="large" color="#1c4722" />
+              ) : plantData.length > 0 ? (
+                <ScrollView
+                  horizontal
+                  showsHorizontalScrollIndicator={true}
+                  style={styles.chartScrollView}
+                  contentContainerStyle={styles.chartScrollContent}
+                >
+                  <LineChart
+                    data={plantTempChartData}
+                    width={plantTempChartWidth}
+                    height={220}
+                    chartConfig={{
+                      ...chartConfig,
+                      backgroundGradientFrom: "#1a237e",
+                      backgroundGradientTo: "#303f9f",
+                    }}
+                    bezier
+                    style={styles.chart}
+                  />
+                </ScrollView>
+              ) : (
+                <View style={styles.noDataContainer}>
+                  <Ionicons name="leaf-outline" size={60} color="#ccc" />
+                  <Text style={styles.noDataText}>No plant data available</Text>
+                </View>
+              )}
+            </View>
+
+            {/* Plant Moisture Chart */}
+            {plantData.length > 0 && (
+              <View style={styles.chartContainer}>
+                <Text style={styles.chartTitle}>
+                  {selectedPlant ? `${selectedPlant} - Moisture Trends` : "Moisture Trends"}
+                </Text>
+
+                <ScrollView
+                  horizontal
+                  showsHorizontalScrollIndicator={true}
+                  style={styles.chartScrollView}
+                  contentContainerStyle={styles.chartScrollContent}
+                >
+                  <LineChart
+                    data={plantMoistureChartData}
+                    width={plantMoistureChartWidth}
+                    height={220}
+                    chartConfig={{
+                      ...chartConfig,
+                      backgroundGradientFrom: "#004d40",
+                      backgroundGradientTo: "#00796b",
+                    }}
+                    bezier
+                    style={styles.chart}
+                  />
+                </ScrollView>
+              </View>
+            )}
+
+            {/* Plant Statistics */}
+            {plantData.length > 0 && (
+              <View style={styles.statsContainer}>
+                <Text style={styles.sectionTitle}>Plant Growth Statistics</Text>
+
+                <View style={styles.statsRow}>
+                  <View style={styles.statCard}>
+                    <Ionicons name="thermometer-outline" size={28} color="#e53935" />
+                    <Text style={styles.statTitle}>Avg. Temperature</Text>
+                    <Text style={styles.statValue}>
+                      {(plantData.reduce((sum, d) => sum + d.temperature, 0) / plantData.length).toFixed(1)}°C
+                    </Text>
+                  </View>
+
+                  <View style={styles.statCard}>
+                    <Ionicons name="water-outline" size={28} color="#1976d2" />
+                    <Text style={styles.statTitle}>Avg. Moisture</Text>
+                    <Text style={styles.statValue}>
+                      {(plantData.reduce((sum, d) => sum + d.moisture, 0) / plantData.length).toFixed(1)}%
+                    </Text>
+                  </View>
+                </View>
+
+                <View style={styles.statsRow}>
+                  <View style={styles.statCard}>
+                    <Ionicons name="flask-outline" size={28} color="#9c27b0" />
+                    <Text style={styles.statTitle}>Avg. pH Level</Text>
+                    <Text style={styles.statValue}>
+                      {(plantData.reduce((sum, d) => sum + d.ph, 0) / plantData.length).toFixed(1)}
+                    </Text>
+                  </View>
+
+                  <View style={styles.statCard}>
+                    <Ionicons name="leaf-outline" size={28} color="#4caf50" />
+                    <Text style={styles.statTitle}>Days Tracked</Text>
+                    <Text style={styles.statValue}>{plantData.length}</Text>
+                  </View>
+                </View>
+              </View>
+            )}
+
+            {/* NPK Levels */}
+            {plantData.length > 0 && (
+              <View style={styles.npkContainer}>
+                <Text style={styles.sectionTitle}>Average NPK Levels</Text>
+
+                <View style={styles.npkChart}>
+                  <View style={styles.npkBar}>
+                    <View
+                      style={[
+                        styles.npkFill,
+                        {
+                          height: `${Math.min(100, plantData.reduce((sum, d) => sum + d.nitrogen, 0) / plantData.length / 1.5)}%`,
+                          backgroundColor: "#4CAF50",
+                        },
+                      ]}
+                    />
+                    <Text style={styles.npkValue}>
+                      {(plantData.reduce((sum, d) => sum + d.nitrogen, 0) / plantData.length).toFixed(0)}
+                    </Text>
+                    <Text style={styles.npkLabel}>Nitrogen</Text>
+                  </View>
+
+                  <View style={styles.npkBar}>
+                    <View
+                      style={[
+                        styles.npkFill,
+                        {
+                          height: `${Math.min(100, plantData.reduce((sum, d) => sum + d.phosphorus, 0) / plantData.length / 0.8)}%`,
+                          backgroundColor: "#FF9800",
+                        },
+                      ]}
+                    />
+                    <Text style={styles.npkValue}>
+                      {(plantData.reduce((sum, d) => sum + d.phosphorus, 0) / plantData.length).toFixed(0)}
+                    </Text>
+                    <Text style={styles.npkLabel}>Phosphorus</Text>
+                  </View>
+
+                  <View style={styles.npkBar}>
+                    <View
+                      style={[
+                        styles.npkFill,
+                        {
+                          height: `${Math.min(100, plantData.reduce((sum, d) => sum + d.potassium, 0) / plantData.length / 1.2)}%`,
+                          backgroundColor: "#2196F3",
+                        },
+                      ]}
+                    />
+                    <Text style={styles.npkValue}>
+                      {(plantData.reduce((sum, d) => sum + d.potassium, 0) / plantData.length).toFixed(0)}
+                    </Text>
+                    <Text style={styles.npkLabel}>Potassium</Text>
+                  </View>
+                </View>
+              </View>
+            )}
+
+            {/* Daily Plant Data Table */}
+            {plantData.length > 0 && (
+              <View style={styles.tableContainer}>
+                <Text style={styles.sectionTitle}>Daily Plant Readings</Text>
+
+                {/* Table Header */}
+                <View style={styles.tableHeader}>
+                  <Text style={[styles.tableHeaderCell, { flex: 1.5 }]}>Date</Text>
+                  <Text style={styles.tableHeaderCell}>Temp</Text>
+                  <Text style={styles.tableHeaderCell}>Moisture</Text>
+                  <Text style={styles.tableHeaderCell}>pH</Text>
+                </View>
+
+                {/* Table Body */}
+                {plantData.slice(-10).map((day, index) => (
+                  <View
+                    key={index}
+                    style={[styles.tableRow, index % 2 === 0 ? styles.tableRowEven : styles.tableRowOdd]}
+                  >
+                    <Text style={[styles.tableCell, { flex: 1.5 }]}>{day.date}</Text>
+                    <Text style={styles.tableCell}>{day.temperature}°C</Text>
+                    <Text style={styles.tableCell}>{day.moisture}%</Text>
+                    <Text style={styles.tableCell}>{day.ph}</Text>
+                  </View>
+                ))}
+              </View>
+            )}
+          </>
+        )}
+
+        {/* Plant Recommendations Tab */}
+        {activeTab === "recommendations" && (
+          <>
+            {/* Header Section */}
+            <View style={styles.recommendationHeader}>
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+                <Text style={styles.sectionTitle}>Smart Planting Recommendations</Text>
+              </View>
+
+              <Text style={styles.subtitle}>
+                Based on weather analysis for {selectedLocation?.city || "your location"}
+              </Text>
+
+              <TouchableOpacity
+                style={styles.refreshButton}
+                onPress={generatePlantRecommendations}
+                disabled={loadingRecommendations}
+              >
+                <Ionicons name="refresh-outline" size={20} color={loadingRecommendations ? "#ccc" : "#1c4722"} />
+                <Text style={styles.refreshButtonText}>Refresh Recommendations</Text>
+              </TouchableOpacity>
+            </View>
+
+            {loadingRecommendations ? (
+              <View style={styles.loadingContainer}>
+                <ActivityIndicator size="large" color="#1c4722" />
+                <Text style={styles.loadingText}>Analyzing weather patterns...</Text>
+              </View>
+            ) : (
+              <>
+                {/* Next Month Weather Prediction */}
+                {plantRecommendations.length > 0 && (
+                  <View style={styles.weatherPredictionCard}>
+                    <Text style={[styles.cardTitle, { textAlign: "center" }]}>Next Month Weather Forecast</Text>
+                    <View style={styles.predictionStats}>
+                      <View style={styles.predictionStat}>
+                        <Ionicons name="thermometer-outline" size={24} color="#e53935" />
+                        <Text style={styles.predictionValue}>
+                          {plantRecommendations[0]?.predictedWeather.nextMonth.avgTemp.toFixed(1)}°C
+                        </Text>
+                        <Text style={styles.predictionLabel}>Avg Temp</Text>
+                      </View>
+                      <View style={styles.predictionStat}>
+                        <Ionicons name="rainy-outline" size={24} color="#2196f3" />
+                        <Text style={styles.predictionValue}>
+                          {plantRecommendations[0]?.predictedWeather.nextMonth.rainfall.toFixed(1)} mm
+                        </Text>
+                        <Text style={styles.predictionLabel}>Rainfall</Text>
+                      </View>
+                      <View style={styles.predictionStat}>
+                        <Ionicons name="water-outline" size={24} color="#1976d2" />
+                        <Text style={styles.predictionValue}>
+                          {plantRecommendations[0]?.predictedWeather.nextMonth.humidity.toFixed(1)}%
+                        </Text>
+                        <Text style={styles.predictionLabel}>Humidity</Text>
+                      </View>
+                    </View>
+
+                    <View
+                      style={[
+                        styles.riskIndicator,
+                        {
+                          backgroundColor: getRiskColor(plantRecommendations[0]?.predictedWeather.nextMonth.riskLevel)
+                            .background,
+                        },
+                      ]}
+                    >
+                      <Text
+                        style={[
+                          styles.riskText,
+                          { color: getRiskColor(plantRecommendations[0]?.predictedWeather.nextMonth.riskLevel).text },
+                        ]}
                       >
-                        {/* All Status */}
+                        Risk Level: {plantRecommendations[0]?.predictedWeather.nextMonth.riskLevel.toUpperCase()}
+                      </Text>
+                    </View>
+                  </View>
+                )}
+
+                {/* Category Selection */}
+                {Object.keys(plantCategories).length > 0 && (
+                  <View style={styles.categoryContainer}>
+                    <Text style={styles.sectionTitle}>Plant Categories</Text>
+                    <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.categoryScrollView}>
+                      {Object.keys(plantCategories).map((category, index) => {
+                        const categoryInfo = getCategoryInfo(category)
+                        return (
+                          <TouchableOpacity
+                            key={index}
+                            style={[styles.categoryCard, selectedCategory === category && styles.activeCategoryCard]}
+                            onPress={() => setSelectedCategory(category)}
+                          >
+                            <View style={styles.categoryIconContainer}>
+                              <Ionicons
+                                name={categoryInfo.icon as any}
+                                size={32}
+                                color={selectedCategory === category ? "#1c4722" : "#666"}
+                              />
+                            </View>
+                            <Text
+                              style={[styles.categoryName, selectedCategory === category && styles.activeCategoryName]}
+                            >
+                              {categoryInfo.name}
+                            </Text>
+                            <Text style={styles.categoryCount}>{categoryInfo.count} plants</Text>
+                          </TouchableOpacity>
+                        )
+                      })}
+                    </ScrollView>
+                  </View>
+                )}
+
+                {/* Enhanced Clickable Status Summary - HORIZONTAL SCROLL VERSION */}
+                {selectedCategory && plantCategories[selectedCategory] && (
+                  <View style={styles.categorySummary}>
+                    <Text style={styles.categorySummaryTitle}>
+                      {getCategoryInfo(selectedCategory).name} Recommendations
+                    </Text>
+                    <Text style={styles.categorySummarySubtitle}>
+                      {plantCategories[selectedCategory].length} plants available for{" "}
+                      {selectedLocation?.city || "your location"}
+                    </Text>
+
+                    {/* ✅ HORIZONTAL SCROLLABLE Status Summary */}
+                    <ScrollView
+                      horizontal
+                      showsHorizontalScrollIndicator={false}
+                      contentContainerStyle={styles.statusSummaryScrollContent}
+                      style={styles.statusSummaryScroll}
+                    >
+                      {/* All Status */}
+                      <TouchableOpacity
+                        style={[styles.statusSummaryItemCard, selectedStatus === "all" && styles.activeStatusItemCard]}
+                        onPress={() => setSelectedStatus("all")}
+                        activeOpacity={0.7}
+                      >
+                        <View style={[styles.statusDot, { backgroundColor: "#666" }]} />
+                        <View style={styles.statusTextContainer}>
+                          <Text style={[styles.statusSummaryText, selectedStatus === "all" && styles.activeStatusText]}>
+                            All Plants
+                          </Text>
+                          <Text style={styles.statusCount}>{plantCategories[selectedCategory].length}</Text>
+                        </View>
+                        {selectedStatus === "all" && (
+                          <Ionicons name="checkmark-circle" size={18} color="#1c4722" style={styles.checkmark} />
+                        )}
+                      </TouchableOpacity>
+
+                      {/* Ideal Status */}
+                      {plantCategories[selectedCategory].filter((r) => r.currentStatus === "ideal").length > 0 && (
                         <TouchableOpacity
                           style={[
                             styles.statusSummaryItemCard,
-                            selectedStatus === "all" && styles.activeStatusItemCard,
+                            selectedStatus === "ideal" && styles.activeStatusItemCard,
                           ]}
-                          onPress={() => setSelectedStatus("all")}
+                          onPress={() => setSelectedStatus("ideal")}
                           activeOpacity={0.7}
                         >
-                          <View style={[styles.statusDot, { backgroundColor: "#666" }]} />
+                          <View style={[styles.statusDot, { backgroundColor: "#00796b" }]} />
                           <View style={styles.statusTextContainer}>
                             <Text
-                              style={[styles.statusSummaryText, selectedStatus === "all" && styles.activeStatusText]}
+                              style={[styles.statusSummaryText, selectedStatus === "ideal" && styles.activeStatusText]}
                             >
-                              All Plants
+                              Ideal
                             </Text>
-                            <Text style={styles.statusCount}>{plantCategories[selectedCategory].length}</Text>
+                            <Text style={styles.statusCount}>
+                              {plantCategories[selectedCategory].filter((r) => r.currentStatus === "ideal").length}
+                            </Text>
                           </View>
-                          {selectedStatus === "all" && (
-                            <Ionicons name="checkmark-circle" size={18} color="#1c4722" style={styles.checkmark} />
+                          {selectedStatus === "ideal" && (
+                            <Ionicons name="checkmark-circle" size={18} color="#00796b" style={styles.checkmark} />
                           )}
                         </TouchableOpacity>
+                      )}
 
-                        {/* Ideal Status */}
-                        {plantCategories[selectedCategory].filter((r) => r.currentStatus === "ideal").length > 0 && (
-                          <TouchableOpacity
-                            style={[
-                              styles.statusSummaryItemCard,
-                              selectedStatus === "ideal" && styles.activeStatusItemCard,
-                            ]}
-                            onPress={() => setSelectedStatus("ideal")}
-                            activeOpacity={0.7}
-                          >
-                            <View style={[styles.statusDot, { backgroundColor: "#00796b" }]} />
-                            <View style={styles.statusTextContainer}>
-                              <Text
-                                style={[
-                                  styles.statusSummaryText,
-                                  selectedStatus === "ideal" && styles.activeStatusText,
-                                ]}
-                              >
-                                Ideal
-                              </Text>
-                              <Text style={styles.statusCount}>
-                                {plantCategories[selectedCategory].filter((r) => r.currentStatus === "ideal").length}
-                              </Text>
-                            </View>
-                            {selectedStatus === "ideal" && (
-                              <Ionicons name="checkmark-circle" size={18} color="#00796b" style={styles.checkmark} />
-                            )}
-                          </TouchableOpacity>
-                        )}
-
-                        {/* Good Status */}
-                        {plantCategories[selectedCategory].filter((r) => r.currentStatus === "good").length > 0 && (
-                          <TouchableOpacity
-                            style={[
-                              styles.statusSummaryItemCard,
-                              selectedStatus === "good" && styles.activeStatusItemCard,
-                            ]}
-                            onPress={() => setSelectedStatus("good")}
-                            activeOpacity={0.7}
-                          >
-                            <View style={[styles.statusDot, { backgroundColor: "#fbc02d" }]} />
-                            <View style={styles.statusTextContainer}>
-                              <Text
-                                style={[styles.statusSummaryText, selectedStatus === "good" && styles.activeStatusText]}
-                              >
-                                Good
-                              </Text>
-                              <Text style={styles.statusCount}>
-                                {plantCategories[selectedCategory].filter((r) => r.currentStatus === "good").length}
-                              </Text>
-                            </View>
-                            {selectedStatus === "good" && (
-                              <Ionicons name="checkmark-circle" size={18} color="#fbc02d" style={styles.checkmark} />
-                            )}
-                          </TouchableOpacity>
-                        )}
-
-                        {/* Caution Status */}
-                        {plantCategories[selectedCategory].filter((r) => r.currentStatus === "caution").length > 0 && (
-                          <TouchableOpacity
-                            style={[
-                              styles.statusSummaryItemCard,
-                              selectedStatus === "caution" && styles.activeStatusItemCard,
-                            ]}
-                            onPress={() => setSelectedStatus("caution")}
-                            activeOpacity={0.7}
-                          >
-                            <View style={[styles.statusDot, { backgroundColor: "#f57c00" }]} />
-                            <View style={styles.statusTextContainer}>
-                              <Text
-                                style={[
-                                  styles.statusSummaryText,
-                                  selectedStatus === "caution" && styles.activeStatusText,
-                                ]}
-                              >
-                                Caution
-                              </Text>
-                              <Text style={styles.statusCount}>
-                                {plantCategories[selectedCategory].filter((r) => r.currentStatus === "caution").length}
-                              </Text>
-                            </View>
-                            {selectedStatus === "caution" && (
-                              <Ionicons name="checkmark-circle" size={18} color="#f57c00" style={styles.checkmark} />
-                            )}
-                          </TouchableOpacity>
-                        )}
-
-                        {/* Avoid Status */}
-                        {plantCategories[selectedCategory].filter((r) => r.currentStatus === "avoid").length > 0 && (
-                          <TouchableOpacity
-                            style={[
-                              styles.statusSummaryItemCard,
-                              selectedStatus === "avoid" && styles.activeStatusItemCard,
-                            ]}
-                            onPress={() => setSelectedStatus("avoid")}
-                            activeOpacity={0.7}
-                          >
-                            <View style={[styles.statusDot, { backgroundColor: "#d32f2f" }]} />
-                            <View style={styles.statusTextContainer}>
-                              <Text
-                                style={[
-                                  styles.statusSummaryText,
-                                  selectedStatus === "avoid" && styles.activeStatusText,
-                                ]}
-                              >
-                                Avoid
-                              </Text>
-                              <Text style={styles.statusCount}>
-                                {plantCategories[selectedCategory].filter((r) => r.currentStatus === "avoid").length}
-                              </Text>
-                            </View>
-                            {selectedStatus === "avoid" && (
-                              <Ionicons name="checkmark-circle" size={18} color="#d32f2f" style={styles.checkmark} />
-                            )}
-                          </TouchableOpacity>
-                        )}
-                      </ScrollView>
-                    </View>
-                  )}
-
-                  {/* Plant Recommendations List for Selected Category */}
-                  {getCurrentCategoryRecommendations().length > 0 ? (
-                    selectedPlantDetail ? (
-                      // Show detailed view for selected plant
-                      <View style={styles.detailView}>
-                        {/* Back button */}
-                        <TouchableOpacity style={styles.backButton} onPress={() => setSelectedPlantDetail(null)}>
-                          <Ionicons name="arrow-back-outline" size={20} color="#1c4722" />
-                          <Text style={styles.backButtonText}>Back to {getCategoryInfo(selectedCategory).name}</Text>
+                      {/* Good Status */}
+                      {plantCategories[selectedCategory].filter((r) => r.currentStatus === "good").length > 0 && (
+                        <TouchableOpacity
+                          style={[
+                            styles.statusSummaryItemCard,
+                            selectedStatus === "good" && styles.activeStatusItemCard,
+                          ]}
+                          onPress={() => setSelectedStatus("good")}
+                          activeOpacity={0.7}
+                        >
+                          <View style={[styles.statusDot, { backgroundColor: "#fbc02d" }]} />
+                          <View style={styles.statusTextContainer}>
+                            <Text
+                              style={[styles.statusSummaryText, selectedStatus === "good" && styles.activeStatusText]}
+                            >
+                              Good
+                            </Text>
+                            <Text style={styles.statusCount}>
+                              {plantCategories[selectedCategory].filter((r) => r.currentStatus === "good").length}
+                            </Text>
+                          </View>
+                          {selectedStatus === "good" && (
+                            <Ionicons name="checkmark-circle" size={18} color="#fbc02d" style={styles.checkmark} />
+                          )}
                         </TouchableOpacity>
+                      )}
 
-                        {/* Detailed Plant Card */}
-                        <View style={styles.detailedRecommendationCard}>
-                          <View style={styles.cardHeader}>
-                            <View style={styles.plantInfo}>
-                              <Text style={styles.plantName}>{selectedPlantDetail.cropName}</Text>
+                      {/* Caution Status */}
+                      {plantCategories[selectedCategory].filter((r) => r.currentStatus === "caution").length > 0 && (
+                        <TouchableOpacity
+                          style={[
+                            styles.statusSummaryItemCard,
+                            selectedStatus === "caution" && styles.activeStatusItemCard,
+                          ]}
+                          onPress={() => setSelectedStatus("caution")}
+                          activeOpacity={0.7}
+                        >
+                          <View style={[styles.statusDot, { backgroundColor: "#f57c00" }]} />
+                          <View style={styles.statusTextContainer}>
+                            <Text
+                              style={[
+                                styles.statusSummaryText,
+                                selectedStatus === "caution" && styles.activeStatusText,
+                              ]}
+                            >
+                              Caution
+                            </Text>
+                            <Text style={styles.statusCount}>
+                              {plantCategories[selectedCategory].filter((r) => r.currentStatus === "caution").length}
+                            </Text>
+                          </View>
+                          {selectedStatus === "caution" && (
+                            <Ionicons name="checkmark-circle" size={18} color="#f57c00" style={styles.checkmark} />
+                          )}
+                        </TouchableOpacity>
+                      )}
+
+                      {/* Avoid Status */}
+                      {plantCategories[selectedCategory].filter((r) => r.currentStatus === "avoid").length > 0 && (
+                        <TouchableOpacity
+                          style={[
+                            styles.statusSummaryItemCard,
+                            selectedStatus === "avoid" && styles.activeStatusItemCard,
+                          ]}
+                          onPress={() => setSelectedStatus("avoid")}
+                          activeOpacity={0.7}
+                        >
+                          <View style={[styles.statusDot, { backgroundColor: "#d32f2f" }]} />
+                          <View style={styles.statusTextContainer}>
+                            <Text
+                              style={[styles.statusSummaryText, selectedStatus === "avoid" && styles.activeStatusText]}
+                            >
+                              Avoid
+                            </Text>
+                            <Text style={styles.statusCount}>
+                              {plantCategories[selectedCategory].filter((r) => r.currentStatus === "avoid").length}
+                            </Text>
+                          </View>
+                          {selectedStatus === "avoid" && (
+                            <Ionicons name="checkmark-circle" size={18} color="#d32f2f" style={styles.checkmark} />
+                          )}
+                        </TouchableOpacity>
+                      )}
+                    </ScrollView>
+                  </View>
+                )}
+
+                {/* Plant Recommendations List for Selected Category */}
+                {getCurrentCategoryRecommendations().length > 0 ? (
+                  selectedPlantDetail ? (
+                    // Show detailed view for selected plant
+                    <View style={styles.detailView}>
+                      {/* Back button */}
+                      <TouchableOpacity style={styles.backButton} onPress={() => setSelectedPlantDetail(null)}>
+                        <Ionicons name="arrow-back-outline" size={20} color="#1c4722" />
+                        <Text style={styles.backButtonText}>Back to {getCategoryInfo(selectedCategory).name}</Text>
+                      </TouchableOpacity>
+
+                      {/* Detailed Plant Card */}
+                      <View style={styles.detailedRecommendationCard}>
+                        <View style={styles.cardHeader}>
+                          <View style={styles.plantInfo}>
+                            <Text style={styles.plantName}>{selectedPlantDetail.cropName}</Text>
+                            <View
+                              style={[
+                                styles.statusBadge,
+                                { backgroundColor: getStatusColor(selectedPlantDetail.currentStatus).background },
+                              ]}
+                            >
+                              <Text
+                                style={[
+                                  styles.statusText,
+                                  { color: getStatusColor(selectedPlantDetail.currentStatus).text },
+                                ]}
+                              >
+                                {selectedPlantDetail.currentStatus.toUpperCase()}
+                              </Text>
+                            </View>
+                          </View>
+                          <Ionicons
+                            name={getStatusIcon(selectedPlantDetail.currentStatus)}
+                            size={28}
+                            color={getStatusColor(selectedPlantDetail.currentStatus).text}
+                          />
+                        </View>
+
+                        {/* Best Planting Months */}
+                        <View style={{ flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 8 }}>
+                          <Calendar size={16} color="#6b7280" />
+                          <Text style={styles.subsectionTitle}>Best Planting Months:</Text>
+                        </View>
+                        <View style={styles.monthsContainer}>
+                          {selectedPlantDetail.bestMonths.map((month, idx) => (
+                            <View key={idx} style={styles.monthChip}>
+                              <Text style={styles.monthText}>
+                                {new Date(2024, month - 1, 1).toLocaleString("default", { month: "short" })}
+                              </Text>
+                            </View>
+                          ))}
+                        </View>
+
+                        {/* Risk Factors */}
+                        {selectedPlantDetail.riskFactors.length > 0 && (
+                          <View style={styles.riskSection}>
+                            <View style={{ flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 8 }}>
+                              <AlertTriangle size={16} color="#ef4444" />
+                              <Text style={styles.subsectionTitle}>Current Risk Factors:</Text>
+                            </View>
+                            {selectedPlantDetail.riskFactors.map((risk, idx) => (
+                              <View key={idx} style={styles.riskItem}>
+                                <Ionicons name="warning-outline" size={16} color="#ff5722" />
+                                <Text style={styles.riskText}>{risk}</Text>
+                              </View>
+                            ))}
+                          </View>
+                        )}
+
+                        {/* Recommendations */}
+                        <View style={styles.recommendationsSection}>
+                          <View style={{ flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 8 }}>
+                            <Lightbulb size={16} color="#f59e0b" />
+                            <Text style={styles.subsectionTitle}>Recommendations:</Text>
+                          </View>
+                          {selectedPlantDetail.recommendations.map((rec, idx) => (
+                            <View key={idx} style={styles.recommendationItem}>
+                              <Ionicons name="checkmark-circle-outline" size={16} color="#4caf50" />
+                              <Text style={styles.recommendationText}>{rec}</Text>
+                            </View>
+                          ))}
+                        </View>
+
+                        {/* Alternative Dates */}
+                        {selectedPlantDetail.alternativePlantingDates.length > 0 && (
+                          <View style={styles.alternativesSection}>
+                            <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
+                              <Calendar size={16} color="#2196f3" />
+                              <Text style={styles.subsectionTitle}>Alternative Options:</Text>
+                            </View>
+                            {selectedPlantDetail.alternativePlantingDates.map((alt, idx) => (
+                              <View key={idx} style={styles.alternativeItem}>
+                                <Ionicons name="calendar-outline" size={16} color="#2196f3" />
+                                <Text style={styles.alternativeText}>{alt}</Text>
+                              </View>
+                            ))}
+                          </View>
+                        )}
+
+                        {/* Database-specific optimal conditions */}
+                        {selectedPlantDetail.optimalTemp && (
+                          <View style={styles.optimalConditions}>
+                            <Text style={styles.subsectionTitle}> Optimal Growing Conditions:</Text>
+                            <Text style={styles.conditionText}>
+                              Temperature: {selectedPlantDetail.optimalTemp.min}°C -{" "}
+                              {selectedPlantDetail.optimalTemp.max}°C
+                            </Text>
+                            {selectedPlantDetail.optimalHumidity && (
+                              <Text style={styles.conditionText}>
+                                Humidity: {selectedPlantDetail.optimalHumidity.min}% -{" "}
+                                {selectedPlantDetail.optimalHumidity.max}%
+                              </Text>
+                            )}
+                            {selectedPlantDetail.optimalPH?.min && selectedPlantDetail.optimalPH?.max && (
+                              <Text style={styles.conditionText}>
+                                pH Level: {selectedPlantDetail.optimalPH.min} - {selectedPlantDetail.optimalPH.max}
+                              </Text>
+                            )}
+                          </View>
+                        )}
+
+                        {/* NPK Requirements from database */}
+                        {selectedPlantDetail.optimalNPK && (
+                          <View style={styles.npkSection}>
+                            <Text style={styles.subsectionTitle}> Nutrient Requirements:</Text>
+                            {selectedPlantDetail.optimalNPK.nitrogen.min &&
+                              selectedPlantDetail.optimalNPK.nitrogen.max && (
+                                <Text style={styles.conditionText}>
+                                  Nitrogen: {selectedPlantDetail.optimalNPK.nitrogen.min} -{" "}
+                                  {selectedPlantDetail.optimalNPK.nitrogen.max} ppm
+                                </Text>
+                              )}
+                            {selectedPlantDetail.optimalNPK.phosphorus.min &&
+                              selectedPlantDetail.optimalNPK.phosphorus.max && (
+                                <Text style={styles.conditionText}>
+                                  Phosphorus: {selectedPlantDetail.optimalNPK.phosphorus.min} -{" "}
+                                  {selectedPlantDetail.optimalNPK.phosphorus.max} ppm
+                                </Text>
+                              )}
+                            {selectedPlantDetail.optimalNPK.potassium.min &&
+                              selectedPlantDetail.optimalNPK.potassium.max && (
+                                <Text style={styles.conditionText}>
+                                  Potassium: {selectedPlantDetail.optimalNPK.potassium.min} -{" "}
+                                  {selectedPlantDetail.optimalNPK.potassium.max} ppm
+                                </Text>
+                              )}
+                          </View>
+                        )}
+                      </View>
+                    </View>
+                  ) : (
+                    // Show compact plant list
+                    <View style={styles.plantListContainer}>
+                      <Text style={styles.listTitle}>{getCategoryInfo(selectedCategory).name} Plants</Text>
+                      <Text style={styles.listSubtitle}>Tap any plant to view detailed recommendations</Text>
+
+                      {getCurrentCategoryRecommendations().map((recommendation, index) => (
+                        <TouchableOpacity
+                          key={index}
+                          style={styles.plantListItem}
+                          onPress={() => setSelectedPlantDetail(recommendation)}
+                        >
+                          <View style={styles.plantListInfo}>
+                            <View style={styles.plantListHeader}>
+                              <Text style={styles.plantListName}>{recommendation.cropName}</Text>
                               <View
                                 style={[
-                                  styles.statusBadge,
-                                  { backgroundColor: getStatusColor(selectedPlantDetail.currentStatus).background },
+                                  styles.compactStatusBadge,
+                                  { backgroundColor: getStatusColor(recommendation.currentStatus).background },
                                 ]}
                               >
                                 <Text
                                   style={[
-                                    styles.statusText,
-                                    { color: getStatusColor(selectedPlantDetail.currentStatus).text },
+                                    styles.compactStatusText,
+                                    { color: getStatusColor(recommendation.currentStatus).text },
                                   ]}
                                 >
-                                  {selectedPlantDetail.currentStatus.toUpperCase()}
+                                  {recommendation.currentStatus.toUpperCase()}
                                 </Text>
                               </View>
                             </View>
-                            <Ionicons
-                              name={getStatusIcon(selectedPlantDetail.currentStatus)}
-                              size={28}
-                              color={getStatusColor(selectedPlantDetail.currentStatus).text}
-                            />
-                          </View>
-
-                          {/* Best Planting Months */}
-                          <View style={{ flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 8 }}>
-                            <Calendar size={16} color="#6b7280" />
-                            <Text style={styles.subsectionTitle}>Best Planting Months:</Text>
-                          </View>
-                          <View style={styles.monthsContainer}>
-                            {selectedPlantDetail.bestMonths.map((month, idx) => (
-                              <View key={idx} style={styles.monthChip}>
-                                <Text style={styles.monthText}>
-                                  {new Date(2024, month - 1, 1).toLocaleString("default", { month: "short" })}
+                            {/* Quick summary */}
+                            <View style={{ marginTop: 8 }}>
+                              {/* Best months */}
+                              <View
+                                style={{
+                                  flexDirection: "row",
+                                  alignItems: "center",
+                                  flexWrap: "wrap",
+                                  marginBottom: 4,
+                                }}
+                              >
+                                <Ionicons
+                                  name="calendar-outline"
+                                  size={18}
+                                  color="#333"
+                                  style={{ marginRight: 6, marginTop: 2 }}
+                                />
+                                <Text style={{ fontSize: 14, color: "#333" }}>
+                                  Best months:{" "}
+                                  {recommendation.bestMonths
+                                    .slice(0, 3)
+                                    .map((month) =>
+                                      new Date(2024, month - 1, 1).toLocaleString("default", { month: "short" }),
+                                    )
+                                    .join(", ")}
+                                  {recommendation.bestMonths.length > 3 ? "..." : ""}
                                 </Text>
                               </View>
-                            ))}
-                          </View>
 
-                          {/* Risk Factors */}
-                          {selectedPlantDetail.riskFactors.length > 0 && (
-                            <View style={styles.riskSection}>
-                              <View style={{ flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 8 }}>
-                                <AlertTriangle size={16} color="#ef4444" />
-                                <Text style={styles.subsectionTitle}>Current Risk Factors:</Text>
-                              </View>
-                              {selectedPlantDetail.riskFactors.map((risk, idx) => (
-                                <View key={idx} style={styles.riskItem}>
-                                  <Ionicons name="warning-outline" size={16} color="#ff5722" />
-                                  <Text style={styles.riskText}>{risk}</Text>
+                              {/* Risk factors */}
+                              {recommendation.riskFactors.length > 0 && (
+                                <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 4 }}>
+                                  <AlertTriangle size={14} color="#e53935" style={{ marginRight: 6, marginTop: 2 }} />
+                                  <Text style={{ fontSize: 13, color: "#e53935", fontWeight: "500" }}>
+                                    {recommendation.riskFactors.length} risk factor
+                                    {recommendation.riskFactors.length > 1 ? "s" : ""} detected
+                                  </Text>
                                 </View>
-                              ))}
-                            </View>
-                          )}
-
-                          {/* Recommendations */}
-                          <View style={styles.recommendationsSection}>
-                            <View style={{ flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 8 }}>
-                              <Lightbulb size={16} color="#f59e0b" />
-                              <Text style={styles.subsectionTitle}>Recommendations:</Text>
-                            </View>
-                            {selectedPlantDetail.recommendations.map((rec, idx) => (
-                              <View key={idx} style={styles.recommendationItem}>
-                                <Ionicons name="checkmark-circle-outline" size={16} color="#4caf50" />
-                                <Text style={styles.recommendationText}>{rec}</Text>
-                              </View>
-                            ))}
-                          </View>
-
-                          {/* Alternative Dates */}
-                          {selectedPlantDetail.alternativePlantingDates.length > 0 && (
-                            <View style={styles.alternativesSection}>
-                              <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
-                                <Calendar size={16} color="#2196f3" />
-                                <Text style={styles.subsectionTitle}>Alternative Options:</Text>
-                              </View>
-                              {selectedPlantDetail.alternativePlantingDates.map((alt, idx) => (
-                                <View key={idx} style={styles.alternativeItem}>
-                                  <Ionicons name="calendar-outline" size={16} color="#2196f3" />
-                                  <Text style={styles.alternativeText}>{alt}</Text>
-                                </View>
-                              ))}
-                            </View>
-                          )}
-
-                          {/* Database-specific optimal conditions */}
-                          {selectedPlantDetail.optimalTemp && (
-                            <View style={styles.optimalConditions}>
-                              <Text style={styles.subsectionTitle}> Optimal Growing Conditions:</Text>
-                              <Text style={styles.conditionText}>
-                                Temperature: {selectedPlantDetail.optimalTemp.min}°C -{" "}
-                                {selectedPlantDetail.optimalTemp.max}°C
-                              </Text>
-                              {selectedPlantDetail.optimalHumidity && (
-                                <Text style={styles.conditionText}>
-                                  Humidity: {selectedPlantDetail.optimalHumidity.min}% -{" "}
-                                  {selectedPlantDetail.optimalHumidity.max}%
-                                </Text>
                               )}
-                              {selectedPlantDetail.optimalPH?.min && selectedPlantDetail.optimalPH?.max && (
-                                <Text style={styles.conditionText}>
-                                  pH Level: {selectedPlantDetail.optimalPH.min} - {selectedPlantDetail.optimalPH.max}
-                                </Text>
+
+                              {/* Optimal temperature */}
+                              {recommendation.optimalTemp && (
+                                <View style={{ flexDirection: "row", alignItems: "center" }}>
+                                  <Thermometer size={14} color="#1c4722" style={{ marginRight: 6, marginTop: 2 }} />
+                                  <Text style={{ fontSize: 13, color: "#1c4722" }}>
+                                    Optimal: {recommendation.optimalTemp.min}°C - {recommendation.optimalTemp.max}°C
+                                  </Text>
+                                </View>
                               )}
                             </View>
-                          )}
+                          </View>
 
-                          {/* NPK Requirements from database */}
-                          {selectedPlantDetail.optimalNPK && (
-                            <View style={styles.npkSection}>
-                              <Text style={styles.subsectionTitle}> Nutrient Requirements:</Text>
-                              {selectedPlantDetail.optimalNPK.nitrogen.min &&
-                                selectedPlantDetail.optimalNPK.nitrogen.max && (
-                                  <Text style={styles.conditionText}>
-                                    Nitrogen: {selectedPlantDetail.optimalNPK.nitrogen.min} -{" "}
-                                    {selectedPlantDetail.optimalNPK.nitrogen.max} ppm
-                                  </Text>
-                                )}
-                              {selectedPlantDetail.optimalNPK.phosphorus.min &&
-                                selectedPlantDetail.optimalNPK.phosphorus.max && (
-                                  <Text style={styles.conditionText}>
-                                    Phosphorus: {selectedPlantDetail.optimalNPK.phosphorus.min} -{" "}
-                                    {selectedPlantDetail.optimalNPK.phosphorus.max} ppm
-                                  </Text>
-                                )}
-                              {selectedPlantDetail.optimalNPK.potassium.min &&
-                                selectedPlantDetail.optimalNPK.potassium.max && (
-                                  <Text style={styles.conditionText}>
-                                    Potassium: {selectedPlantDetail.optimalNPK.potassium.min} -{" "}
-                                    {selectedPlantDetail.optimalNPK.potassium.max} ppm
-                                  </Text>
-                                )}
-                            </View>
-                          )}
-                        </View>
-                      </View>
-                    ) : (
-                      // Show compact plant list
-                      <View style={styles.plantListContainer}>
-                        <Text style={styles.listTitle}>{getCategoryInfo(selectedCategory).name} Plants</Text>
-                        <Text style={styles.listSubtitle}>Tap any plant to view detailed recommendations</Text>
-
-                        {getCurrentCategoryRecommendations().map((recommendation, index) => (
-                          <TouchableOpacity
-                            key={index}
-                            style={styles.plantListItem}
-                            onPress={() => setSelectedPlantDetail(recommendation)}
-                          >
-                            <View style={styles.plantListInfo}>
-                              <View style={styles.plantListHeader}>
-                                <Text style={styles.plantListName}>{recommendation.cropName}</Text>
-                                <View
-                                  style={[
-                                    styles.compactStatusBadge,
-                                    { backgroundColor: getStatusColor(recommendation.currentStatus).background },
-                                  ]}
-                                >
-                                  <Text
-                                    style={[
-                                      styles.compactStatusText,
-                                      { color: getStatusColor(recommendation.currentStatus).text },
-                                    ]}
-                                  >
-                                    {recommendation.currentStatus.toUpperCase()}
-                                  </Text>
-                                </View>
-                              </View>
-
-                              <View style={{ gap: 6 }}>
-                                {/* Best Months */}
-                                <View style={{ flexDirection: "row", alignItems: "center", flexWrap: "wrap" }}>
-                                  <Ionicons
-                                    name="calendar-outline"
-                                    size={14}
-                                    color="#1c4722"
-                                    style={{ marginRight: 6 }}
-                                  />
-                                  <Text style={styles.quickSummaryText}>
-                                    Best months:{" "}
-                                    {recommendation.bestMonths
-                                      .slice(0, 3)
-                                      .map((month) =>
-                                        new Date(2024, month - 1, 1).toLocaleString("default", { month: "short" }),
-                                      )
-                                      .join(", ")}
-                                    {recommendation.bestMonths.length > 3 ? "..." : ""}
-                                  </Text>
-                                </View>
-
-                                {/* Risk Factors */}
-                                {recommendation.riskFactors.length > 0 && (
-                                  <View style={{ flexDirection: "row", alignItems: "center", flexWrap: "wrap" }}>
-                                    <Ionicons
-                                      name="alert-circle-outline"
-                                      size={14}
-                                      color="#1c4722"
-                                      style={{ marginRight: 6 }}
-                                    />
-                                    <Text style={styles.riskBadgeText}>
-                                      {recommendation.riskFactors.length} risk factor
-                                      {recommendation.riskFactors.length > 1 ? "s" : ""} detected
-                                    </Text>
-                                  </View>
-                                )}
-
-                                {/* Optimal Temp */}
-                                {recommendation.optimalTemp && (
-                                  <View style={{ flexDirection: "row", alignItems: "center", flexWrap: "wrap" }}>
-                                    <Ionicons
-                                      name="thermometer-outline"
-                                      size={14}
-                                      color="#1c4722"
-                                      style={{ marginRight: 6 }}
-                                    />
-                                    <Text style={styles.cropDetailText}>
-                                      Optimal: {recommendation.optimalTemp.min}°C - {recommendation.optimalTemp.max}°C
-                                    </Text>
-                                  </View>
-                                )}
-                              </View>
-                            </View>
-
-                            <Ionicons name="chevron-forward-outline" size={20} color="#666" />
-                          </TouchableOpacity>
-                        ))}
-                      </View>
-                    )
-                  ) : (
-                    // No plants message
-                    <View style={styles.noDataContainer}>
-                      <Ionicons name="leaf-outline" size={60} color="#ccc" />
-                      <Text style={styles.noDataText}>
-                        No {getCategoryInfo(selectedCategory).name.toLowerCase()} available for current conditions
-                      </Text>
+                          <Ionicons name="chevron-forward-outline" size={20} color="#666" />
+                        </TouchableOpacity>
+                      ))}
                     </View>
-                  )}
-                </>
-              )}
-            </>
-          )}
+                  )
+                ) : (
+                  // No plants message
+                  <View style={styles.noDataContainer}>
+                    <Ionicons name="leaf-outline" size={60} color="#ccc" />
+                    <Text style={styles.noDataText}>
+                      No {getCategoryInfo(selectedCategory).name.toLowerCase()} available for current conditions
+                    </Text>
+                  </View>
+                )}
+              </>
+            )}
+          </>
+        )}
 
-          {/* Blank space at bottom to prevent footer overlap */}
-          <View style={styles.footerSpace} />
-        </ScrollView>
+        {/* Blank space at bottom to prevent footer overlap */}
+        <View style={styles.footerSpace} />
+      </ScrollView>
 
-        <FooterNavigation />
-      </View>
-    </>
+      <FooterNavigation />
+    </View>
   )
 }
 
