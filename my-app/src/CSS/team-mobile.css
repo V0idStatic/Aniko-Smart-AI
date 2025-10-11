@@ -85,22 +85,34 @@
 }
 
 @media (min-width: 320px) and (max-width: 575.75px) {
-  .mobile-team-slider {
-    gap: 2.5rem;
+   .mobile-team-slider {
+    display: flex;
+    overflow-x: auto;
+    gap: 2rem !important;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    padding: 0 1rem;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .mobile-team-slider::-webkit-scrollbar {
+    display: none;
   }
 
   .mobile-team-item {
-    flex: 0 0 30%;
-    min-width: 30%;
+    flex: 0 0 40%;
+    min-width: 40%;
+    scroll-snap-align: start;
+    text-align: center;
   }
 
   .mobile-team-img {
-    width: 120px;
-    height: 120px;
+    width: 90px;
+    height: 90px;
   }
 
-  .mobile-team-img {
-    font-size: 12px !important;
+  .mobile-team-name {
+    font-size: 12px !important; 
   }
 
   .mobile-team-role {
