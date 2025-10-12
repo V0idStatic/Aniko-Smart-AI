@@ -89,13 +89,17 @@ const Home: React.FC = () => {
                 </svg>
               </a>
             </div>
-            <div className="col-lg-4 text-center mt-4 mt-lg-0">
-              <img
-                src="PICTURES/google-play.png"
-                alt="Download on Google Play"
-                className="hero-img img-fluid"
-              />
-            </div>
+      <div className="col-lg-4 text-center mt-4 mt-lg-0">
+        <img
+          src="PICTURES/github.png"
+          alt="Download on Google Play"
+          className="hero-img img-fluid"
+          style={{ maxWidth: "250px", width: "100%", height: "auto" }}
+        />
+      </div>
+
+
+
           </div>
         </div>
       </section>

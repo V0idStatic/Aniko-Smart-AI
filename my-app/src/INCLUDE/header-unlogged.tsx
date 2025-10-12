@@ -46,17 +46,8 @@ const HeaderUnlogged: React.FC = () => {
               <li className="nav-item"><Link className="nav-link" to="/">Home</Link></li>
               <li className="nav-item"><a className="nav-link" href="#about">About</a></li>
               <li className="nav-item"><a className="nav-link" href="#features">Features</a></li>
+                <li className="nav-item"><a className="nav-link" href="testimonialDisplay">Testimonial</a></li>
 
-              {/* Require login for Testimonial */}
-              <li className="nav-item">
-                <a
-                  className="nav-link"
-                  href="/testimonialDisplay"
-                  onClick={(e) => requireLogin(e, "/testimonialDisplay")}
-                >
-                  Testimonial
-                </a>
-              </li>
 
               <li className="nav-item"><a className="nav-link" href="#download">Download</a></li>
               <li className="nav-item"><a className="nav-link" href="#why-aniko">Why Aniko</a></li>
