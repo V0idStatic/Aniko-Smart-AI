@@ -5,6 +5,7 @@ import { useState, useEffect } from "react"
 import { useAppContext } from "./CONFIG/GlobalContext"
 import type { PhLocation } from "./CONFIG/GlobalContext"
 import FooterNavigation from "../components/FooterNavigation"
+import DraggableAIButton from "../components/DraggableAIButton"
 
 import StatusCard from "../components/StatusCard"
 import DiagnosisCard from "../components/DiagnosisCard"
@@ -1107,21 +1108,6 @@ export default function Dashboard() {
           </ScrollView>
         </View>
 
-           <TouchableOpacity style={styles.chatbotCard} onPress={() => router.push("/chatbot")}>
-          <View style={styles.chatbotIconWrapper}>
-            <LinearGradient colors={[colors.primary, colors.primaryDark]} style={styles.chatbotIconGradient}>
-              <Ionicons name="chatbubbles" size={28} color="#fff" />
-            </LinearGradient>
-          </View>
-          <View style={styles.chatbotContent}>
-            <Text style={styles.chatbotTitle}>AI Assistant</Text>
-            <Text style={styles.chatbotSubtitle}>Get instant help and recommendations</Text>
-          </View>
-          <Ionicons name="chevron-forward" size={24} color={colors.textSecondary} />
-        </TouchableOpacity>
-
-        
-
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>My Crops</Text>
         </View>
@@ -1152,6 +1138,8 @@ export default function Dashboard() {
 
         <View style={{ height: 100 }} />
       </ScrollView>
+
+      <DraggableAIButton onPress={() => router.push("/chatbot")} />
 
       <FooterNavigation />
     </View>
