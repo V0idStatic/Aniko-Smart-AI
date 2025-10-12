@@ -15,6 +15,8 @@ import {
   FlatList,
   Alert,
   StyleSheet,
+  Keyboard,
+  Dimensions,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
@@ -52,6 +54,8 @@ export default function Chatbot({ userId }: ChatbotProps) {
   const [activeChatId, setActiveChatId] = useState<string | null>(null);
   const [sidePanelVisible, setSidePanelVisible] = useState(false);
   const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
+  const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
   const scrollViewRef = useRef<ScrollView>(null);
 
   const STORAGE_KEY = `chatHistory_${userId}`;
@@ -74,6 +78,38 @@ export default function Chatbot({ userId }: ChatbotProps) {
     loadChatHistory();
     refreshSuggestions();
   }, [userId]);
+
+  // Improved keyboard listeners
+  useEffect(() => {
+    const keyboardDidShowListener = Keyboard.addListener(
+      'keyboardDidShow',
+      (e) => {
+        setKeyboardHeight(e.endCoordinates.height);
+        setIsKeyboardVisible(true);
+        // Auto scroll to bottom when keyboard opens
+        setTimeout(() => {
+          scrollViewRef.current?.scrollToEnd({ animated: true });
+        }, 100);
+      }
+    );
+
+    const keyboardDidHideListener = Keyboard.addListener(
+      'keyboardDidHide',
+      () => {
+        setKeyboardHeight(0);
+        setIsKeyboardVisible(false);
+        // Shorter delay to prevent space issues
+        setTimeout(() => {
+          scrollViewRef.current?.scrollToEnd({ animated: true });
+        }, 50);
+      }
+    );
+
+    return () => {
+      keyboardDidShowListener?.remove();
+      keyboardDidHideListener?.remove();
+    };
+  }, []);
 
   const refreshSuggestions = () => {
     const shuffled = [...agricultureQuestions].sort(() => 0.5 - Math.random());
@@ -333,135 +369,318 @@ export default function Chatbot({ userId }: ChatbotProps) {
     <>
       <Stack.Screen options={{ headerShown: false }} />
       <SafeAreaView style={styles.safeContainer}>
-        <KeyboardAvoidingView
-          behavior={Platform.OS === "ios" ? "padding" : undefined}
-          style={styles.container}
-        >
+        <View style={styles.container}>
           {/* HEADER */}
           <View style={styles.header}>
             <TouchableOpacity onPress={() => setSidePanelVisible(true)} style={styles.burgerBtn}>
               <Ionicons name="menu" size={26} color="#FFFFFF" />
             </TouchableOpacity>
             <View style={styles.headerContent}>
-           
               <Text style={styles.headerTitle}>AniKo Chatbot</Text>
             </View>
             <View style={{ width: 40 }} />
           </View>
 
-          {/* INTRODUCTORY VIEW */}
-          {messages.length === 0 && (
-            <View style={introStyles.container}>
-              <Text style={introStyles.title}>Welcome to Aniko</Text>
-              <Text style={introStyles.subtitle}>
-                Your intelligent agriculture companion. Get expert advice on crops, soil health, and sustainable farming practices.
-              </Text>
+          {/* MAIN CONTENT AREA - Fixed keyboard behavior */}
+          {Platform.OS === "ios" ? (
+            <KeyboardAvoidingView
+              behavior="padding"
+              style={styles.keyboardAvoidingView}
+              keyboardVerticalOffset={0}
+            >
+              {/* INTRODUCTORY VIEW */}
+              {messages.length === 0 && (
+                <View style={introStyles.container}>
+                  <Text style={introStyles.title}>Welcome to Aniko</Text>
+                  <Text style={introStyles.subtitle}>
+                    Your intelligent agriculture companion. Get expert advice on crops, soil health, and sustainable farming practices.
+                  </Text>
 
-              {/* Recommended Questions */}
-              <View style={introStyles.suggestionContainer}>
-                <View style={introStyles.suggestionHeader}>
-                  <Text style={introStyles.suggestionTitle}>Suggested Questions</Text>
-                  <TouchableOpacity onPress={refreshSuggestions} style={introStyles.refreshBtn}>
-                    <Ionicons name="refresh-outline" size={20} color="#2D6A4F" />
-                  </TouchableOpacity>
+                  {/* Recommended Questions */}
+                  <View style={introStyles.suggestionContainer}>
+                    <View style={introStyles.suggestionHeader}>
+                      <Text style={introStyles.suggestionTitle}>Suggested Questions</Text>
+                      <TouchableOpacity onPress={refreshSuggestions} style={introStyles.refreshBtn}>
+                        <Ionicons name="refresh-outline" size={20} color="#2D6A4F" />
+                      </TouchableOpacity>
+                    </View>
+
+                    {suggestions.map((q, i) => (
+                      <TouchableOpacity
+                        key={i}
+                        onPress={() => setInput(q)}
+                        style={introStyles.suggestionBtn}
+                        activeOpacity={0.7}
+                      >
+                        <MaterialCommunityIcons name="lightbulb-on-outline" size={18} color="#40916C" />
+                        <Text style={introStyles.suggestionText}>{q}</Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
                 </View>
+              )}
 
-                {suggestions.map((q, i) => (
-                  <TouchableOpacity
-                    key={i}
-                    onPress={() => setInput(q)}
-                    style={introStyles.suggestionBtn}
-                    activeOpacity={0.7}
+              {/* MESSAGES */}
+              {messages.length > 0 && (
+                !dataLoaded ? (
+                  <View style={styles.loadingContainer}>
+                    <ActivityIndicator size="large" color="#2D6A4F" />
+                    <Text style={styles.loadingText}>Loading crop database...</Text>
+                  </View>
+                ) : (
+                  <ScrollView
+                    ref={scrollViewRef}
+                    style={styles.messages}
+                    contentContainerStyle={{ 
+                      paddingVertical: 16, 
+                      paddingHorizontal: 16,
+                      paddingBottom: 16,
+                      flexGrow: 1
+                    }}
+                    showsVerticalScrollIndicator={false}
+                    keyboardShouldPersistTaps="handled"
+                    maintainVisibleContentPosition={{
+                      minIndexForVisible: 0,
+                      autoscrollToTopThreshold: 10,
+                    }}
+                    onContentSizeChange={() => {
+                      if (!isKeyboardVisible) {
+                        scrollViewRef.current?.scrollToEnd({ animated: false });
+                      }
+                    }}
                   >
-                    <MaterialCommunityIcons name="lightbulb-on-outline" size={18} color="#40916C" />
-                    <Text style={introStyles.suggestionText}>{q}</Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-            </View>
-          )}
-
-          {/* MESSAGES */}
-          {messages.length > 0 && (
-            !dataLoaded ? (
-              <View style={styles.loadingContainer}>
-                <ActivityIndicator size="large" color="#2D6A4F" />
-                <Text style={styles.loadingText}>Loading crop database...</Text>
-              </View>
-            ) : (
-              <ScrollView
-                ref={scrollViewRef}
-                style={styles.messages}
-                contentContainerStyle={{ paddingVertical: 16, paddingHorizontal: 16 }}
-                showsVerticalScrollIndicator={false}
-              >
-                {messages.map((m, i) => (
-                  <View
-                    key={i}
-                    style={[
-                      styles.messageWrapper,
-                      m.role === "user" ? styles.userMessageWrapper : styles.botMessageWrapper,
-                    ]}
-                  >
-                    {m.role === "assistant" && (
-                      <View style={styles.botAvatar}>
-                        <MaterialCommunityIcons name="sprout" size={16} color="#FFFFFF" />
+                    {messages.map((m, i) => (
+                      <View
+                        key={i}
+                        style={[
+                          styles.messageWrapper,
+                          m.role === "user" ? styles.userMessageWrapper : styles.botMessageWrapper,
+                        ]}
+                      >
+                        {m.role === "assistant" && (
+                          <View style={styles.botAvatar}>
+                            <MaterialCommunityIcons name="sprout" size={16} color="#FFFFFF" />
+                          </View>
+                        )}
+                        <View
+                          style={[
+                            styles.msg,
+                            m.role === "user" ? styles.userMsg : styles.botMsg,
+                          ]}
+                        >
+                          <Text style={[styles.msgText, m.role === "user" && styles.userMsgText]}>
+                            {m.text}
+                          </Text>
+                        </View>
+                        {m.role === "user" && <View style={{ width: 8 }} />}
+                      </View>
+                    ))}
+                    {loading && (
+                      <View style={styles.typingContainer}>
+                        <View style={styles.botAvatar}>
+                          <MaterialCommunityIcons name="sprout" size={16} color="#FFFFFF" />
+                        </View>
+                        <View style={styles.typingBubble}>
+                          <View style={styles.typingDots}>
+                            <View style={[styles.dot, styles.dot1]} />
+                            <View style={[styles.dot, styles.dot2]} />
+                            <View style={[styles.dot, styles.dot3]} />
+                          </View>
+                        </View>
                       </View>
                     )}
-                    <View
-                      style={[
-                        styles.msg,
-                        m.role === "user" ? styles.userMsg : styles.botMsg,
-                      ]}
-                    >
-                      <Text style={[styles.msgText, m.role === "user" && styles.userMsgText]}>
-                        {m.text}
-                      </Text>
-                    </View>
-                    {m.role === "user" && <View style={{ width: 8 }} />}
-                  </View>
-                ))}
-                {loading && (
-                  <View style={styles.typingContainer}>
-                    <View style={styles.botAvatar}>
-                      <MaterialCommunityIcons name="sprout" size={16} color="#FFFFFF" />
-                    </View>
-                    <View style={styles.typingBubble}>
-                      <View style={styles.typingDots}>
-                        <View style={[styles.dot, styles.dot1]} />
-                        <View style={[styles.dot, styles.dot2]} />
-                        <View style={[styles.dot, styles.dot3]} />
-                      </View>
-                    </View>
-                  </View>
-                )}
-              </ScrollView>
-            )
-          )}
+                  </ScrollView>
+                )
+              )}
 
-          {/* INPUT */}
-          <View style={styles.inputWrapper}>
-            <View style={styles.inputRow}>
-              <TextInput
-                style={styles.input}
-                placeholder="Ask about crops, soil, or farming..."
-                placeholderTextColor="#95A5A6"
-                value={input}
-                onChangeText={setInput}
-                onSubmitEditing={sendMessage}
-                multiline
-                maxLength={500}
-              />
-              <TouchableOpacity
-                onPress={sendMessage}
-                style={[styles.sendBtn, (!dataLoaded || !input.trim()) && styles.sendBtnDisabled]}
-                disabled={loading || !dataLoaded || !input.trim()}
-                activeOpacity={0.8}
-              >
-                <Ionicons name="send" size={20} color="white" />
-              </TouchableOpacity>
+              {/* INPUT */}
+              <View style={styles.inputWrapper}>
+                <View style={styles.inputRow}>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Ask about crops, soil, or farming..."
+                    placeholderTextColor="#95A5A6"
+                    value={input}
+                    onChangeText={setInput}
+                    onSubmitEditing={sendMessage}
+                    multiline
+                    maxLength={500}
+                    onFocus={() => {
+                      setTimeout(() => {
+                        scrollViewRef.current?.scrollToEnd({ animated: true });
+                      }, 100);
+                    }}
+                    blurOnSubmit={false}
+                    returnKeyType="send"
+                    enablesReturnKeyAutomatically={true}
+                    textAlignVertical="center"
+                  />
+                  <TouchableOpacity
+                    onPress={sendMessage}
+                    style={[styles.sendBtn, (!dataLoaded || !input.trim()) && styles.sendBtnDisabled]}
+                    disabled={loading || !dataLoaded || !input.trim()}
+                    activeOpacity={0.8}
+                  >
+                    <Ionicons name="send" size={20} color="white" />
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </KeyboardAvoidingView>
+          ) : (
+            /* ANDROID LAYOUT - Different approach to prevent space issues */
+            <View style={styles.keyboardAvoidingView}>
+              {/* INTRODUCTORY VIEW */}
+              {messages.length === 0 && (
+                <View style={introStyles.container}>
+                  <Text style={introStyles.title}>Welcome to Aniko</Text>
+                  <Text style={introStyles.subtitle}>
+                    Your intelligent agriculture companion. Get expert advice on crops, soil health, and sustainable farming practices.
+                  </Text>
+
+                  {/* Recommended Questions */}
+                  <View style={introStyles.suggestionContainer}>
+                    <View style={introStyles.suggestionHeader}>
+                      <Text style={introStyles.suggestionTitle}>Suggested Questions</Text>
+                      <TouchableOpacity onPress={refreshSuggestions} style={introStyles.refreshBtn}>
+                        <Ionicons name="refresh-outline" size={20} color="#2D6A4F" />
+                      </TouchableOpacity>
+                    </View>
+
+                    {suggestions.map((q, i) => (
+                      <TouchableOpacity
+                        key={i}
+                        onPress={() => setInput(q)}
+                        style={introStyles.suggestionBtn}
+                        activeOpacity={0.7}
+                      >
+                        <MaterialCommunityIcons name="lightbulb-on-outline" size={18} color="#40916C" />
+                        <Text style={introStyles.suggestionText}>{q}</Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                </View>
+              )}
+
+              {/* MESSAGES */}
+              {messages.length > 0 && (
+                !dataLoaded ? (
+                  <View style={styles.loadingContainer}>
+                    <ActivityIndicator size="large" color="#2D6A4F" />
+                    <Text style={styles.loadingText}>Loading crop database...</Text>
+                  </View>
+                ) : (
+                  <ScrollView
+                    ref={scrollViewRef}
+                    style={[
+                      styles.messages,
+                      isKeyboardVisible && {
+                        marginBottom: keyboardHeight - 50
+                      }
+                    ]}
+                    contentContainerStyle={{ 
+                      paddingVertical: 16, 
+                      paddingHorizontal: 16,
+                      paddingBottom: 16,
+                      flexGrow: 1
+                    }}
+                    showsVerticalScrollIndicator={false}
+                    keyboardShouldPersistTaps="handled"
+                    maintainVisibleContentPosition={{
+                      minIndexForVisible: 0,
+                      autoscrollToTopThreshold: 10,
+                    }}
+                    onContentSizeChange={() => {
+                      if (!isKeyboardVisible) {
+                        scrollViewRef.current?.scrollToEnd({ animated: false });
+                      }
+                    }}
+                  >
+                    {messages.map((m, i) => (
+                      <View
+                        key={i}
+                        style={[
+                          styles.messageWrapper,
+                          m.role === "user" ? styles.userMessageWrapper : styles.botMessageWrapper,
+                        ]}
+                      >
+                        {m.role === "assistant" && (
+                          <View style={styles.botAvatar}>
+                            <MaterialCommunityIcons name="sprout" size={16} color="#FFFFFF" />
+                          </View>
+                        )}
+                        <View
+                          style={[
+                            styles.msg,
+                            m.role === "user" ? styles.userMsg : styles.botMsg,
+                          ]}
+                        >
+                          <Text style={[styles.msgText, m.role === "user" && styles.userMsgText]}>
+                            {m.text}
+                          </Text>
+                        </View>
+                        {m.role === "user" && <View style={{ width: 8 }} />}
+                      </View>
+                    ))}
+                    {loading && (
+                      <View style={styles.typingContainer}>
+                        <View style={styles.botAvatar}>
+                          <MaterialCommunityIcons name="sprout" size={16} color="#FFFFFF" />
+                        </View>
+                        <View style={styles.typingBubble}>
+                          <View style={styles.typingDots}>
+                            <View style={[styles.dot, styles.dot1]} />
+                            <View style={[styles.dot, styles.dot2]} />
+                            <View style={[styles.dot, styles.dot3]} />
+                          </View>
+                        </View>
+                      </View>
+                    )}
+                  </ScrollView>
+                )
+              )}
+
+              {/* INPUT */}
+              <View style={[
+                styles.inputWrapper,
+                isKeyboardVisible && {
+                  position: 'absolute',
+                  bottom: keyboardHeight + 20,
+                  left: 0,
+                  right: 0,
+                }
+              ]}>
+                <View style={styles.inputRow}>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Ask about crops, soil, or farming..."
+                    placeholderTextColor="#95A5A6"
+                    value={input}
+                    onChangeText={setInput}
+                    onSubmitEditing={sendMessage}
+                    multiline
+                    maxLength={500}
+                    onFocus={() => {
+                      setTimeout(() => {
+                        scrollViewRef.current?.scrollToEnd({ animated: true });
+                      }, 100);
+                    }}
+                    blurOnSubmit={false}
+                    returnKeyType="send"
+                    enablesReturnKeyAutomatically={true}
+                    textAlignVertical="center"
+                  />
+                  <TouchableOpacity
+                    onPress={sendMessage}
+                    style={[styles.sendBtn, (!dataLoaded || !input.trim()) && styles.sendBtnDisabled]}
+                    disabled={loading || !dataLoaded || !input.trim()}
+                    activeOpacity={0.8}
+                  >
+                    <Ionicons name="send" size={20} color="white" />
+                  </TouchableOpacity>
+                </View>
+              </View>
             </View>
-          </View>
+          )}
 
           {/* SIDE PANEL */}
           <Modal
@@ -535,7 +754,7 @@ export default function Chatbot({ userId }: ChatbotProps) {
               </View>
             </View>
           </Modal>
-        </KeyboardAvoidingView>
+        </View>
       </SafeAreaView>
     </>
   );
@@ -549,6 +768,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#F8F9FA",
+  },
+  keyboardAvoidingView: {
+    flex: 1,
   },
   header: {
     flexDirection: "row",
@@ -564,18 +786,18 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.15,
     shadowRadius: 8,
     elevation: 8,
+    zIndex: 1,
   },
   burgerBtn: {
     padding: 8,
-     marginTop: 20, 
+    marginTop: 20, 
   },
-headerContent: {
-  flexDirection: "row",
-  alignItems: "center",
-  gap: 10,
-  marginTop: 20, 
-},
-
+  headerContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    marginTop: 20, 
+  },
   headerTitle: {
     fontSize: 22,
     fontWeight: "700",
@@ -682,7 +904,7 @@ headerContent: {
   inputWrapper: {
     backgroundColor: "#FFFFFF",
     paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingVertical: 8,
     borderTopWidth: 1,
     borderTopColor: "#E8ECEF",
     shadowColor: "#000",
@@ -690,6 +912,9 @@ headerContent: {
     shadowOpacity: 0.05,
     shadowRadius: 8,
     elevation: 8,
+    zIndex: 2,
+    minHeight: 64,
+    marginBottom: 0,
   },
   inputRow: {
     flexDirection: "row",
@@ -701,12 +926,14 @@ headerContent: {
     backgroundColor: "#F8F9FA",
     borderRadius: 24,
     paddingHorizontal: 18,
-    paddingVertical: 12,
+    paddingVertical: 10,
     fontSize: 15,
     color: "#2C3E50",
-    maxHeight: 100,
+    maxHeight: 80,
+    minHeight: 40,
     borderWidth: 1,
     borderColor: "#E8ECEF",
+    textAlignVertical: 'center',
   },
   sendBtn: {
     width: 48,
