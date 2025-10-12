@@ -1,8 +1,7 @@
 "use client"
 
 import { useRef } from "react"
-import { View, TouchableOpacity, Animated, PanResponder, StyleSheet, Dimensions, Image } from "react-native"
-import { Ionicons } from "@expo/vector-icons"
+import { View, Animated, PanResponder, StyleSheet, Dimensions, Image } from "react-native"
 import { LinearGradient } from "expo-linear-gradient"
 import { colors } from "../app/styles/dashboard.style"
 
@@ -68,8 +67,8 @@ export default function DraggableAIButton({ onPress }: DraggableAIButtonProps) {
           tension: 40,
         }).start()
 
-        // If it was just a tap (minimal movement), trigger onPress
         if (Math.abs(gesture.dx) < 5 && Math.abs(gesture.dy) < 5) {
+          console.log("[v0] Draggable button tapped - navigating to chatbot")
           onPress()
         }
       },
@@ -86,19 +85,14 @@ export default function DraggableAIButton({ onPress }: DraggableAIButtonProps) {
       ]}
       {...panResponder.panHandlers}
     >
-     <TouchableOpacity activeOpacity={0.9} style={styles.button}>
-  <LinearGradient colors={[colors.primary, colors.primaryDark]} style={styles.gradient}>
-    <Image
-      source={require('../assets/logo.png')}
-      style={styles.logo}
-      resizeMode="contain"
-    />
-  </LinearGradient>
-  <View style={styles.badge}>
-    <View style={styles.badgeDot} />
-  </View>
-</TouchableOpacity>
-
+      <View style={styles.button}>
+        <LinearGradient colors={[colors.primary, colors.primaryDark]} style={styles.gradient}>
+          <Image source={require("../assets/logo.png")} style={styles.logo} resizeMode="contain" />
+        </LinearGradient>
+        <View style={styles.badge}>
+          <View style={styles.badgeDot} />
+        </View>
+      </View>
     </Animated.View>
   )
 }
@@ -128,8 +122,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   logo: {
-    width: BUTTON_SIZE * 0.6,
-    height: BUTTON_SIZE * 0.6,
+    width: 36,
+    height: 36,
   },
   badge: {
     position: "absolute",
