@@ -526,10 +526,23 @@ export default function Chatbot({ userId }: ChatbotProps) {
     dot1: {},
     dot2: {},
     dot3: {},
+    inputWrapperContainer: {
+      position: 'relative',
+    },
+    inputBackground: {
+      position: 'absolute',
+      bottom: 0,
+      left: 0,
+      right: 0,
+      height: Platform.OS === 'android' ? 120 : 100,
+      backgroundColor: "#FFFFFF",
+      zIndex: 1,
+    },
     inputWrapper: {
       backgroundColor: "#FFFFFF",
       paddingHorizontal: isTablet ? 24 : 16,
       paddingVertical: isTablet ? 16 : 12,
+      paddingBottom: Platform.OS === 'android' ? (isTablet ? 40 : 30) : (isTablet ? 24 : 16),
       borderTopWidth: 1,
       borderTopColor: "#E8ECEF",
       shadowColor: "#000",
@@ -539,7 +552,7 @@ export default function Chatbot({ userId }: ChatbotProps) {
       elevation: 8,
       zIndex: 2,
       minHeight: isTablet ? 80 : isSmallDevice ? 60 : 68,
-      marginBottom: 0,
+      position: 'relative',
     },
     inputRow: {
       flexDirection: "row",
@@ -770,7 +783,7 @@ export default function Chatbot({ userId }: ChatbotProps) {
   return (
     <>
       <Stack.Screen options={{ headerShown: false }} />
-      <SafeAreaView style={styles.safeContainer}>
+      <SafeAreaView style={styles.safeContainer} edges={['top', 'left', 'right']}>
         <View style={styles.container}>
           {/* HEADER */}
           <View style={styles.header}>
@@ -895,36 +908,39 @@ export default function Chatbot({ userId }: ChatbotProps) {
                 )
               )}
 
-              {/* INPUT */}
-              <View style={styles.inputWrapper}>
-                <View style={styles.inputRow}>
-                  <TextInput
-                    style={styles.input}
-                    placeholder="Ask about crops, soil, or farming..."
-                    placeholderTextColor="#95A5A6"
-                    value={input}
-                    onChangeText={setInput}
-                    onSubmitEditing={sendMessage}
-                    multiline
-                    maxLength={500}
-                    onFocus={() => {
-                      setTimeout(() => {
-                        scrollViewRef.current?.scrollToEnd({ animated: true });
-                      }, 100);
-                    }}
-                    blurOnSubmit={false}
-                    returnKeyType="send"
-                    enablesReturnKeyAutomatically={true}
-                    textAlignVertical="center"
-                  />
-                  <TouchableOpacity
-                    onPress={sendMessage}
-                    style={[styles.sendBtn, (!dataLoaded || !input.trim()) && styles.sendBtnDisabled]}
-                    disabled={loading || !dataLoaded || !input.trim()}
-                    activeOpacity={0.8}
-                  >
-                    <Ionicons name="send" size={isTablet ? 24 : 20} color="white" />
-                  </TouchableOpacity>
+              {/* INPUT with background extension */}
+              <View style={styles.inputWrapperContainer}>
+                <View style={styles.inputBackground} />
+                <View style={styles.inputWrapper}>
+                  <View style={styles.inputRow}>
+                    <TextInput
+                      style={styles.input}
+                      placeholder="Ask about crops, soil, or farming..."
+                      placeholderTextColor="#95A5A6"
+                      value={input}
+                      onChangeText={setInput}
+                      onSubmitEditing={sendMessage}
+                      multiline
+                      maxLength={500}
+                      onFocus={() => {
+                        setTimeout(() => {
+                          scrollViewRef.current?.scrollToEnd({ animated: true });
+                        }, 100);
+                      }}
+                      blurOnSubmit={false}
+                      returnKeyType="send"
+                      enablesReturnKeyAutomatically={true}
+                      textAlignVertical="center"
+                    />
+                    <TouchableOpacity
+                      onPress={sendMessage}
+                      style={[styles.sendBtn, (!dataLoaded || !input.trim()) && styles.sendBtnDisabled]}
+                      disabled={loading || !dataLoaded || !input.trim()}
+                      activeOpacity={0.8}
+                    >
+                      <Ionicons name="send" size={isTablet ? 24 : 20} color="white" />
+                    </TouchableOpacity>
+                  </View>
                 </View>
               </View>
             </KeyboardAvoidingView>
@@ -1041,9 +1057,9 @@ export default function Chatbot({ userId }: ChatbotProps) {
                 )
               )}
 
-              {/* INPUT */}
+              {/* INPUT with background extension for Android */}
               <View style={[
-                styles.inputWrapper,
+                styles.inputWrapperContainer,
                 isKeyboardVisible && {
                   position: 'absolute',
                   bottom: keyboardHeight + (isSmallDevice ? 5 : isTablet ? 15 : 10),
@@ -1051,34 +1067,47 @@ export default function Chatbot({ userId }: ChatbotProps) {
                   right: 0,
                 }
               ]}>
-                <View style={styles.inputRow}>
-                  <TextInput
-                    style={styles.input}
-                    placeholder="Ask about crops, soil, or farming..."
-                    placeholderTextColor="#95A5A6"
-                    value={input}
-                    onChangeText={setInput}
-                    onSubmitEditing={sendMessage}
-                    multiline
-                    maxLength={500}
-                    onFocus={() => {
-                      setTimeout(() => {
-                        scrollViewRef.current?.scrollToEnd({ animated: true });
-                      }, 100);
-                    }}
-                    blurOnSubmit={false}
-                    returnKeyType="send"
-                    enablesReturnKeyAutomatically={true}
-                    textAlignVertical="center"
-                  />
-                  <TouchableOpacity
-                    onPress={sendMessage}
-                    style={[styles.sendBtn, (!dataLoaded || !input.trim()) && styles.sendBtnDisabled]}
-                    disabled={loading || !dataLoaded || !input.trim()}
-                    activeOpacity={0.8}
-                  >
-                    <Ionicons name="send" size={isTablet ? 24 : 20} color="white" />
-                  </TouchableOpacity>
+                <View style={[
+                  styles.inputBackground,
+                  isKeyboardVisible && {
+                    height: Platform.OS === 'android' ? 150 : 100,
+                  }
+                ]} />
+                <View style={[
+                  styles.inputWrapper,
+                  isKeyboardVisible && {
+                    paddingBottom: Platform.OS === 'android' ? (isTablet ? 50 : 40) : (isTablet ? 24 : 16),
+                  }
+                ]}>
+                  <View style={styles.inputRow}>
+                    <TextInput
+                      style={styles.input}
+                      placeholder="Ask about crops, soil, or farming..."
+                      placeholderTextColor="#95A5A6"
+                      value={input}
+                      onChangeText={setInput}
+                      onSubmitEditing={sendMessage}
+                      multiline
+                      maxLength={500}
+                      onFocus={() => {
+                        setTimeout(() => {
+                          scrollViewRef.current?.scrollToEnd({ animated: true });
+                        }, 100);
+                      }}
+                      blurOnSubmit={false}
+                      returnKeyType="send"
+                      enablesReturnKeyAutomatically={true}
+                      textAlignVertical="center"
+                    />
+                    <TouchableOpacity
+                      onPress={sendMessage}
+                      style={[styles.sendBtn, (!dataLoaded || !input.trim()) && styles.sendBtnDisabled]}
+                      disabled={loading || !dataLoaded || !input.trim()}
+                      activeOpacity={0.8}
+                    >
+                      <Ionicons name="send" size={isTablet ? 24 : 20} color="white" />
+                    </TouchableOpacity>
+                  </View>
                 </View>
               </View>
             </View>
