@@ -1,6 +1,8 @@
+"use client"
+
 // chatbot.tsx - Enhanced Professional Version with Responsive Design
 
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react"
 import {
   View,
   Text,
@@ -16,57 +18,57 @@ import {
   StyleSheet,
   Keyboard,
   Dimensions,
-} from "react-native";
-import { SafeAreaView } from 'react-native-safe-area-context';
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+} from "react-native"
+import { SafeAreaView } from "react-native-safe-area-context"
+import AsyncStorage from "@react-native-async-storage/async-storage"
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons"
 import {
   fetchAllCropParameters,
   formatCropDataForAI,
-  CropParameter,
+  type CropParameter,
   formatSingleCropForAI,
-} from "../services/cropDataService";
-import { Stack } from "expo-router";
+} from "../services/cropDataService"
+import { Stack } from "expo-router"
 
 type ChatMessage = {
-  role: "user" | "assistant";
-  text: string;
-};
+  role: "user" | "assistant"
+  text: string
+}
 
 type ChatSession = {
-  id: string;
-  title: string;
-  messages: ChatMessage[];
-  timestamp: string;
-};
+  id: string
+  title: string
+  messages: ChatMessage[]
+  timestamp: string
+}
 
 interface ChatbotProps {
-  userId: string;
+  userId: string
 }
 
 export default function Chatbot({ userId }: ChatbotProps) {
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [input, setInput] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [cropData, setCropData] = useState<CropParameter[]>([]);
-  const [dataLoaded, setDataLoaded] = useState(false);
-  const [chatHistory, setChatHistory] = useState<ChatSession[]>([]);
-  const [activeChatId, setActiveChatId] = useState<string | null>(null);
-  const [sidePanelVisible, setSidePanelVisible] = useState(false);
-  const [suggestions, setSuggestions] = useState<string[]>([]);
-  const [keyboardHeight, setKeyboardHeight] = useState(0);
-  const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
-  const [screenData, setScreenData] = useState(Dimensions.get('window'));
-  const scrollViewRef = useRef<ScrollView>(null);
+  const [messages, setMessages] = useState<ChatMessage[]>([])
+  const [input, setInput] = useState("")
+  const [loading, setLoading] = useState(false)
+  const [cropData, setCropData] = useState<CropParameter[]>([])
+  const [dataLoaded, setDataLoaded] = useState(false)
+  const [chatHistory, setChatHistory] = useState<ChatSession[]>([])
+  const [activeChatId, setActiveChatId] = useState<string | null>(null)
+  const [sidePanelVisible, setSidePanelVisible] = useState(false)
+  const [suggestions, setSuggestions] = useState<string[]>([])
+  const [keyboardHeight, setKeyboardHeight] = useState(0)
+  const [isKeyboardVisible, setIsKeyboardVisible] = useState(false)
+  const [screenData, setScreenData] = useState(Dimensions.get("window"))
+  const scrollViewRef = useRef<ScrollView>(null)
 
-  const STORAGE_KEY = `chatHistory_${userId}`;
+  const STORAGE_KEY = `chatHistory_${userId}`
 
   // Responsive breakpoints
-  const { width: screenWidth, height: screenHeight } = screenData;
-  const isSmallDevice = screenWidth < 375;
-  const isMediumDevice = screenWidth >= 375 && screenWidth < 414;
-  const isLargeDevice = screenWidth >= 414;
-  const isTablet = screenWidth > 768;
+  const { width: screenWidth, height: screenHeight } = screenData
+  const isSmallDevice = screenWidth < 375
+  const isMediumDevice = screenWidth >= 375 && screenWidth < 414
+  const isLargeDevice = screenWidth >= 414
+  const isTablet = screenWidth > 768
 
   const agricultureQuestions = [
     "What are the ideal conditions for growing tomatoes?",
@@ -79,253 +81,481 @@ export default function Chatbot({ userId }: ChatbotProps) {
     "How can I improve soil fertility naturally?",
     "What crops grow best in dry climate areas?",
     "How do I manage irrigation for peanut farming?",
-  ];
+  ]
 
   useEffect(() => {
-    loadCropData();
-    loadChatHistory();
-    refreshSuggestions();
-  }, [userId]);
+    loadCropData()
+    loadChatHistory()
+    refreshSuggestions()
+  }, [userId])
 
   // Screen size listener
   useEffect(() => {
     const onChange = (result: any) => {
-      setScreenData(result.window);
-    };
+      setScreenData(result.window)
+    }
 
-    const subscription = Dimensions.addEventListener('change', onChange);
-    return () => subscription?.remove();
-  }, []);
+    const subscription = Dimensions.addEventListener("change", onChange)
+    return () => subscription?.remove()
+  }, [])
 
   // Improved keyboard listeners
   useEffect(() => {
-    const keyboardDidShowListener = Keyboard.addListener(
-      'keyboardDidShow',
-      (e) => {
-        setKeyboardHeight(e.endCoordinates.height);
-        setIsKeyboardVisible(true);
-        // Auto scroll to bottom when keyboard opens
-        setTimeout(() => {
-          scrollViewRef.current?.scrollToEnd({ animated: true });
-        }, 100);
-      }
-    );
+    const keyboardDidShowListener = Keyboard.addListener("keyboardDidShow", (e) => {
+      setKeyboardHeight(e.endCoordinates.height)
+      setIsKeyboardVisible(true)
+      // Auto scroll to bottom when keyboard opens
+      setTimeout(() => {
+        scrollViewRef.current?.scrollToEnd({ animated: true })
+      }, 100)
+    })
 
-    const keyboardDidHideListener = Keyboard.addListener(
-      'keyboardDidHide',
-      () => {
-        setKeyboardHeight(0);
-        setIsKeyboardVisible(false);
-        // Shorter delay to prevent space issues
-        setTimeout(() => {
-          scrollViewRef.current?.scrollToEnd({ animated: true });
-        }, 50);
-      }
-    );
+    const keyboardDidHideListener = Keyboard.addListener("keyboardDidHide", () => {
+      setKeyboardHeight(0)
+      setIsKeyboardVisible(false)
+      // Shorter delay to prevent space issues
+      setTimeout(() => {
+        scrollViewRef.current?.scrollToEnd({ animated: true })
+      }, 50)
+    })
 
     return () => {
-      keyboardDidShowListener?.remove();
-      keyboardDidHideListener?.remove();
-    };
-  }, []);
+      keyboardDidShowListener?.remove()
+      keyboardDidHideListener?.remove()
+    }
+  }, [])
 
   const refreshSuggestions = () => {
-    const shuffled = [...agricultureQuestions].sort(() => 0.5 - Math.random());
-    setSuggestions(shuffled.slice(0, 4));
-  };
+    const shuffled = [...agricultureQuestions].sort(() => 0.5 - Math.random())
+    setSuggestions(shuffled.slice(0, 4))
+  }
 
   const loadCropData = async () => {
     try {
-      const data = await fetchAllCropParameters();
-      setCropData(data);
-      setDataLoaded(true);
+      const data = await fetchAllCropParameters()
+      setCropData(data)
+      setDataLoaded(true)
     } catch (err) {
-      setDataLoaded(false);
-      console.error("Failed to load crop data:", err);
+      setDataLoaded(false)
+      console.error("Failed to load crop data:", err)
     }
-  };
+  }
 
   const loadChatHistory = async () => {
     try {
-      const stored = await AsyncStorage.getItem(STORAGE_KEY);
-      if (stored) setChatHistory(JSON.parse(stored));
+      const stored = await AsyncStorage.getItem(STORAGE_KEY)
+      if (stored) setChatHistory(JSON.parse(stored))
     } catch (err) {
-      console.error("Failed to load chat history:", err);
+      console.error("Failed to load chat history:", err)
     }
-  };
+  }
 
   const saveChatHistory = async (updatedHistory: ChatSession[]) => {
     try {
-      setChatHistory(updatedHistory);
-      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updatedHistory));
+      setChatHistory(updatedHistory)
+      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updatedHistory))
     } catch (err) {
-      console.error("Failed to save chat history:", err);
+      console.error("Failed to save chat history:", err)
     }
-  };
+  }
 
   const detectCropQuery = async (userMessage: string): Promise<string | null> => {
-    const lowerMsg = userMessage.toLowerCase();
-    const cropKeywords = [
-      "what is",
-      "tell me about",
-      "information about",
-      "details of",
-      "requirements for",
-      "how to grow",
-      "optimal conditions for",
-      "temperature for",
-      "ph level for",
-      "npk for",
-    ];
-    const isCropQuery = cropKeywords.some((keyword) => lowerMsg.includes(keyword));
+    const lowerMsg = userMessage.toLowerCase()
 
-    if (isCropQuery) {
-      for (const crop of cropData) {
-        const cropNameLower = crop.crop_name.toLowerCase();
-        if (lowerMsg.includes(cropNameLower)) {
-          return formatSingleCropForAI(crop);
-        }
+    const explicitDataKeywords = [
+      "show me",
+      "display",
+      "get me",
+      "fetch",
+      "retrieve",
+      "give me the data",
+      "show data",
+      "database",
+      "parameters for",
+      "specs for",
+      "specifications for",
+      "data for",
+      "information for", // Only when combined with "data" or "parameters"
+      "details for", // Only when combined with "data" or "parameters"
+    ]
+
+    // Check if it's an explicit request for database information
+    const isExplicitDataRequest = explicitDataKeywords.some((keyword) => lowerMsg.includes(keyword))
+
+    // If not an explicit data request, don't return database info
+    if (!isExplicitDataRequest) {
+      return null
+    }
+
+    // Only proceed if it's an explicit data request
+    for (const crop of cropData) {
+      const cropNameLower = crop.crop_name.toLowerCase()
+      if (lowerMsg.includes(cropNameLower)) {
+        return formatSingleCropForAI(crop)
       }
     }
-    return null;
-  };
+
+    return null
+  }
 
   const detectSmallTalk = (userMessage: string): string | null => {
-    const msg = userMessage.toLowerCase();
+    const msg = userMessage.toLowerCase()
     if (/^(hi|hello|hey)\b/.test(msg))
-      return "Hello there! I'm Aniko, your friendly Smart Agriculture Assistant. How can I help you with crops or farming today?";
+      return "Hello there! I'm Aniko, your friendly Smart Agriculture Assistant. How can I help you with crops or farming today?"
     if (msg.includes("my name is")) {
-      const name = msg.split("my name is")[1]?.trim().split(" ")[0];
+      const name = msg.split("my name is")[1]?.trim().split(" ")[0]
       if (name)
-        return `Nice to meet you, ${name.charAt(0).toUpperCase() + name.slice(1)}! What crop would you like to know about?`;
-      return "Nice to meet you! What crop would you like to learn about?";
+        return `Nice to meet you, ${name.charAt(0).toUpperCase() + name.slice(1)}! What crop would you like to know about?`
+      return "Nice to meet you! What crop would you like to learn about?"
     }
-    if (msg.includes("thank") || msg.includes("thanks"))
-      return "You're welcome! Always happy to help!";
-    if (msg.includes("how are you"))
-      return "I'm just a bot, but I'm feeling productive today!";
-    if (msg.includes("who are you"))
-      return "I'm Aniko, an AI agriculture assistant for Filipino farmers.";
-    return null;
-  };
+    if (msg.includes("thank") || msg.includes("thanks")) return "You're welcome! Always happy to help!"
+    if (msg.includes("how are you")) return "I'm just a bot, but I'm feeling productive today!"
+    if (msg.includes("who are you")) return "I'm Aniko, an AI agriculture assistant for Filipino farmers."
+    return null
+  }
 
   const isAgricultureRelated = (userMessage: string): boolean => {
-    const msg = userMessage.toLowerCase();
+    const msg = userMessage.toLowerCase().trim()
+
+    // Enhanced agriculture keywords
     const agriWords = [
+      // Core farming terms
       "crop",
+      "crops",
       "soil",
       "fertilizer",
+      "fertiliser",
       "farming",
+      "farm",
+      "farmer",
       "plant",
+      "plants",
+      "planting",
       "seed",
+      "seeds",
       "harvest",
+      "harvesting",
+
+      // Climate and environment
       "climate",
       "weather",
-      "irrigation",
-      "ph",
+      "rain",
+      "rainfall",
+      "drought",
+      "season",
+      "seasonal",
       "temperature",
-      "fruit",
-      "vegetable",
-      "field",
-      "water",
-      "grow",
-      "agriculture",
-      "farm",
+      "humidity",
+      "sunlight",
+      "shade",
+      "wind",
+
+      // Soil and nutrients
+      "ph",
+      "nitrogen",
+      "phosphorus",
+      "potassium",
+      "npk",
+      "nutrient",
+      "nutrients",
       "compost",
       "organic",
-      "npk",
+      "manure",
+      "mulch",
+      "topsoil",
+      "clay",
+      "loam",
+      "sandy",
+
+      // Water management
+      "irrigation",
+      "water",
+      "watering",
+      "drip",
+      "sprinkler",
+      "drainage",
+
+      // Crop types
+      "vegetable",
+      "vegetables",
+      "fruit",
+      "fruits",
+      "grain",
+      "grains",
+      "cereal",
+      "legume",
+      "legumes",
+      "root crop",
+      "tuber",
+      "herb",
+      "herbs",
+
+      // Common crops (Philippines context)
+      "rice",
+      "corn",
+      "maize",
+      "banana",
+      "mango",
+      "coconut",
+      "sugarcane",
+      "tomato",
+      "eggplant",
+      "cabbage",
+      "lettuce",
+      "peanut",
+      "cassava",
+      "sweet potato",
+      "potato",
+      "onion",
+      "garlic",
+      "ginger",
+      "pineapple",
+      "papaya",
+      "guava",
+      "calamansi",
+      "pepper",
+      "chili",
+      "squash",
+      "cucumber",
+      "beans",
+      "mongo",
+      "sitaw",
+      "okra",
+      "ampalaya",
+      "bitter gourd",
+      "kangkong",
+      "pechay",
+      "mustard",
+      "radish",
+      "carrot",
+      "taro",
+      "ube",
+
+      // Farming practices
+      "grow",
+      "growing",
+      "cultivate",
+      "cultivation",
+      "sow",
+      "sowing",
+      "transplant",
+      "transplanting",
+      "prune",
+      "pruning",
+      "weed",
+      "weeding",
+
+      // Pest and disease
+      "pest",
+      "pests",
       "pesticide",
+      "insect",
+      "insects",
       "disease",
-    ];
-    return agriWords.some((word) => msg.includes(word));
-  };
+      "diseases",
+      "fungus",
+      "bacteria",
+      "virus",
+      "blight",
+      "rot",
+      "wilt",
+      "infestation",
+
+      // Farm management
+      "yield",
+      "production",
+      "productivity",
+      "spacing",
+      "density",
+      "rotation",
+      "intercropping",
+      "monoculture",
+      "polyculture",
+
+      // Equipment and tools
+      "tractor",
+      "plow",
+      "hoe",
+      "rake",
+      "shovel",
+      "greenhouse",
+      "nursery",
+
+      // Agricultural science
+      "agriculture",
+      "agronomy",
+      "horticulture",
+      "botany",
+      "agri",
+    ]
+
+    // Check if message contains any agriculture keywords
+    const hasAgriKeyword = agriWords.some((word) => msg.includes(word))
+    if (hasAgriKeyword) return true
+
+    if (cropData && cropData.length > 0) {
+      const matchesCropName = cropData.some((crop) => {
+        const cropName = crop.crop_name.toLowerCase()
+        // Check for exact match or if crop name is contained in message
+        return (
+          msg === cropName ||
+          msg.includes(cropName) ||
+          cropName.includes(msg) ||
+          // Handle plural forms
+          msg === cropName + "s" ||
+          msg === cropName + "es"
+        )
+      })
+      if (matchesCropName) return true
+    }
+
+    const farmingPatterns = [
+      /how (to|do|can|should).*(grow|plant|cultivate|farm)/i,
+      /what (is|are).*(best|good|ideal|optimal|suitable)/i,
+      /when (to|should|can).*(plant|sow|harvest|grow)/i,
+      /which (crop|plant|vegetable|fruit)/i,
+      /(tell me|show me|explain).*(about|how)/i,
+      /can (i|you|we).*(grow|plant|farm)/i,
+    ]
+
+    const matchesPattern = farmingPatterns.some((pattern) => pattern.test(msg))
+    if (matchesPattern) return true
+
+    // It might be a follow-up question or crop name
+    const wordCount = msg.split(/\s+/).filter((w) => w.length > 0).length
+    if (wordCount <= 3 && msg.length >= 3) {
+      // Check if it could be a crop or farming term
+      // Allow it through if it's not obviously unrelated
+      const obviouslyUnrelated = [
+        "hello",
+        "hi",
+        "hey",
+        "thanks",
+        "thank you",
+        "bye",
+        "goodbye",
+        "yes",
+        "no",
+        "ok",
+        "okay",
+        "sure",
+        "maybe",
+        "what",
+        "why",
+        "how",
+        "when",
+        "where",
+        "who",
+      ]
+
+      if (!obviouslyUnrelated.includes(msg)) {
+        // Likely a crop name or farming term - allow it
+        return true
+      }
+    }
+
+    return false
+  }
 
   const sendMessage = async () => {
-    if (!input.trim()) return;
-    const userMessage: ChatMessage = { role: "user", text: input.trim() };
-    setMessages((prev) => [...prev, userMessage]);
-    setInput("");
-    setLoading(true);
+    if (!input.trim()) return
+    const userMessage: ChatMessage = { role: "user", text: input.trim() }
+    setMessages((prev) => [...prev, userMessage])
+    setInput("")
+    setLoading(true)
 
     try {
-      const smallTalk = detectSmallTalk(userMessage.text);
+      const smallTalk = detectSmallTalk(userMessage.text)
       if (smallTalk) {
-        addBotReply(smallTalk);
-        return;
+        addBotReply(smallTalk)
+        return
       }
 
-      if (!isAgricultureRelated(userMessage.text)) {
-        addBotReply(
-          "Hmm... That doesn't sound related to agriculture. I can help you with crop requirements, soil nutrients, or farming tips! 🌾"
-        );
-        return;
-      }
-
-      const cropInfo = await detectCropQuery(userMessage.text);
+      const cropInfo = await detectCropQuery(userMessage.text)
       if (cropInfo) {
-        addBotReply(cropInfo);
-        return;
+        addBotReply(cropInfo)
+        return
       }
 
-      const cropContext = formatCropDataForAI(cropData);
-      const systemPrompt = `
-        You are Aniko, an AI assistant specialized in agriculture in the Philippines.
-        Use this data to answer accurately about crops, climate, and soil conditions.
-        ${cropContext}
-      `;
+      const isAgriRelated = isAgricultureRelated(userMessage.text)
 
-      const resp = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${process.env.EXPO_PUBLIC_OPENROUTER_API_KEY}`,
-        },
-        body: JSON.stringify({
-          model: "gpt-3.5-turbo",
-          messages: [
-            { role: "system", content: systemPrompt },
-            { role: "user", content: userMessage.text },
-          ],
-          max_tokens: 1000,
-        }),
-      });
+      if (isAgriRelated) {
+        const cropContext = formatCropDataForAI(cropData)
+        const systemPrompt = `
+          You are Aniko, an AI assistant specialized in agriculture and farming in the Philippines.
+          You help farmers with crop information, soil management, pest control, irrigation, and farming best practices.
+          
+          You have access to this crop database for reference:
+          ${cropContext}
+          
+          When answering:
+          - Be helpful, friendly, and encouraging
+          - Provide practical, actionable advice tailored to the user's question
+          - Consider Philippine climate and conditions
+          - Use the crop database as reference when relevant, but answer naturally
+          - For questions like "when to plant", "best time", "how to grow", provide comprehensive farming advice
+          - Only show raw database parameters if explicitly asked (e.g., "show me mango data", "what are the parameters for tomato")
+          - If asked about a crop not in the database, provide general farming knowledge
+          - Always relate your answers to agriculture and farming
+          - Answer in a conversational, educational tone
+        `
 
-      const data = await resp.json();
-      const reply =
-        data?.choices?.[0]?.message?.content ||
-        data?.error?.message ||
-        "No response from Aniko.";
-      addBotReply(reply);
+        const resp = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${process.env.EXPO_PUBLIC_OPENROUTER_API_KEY}`,
+          },
+          body: JSON.stringify({
+            model: "gpt-3.5-turbo",
+            messages: [
+              { role: "system", content: systemPrompt },
+              { role: "user", content: userMessage.text },
+            ],
+            max_tokens: 1000,
+          }),
+        })
+
+        const data = await resp.json()
+        const reply =
+          data?.choices?.[0]?.message?.content ||
+          data?.error?.message ||
+          "I'm having trouble responding right now. Please try again."
+        addBotReply(reply)
+        return
+      }
+
+      addBotReply(
+        "Hmm... That doesn't seem related to agriculture or farming. I specialize in helping with crops, soil, planting, harvesting, and farming techniques. How can I assist you with your farm? 🌾",
+      )
     } catch (err: any) {
-      addBotReply(`Error: ${err.message || err}`);
+      addBotReply(`Error: ${err.message || err}`)
     }
-  };
+  }
 
   const addBotReply = async (reply: string) => {
-    setMessages((prev) => [...prev, { role: "assistant", text: reply }]);
-    setLoading(false);
-    await saveSessionMessages([...messages, { role: "assistant", text: reply }]);
-  };
+    setMessages((prev) => [...prev, { role: "assistant", text: reply }])
+    setLoading(false)
+    await saveSessionMessages([...messages, { role: "assistant", text: reply }])
+  }
 
   const saveSessionMessages = async (newMessages: ChatMessage[]) => {
-    let updatedHistory = [...chatHistory];
+    let updatedHistory = [...chatHistory]
     if (activeChatId) {
-      updatedHistory = updatedHistory.map((s) =>
-        s.id === activeChatId ? { ...s, messages: newMessages } : s
-      );
+      updatedHistory = updatedHistory.map((s) => (s.id === activeChatId ? { ...s, messages: newMessages } : s))
     } else {
-      const newId = Date.now().toString();
+      const newId = Date.now().toString()
       const newSession: ChatSession = {
         id: newId,
         title: await generateChatTitle(newMessages[0].text),
         messages: newMessages,
         timestamp: new Date().toLocaleString(),
-      };
-      updatedHistory.unshift(newSession);
-      setActiveChatId(newId);
+      }
+      updatedHistory.unshift(newSession)
+      setActiveChatId(newId)
     }
-    await saveChatHistory(updatedHistory);
-  };
+    await saveChatHistory(updatedHistory)
+  }
 
   const generateChatTitle = async (prompt: string): Promise<string> => {
     try {
@@ -347,19 +577,19 @@ export default function Chatbot({ userId }: ChatbotProps) {
           ],
           max_tokens: 20,
         }),
-      });
-      const data = await resp.json();
-      return data?.choices?.[0]?.message?.content?.trim() || "New Chat";
+      })
+      const data = await resp.json()
+      return data?.choices?.[0]?.message?.content?.trim() || "New Chat"
     } catch {
-      return "New Chat";
+      return "New Chat"
     }
-  };
+  }
 
   const reopenChat = (session: ChatSession) => {
-    setActiveChatId(session.id);
-    setMessages(session.messages);
-    setSidePanelVisible(false);
-  };
+    setActiveChatId(session.id)
+    setMessages(session.messages)
+    setSidePanelVisible(false)
+  }
 
   const deleteChat = async (index: number) => {
     Alert.alert("Delete Chat", "Are you sure you want to delete this chat?", [
@@ -368,30 +598,30 @@ export default function Chatbot({ userId }: ChatbotProps) {
         text: "Delete",
         style: "destructive",
         onPress: async () => {
-          const updated = chatHistory.filter((_, i) => i !== index);
-          await saveChatHistory(updated);
+          const updated = chatHistory.filter((_, i) => i !== index)
+          await saveChatHistory(updated)
           if (chatHistory[index].id === activeChatId) {
-            setMessages([]);
-            setActiveChatId(null);
+            setMessages([])
+            setActiveChatId(null)
           }
         },
       },
-    ]);
-  };
+    ])
+  }
 
   useEffect(() => {
-    scrollViewRef.current?.scrollToEnd({ animated: true });
-  }, [messages]);
+    scrollViewRef.current?.scrollToEnd({ animated: true })
+  }, [messages])
 
   // Responsive styles
   const styles = StyleSheet.create({
     safeContainer: {
       flex: 1,
-      backgroundColor: "#F8F9FA",
+      backgroundColor: "#1c4722",
     },
     container: {
       flex: 1,
-      backgroundColor: "#F8F9FA",
+      backgroundColor: "#E6DED1",
     },
     keyboardAvoidingView: {
       flex: 1,
@@ -409,18 +639,18 @@ export default function Chatbot({ userId }: ChatbotProps) {
       shadowOffset: { width: 0, height: 4 },
       shadowOpacity: 0.15,
       shadowRadius: 8,
-      elevation: 8,
+
       zIndex: 1,
     },
     burgerBtn: {
       padding: isTablet ? 12 : 8,
-      marginTop: 20, 
+      marginTop: 20,
     },
     headerContent: {
       flexDirection: "row",
       alignItems: "center",
       gap: 10,
-      marginTop: 20, 
+      marginTop: 20,
     },
     headerTitle: {
       fontSize: isTablet ? 28 : isSmallDevice ? 20 : 22,
@@ -441,7 +671,7 @@ export default function Chatbot({ userId }: ChatbotProps) {
     },
     messages: {
       flex: 1,
-      backgroundColor: "#F8F9FA",
+      backgroundColor: "#E6DED1",
     },
     messageWrapper: {
       flexDirection: "row",
@@ -527,22 +757,22 @@ export default function Chatbot({ userId }: ChatbotProps) {
     dot2: {},
     dot3: {},
     inputWrapperContainer: {
-      position: 'relative',
+      position: "relative",
     },
     inputBackground: {
-      position: 'absolute',
+      position: "absolute",
       bottom: 0,
       left: 0,
       right: 0,
-      height: Platform.OS === 'android' ? 120 : 100,
-      backgroundColor: "#FFFFFF",
+      height: Platform.OS === "android" ? 120 : 100,
+      backgroundColor: "#E6DED1",
       zIndex: 1,
     },
     inputWrapper: {
       backgroundColor: "#FFFFFF",
       paddingHorizontal: isTablet ? 24 : 16,
       paddingVertical: isTablet ? 16 : 12,
-      paddingBottom: Platform.OS === 'android' ? (isTablet ? 40 : 30) : (isTablet ? 24 : 16),
+      paddingBottom: Platform.OS === "android" ? (isTablet ? 40 : 30) : isTablet ? 24 : 16,
       borderTopWidth: 1,
       borderTopColor: "#E8ECEF",
       shadowColor: "#000",
@@ -552,7 +782,7 @@ export default function Chatbot({ userId }: ChatbotProps) {
       elevation: 8,
       zIndex: 2,
       minHeight: isTablet ? 80 : isSmallDevice ? 60 : 68,
-      position: 'relative',
+      position: "relative",
     },
     inputRow: {
       flexDirection: "row",
@@ -571,7 +801,7 @@ export default function Chatbot({ userId }: ChatbotProps) {
       minHeight: isTablet ? 50 : isSmallDevice ? 36 : 40,
       borderWidth: 1,
       borderColor: "#E8ECEF",
-      textAlignVertical: 'center',
+      textAlignVertical: "center",
     },
     sendBtn: {
       width: isTablet ? 56 : isSmallDevice ? 44 : 48,
@@ -591,7 +821,7 @@ export default function Chatbot({ userId }: ChatbotProps) {
       shadowOpacity: 0,
       elevation: 0,
     },
-  });
+  })
 
   const introStyles = StyleSheet.create({
     container: {
@@ -599,7 +829,7 @@ export default function Chatbot({ userId }: ChatbotProps) {
       alignItems: "center",
       justifyContent: "center",
       paddingHorizontal: isTablet ? 48 : 24,
-      backgroundColor: "#F8F9FA",
+      backgroundColor: "#E6DED1",
     },
     iconContainer: {
       width: isTablet ? 140 : 120,
@@ -675,7 +905,7 @@ export default function Chatbot({ userId }: ChatbotProps) {
       flex: 1,
       fontWeight: "500",
     },
-  });
+  })
 
   const modalStyles = StyleSheet.create({
     overlay: {
@@ -778,12 +1008,12 @@ export default function Chatbot({ userId }: ChatbotProps) {
       marginTop: isTablet ? 12 : 8,
       fontSize: isTablet ? 16 : 14,
     },
-  });
+  })
 
   return (
     <>
       <Stack.Screen options={{ headerShown: false }} />
-      <SafeAreaView style={styles.safeContainer} edges={['top', 'left', 'right']}>
+      <SafeAreaView style={styles.safeContainer} edges={["top", "left", "right"]}>
         <View style={styles.container}>
           {/* HEADER */}
           <View style={styles.header}>
@@ -801,14 +1031,15 @@ export default function Chatbot({ userId }: ChatbotProps) {
             <KeyboardAvoidingView
               behavior="padding"
               style={styles.keyboardAvoidingView}
-              keyboardVerticalOffset={Platform.OS === 'ios' ? (isSmallDevice ? 5 : isTablet ? 20 : 10) : 0}
+              keyboardVerticalOffset={Platform.OS === "ios" ? (isSmallDevice ? 5 : isTablet ? 20 : 10) : 0}
             >
               {/* INTRODUCTORY VIEW */}
               {messages.length === 0 && (
                 <View style={introStyles.container}>
                   <Text style={introStyles.title}>Welcome to Aniko</Text>
                   <Text style={introStyles.subtitle}>
-                    Your intelligent agriculture companion. Get expert advice on crops, soil health, and sustainable farming practices.
+                    Your intelligent agriculture companion. Get expert advice on crops, soil health, and sustainable
+                    farming practices.
                   </Text>
 
                   {/* Recommended Questions */}
@@ -836,8 +1067,8 @@ export default function Chatbot({ userId }: ChatbotProps) {
               )}
 
               {/* MESSAGES */}
-              {messages.length > 0 && (
-                !dataLoaded ? (
+              {messages.length > 0 &&
+                (!dataLoaded ? (
                   <View style={styles.loadingContainer}>
                     <ActivityIndicator size="large" color="#2D6A4F" />
                     <Text style={styles.loadingText}>Loading crop database...</Text>
@@ -846,11 +1077,11 @@ export default function Chatbot({ userId }: ChatbotProps) {
                   <ScrollView
                     ref={scrollViewRef}
                     style={styles.messages}
-                    contentContainerStyle={{ 
-                      paddingVertical: isTablet ? 24 : 16, 
+                    contentContainerStyle={{
+                      paddingVertical: isTablet ? 24 : 16,
                       paddingHorizontal: isTablet ? 24 : 16,
                       paddingBottom: 16,
-                      flexGrow: 1
+                      flexGrow: 1,
                     }}
                     showsVerticalScrollIndicator={false}
                     keyboardShouldPersistTaps="handled"
@@ -860,7 +1091,7 @@ export default function Chatbot({ userId }: ChatbotProps) {
                     }}
                     onContentSizeChange={() => {
                       if (!isKeyboardVisible) {
-                        scrollViewRef.current?.scrollToEnd({ animated: false });
+                        scrollViewRef.current?.scrollToEnd({ animated: false })
                       }
                     }}
                   >
@@ -877,15 +1108,8 @@ export default function Chatbot({ userId }: ChatbotProps) {
                             <MaterialCommunityIcons name="sprout" size={isTablet ? 20 : 16} color="#FFFFFF" />
                           </View>
                         )}
-                        <View
-                          style={[
-                            styles.msg,
-                            m.role === "user" ? styles.userMsg : styles.botMsg,
-                          ]}
-                        >
-                          <Text style={[styles.msgText, m.role === "user" && styles.userMsgText]}>
-                            {m.text}
-                          </Text>
+                        <View style={[styles.msg, m.role === "user" ? styles.userMsg : styles.botMsg]}>
+                          <Text style={[styles.msgText, m.role === "user" && styles.userMsgText]}>{m.text}</Text>
                         </View>
                         {m.role === "user" && <View style={{ width: 8 }} />}
                       </View>
@@ -905,8 +1129,7 @@ export default function Chatbot({ userId }: ChatbotProps) {
                       </View>
                     )}
                   </ScrollView>
-                )
-              )}
+                ))}
 
               {/* INPUT with background extension */}
               <View style={styles.inputWrapperContainer}>
@@ -924,8 +1147,8 @@ export default function Chatbot({ userId }: ChatbotProps) {
                       maxLength={500}
                       onFocus={() => {
                         setTimeout(() => {
-                          scrollViewRef.current?.scrollToEnd({ animated: true });
-                        }, 100);
+                          scrollViewRef.current?.scrollToEnd({ animated: true })
+                        }, 100)
                       }}
                       blurOnSubmit={false}
                       returnKeyType="send"
@@ -952,7 +1175,8 @@ export default function Chatbot({ userId }: ChatbotProps) {
                 <View style={introStyles.container}>
                   <Text style={introStyles.title}>Welcome to Aniko</Text>
                   <Text style={introStyles.subtitle}>
-                    Your intelligent agriculture companion. Get expert advice on crops, soil health, and sustainable farming practices.
+                    Your intelligent agriculture companion. Get expert advice on crops, soil health, and sustainable
+                    farming practices.
                   </Text>
 
                   {/* Recommended Questions */}
@@ -980,8 +1204,8 @@ export default function Chatbot({ userId }: ChatbotProps) {
               )}
 
               {/* MESSAGES */}
-              {messages.length > 0 && (
-                !dataLoaded ? (
+              {messages.length > 0 &&
+                (!dataLoaded ? (
                   <View style={styles.loadingContainer}>
                     <ActivityIndicator size="large" color="#2D6A4F" />
                     <Text style={styles.loadingText}>Loading crop database...</Text>
@@ -992,14 +1216,14 @@ export default function Chatbot({ userId }: ChatbotProps) {
                     style={[
                       styles.messages,
                       isKeyboardVisible && {
-                        marginBottom: keyboardHeight - (isSmallDevice ? 30 : isTablet ? 60 : 40)
-                      }
+                        marginBottom: keyboardHeight - (isSmallDevice ? 30 : isTablet ? 60 : 40),
+                      },
                     ]}
-                    contentContainerStyle={{ 
-                      paddingVertical: isTablet ? 24 : 16, 
+                    contentContainerStyle={{
+                      paddingVertical: isTablet ? 24 : 16,
                       paddingHorizontal: isTablet ? 24 : 16,
                       paddingBottom: 16,
-                      flexGrow: 1
+                      flexGrow: 1,
                     }}
                     showsVerticalScrollIndicator={false}
                     keyboardShouldPersistTaps="handled"
@@ -1009,7 +1233,7 @@ export default function Chatbot({ userId }: ChatbotProps) {
                     }}
                     onContentSizeChange={() => {
                       if (!isKeyboardVisible) {
-                        scrollViewRef.current?.scrollToEnd({ animated: false });
+                        scrollViewRef.current?.scrollToEnd({ animated: false })
                       }
                     }}
                   >
@@ -1026,15 +1250,8 @@ export default function Chatbot({ userId }: ChatbotProps) {
                             <MaterialCommunityIcons name="sprout" size={isTablet ? 20 : 16} color="#FFFFFF" />
                           </View>
                         )}
-                        <View
-                          style={[
-                            styles.msg,
-                            m.role === "user" ? styles.userMsg : styles.botMsg,
-                          ]}
-                        >
-                          <Text style={[styles.msgText, m.role === "user" && styles.userMsgText]}>
-                            {m.text}
-                          </Text>
+                        <View style={[styles.msg, m.role === "user" ? styles.userMsg : styles.botMsg]}>
+                          <Text style={[styles.msgText, m.role === "user" && styles.userMsgText]}>{m.text}</Text>
                         </View>
                         {m.role === "user" && <View style={{ width: 8 }} />}
                       </View>
@@ -1054,31 +1271,36 @@ export default function Chatbot({ userId }: ChatbotProps) {
                       </View>
                     )}
                   </ScrollView>
-                )
-              )}
+                ))}
 
               {/* INPUT with background extension for Android */}
-              <View style={[
-                styles.inputWrapperContainer,
-                isKeyboardVisible && {
-                  position: 'absolute',
-                  bottom: keyboardHeight + (isSmallDevice ? 5 : isTablet ? 15 : 10),
-                  left: 0,
-                  right: 0,
-                }
-              ]}>
-                <View style={[
-                  styles.inputBackground,
+              <View
+                style={[
+                  styles.inputWrapperContainer,
                   isKeyboardVisible && {
-                    height: Platform.OS === 'android' ? 150 : 100,
-                  }
-                ]} />
-                <View style={[
-                  styles.inputWrapper,
-                  isKeyboardVisible && {
-                    paddingBottom: Platform.OS === 'android' ? (isTablet ? 50 : 40) : (isTablet ? 24 : 16),
-                  }
-                ]}>
+                    position: "absolute",
+                    bottom: keyboardHeight + (isSmallDevice ? 5 : isTablet ? 15 : 10),
+                    left: 0,
+                    right: 0,
+                  },
+                ]}
+              >
+                <View
+                  style={[
+                    styles.inputBackground,
+                    isKeyboardVisible && {
+                      height: Platform.OS === "android" ? 150 : 100,
+                    },
+                  ]}
+                />
+                <View
+                  style={[
+                    styles.inputWrapper,
+                    isKeyboardVisible && {
+                      paddingBottom: Platform.OS === "android" ? (isTablet ? 50 : 40) : isTablet ? 24 : 16,
+                    },
+                  ]}
+                >
                   <View style={styles.inputRow}>
                     <TextInput
                       style={styles.input}
@@ -1091,8 +1313,8 @@ export default function Chatbot({ userId }: ChatbotProps) {
                       maxLength={500}
                       onFocus={() => {
                         setTimeout(() => {
-                          scrollViewRef.current?.scrollToEnd({ animated: true });
-                        }, 100);
+                          scrollViewRef.current?.scrollToEnd({ animated: true })
+                        }, 100)
                       }}
                       blurOnSubmit={false}
                       returnKeyType="send"
@@ -1132,10 +1354,7 @@ export default function Chatbot({ userId }: ChatbotProps) {
                     <Text style={modalStyles.historyTitle}>Chat History</Text>
                     <Text style={modalStyles.historySubtitle}>{chatHistory.length} conversations</Text>
                   </View>
-                  <TouchableOpacity
-                    onPress={() => setSidePanelVisible(false)}
-                    style={modalStyles.closeBtn}
-                  >
+                  <TouchableOpacity onPress={() => setSidePanelVisible(false)} style={modalStyles.closeBtn}>
                     <Ionicons name="close" size={isTablet ? 28 : 24} color="#2C3E50" />
                   </TouchableOpacity>
                 </View>
@@ -1149,10 +1368,9 @@ export default function Chatbot({ userId }: ChatbotProps) {
                       onPress={() => reopenChat(item)}
                       activeOpacity={0.7}
                     >
-                      <View style={[
-                        modalStyles.historyCard,
-                        item.id === activeChatId && modalStyles.activeHistoryCard
-                      ]}>
+                      <View
+                        style={[modalStyles.historyCard, item.id === activeChatId && modalStyles.activeHistoryCard]}
+                      >
                         <View style={modalStyles.historyCardHeader}>
                           <MaterialCommunityIcons
                             name="message-text-outline"
@@ -1161,15 +1379,16 @@ export default function Chatbot({ userId }: ChatbotProps) {
                           />
                           <Text style={modalStyles.historyDate}>{item.timestamp}</Text>
                         </View>
-                        <Text style={[
-                          modalStyles.historyTitleText,
-                          item.id === activeChatId && modalStyles.activeHistoryTitle
-                        ]} numberOfLines={2}>
+                        <Text
+                          style={[
+                            modalStyles.historyTitleText,
+                            item.id === activeChatId && modalStyles.activeHistoryTitle,
+                          ]}
+                          numberOfLines={2}
+                        >
                           {item.title}
                         </Text>
-                        <Text style={modalStyles.messageCount}>
-                          {item.messages.length} messages
-                        </Text>
+                        <Text style={modalStyles.messageCount}>{item.messages.length} messages</Text>
                       </View>
                     </TouchableOpacity>
                   )}
@@ -1188,5 +1407,5 @@ export default function Chatbot({ userId }: ChatbotProps) {
         </View>
       </SafeAreaView>
     </>
-  );
+  )
 }

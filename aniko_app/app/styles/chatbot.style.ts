@@ -5,11 +5,11 @@ const { width } = Dimensions.get("window");
 export const styles = StyleSheet.create({
   safeContainer: {
     flex: 1,
-    backgroundColor: "#f5f5f0",
+    backgroundColor: "#E6DED1",
   },
   container: {
     flex: 1,
-    backgroundColor: "#f5f5f0",
+    backgroundColor: "#E6DED1",
   },
   overlay: {
     position: "absolute",

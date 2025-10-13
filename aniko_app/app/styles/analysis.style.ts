@@ -9,7 +9,7 @@ const analysis = StyleSheet.create({
   // ===== CONTAINER STYLES =====
   container: {
     flex: 1,
-    backgroundColor: "#F5F7FA", // More professional neutral background
+    backgroundColor: "#CBBA9E", // More professional neutral background
   },
 
   scrollContent: {
