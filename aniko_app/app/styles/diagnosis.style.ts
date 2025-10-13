@@ -14,6 +14,8 @@ export const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 3,
     elevation: 4,
+    borderBottomLeftRadius: 24,
+    borderBottomRightRadius: 24,
   },
   menuButton: {
     padding: 8,

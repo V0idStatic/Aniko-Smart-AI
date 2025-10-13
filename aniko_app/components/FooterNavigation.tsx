@@ -17,10 +17,7 @@ const FooterNavigation = () => {
           <Ionicons name="leaf" size={24} color="#fff" />
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.navButton} onPress={() => router.push("/dashboard")} activeOpacity={0.7}>
-          <Ionicons name="cloud" size={24} color="#fff" />
-        </TouchableOpacity>
-
+      
         <TouchableOpacity style={styles.navButton} onPress={() => router.push("/sensor")} activeOpacity={0.7}>
           <Ionicons name="analytics-outline" size={24} color="#fff" />
         </TouchableOpacity>

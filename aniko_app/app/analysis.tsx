@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Dimensions } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
-import { useRouter } from "expo-router"
+import { useRouter, Stack } from "expo-router"
 import { LinearGradient } from "expo-linear-gradient"
 import supabase from "./CONFIG/supaBase"
 import { useAppContext } from "./CONFIG/GlobalContext"
@@ -1516,7 +1516,9 @@ export default function Analysis() {
   }, [selectedStatus])
 
   return (
-    <View style={styles.container}>
+    <>
+      <Stack.Screen options={{ headerShown: false }} />
+      <View style={styles.container}>
       {/* Header */}
       <LinearGradient colors={["#1c4722", "#4d7f39"]} style={styles.headerBackground}>
         <View style={styles.headerTop}>
@@ -2631,7 +2633,8 @@ export default function Analysis() {
       </ScrollView>
 
       <FooterNavigation />
-    </View>
+      </View>
+    </>
   )
 }
 

@@ -23,6 +23,8 @@ const analysis = StyleSheet.create({
     paddingTop: 50,
     paddingBottom: 32, // Consistent spacing scale
     paddingHorizontal: 20,
+    borderBottomLeftRadius: 24,
+    borderBottomRightRadius: 24,
   },
 
   headerTop: {
@@ -142,9 +144,9 @@ const analysis = StyleSheet.create({
   refreshButton: {
     padding: 10,
     borderRadius: 24,
-    backgroundColor: "#F0F9F4", // Consistent with theme
+    backgroundColor: "#1c4722", // Consistent with theme
     borderWidth: 1.5, // Consistent border width
-    borderColor: "#D1E7DD", // Professional border
+    borderColor: "#1c4722", // Professional border
     alignItems: "center", // Centers content horizontally
     justifyContent: "center", // Centers content vertically
     flexDirection: "row", // Ensures icon + text are aligned in a row
@@ -152,7 +154,7 @@ const analysis = StyleSheet.create({
 
   refreshButtonText: {
     fontSize: 14,
-    color: "#1c4722",
+    color: "#D1E7DD",
     marginLeft: 8,
     fontWeight: "700",
   },
@@ -277,7 +279,7 @@ const analysis = StyleSheet.create({
 
   chartSubtitle: {
     fontSize: 12,
-    color: "#64748B", // Professional gray
+    color: "#1E293B", // Professional gray
     fontStyle: "italic",
     marginBottom: 10,
     textAlign: "center",
@@ -285,7 +287,7 @@ const analysis = StyleSheet.create({
 
   subtitle: {
     fontSize: 14,
-    color: "#64748B", // Professional gray
+    color: "#1E293B", // Professional gray
     marginBottom: 16, // Consistent spacing
     lineHeight: 20,
   },
