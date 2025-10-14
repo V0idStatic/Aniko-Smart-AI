@@ -33,7 +33,7 @@ export default function Login() {
     return digest
   }
 
-  // Test database connection
+  //Verifies database connection
   const testDatabaseConnection = async () => {
     try {
       const { error } = await supabase.from("users").select("count").limit(1)
