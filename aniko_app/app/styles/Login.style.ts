@@ -1,14 +1,14 @@
 import { StyleSheet } from "react-native"
+import { LinearGradient } from "expo-linear-gradient";
 
-export default StyleSheet.create({
+
+export default StyleSheet.create({ 
   container: {
     flex: 1,
-    backgroundColor: "#f8f9fa",
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 20,
+    justifyContent: "center",  
+    alignItems: "center",      
+    backgroundColor: "#cfc4b2ff", 
   },
-
   // Status Bar Styles
   statusBar: {
     position: "absolute",
@@ -62,16 +62,25 @@ export default StyleSheet.create({
 
   // Content Card
   contentCard: {
-    width: "100%",
-    maxWidth: 400,
-    backgroundColor: "#fff",
-    borderRadius: 24,
+    position: "absolute",   
+    bottom: 0,                 
+    left: 0,
+    right: 0,
+    marginHorizontal: "auto",   
+    width: "100%",              
+    maxWidth: 500,              
+    backgroundColor: "#E6DED1",
+    borderRadius: 0,
+    borderTopRightRadius: 180,
+    borderTopLeftRadius: 180,
     padding: 32,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
     shadowRadius: 12,
     elevation: 5,
+    alignSelf: "center",
+    paddingTop: 50,
   },
 
   // Logo
@@ -89,14 +98,14 @@ export default StyleSheet.create({
   title: {
     fontSize: 28,
     fontWeight: "700",
-    color: "#1f2937",
+    color: "#4D2D18",
     textAlign: "center",
     marginBottom: 8,
     letterSpacing: -0.5,
   },
   subtitle: {
     fontSize: 15,
-    color: "#6b7280",
+    color: "#374151",
     textAlign: "center",
     marginBottom: 32,
     letterSpacing: 0.2,
@@ -109,19 +118,23 @@ export default StyleSheet.create({
   label: {
     fontSize: 14,
     fontWeight: "600",
-    color: "#374151",
+    color: "#4C4B2C",
     marginBottom: 8,
     letterSpacing: 0.2,
   },
   inputContainer: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#f9fafb",
-    borderRadius: 12,
+    backgroundColor: "transparent",
+    borderRadius: 25,
     borderWidth: 1,
-    borderColor: "#e5e7eb",
+    borderColor: "#756C65",
     paddingHorizontal: 16,
     height: 52,
+  },
+  inputFocused: {
+    backgroundColor: "#FEF5E6", 
+    borderColor: "#4C6444",  
   },
   inputIcon: {
     marginRight: 12,
@@ -155,19 +168,19 @@ export default StyleSheet.create({
 
   // Login Button
   loginButton: {
-    backgroundColor: "#10b981",
-    borderRadius: 12,
+    backgroundColor: "#4C6444",
+    borderRadius: 25,
     paddingVertical: 16,
     alignItems: "center",
     marginTop: 8,
-    shadowColor: "#10b981",
+    shadowColor: "#374151",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
     elevation: 4,
   },
   disabledButton: {
-    backgroundColor: "#9ca3af",
+    backgroundColor: "#374151",
     opacity: 0.6,
   },
   loginText: {
@@ -184,10 +197,10 @@ export default StyleSheet.create({
   },
   signupText: {
     fontSize: 14,
-    color: "#6b7280",
+    color: "#6A7D4F",
   },
   signupLink: {
-    color: "#10b981",
+    color: "#4C4B2C",
     fontWeight: "600",
   },
 
@@ -200,12 +213,12 @@ export default StyleSheet.create({
   divider: {
     flex: 1,
     height: 1,
-    backgroundColor: "#e5e7eb",
+    backgroundColor: "#756C65",
   },
   orText: {
     marginHorizontal: 16,
     fontSize: 13,
-    color: "#9ca3af",
+    color: "#756C65",
     fontWeight: "600",
     letterSpacing: 0.5,
   },
@@ -215,11 +228,11 @@ export default StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#fff",
-    borderRadius: 12,
+    backgroundColor: "#cfc4b2ff",
+    borderRadius: 25,
     paddingVertical: 14,
-    borderWidth: 1.5,
-    borderColor: "#e5e7eb",
+    borderWidth: 0,
+    borderColor: "none",
   },
   googleIcon: {
     width: 20,
@@ -228,7 +241,7 @@ export default StyleSheet.create({
   },
   googleText: {
     fontSize: 15,
-    color: "#374151",
+    color: "#4D2D18",
     fontWeight: "600",
     letterSpacing: 0.3,
   },

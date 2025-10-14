@@ -8,7 +8,7 @@ import { StatusBar } from "expo-status-bar"
 import { Stack } from "expo-router"
 import styles from "./styles/Login.style"
 import { Ionicons } from "@expo/vector-icons"
-import * as Crypto from 'expo-crypto' // ← ADD THIS IMPORT
+import * as Crypto from 'expo-crypto'
 
 export default function Login() {
   const [username, setUsername] = useState("")
@@ -17,15 +17,17 @@ export default function Login() {
   const [isDatabaseConnected, setIsDatabaseConnected] = useState<boolean | null>(null)
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
-  const router = useRouter()
+  const [isUsernameFocused, setIsUsernameFocused] = useState(false)
+  const [isPasswordFocused, setIsPasswordFocused] = useState(false)
 
+  const router = useRouter()
   const { setCurrentUser } = require("./CONFIG/currentUser")
 
   // ==========================================
-  // PASSWORD HASHING FUNCTION (ADD THIS)
+  // PASSWORD HASHING FUNCTION (UNCHANGED)
   // ==========================================
   const hashPassword = async (password: string): Promise<string> => {
-    const salt = 'ANIKO_SALT_2024' // MUST MATCH signup.tsx!
+    const salt = 'ANIKO_SALT_2024'
     const digest = await Crypto.digestStringAsync(
       Crypto.CryptoDigestAlgorithm.SHA256,
       password + salt
@@ -33,7 +35,9 @@ export default function Login() {
     return digest
   }
 
-  //Verifies database connection
+  // ==========================================
+  // DATABASE CONNECTION CHECK (UNCHANGED)
+  // ==========================================
   const testDatabaseConnection = async () => {
     try {
       const { error } = await supabase.from("users").select("count").limit(1)
@@ -51,7 +55,7 @@ export default function Login() {
   }
 
   // ==========================================
-  // UPDATED LOGIN HANDLER
+  // LOGIN HANDLER (UNCHANGED)
   // ==========================================
   const handleLogin = async () => {
     try {
@@ -66,9 +70,6 @@ export default function Login() {
 
       console.log("🔍 Looking up username in public.users...")
 
-      // ==========================================
-      // FIND USER BY USERNAME IN PUBLIC.USERS TABLE
-      // ==========================================
       const { data: userData, error: userError } = await supabase
         .from('users')
         .select('email, auth_id, username')
@@ -83,9 +84,6 @@ export default function Login() {
 
       console.log("✅ User found:", userData.username)
 
-      // ==========================================
-      // LOGIN WITH EMAIL & PASSWORD
-      // ==========================================
       const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
         email: userData.email,
         password: password,
@@ -123,7 +121,6 @@ export default function Login() {
 
       console.log("✅ Login successful!")
 
-      // Set user session
       setCurrentUser({
         id: authData.user.id,
         username: userData.username,
@@ -143,6 +140,9 @@ export default function Login() {
     testDatabaseConnection()
   }, [])
 
+  // ==========================================
+  // UI SECTION
+  // ==========================================
   return (
     <>
       <Stack.Screen options={{ headerShown: false }} />
@@ -188,34 +188,48 @@ export default function Login() {
           <Text style={styles.title}>Welcome Back</Text>
           <Text style={styles.subtitle}>Sign in to continue</Text>
 
-          {/* Username Input */}
+          {/* USERNAME INPUT */}
           <View style={styles.inputGroup}>
             <Text style={styles.label}>Username</Text>
-            <View style={styles.inputContainer}>
+            <View
+              style={[
+                styles.inputContainer,
+                isUsernameFocused && styles.inputFocused, // Apply white bg on focus
+              ]}
+            >
               <Ionicons name="person-outline" size={20} color="#666" style={styles.inputIcon} />
               <TextInput
-                placeholder="Enter your username"
+                placeholder={username.length > 0 ? "" : "Enter your username"} // Clear placeholder when typing
                 style={styles.input}
-                placeholderTextColor="#999"
+                placeholderTextColor="#4C4B2C"
                 value={username}
                 onChangeText={setUsername}
                 autoCapitalize="none"
+                onFocus={() => setIsUsernameFocused(true)}
+                onBlur={() => setIsUsernameFocused(false)}
               />
             </View>
           </View>
 
-          {/* Password Input */}
+          {/* PASSWORD INPUT */}
           <View style={styles.inputGroup}>
             <Text style={styles.label}>Password</Text>
-            <View style={styles.inputContainer}>
+            <View
+              style={[
+                styles.inputContainer,
+                isPasswordFocused && styles.inputFocused, 
+              ]}
+            >
               <Ionicons name="lock-closed-outline" size={20} color="#666" style={styles.inputIcon} />
               <TextInput
-                placeholder="Enter your password"
+                placeholder={password.length > 0 ? "" : "Enter your password"} 
                 style={styles.input}
-                placeholderTextColor="#999"
+                placeholderTextColor="#4C4B2C"
                 value={password}
                 onChangeText={setPassword}
                 secureTextEntry={!showPassword}
+                onFocus={() => setIsPasswordFocused(true)}
+                onBlur={() => setIsPasswordFocused(false)}
               />
               <TouchableOpacity style={styles.eyeIcon} onPress={() => setShowPassword(!showPassword)}>
                 <Ionicons name={showPassword ? "eye-off-outline" : "eye-outline"} size={20} color="#666" />
@@ -240,7 +254,7 @@ export default function Login() {
             <Text style={styles.loginText}>Sign In</Text>
           </TouchableOpacity>
 
-          {/* Sign-up link */}
+          {/* Sign-up Link */}
           <TouchableOpacity style={styles.signupContainer} onPress={() => router.push("/signup")}>
             <Text style={styles.signupText}>
               Don't have an account? <Text style={styles.signupLink}>Sign up</Text>
