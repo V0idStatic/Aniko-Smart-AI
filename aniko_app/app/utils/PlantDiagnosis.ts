@@ -15,7 +15,7 @@ export const diagnosePlant = async (
     cause: string;
   }[];
 }> => {
-  const apiKey = "zB45Repg0x5h5w3sLlZP3IyCnyisgdhJRj9lyUOD1hyizNCMT0"; // Plant.id key
+  const apiKey = "c1jg3HSCnJdrhbhy3HY5pD0dVLlDW4wGq5IGx1wHhbZkYgYkap"; // Plant.id key
 
   try {
     // Resize/compress image

@@ -6,6 +6,7 @@ import "../CSS/testimonialDisplay.css";
 import HeaderLogged from "../INCLUDE/header-logged";
 import HeaderUnlogged from "../INCLUDE/header-unlogged";
 import Footer from "../INCLUDE/footer";
+import { useNavigate } from "react-router-dom";
 
 type UserRow = {
   uid: string;
@@ -39,6 +40,7 @@ const TestimonialDisplay: React.FC = () => {
   const [data, setData] = useState<TestimonialRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [visibleCount, setVisibleCount] = useState(9);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, (user) => setAuthUser(user));
@@ -103,14 +105,38 @@ const TestimonialDisplay: React.FC = () => {
     setVisibleCount((prev) => (prev === 9 ? data.length : 9));
   };
 
+  // 🟢 Button handler for redirect/login logic
+  const handleSubmitClick = () => {
+    if (authUser) {
+      navigate("/testimonialSubmit");
+    } else {
+      navigate("/login", { state: { redirectTo: "/testimonialSubmit" } });
+    }
+  };
+
   return (
     <>
       {authUser ? <HeaderLogged /> : <HeaderUnlogged />}
       <main>
         <section className="testDisplay-section">
           <h2>Hear Directly From Our Users</h2>
-          <h6>We don’t just create solutions—we build relationships that last. Discover how our work has <br/> made a difference through the voices of those who matter most.</h6>
-          <a href="/testimonialSubmit" className="testSubmit-link"><button className="testimonialSubmit-headerBtn">Submit Testimonial</button></a>
+          <h6>
+            We don’t just create solutions—we build relationships that last.
+            Discover how our work has <br /> made a difference through the
+            voices of those who matter most.
+          </h6>
+
+          {/* 🟣 Updated button with navigate() */}
+          <button
+            onClick={handleSubmitClick}
+            className="testimonialSubmit-headerBtn"
+            style={{
+              cursor: "pointer",
+            }}
+          >
+            Submit Testimonial
+          </button>
+
           {loading && <p style={{ textAlign: "center" }}>Loading…</p>}
           {!loading && !data.length && (
             <p style={{ textAlign: "center" }}>No testimonials yet.</p>
@@ -123,23 +149,27 @@ const TestimonialDisplay: React.FC = () => {
                   <div className="testDisplay-card" key={t.id}>
                     <div className="testDisplay-userDetails">
                       <img
-                        src={t.users?.profile_picture || "/PICTURES/default-avatar.png"}
+                        src={
+                          t.users?.profile_picture ||
+                          "/PICTURES/default-avatar.png"
+                        }
                         alt={t.users?.username || "User"}
                       />
                       <div>
                         <h5>{t.users?.username ?? "Unknown User"}</h5>
                         <small>{t.users?.email ?? "No email"}</small>
                       </div>
-                    
                     </div>
-                   
                     <p>“{t.testimonial}”</p>
                   </div>
                 ))}
               </div>
               {data.length > 9 && (
                 <div className="testDisplay-view-more-container">
-                  <button className="testDisplay-view-more-btn" onClick={toggleView}>
+                  <button
+                    className="testDisplay-view-more-btn"
+                    onClick={toggleView}
+                  >
                     {visibleCount === 9 ? "View More" : "See Less"}
                   </button>
                 </div>

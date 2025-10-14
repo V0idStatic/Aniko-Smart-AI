@@ -82,7 +82,7 @@ export default StyleSheet.create({
   },
   getStartedButton: {
     position: "absolute",
-    bottom: 50,
+    bottom: 20,
     alignSelf: "center",
     backgroundColor: "#1D4101",
     paddingVertical: 15,

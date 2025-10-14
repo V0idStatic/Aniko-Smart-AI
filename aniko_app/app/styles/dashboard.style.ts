@@ -11,7 +11,7 @@ export const colors = {
   accentLight: "#FFA726",
 
   // Background colors
-  background: "#F5F7FA",
+  background: "#CBBA9E",
   cardBackground: "#FFFFFF",
 
   // Text colors

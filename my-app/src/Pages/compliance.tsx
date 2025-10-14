@@ -110,6 +110,34 @@ const Compliance: React.FC = () => {
       <div className="main-content">
         <section className="contact-section">
           <div className="contact-wrapper">
+            {/* mobile contact info */}
+            <div className="mobile-contact-info">
+              <h3>Get In Touch</h3>
+              <p className="mobile-conSubtext">Need help or have an issue? Our team's ready to assist.</p>
+              <div className="mobile-contact-item-row row">
+                <div className="col-12 col-md-6">
+                  <div className="mobile-contact-item">
+                    <i className="bi bi-geo-alt-fill"></i>
+                    <div className="contact-item-content">Olongapo City, Zambales, Philippines</div>
+                  </div>
+                  <div className="mobile-contact-item">
+                    <i className="bi bi-phone"></i>
+                    <div className="contact-item-content">0912-123-1234</div>
+                  </div>
+                </div>
+                <div className="col-12 col-md-6">
+                  <div className="mobile-contact-item">
+                    <i className="bi bi-envelope"></i>
+                    <div className="contact-item-content">anikosmartcropsystem@gmail.com</div>
+                  </div>
+                  <div className="mobile-contact-item">
+                    <i className="bi bi-clock"></i>
+                    <div className="contact-item-content">9:00 AM - 10:00 PM</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+              
             {/* Contact Info */}
             <div className="contact-info-section">
               <h3>Get In Touch</h3>
@@ -270,6 +298,11 @@ const Compliance: React.FC = () => {
                   )}
                 </button>
               </form>
+            </div>
+            <div className="mobile-social-links">
+              <a href="#"><i className="bi bi-facebook"></i></a>
+              <a href="#"><i className="bi bi-twitter"></i></a>
+              <a href="#"><i className="bi bi-instagram"></i></a>
             </div>
           </div>
         </section>

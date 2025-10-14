@@ -2,14 +2,57 @@ import { StyleSheet, Platform, Dimensions } from "react-native";
 
 const { width } = Dimensions.get("window");
 
+export const colors = {
+  // Primary colors
+  primary: "#2E7D32",
+  primaryDark: "#1B5E20",
+  primaryLight: "#4CAF50",
+
+  // Accent colors
+  accent: "#FF6F00",
+  accentLight: "#FFA726",
+
+  // Background colors
+  background: "#CBBA9E",
+  cardBackground: "#FFFFFF",
+
+  // Text colors
+  textPrimary: "#1A1A1A",
+  textSecondary: "#6B7280",
+  textLight: "#9CA3AF",
+
+  // Status colors
+  success: "#4CAF50",
+  warning: "#FFC107",
+  error: "#F44336",
+  info: "#2196F3",
+
+  // Neutral colors
+  white: "#FFFFFF",
+  gray100: "#F3F4F6",
+  gray200: "#E5E7EB",
+  gray300: "#D1D5DB",
+  gray400: "#9CA3AF",
+  gray500: "#6B7280",
+  gray600: "#4B5563",
+  gray700: "#374151",
+  gray800: "#1F2937",
+  gray900: "#111827",
+
+  // Border colors
+  border: "#E5E7EB",
+  borderLight: "#F3F4F6",
+}
+
+
 export const styles = StyleSheet.create({
   safeContainer: {
     flex: 1,
-    backgroundColor: "#f5f5f0",
+    backgroundColor: "#E6DED1",
   },
   container: {
     flex: 1,
-    backgroundColor: "#f5f5f0",
+    backgroundColor: "#E6DED1",
   },
   overlay: {
     position: "absolute",
@@ -78,6 +121,8 @@ export const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderColor: "#C8E6C9",
     elevation: 3,
+      borderBottomLeftRadius: 24,
+    borderBottomRightRadius: 24,
   },
   headerTitle: {
     fontSize: 20,
