@@ -81,7 +81,7 @@ const Header: React.FC = () => {
               ) : (
                 <div className="dropdown">
                   <button
-                    className="btn d-flex align-items-center dropdown-toggle"
+                    className="btn d-flex align-items-center dropdown-toggle profile-btn"
                     id="profileDropdown"
                     data-bs-toggle="dropdown"
                     aria-expanded="false"
@@ -94,7 +94,7 @@ const Header: React.FC = () => {
                       height="40"
                       className="rounded-circle border border-light me-2"
                     />
-                    <span className="fw-semibold">{user.displayName || "User"}</span>
+                    <span className="fw-semibold user-name">{user.displayName || "User"}</span>
                   </button>
 
                   <ul className="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown">
@@ -124,7 +124,7 @@ const Header: React.FC = () => {
           top: 10px;
           left: 50%;
           transform: translateX(-50%);
-          z-index: 2000;
+          z-index: 1060;
         }
         .floating-header .nav-link {
           color: #fff !important;
@@ -137,6 +137,97 @@ const Header: React.FC = () => {
         .dropdown-menu {
           border-radius: 12px;
           box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+          background: #112822;
+          border: 1px solid rgba(189, 224, 138, 0.2);
+        }
+        .dropdown-item {
+          color: white;
+        }
+        .dropdown-item:hover {
+          background: rgba(189, 224, 138, 0.1);
+          color: white;
+        }
+        
+        @media (max-width: 991.98px) {
+          .navbar-collapse {
+            position: fixed;
+            top: 70px;
+            right: -280px;
+            width: 280px;
+            height: auto;
+            max-height: calc(100vh - 80px);
+            background: #112822;
+            padding: 20px;
+            border-radius: 15px 0 0 15px;
+            box-shadow: -4px 0 12px rgba(0,0,0,0.3);
+            transition: right 0.3s ease-in-out;
+            z-index: 1050;
+            overflow-y: auto;
+          }
+          
+          .navbar-collapse.show {
+            right: 0;
+          }
+          
+          .navbar-collapse.collapsing {
+            right: -280px;
+            transition: right 0.3s ease-in-out;
+            height: auto;
+          }
+          
+          .navbar-nav {
+            text-align: left;
+            align-items: flex-start;
+          }
+          
+          .navbar-nav .nav-link {
+            padding: 10px 14px;
+            border-radius: 8px;
+            margin-bottom: 6px;
+            font-size: 14px;
+          }
+          
+          .navbar-nav .nav-link:hover {
+            background: rgba(189, 224, 138, 0.1);
+          }
+          
+          .ms-lg-auto {
+            margin-left: 0 !important;
+            margin-top: 20px !important;
+            padding-top: 20px;
+            border-top: 1px solid rgba(189, 224, 138, 0.2);
+          }
+          
+          .profile-btn {
+            width: 100%;
+            justify-content: flex-start !important;
+            padding: 10px 14px !important;
+            border-radius: 8px !important;
+          }
+          
+          .profile-btn:hover {
+            background: rgba(189, 224, 138, 0.1) !important;
+          }
+          
+          .user-name {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 150px;
+          }
+          
+          .dropdown-menu {
+            position: static !important;
+            transform: none !important;
+            width: 100%;
+            margin-top: 8px !important;
+            box-shadow: none;
+            border: 1px solid rgba(189, 224, 138, 0.2);
+          }
+          
+          .dropdown-item {
+            padding: 10px 14px;
+          }
         }
       `}</style>
     </header>

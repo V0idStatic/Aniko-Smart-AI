@@ -68,7 +68,7 @@ const HeaderUnlogged: React.FC = () => {
             {/* LOGIN BUTTON on the right side */}
             <div className="ms-lg-auto text-center mt-3 mt-lg-0">
               <Link to="/login" className="btn btn-outline-light px-4 rounded-pill">
-                <i className="bi bi-box-arrow-in-right me-2"></i>Login
+                <i className="bi box-arrow-in-right me-2"></i>Login
               </Link>
             </div>
           </div>
@@ -88,7 +88,7 @@ const HeaderUnlogged: React.FC = () => {
           top: 10px;
           left: 50%;
           transform: translateX(-50%);
-          z-index: 1000;
+          z-index: 1060;
         }
         .floating-header .nav-link {
           color: #fff !important;
@@ -107,6 +107,50 @@ const HeaderUnlogged: React.FC = () => {
         .floating-header .btn-outline-light:hover {
           background: #BDE08A;
           color: #112822;
+        }
+        
+        @media (max-width: 991.98px) {
+          .navbar-collapse {
+            position: fixed;
+            top: 70px;
+            right: -250px;
+            width: 250px;
+            height: auto;
+            max-height: calc(100vh - 80px);
+            background: #112822;
+            padding: 20px;
+            border-radius: 15px 0 0 15px;
+            box-shadow: -4px 0 12px rgba(0,0,0,0.3);
+            transition: right 0.3s ease-in-out;
+            z-index: 1050;
+            overflow-y: auto;
+          }
+          
+          .navbar-collapse.show {
+            right: 0;
+          }
+          
+          .navbar-collapse.collapsing {
+            right: -250px;
+            transition: right 0.3s ease-in-out;
+            height: auto;
+          }
+          
+          .navbar-nav {
+            text-align: left;
+            align-items: flex-start;
+          }
+          
+          .navbar-nav .nav-link {
+            padding: 10px 14px;
+            border-radius: 8px;
+            margin-bottom: 6px;
+            font-size: 14px;
+          }
+          
+          .navbar-nav .nav-link:hover {
+            background: rgba(189, 224, 138, 0.1);
+          }
         }
       `}</style>
     </header>
