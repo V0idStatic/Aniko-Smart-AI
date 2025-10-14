@@ -1150,6 +1150,416 @@ const analysis = StyleSheet.create({
     color: "#1c4722",
     fontWeight: "700",
   },
+
+  // ===== PLANT LIBRARY STYLES =====
+  plantLibraryHeader: {
+    padding: 16,
+    backgroundColor: "#fff",
+    borderBottomWidth: 1,
+    borderBottomColor: "#e5e7eb",
+  },
+
+  libraryHeaderContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 16,
+  },
+
+  libraryIconContainer: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: "#e8f5e9",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  libraryTitleContainer: {
+    flex: 1,
+  },
+
+  libraryTitle: {
+    fontSize: 24,
+    fontWeight: "700",
+    color: "#1c4722",
+    marginBottom: 4,
+  },
+
+  librarySubtitle: {
+    fontSize: 14,
+    color: "#666",
+    lineHeight: 20,
+  },
+
+  searchContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#f3f4f6",
+    marginHorizontal: 16,
+    marginTop: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 12,
+    gap: 12,
+  },
+
+  searchIcon: {
+    opacity: 0.5,
+  },
+
+  searchPlaceholder: {
+    fontSize: 15,
+    color: "#9ca3af",
+    fontStyle: "italic",
+  },
+
+  categoryFilterSection: {
+    paddingVertical: 20,
+    paddingLeft: 16,
+    backgroundColor: "#fff",
+    borderBottomWidth: 1,
+    borderBottomColor: "#e5e7eb",
+  },
+
+  categoryFilterTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#333",
+    marginBottom: 12,
+  },
+
+  categoryScrollContent: {
+    paddingRight: 16,
+    gap: 8,
+  },
+
+  categoryChip: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#f3f4f6",
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 20,
+    gap: 8,
+    borderWidth: 1,
+    borderColor: "#e5e7eb",
+    marginRight: 8,
+  },
+
+  activeCategoryChip: {
+    backgroundColor: "#1c4722",
+    borderColor: "#1c4722",
+  },
+
+  categoryChipText: {
+    fontSize: 14,
+    fontWeight: "500",
+    color: "#1c4722",
+  },
+
+  activeCategoryChipText: {
+    color: "#fff",
+  },
+
+  categoryChipBadge: {
+    backgroundColor: "#e5e7eb",
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 10,
+    minWidth: 24,
+    alignItems: "center",
+  },
+
+  activeCategoryChipBadge: {
+    backgroundColor: "rgba(255, 255, 255, 0.3)",
+  },
+
+  categoryChipBadgeText: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: "#1c4722",
+  },
+
+  activeCategoryChipBadgeText: {
+    color: "#fff",
+  },
+
+  gridHeader: {
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    backgroundColor: "#f9fafb",
+    borderBottomWidth: 1,
+    borderBottomColor: "#e5e7eb",
+  },
+
+  compactPlantCard: {
+    backgroundColor: "#fff",
+    marginHorizontal: 16,
+    marginBottom: 12,
+    borderRadius: 12,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: "#e5e7eb",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+
+  compactCardHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 12,
+  },
+
+  plantIconCircle: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: "#e8f5e9",
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 12,
+  },
+
+  plantCardTitleSection: {
+    flex: 1,
+  },
+
+  compactPlantName: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#1c4722",
+    marginBottom: 2,
+  },
+
+  compactPlantCategory: {
+    fontSize: 13,
+    color: "#666",
+  },
+
+  quickStatsRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 12,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: "#f3f4f6",
+  },
+
+  miniStat: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    backgroundColor: "#f9fafb",
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 6,
+  },
+
+  miniStatText: {
+    fontSize: 12,
+    fontWeight: "500",
+    color: "#374151",
+  },
+
+  // Updated detail view styles
+  statSection: {
+    marginBottom: 24,
+    paddingBottom: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: "#f3f4f6",
+  },
+
+  rangeDisplay: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#f9fafb",
+    borderRadius: 12,
+    padding: 16,
+    marginTop: 12,
+  },
+
+  rangeItem: {
+    flex: 1,
+    alignItems: "center",
+  },
+
+  rangeDivider: {
+    width: 1,
+    height: 40,
+    backgroundColor: "#e5e7eb",
+    marginHorizontal: 16,
+  },
+
+  rangeLabel: {
+    fontSize: 12,
+    color: "#6b7280",
+    marginBottom: 8,
+    textTransform: "uppercase",
+    fontWeight: "500",
+  },
+
+  rangeValue: {
+    fontSize: 24,
+    fontWeight: "700",
+    color: "#1c4722",
+  },
+
+  npkRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    backgroundColor: "#f9fafb",
+    borderRadius: 8,
+    marginBottom: 8,
+  },
+
+  npkDot: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+  },
+
+  npkLabelText: {
+    fontSize: 14,
+    fontWeight: "500",
+    color: "#374151",
+  },
+
+  emptyStateContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 60,
+    paddingHorizontal: 40,
+  },
+
+  emptyStateTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#9ca3af",
+    marginTop: 16,
+    marginBottom: 8,
+  },
+
+  emptyStateText: {
+    fontSize: 14,
+    color: "#9ca3af",
+    textAlign: "center",
+    lineHeight: 20,
+  },
+
+  plantGridContainer: {
+    marginTop: 10,
+  },
+  plantDetailCard: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  plantDetailHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+    gap: 12,
+  },
+  plantDetailName: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#1c4722',
+  },
+  statSectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+    gap: 8,
+  },
+  statSectionTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+  },
+  rangeBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 12,
+  },
+  rangeInfo: {
+    alignItems: 'center',
+  },
+
+  rangeBarFill: {
+    height: 8,
+    borderRadius: 4,
+  },
+  plantingMonthsSection: {
+    marginTop: 16,
+  },
+  gridTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#1c4722',
+    marginBottom: 8,
+  },
+  gridSubtitle: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 16,
+  },
+  plantCard: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  plantCardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+    gap: 12,
+  },
+  plantCardInfo: {
+    flex: 1,
+  },
+  plantCardName: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#1c4722',
+    marginBottom: 4,
+  },
+  plantCardStat: {
+    fontSize: 14,
+    color: '#666',
+  },
+  plantCardStats: {
+    flexDirection: 'row',
+    gap: 12,
+    flexWrap: 'wrap',
+  },
+  quickStat: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  quickStatText: {
+    fontSize: 12,
+    color: '#666',
+  },
 })
 
 export default analysis

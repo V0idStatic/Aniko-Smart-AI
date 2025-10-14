@@ -1759,7 +1759,7 @@ export default function Analysis() {
                   <Ionicons name={showAllRecords ? "chevron-up" : "chevron-down"} size={16} color="#1c4722" />
                   <Text style={styles.expandButtonText}>{showAllRecords ? "Show Less" : "Show All"}</Text>
                 </TouchableOpacity>
-              </View>
+                           </View>
 
               <Text style={styles.subtitle}>
                 {showAllRecords ? `Showing all ${weatherData.length} records` : "Showing last 5 records"}
@@ -1900,216 +1900,313 @@ export default function Analysis() {
         {/* Plant Analysis Tab */}
         {activeTab === "plants" && (
           <>
-            {/* Plant Selection */}
-            {Object.keys(plantHistory).length > 0 && (
-              <View style={styles.plantSelectionContainer}>
-                <Text style={styles.sectionTitle}>Select Plant:</Text>
-                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                  {Object.keys(plantHistory).map((plantName, index) => (
+            
+
+            {/* Category Filter */}
+            <View style={styles.categoryContainer}>
+              <Text style={styles.sectionTitle}>Plant Categories</Text>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.categoryScrollView}>
+                {[
+                  { key: 'all', name: 'All Plants', icon: 'apps-outline' },
+                  { key: 'vegetables', name: 'Vegetables', icon: 'leaf-outline' },
+                  { key: 'fruits', name: 'Fruits', icon: 'nutrition-outline' },
+                  { key: 'grains', name: 'Grains', icon: 'grain-outline' },
+                  { key: 'herbs', name: 'Herbs', icon: 'flower-outline' },
+                  { key: 'legumes', name: 'Legumes', icon: 'ellipse-outline' },
+                  { key: 'roots', name: 'Root Crops', icon: 'fitness-outline' },
+                ].map((category, index) => (
+                  <TouchableOpacity
+                    key={index}
+                    style={[
+                      styles.categoryCard,
+                      selectedCategory === category.key && styles.activeCategoryCard,
+                    ]}
+                    onPress={() => setSelectedCategory(category.key)}
+                  >
+                    <View style={styles.categoryIconContainer}>
+                      <Ionicons
+                        name={category.icon as any}
+                        size={32}
+                        color={selectedCategory === category.key ? '#1c4722' : '#666'}
+                      />
+                    </View>
+                    <Text
+                      style={[
+                        styles.categoryName,
+                        selectedCategory === category.key && styles.activeCategoryName,
+                      ]}
+                    >
+                      {category.name}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+            </View>
+
+            {/* Plant Cards Grid */}
+            <View style={styles.plantGridContainer}>
+              {loadingRecommendations ? (
+                <View style={styles.loadingContainer}>
+                  <ActivityIndicator size="large" color="#1c4722" />
+                  <Text style={styles.loadingText}>Loading plant library...</Text>
+                </View>
+              ) : selectedPlantDetail ? (
+                // Detailed Plant View
+                <View style={styles.detailView}>
+                  {/* Back Button */}
+                  <TouchableOpacity
+                    style={styles.backButton}
+                    onPress={() => setSelectedPlantDetail(null)}
+                  >
+                    <Ionicons name="arrow-back-outline" size={20} color="#1c4722" />
+                    <Text style={styles.backButtonText}>Back to Library</Text>
+                  </TouchableOpacity>
+
+                  {/* Plant Details Card */}
+                  <View style={styles.plantDetailCard}>
+                    {/* Header */}
+                    <View style={styles.plantDetailHeader}>
+                      <Ionicons name="leaf" size={40} color="#1c4722" />
+                      <Text style={styles.plantDetailName}>{selectedPlantDetail.cropName}</Text>
+                    </View>
+
+                    {/* Optimal Temperature */}
+                    {selectedPlantDetail.optimalTemp && (
+                      <View style={styles.statSection}>
+                        <View style={styles.statSectionHeader}>
+                          <Ionicons name="thermometer-outline" size={24} color="#e53935" />
+                          <Text style={styles.statSectionTitle}>Temperature Range</Text>
+                        </View>
+                        <View style={styles.rangeBar}>
+                          <View style={styles.rangeInfo}>
+                            <Text style={styles.rangeLabel}>Min</Text>
+                            <Text style={styles.rangeValue}>
+                              {selectedPlantDetail.optimalTemp.min}°C
+                            </Text>
+                          </View>
+                          <View style={styles.rangeBar}>
+                            <View
+                              style={[
+                                styles.rangeBarFill,
+                                { 
+                                  width: '100%', 
+                                  backgroundColor: '#ff5722' 
+                                },
+                              ]}
+                            />
+                          </View>
+                          <View style={styles.rangeInfo}>
+                            <Text style={styles.rangeLabel}>Max</Text>
+                            <Text style={styles.rangeValue}>
+                              {selectedPlantDetail.optimalTemp.max}°C
+                            </Text>
+                          </View>
+                        </View>
+                      </View>
+                    )}
+
+                    {/* Optimal Humidity */}
+                    {selectedPlantDetail.optimalHumidity && (
+                      <View style={styles.statSection}>
+                        <View style={styles.statSectionHeader}>
+                          <Ionicons name="water-outline" size={24} color="#1976d2" />
+                          <Text style={styles.statSectionTitle}>Humidity Range</Text>
+                        </View>
+                        <View style={styles.rangeBar}>
+                          <View style={styles.rangeInfo}>
+                            <Text style={styles.rangeLabel}>Min</Text>
+                            <Text style={styles.rangeValue}>
+                              {selectedPlantDetail.optimalHumidity.min}%
+                            </Text>
+                          </View>
+                          <View style={styles.rangeBar}>
+                            <View
+                              style={[
+                                styles.rangeBarFill,
+                                { 
+                                  width: '100%', 
+                                  backgroundColor: '#2196f3' 
+                                },
+                              ]}
+                            />
+                          </View>
+                          <View style={styles.rangeInfo}>
+                            <Text style={styles.rangeLabel}>Max</Text>
+                            <Text style={styles.rangeValue}>
+                              {selectedPlantDetail.optimalHumidity.max}%
+                            </Text>
+                          </View>
+                        </View>
+                      </View>
+                    )}
+
+                    {/* pH Level */}
+                    {selectedPlantDetail.optimalPH?.min && selectedPlantDetail.optimalPH?.max && (
+                      <View style={styles.statSection}>
+                        <View style={styles.statSectionHeader}>
+                          <Ionicons name="flask-outline" size={24} color="#9c27b0" />
+                          <Text style={styles.statSectionTitle}>pH Level</Text>
+                        </View>
+                        <View style={styles.rangeBar}>
+                          <View style={styles.rangeInfo}>
+                            <Text style={styles.rangeLabel}>Min</Text>
+                            <Text style={styles.rangeValue}>
+                              {selectedPlantDetail.optimalPH.min}
+                            </Text>
+                          </View>
+                          <View style={styles.rangeBar}>
+                            <View
+                              style={[
+                                styles.rangeBarFill,
+                                { 
+                                  width: '100%', 
+                                  backgroundColor: '#9c27b0' 
+                                },
+                              ]}
+                            />
+                          </View>
+                          <View style={styles.rangeInfo}>
+                            <Text style={styles.rangeLabel}>Max</Text>
+                            <Text style={styles.rangeValue}>
+                              {selectedPlantDetail.optimalPH.max}
+                            </Text>
+                          </View>
+                        </View>
+                      </View>
+                    )}
+
+                    {/* NPK Requirements */}
+                    {selectedPlantDetail.optimalNPK && (
+                      <View style={styles.npkContainer}>
+                        <Text style={styles.sectionTitle}>Nutrient Requirements (NPK)</Text>
+
+                        <View style={styles.npkChart}>
+                          {/* Nitrogen */}
+                          {selectedPlantDetail.optimalNPK.nitrogen.min && (
+                            <View style={styles.npkBar}>
+                              <View
+                                style={[
+                                  styles.npkFill,
+                                  {
+                                    height: `${Math.min(100, (selectedPlantDetail.optimalNPK.nitrogen.max || 100) / 2)}%`,
+                                    backgroundColor: '#4CAF50',
+                                  },
+                                ]}
+                              />
+                              <Text style={styles.npkValue}>
+                                {selectedPlantDetail.optimalNPK.nitrogen.min}-
+                                {selectedPlantDetail.optimalNPK.nitrogen.max}
+                              </Text>
+                              <Text style={styles.npkLabel}>Nitrogen (ppm)</Text>
+                            </View>
+                          )}
+
+                          {/* Phosphorus */}
+                          {selectedPlantDetail.optimalNPK.phosphorus.min && (
+                            <View style={styles.npkBar}>
+                              <View
+                                style={[
+                                  styles.npkFill,
+                                  {
+                                    height: `${Math.min(100, (selectedPlantDetail.optimalNPK.phosphorus.max || 100) / 2)}%`,
+                                    backgroundColor: '#FF9800',
+                                  },
+                                ]}
+                              />
+                              <Text style={styles.npkValue}>
+                                {selectedPlantDetail.optimalNPK.phosphorus.min}-
+                                {selectedPlantDetail.optimalNPK.phosphorus.max}
+                              </Text>
+                              <Text style={styles.npkLabel}>Phosphorus (ppm)</Text>
+                            </View>
+                          )}
+
+                          {/* Potassium */}
+                          {selectedPlantDetail.optimalNPK.potassium.min && (
+                            <View style={styles.npkBar}>
+                              <View
+                                style={[
+                                  styles.npkFill,
+                                  {
+                                    height: `${Math.min(100, (selectedPlantDetail.optimalNPK.potassium.max || 100) / 2)}%`,
+                                    backgroundColor: '#2196F3',
+                                  },
+                                ]}
+                              />
+                              <Text style={styles.npkValue}>
+                                {selectedPlantDetail.optimalNPK.potassium.min}-
+                                {selectedPlantDetail.optimalNPK.potassium.max}
+                              </Text>
+                              <Text style={styles.npkLabel}>Potassium (ppm)</Text>
+                            </View>
+                          )}
+                        </View>
+                      </View>
+                    )}
+
+                    {/* Best Planting Months */}
+                    <View style={styles.plantingMonthsSection}>
+                      <View style={styles.statSectionHeader}>
+                        <Ionicons name="calendar-outline" size={24} color="#4caf50" />
+                        <Text style={styles.statSectionTitle}>Best Planting Months</Text>
+                      </View>
+                      <View style={styles.monthsContainer}>
+                        {selectedPlantDetail.bestMonths.map((month, idx) => (
+                          <View key={idx} style={styles.monthChip}>
+                            <Text style={styles.monthText}>
+                              {new Date(2024, month - 1, 1).toLocaleString('default', {
+                                month: 'short',
+                              })}
+                            </Text>
+                          </View>
+                        ))}
+                      </View>
+                    </View>
+                  </View>
+                </View>
+              ) : (
+                // Plant Grid View
+                <View>
+                  <Text style={styles.gridTitle}>
+                    {selectedCategory === 'all' 
+                      ? 'All Plants' 
+                      : `${selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1)}`}
+                  </Text>
+                  <Text style={styles.gridSubtitle}>
+                    Tap any plant to view detailed growing requirements
+                  </Text>
+
+                  {/* Plant Cards */}
+                  {getCurrentCategoryRecommendations().map((plant, index) => (
                     <TouchableOpacity
                       key={index}
-                      style={[styles.plantSelectBtn, selectedPlant === plantName && styles.activePlantBtn]}
-                      onPress={() => handlePlantSelect(plantName)}
+                      style={styles.plantCard}
+                      onPress={() => setSelectedPlantDetail(plant)}
+                      activeOpacity={0.7}
                     >
-                      <Text style={[styles.plantSelectText, selectedPlant === plantName && styles.activePlantText]}>
-                        {plantName}
-                      </Text>
+                      <View style={styles.plantCardHeader}>
+                        <Ionicons name="leaf" size={32} color="#1c4722" />
+                        <View style={styles.plantCardInfo}>
+                          <Text style={styles.plantCardName}>{plant.cropName}</Text>
+                       
+                        </View>
+                        <Ionicons name="chevron-forward-outline" size={20} color="#666" />
+                      </View>
+                   
                     </TouchableOpacity>
                   ))}
-                </ScrollView>
-              </View>
-            )}
 
-            {/* Plant Temperature Chart */}
-            <View style={styles.chartContainer}>
-              <Text style={styles.chartTitle}>
-                {selectedPlant ? `${selectedPlant} - Temperature Trends` : "Temperature Trends"}
-              </Text>
-
-              {loadingPlant ? (
-                <ActivityIndicator size="large" color="#1c4722" />
-              ) : plantData.length > 0 ? (
-                <ScrollView
-                  horizontal
-                  showsHorizontalScrollIndicator={true}
-                  style={styles.chartScrollView}
-                  contentContainerStyle={styles.chartScrollContent}
-                >
-                  <LineChart
-                    data={plantTempChartData}
-                    width={plantTempChartWidth}
-                    height={220}
-                    chartConfig={{
-                      ...chartConfig,
-                      backgroundGradientFrom: "#1a237e",
-                      backgroundGradientTo: "#303f9f",
-                    }}
-                    bezier
-                    style={styles.chart}
-                  />
-                </ScrollView>
-              ) : (
-                <View style={styles.noDataContainer}>
-                  <Ionicons name="leaf-outline" size={60} color="#ccc" />
-                  <Text style={styles.noDataText}>No plant data available</Text>
+                  {getCurrentCategoryRecommendations().length === 0 && (
+                    <View style={styles.noDataContainer}>
+                      <Ionicons name="leaf-outline" size={60} color="#ccc" />
+                      <Text style={styles.noDataText}>
+                        No plants found in this category
+                      </Text>
+                    </View>
+                  )}
                 </View>
               )}
             </View>
-
-            {/* Plant Moisture Chart */}
-            {plantData.length > 0 && (
-              <View style={styles.chartContainer}>
-                <Text style={styles.chartTitle}>
-                  {selectedPlant ? `${selectedPlant} - Moisture Trends` : "Moisture Trends"}
-                </Text>
-
-                <ScrollView
-                  horizontal
-                  showsHorizontalScrollIndicator={true}
-                  style={styles.chartScrollView}
-                  contentContainerStyle={styles.chartScrollContent}
-                >
-                  <LineChart
-                    data={plantMoistureChartData}
-                    width={plantMoistureChartWidth}
-                    height={220}
-                    chartConfig={{
-                      ...chartConfig,
-                      backgroundGradientFrom: "#004d40",
-                      backgroundGradientTo: "#00796b",
-                    }}
-                    bezier
-                    style={styles.chart}
-                  />
-                </ScrollView>
-              </View>
-            )}
-
-            {/* Plant Statistics */}
-            {plantData.length > 0 && (
-              <View style={styles.statsContainer}>
-                <Text style={styles.sectionTitle}>Plant Growth Statistics</Text>
-
-                <View style={styles.statsRow}>
-                  <View style={styles.statCard}>
-                    <Ionicons name="thermometer-outline" size={28} color="#e53935" />
-                    <Text style={styles.statTitle}>Avg. Temperature</Text>
-                    <Text style={styles.statValue}>
-                      {(plantData.reduce((sum, d) => sum + d.temperature, 0) / plantData.length).toFixed(1)}°C
-                    </Text>
-                  </View>
-
-                  <View style={styles.statCard}>
-                    <Ionicons name="water-outline" size={28} color="#1976d2" />
-                    <Text style={styles.statTitle}>Avg. Moisture</Text>
-                    <Text style={styles.statValue}>
-                      {(plantData.reduce((sum, d) => sum + d.moisture, 0) / plantData.length).toFixed(1)}%
-                    </Text>
-                  </View>
-                </View>
-
-                <View style={styles.statsRow}>
-                  <View style={styles.statCard}>
-                    <Ionicons name="flask-outline" size={28} color="#9c27b0" />
-                    <Text style={styles.statTitle}>Avg. pH Level</Text>
-                    <Text style={styles.statValue}>
-                      {(plantData.reduce((sum, d) => sum + d.ph, 0) / plantData.length).toFixed(1)}
-                    </Text>
-                  </View>
-
-                  <View style={styles.statCard}>
-                    <Ionicons name="leaf-outline" size={28} color="#4caf50" />
-                    <Text style={styles.statTitle}>Days Tracked</Text>
-                    <Text style={styles.statValue}>{plantData.length}</Text>
-                  </View>
-                </View>
-              </View>
-            )}
-
-            {/* NPK Levels */}
-            {plantData.length > 0 && (
-              <View style={styles.npkContainer}>
-                <Text style={styles.sectionTitle}>Average NPK Levels</Text>
-
-                <View style={styles.npkChart}>
-                  <View style={styles.npkBar}>
-                    <View
-                      style={[
-                        styles.npkFill,
-                        {
-                          height: `${Math.min(100, plantData.reduce((sum, d) => sum + d.nitrogen, 0) / plantData.length / 1.5)}%`,
-                          backgroundColor: "#4CAF50",
-                        },
-                      ]}
-                    />
-                    <Text style={styles.npkValue}>
-                      {(plantData.reduce((sum, d) => sum + d.nitrogen, 0) / plantData.length).toFixed(0)}
-                    </Text>
-                    <Text style={styles.npkLabel}>Nitrogen</Text>
-                  </View>
-
-                  <View style={styles.npkBar}>
-                    <View
-                      style={[
-                        styles.npkFill,
-                        {
-                          height: `${Math.min(100, plantData.reduce((sum, d) => sum + d.phosphorus, 0) / plantData.length / 0.8)}%`,
-                          backgroundColor: "#FF9800",
-                        },
-                      ]}
-                    />
-                    <Text style={styles.npkValue}>
-                      {(plantData.reduce((sum, d) => sum + d.phosphorus, 0) / plantData.length).toFixed(0)}
-                    </Text>
-                    <Text style={styles.npkLabel}>Phosphorus</Text>
-                  </View>
-
-                  <View style={styles.npkBar}>
-                    <View
-                      style={[
-                        styles.npkFill,
-                        {
-                          height: `${Math.min(100, plantData.reduce((sum, d) => sum + d.potassium, 0) / plantData.length / 1.2)}%`,
-                          backgroundColor: "#2196F3",
-                        },
-                      ]}
-                    />
-                    <Text style={styles.npkValue}>
-                      {(plantData.reduce((sum, d) => sum + d.potassium, 0) / plantData.length).toFixed(0)}
-                    </Text>
-                    <Text style={styles.npkLabel}>Potassium</Text>
-                  </View>
-                </View>
-              </View>
-            )}
-
-            {/* Daily Plant Data Table */}
-            {plantData.length > 0 && (
-              <View style={styles.tableContainer}>
-                <Text style={styles.sectionTitle}>Daily Plant Readings</Text>
-
-                {/* Table Header */}
-                <View style={styles.tableHeader}>
-                  <Text style={[styles.tableHeaderCell, { flex: 1.5 }]}>Date</Text>
-                  <Text style={styles.tableHeaderCell}>Temp</Text>
-                  <Text style={styles.tableHeaderCell}>Moisture</Text>
-                  <Text style={styles.tableHeaderCell}>pH</Text>
-                </View>
-
-                {/* Table Body */}
-                {plantData.slice(-10).map((day, index) => (
-                  <View
-                    key={index}
-                    style={[styles.tableRow, index % 2 === 0 ? styles.tableRowEven : styles.tableRowOdd]}
-                  >
-                    <Text style={[styles.tableCell, { flex: 1.5 }]}>{day.date}</Text>
-                    <Text style={styles.tableCell}>{day.temperature}°C</Text>
-                    <Text style={styles.tableCell}>{day.moisture}%</Text>
-                    <Text style={styles.tableCell}>{day.ph}</Text>
-                  </View>
-                ))}
-              </View>
-            )}
           </>
         )}
 
