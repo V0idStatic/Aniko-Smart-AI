@@ -29,10 +29,13 @@ import {
   formatSingleCropForAI,
 } from "../services/cropDataService"
 import { Stack } from "expo-router"
+import { spellCheckMessage, generateCorrectionMessage } from "./lib/spell-checker"
 
 type ChatMessage = {
   role: "user" | "assistant"
   text: string
+  wasCorrected?: boolean
+  originalText?: string
 }
 
 type ChatSession = {
@@ -459,25 +462,52 @@ export default function Chatbot({ userId }: ChatbotProps) {
 
   const sendMessage = async () => {
     if (!input.trim()) return
-    const userMessage: ChatMessage = { role: "user", text: input.trim() }
+
+    const cropNames = cropData.map((crop) => crop.crop_name)
+    const spellCheckResult = spellCheckMessage(input.trim(), cropNames)
+
+    const hasCorrections = spellCheckResult.corrections.length > 0
+    const messageToProcess = hasCorrections ? spellCheckResult.corrected : input.trim()
+
+    const userMessage: ChatMessage = {
+      role: "user",
+      text: messageToProcess,
+      wasCorrected: hasCorrections,
+      originalText: hasCorrections ? input.trim() : undefined,
+    }
+
     setMessages((prev) => [...prev, userMessage])
     setInput("")
     setLoading(true)
 
     try {
-      const smallTalk = detectSmallTalk(userMessage.text)
+      if (hasCorrections) {
+        const correctionMsg = generateCorrectionMessage(spellCheckResult)
+        if (correctionMsg) {
+          // Add a brief correction notification
+          const correctionNotice: ChatMessage = {
+            role: "assistant",
+            text: `✓ ${correctionMsg}`,
+          }
+          setMessages((prev) => [...prev, correctionNotice])
+          // Small delay so user can see the correction
+          await new Promise((resolve) => setTimeout(resolve, 500))
+        }
+      }
+
+      const smallTalk = detectSmallTalk(messageToProcess)
       if (smallTalk) {
         addBotReply(smallTalk)
         return
       }
 
-      const cropInfo = await detectCropQuery(userMessage.text)
+      const cropInfo = await detectCropQuery(messageToProcess)
       if (cropInfo) {
         addBotReply(cropInfo)
         return
       }
 
-      const isAgriRelated = isAgricultureRelated(userMessage.text)
+      const isAgriRelated = isAgricultureRelated(messageToProcess)
 
       if (isAgriRelated) {
         const cropContext = formatCropDataForAI(cropData)
@@ -510,7 +540,7 @@ export default function Chatbot({ userId }: ChatbotProps) {
             model: "gpt-3.5-turbo",
             messages: [
               { role: "system", content: systemPrompt },
-              { role: "user", content: userMessage.text },
+              { role: "user", content: messageToProcess },
             ],
             max_tokens: 1000,
           }),
@@ -821,6 +851,23 @@ export default function Chatbot({ userId }: ChatbotProps) {
       shadowOpacity: 0,
       elevation: 0,
     },
+    // Add style for correction badge
+    correctionBadge: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 4,
+      marginTop: 4,
+      paddingHorizontal: 8,
+      paddingVertical: 2,
+      backgroundColor: "rgba(255, 255, 255, 0.2)",
+      borderRadius: 8,
+      alignSelf: "flex-start",
+    },
+    correctionText: {
+      fontSize: isTablet ? 11 : 10,
+      color: "#FFFFFF",
+      fontStyle: "italic",
+    },
   })
 
   const introStyles = StyleSheet.create({
@@ -1110,6 +1157,12 @@ export default function Chatbot({ userId }: ChatbotProps) {
                         )}
                         <View style={[styles.msg, m.role === "user" ? styles.userMsg : styles.botMsg]}>
                           <Text style={[styles.msgText, m.role === "user" && styles.userMsgText]}>{m.text}</Text>
+                          {m.role === "user" && m.wasCorrected && m.originalText && (
+                            <View style={styles.correctionBadge}>
+                              <Ionicons name="checkmark-circle" size={12} color="#FFFFFF" />
+                              <Text style={styles.correctionText}>Auto-corrected from: "{m.originalText}"</Text>
+                            </View>
+                          )}
                         </View>
                         {m.role === "user" && <View style={{ width: 8 }} />}
                       </View>
@@ -1252,6 +1305,12 @@ export default function Chatbot({ userId }: ChatbotProps) {
                         )}
                         <View style={[styles.msg, m.role === "user" ? styles.userMsg : styles.botMsg]}>
                           <Text style={[styles.msgText, m.role === "user" && styles.userMsgText]}>{m.text}</Text>
+                          {m.role === "user" && m.wasCorrected && m.originalText && (
+                            <View style={styles.correctionBadge}>
+                              <Ionicons name="checkmark-circle" size={12} color="#FFFFFF" />
+                              <Text style={styles.correctionText}>Auto-corrected from: "{m.originalText}"</Text>
+                            </View>
+                          )}
                         </View>
                         {m.role === "user" && <View style={{ width: 8 }} />}
                       </View>

@@ -39,7 +39,7 @@ const Footer: React.FC = () => {
                 <li><a href="#">Home</a></li>
                 <li><a href="#about">About</a></li>
                 <li><a href="#features">Feature</a></li>
-                <li><a href="#testimonial">Testimonial</a></li>
+                <li><a href="testimonialDisplay">Testimonial</a></li>
               </ul>
             </div>
           </div>
@@ -51,7 +51,7 @@ const Footer: React.FC = () => {
                 <li><a href="#download">Download</a></li>
                 <li><a href="#why-aniko">Why Aniko</a></li>
                 <li><a href="#team">Team</a></li>
-                <li><a href="#">Blog</a></li>
+              
               </ul>
             </div>
           </div>
@@ -60,10 +60,10 @@ const Footer: React.FC = () => {
           <div className="col-lg-3 col-md-6 mb-4">
             <div className="footer-links">
               <ul>
-                <li><a href="#">Location</a></li>
-                <li><a href="#">Contact Us</a></li>
+                <li><a href="compliance">Location</a></li>
+                <li><a href="compliance">Contact Us</a></li>
                 <li><a href="#">Privacy Policy</a></li>
-                <li><a href="#">Cookie Policy</a></li>
+
               </ul>
             </div>
           </div>

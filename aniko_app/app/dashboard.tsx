@@ -13,7 +13,7 @@ import WeatherHistory from "../components/WeatherHistory"
 
 import { styles, COLORS } from "./styles/dashboard.style"
 
-import { Text, View, TouchableOpacity, ScrollView, Alert, Modal } from "react-native"
+import { Text, View, TouchableOpacity, ScrollView, Alert, Modal, Image } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
 import { useRouter } from "expo-router"
 import { LinearGradient } from "expo-linear-gradient"
@@ -92,14 +92,22 @@ export default function Dashboard() {
   const [showLocationModal, setShowLocationModal] = useState(false)
   const [showInlinePicker, setShowInlinePicker] = useState(false)
 
-  const regions = Array.from(new Set(locations.map((l) => l.region)))
-  const provinces = Array.from(new Set(locations.filter((l) => l.region === selectedRegion).map((l) => l.province)))
-  const cities = locations.filter((l) => l.region === selectedRegion && l.province === selectedProvince)
+  const [showRegionDropdown, setShowRegionDropdown] = useState(false)
+  const [showProvinceDropdown, setShowProvinceDropdown] = useState(false)
+  const [showCityDropdown, setShowCityDropdown] = useState(false)
 
   const [selectedRegion, setSelectedRegion] = useState<string>("")
   const [selectedProvince, setSelectedProvince] = useState<string>("")
   const [activeRegion, setActiveRegion] = useState<string>("")
   const [activeProvince, setActiveProvince] = useState<string>("")
+
+  const regions = Array.from(new Set(locations.map((l) => l.region)))
+  const provinces = Array.from(new Set(locations.filter((l) => l.region === selectedRegion).map((l) => l.province)))
+  const cities = locations.filter((l) => l.region === selectedRegion && l.province === selectedProvince)
+
+  console.log("[v0] selectedRegion:", selectedRegion)
+  console.log("[v0] provinces array:", provinces)
+  console.log("[v0] cities array:", cities)
 
   const router = useRouter()
   const [nowClock, setNowClock] = useState<string>(
@@ -347,7 +355,7 @@ export default function Dashboard() {
         daily: [
           "temperature_2m_max",
           "temperature_2m_min",
-          "precipitation_sum",
+          "temperature_2m_mean",
           "weather_code",
           "precipitation_probability_max",
         ],
@@ -585,10 +593,10 @@ export default function Dashboard() {
           ? week
           : ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((d) => ({
               day: d,
-              status: "Sunny",
-              temp: "30°C",
-              humidity: "60%",
-              color: "#8BC34A",
+              status: "—",
+              temp: "—",
+              humidity: "—",
+              color: "#9E9E9E",
             })),
       )
     } catch (err) {
@@ -675,6 +683,32 @@ export default function Dashboard() {
       })
     } catch (e) {
       // silent fail for lightweight updates
+    }
+  }
+
+  /* ===================== Weather helpers ===================== */
+
+  const getWeatherIcon = (condition: string) => {
+    const lowerCondition = condition.toLowerCase()
+
+    if (lowerCondition.includes("sunny") || lowerCondition.includes("clear")) {
+      return require("../assets/sunny.png")
+    } else if (
+      lowerCondition.includes("rain") ||
+      lowerCondition.includes("drizzle") ||
+      lowerCondition.includes("showers")
+    ) {
+      return require("../assets/rainy.png")
+    } else if (lowerCondition.includes("cloud")) {
+      return require("../assets/cloudy.png")
+    } else if (lowerCondition.includes("thunderstorm")) {
+      return require("../assets/thunderstorm.png")
+    } else if (lowerCondition.includes("snow")) {
+      return require("../assets/cloudy.png")
+    } else if (lowerCondition.includes("fog")) {
+      return require("../assets/cloudy.png")
+    } else {
+      return require("../assets/sunny.png")
     }
   }
 
@@ -981,131 +1015,205 @@ export default function Dashboard() {
 
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <LinearGradient colors={[COLORS.mutedGreen, COLORS.pastelGreen, COLORS.mutedGreen]} style={styles.weatherCard}>
-            <View style={styles.weatherHeader}>
-              <View style={styles.weatherLocation}>
-                <Ionicons name="location" size={20} color={COLORS.lightGreen} />
-                <Text style={styles.weatherCity}>{weather.city}</Text>
-              </View>
-              <TouchableOpacity style={styles.changeLocationButton} onPress={() => setShowInlinePicker((s) => !s)}>
-                <Text style={styles.changeLocationText}>Change</Text>
-                <Ionicons name="chevron-down" size={16} color={COLORS.primaryGreen} />
-              </TouchableOpacity>
+          <View style={styles.weatherHeader}>
+            <View style={styles.weatherLocation}>
+              <Ionicons name="location" size={20} color={COLORS.lightGreen} />
+              <Text style={styles.weatherCity}>{weather.city}</Text>
             </View>
+            <TouchableOpacity style={styles.changeLocationButton} onPress={() => setShowInlinePicker((s) => !s)}>
+              <Text style={styles.changeLocationText}>Change</Text>
+              <Ionicons name="chevron-down" size={16} color={COLORS.primaryGreen} />
+            </TouchableOpacity>
+          </View>
 
-            {showInlinePicker && (
-              <View style={styles.inlinePicker}>
-                <Text style={styles.inlinePickerLabel}>Region</Text>
-                <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.inlineChipContainer}>
-                  {regions.map((region) => (
+          {showInlinePicker && (
+            <View style={styles.dropdownContainer}>
+              <Text style={styles.dropdownLabel}>Region</Text>
+              <TouchableOpacity
+                style={styles.dropdownButton}
+                onPress={() => setShowRegionDropdown(!showRegionDropdown)}
+              >
+                <Text style={selectedRegion ? styles.dropdownButtonText : styles.dropdownButtonPlaceholder}>
+                  {selectedRegion || "Select Region"}
+                </Text>
+                <Ionicons
+                  name={showRegionDropdown ? "chevron-up" : "chevron-down"}
+                  size={20}
+                  color={COLORS.textSecondary}
+                />
+              </TouchableOpacity>
+
+              {showRegionDropdown && (
+                <ScrollView style={styles.dropdownList} nestedScrollEnabled={true}>
+                  {regions.map((region, index) => (
                     <TouchableOpacity
                       key={region}
+                      style={[styles.dropdownItem, index === regions.length - 1 && styles.dropdownItemLast]}
                       onPress={() => {
+                        console.log("[v0] Region selected:", region)
                         setSelectedRegion(region)
                         setSelectedProvince("")
+                        setShowRegionDropdown(false)
+                        setShowProvinceDropdown(false)
+                        setShowCityDropdown(false)
                       }}
-                      style={[styles.inlineChip, selectedRegion === region && styles.inlineChipActive]}
                     >
-                      <Text style={[styles.inlineChipText, selectedRegion === region && styles.inlineChipTextActive]}>
-                        {region}
-                      </Text>
+                      <Ionicons
+                        name={selectedRegion === region ? "radio-button-on" : "radio-button-off"}
+                        size={20}
+                        color={COLORS.primaryGreen}
+                      />
+                      <Text style={styles.dropdownItemText}>{region}</Text>
                     </TouchableOpacity>
                   ))}
                 </ScrollView>
+              )}
 
-                {selectedRegion && (
-                  <>
-                    <Text style={[styles.inlinePickerLabel, { marginTop: 12 }]}>Province</Text>
-                    <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.inlineChipContainer}>
-                      {locations
-                        .filter((l) => l.region === selectedRegion)
-                        .map((l) => l.province)
-                        .filter((province, index, arr) => arr.indexOf(province) === index)
-                        .map((province) => (
+              {selectedRegion && (
+                <>
+                  <Text style={[styles.dropdownLabel, { marginTop: 12 }]}>Province</Text>
+                  <TouchableOpacity
+                    style={styles.dropdownButton}
+                    onPress={() => {
+                      console.log("[v0] Province dropdown clicked. Provinces available:", provinces.length)
+                      setShowProvinceDropdown(!showProvinceDropdown)
+                    }}
+                  >
+                    <Text style={selectedProvince ? styles.dropdownButtonText : styles.dropdownButtonPlaceholder}>
+                      {selectedProvince || "Select Province"}
+                    </Text>
+                    <Ionicons
+                      name={showProvinceDropdown ? "chevron-up" : "chevron-down"}
+                      size={20}
+                      color={COLORS.textSecondary}
+                    />
+                  </TouchableOpacity>
+
+                  {showProvinceDropdown && (
+                    <ScrollView style={styles.dropdownList} nestedScrollEnabled={true}>
+                      {provinces.length > 0 ? (
+                        provinces.map((province, index) => (
                           <TouchableOpacity
                             key={province}
-                            onPress={() => setSelectedProvince(province)}
-                            style={[styles.inlineChip, selectedProvince === province && styles.inlineChipActive]}
+                            style={[styles.dropdownItem, index === provinces.length - 1 && styles.dropdownItemLast]}
+                            onPress={() => {
+                              console.log("[v0] Province selected:", province)
+                              setSelectedProvince(province)
+                              setShowProvinceDropdown(false)
+                              setShowCityDropdown(false)
+                            }}
                           >
-                            <Text
-                              style={[
-                                styles.inlineChipText,
-                                selectedProvince === province && styles.inlineChipTextActive,
-                              ]}
-                            >
-                              {province}
-                            </Text>
+                            <Ionicons
+                              name={selectedProvince === province ? "radio-button-on" : "radio-button-off"}
+                              size={20}
+                              color={COLORS.primaryGreen}
+                            />
+                            <Text style={styles.dropdownItemText}>{province}</Text>
                           </TouchableOpacity>
-                        ))}
+                        ))
+                      ) : (
+                        <View style={styles.dropdownItem}>
+                          <Text style={styles.dropdownItemText}>No provinces available</Text>
+                        </View>
+                      )}
                     </ScrollView>
-                  </>
-                )}
+                  )}
+                </>
+              )}
 
-                {selectedRegion && selectedProvince && (
-                  <>
-                    <Text style={[styles.inlinePickerLabel, { marginTop: 12 }]}>City / Municipality</Text>
-                    <View style={styles.inlineCityList}>
-                      <ScrollView style={{ maxHeight: 150 }}>
-                        {locations
-                          .filter((l) => l.region === selectedRegion && l.province === selectedProvince)
-                          .map((loc) => (
-                            <TouchableOpacity
-                              key={loc.city}
-                              style={styles.inlineCityItem}
-                              onPress={() => handleLocationSelect(loc)}
-                            >
-                              <Ionicons
-                                name={selectedLocation?.city === loc.city ? "radio-button-on" : "radio-button-off"}
-                                size={18}
-                                color={COLORS.primaryGreen}
-                              />
-                              <Text style={styles.inlineCityText}>{loc.city}</Text>
-                            </TouchableOpacity>
-                          ))}
-                      </ScrollView>
-                    </View>
-                  </>
-                )}
-              </View>
-            )}
+              {selectedRegion && selectedProvince && (
+                <>
+                  <Text style={[styles.dropdownLabel, { marginTop: 12 }]}>City / Municipality</Text>
+                  <TouchableOpacity
+                    style={styles.dropdownButton}
+                    onPress={() => {
+                      console.log("[v0] City dropdown clicked. Cities available:", cities.length)
+                      setShowCityDropdown(!showCityDropdown)
+                    }}
+                  >
+                    <Text style={styles.dropdownButtonPlaceholder}>Select City</Text>
+                    <Ionicons
+                      name={showCityDropdown ? "chevron-up" : "chevron-down"}
+                      size={20}
+                      color={COLORS.textSecondary}
+                    />
+                  </TouchableOpacity>
 
-            <View style={styles.weatherMain}>
-              <View style={styles.weatherLeft}>
-                <Text style={styles.temperature}>{weather.temperature}</Text>
-                <Text style={styles.condition}>{weather.condition}</Text>
-                <Text style={styles.highLow}>{weather.highLow}</Text>
-              </View>
-              <View style={styles.weatherRight}>
-                <Ionicons name="partly-sunny" size={80} color={COLORS.primaryGreen} />
-              </View>
+                  {showCityDropdown && (
+                    <ScrollView style={styles.dropdownList} nestedScrollEnabled={true}>
+                      {cities.length > 0 ? (
+                        cities.map((loc, index) => (
+                          <TouchableOpacity
+                            key={loc.city}
+                            style={[styles.dropdownItem, index === cities.length - 1 && styles.dropdownItemLast]}
+                            onPress={() => {
+                              console.log("[v0] City selected:", loc.city)
+                              handleLocationSelect(loc)
+                              setShowCityDropdown(false)
+                            }}
+                          >
+                            <Ionicons
+                              name={selectedLocation?.city === loc.city ? "radio-button-on" : "radio-button-off"}
+                              size={20}
+                              color={COLORS.primaryGreen}
+                            />
+                            <Text style={styles.dropdownItemText}>{loc.city}</Text>
+                          </TouchableOpacity>
+                        ))
+                      ) : (
+                        <View style={styles.dropdownItem}>
+                          <Text style={styles.dropdownItemText}>No cities available</Text>
+                        </View>
+                      )}
+                    </ScrollView>
+                  )}
+                </>
+              )}
             </View>
+          )}
 
-            <View style={styles.weatherMeta}>
-              <View style={styles.weatherMetaItem}>
-                <Ionicons name="time-outline" size={16} color={COLORS.primaryBrown} />
-                <Text style={styles.weatherMetaText}>{nowClock}</Text>
-              </View>
-              <View style={styles.weatherMetaItem}>
-                <Ionicons name="refresh-outline" size={16} color={COLORS.primaryBrown} />
-                <Text style={styles.weatherMetaText}>Updated: {weather.updatedAt}</Text>
-              </View>
+          <View style={styles.weatherMain}>
+            <View style={styles.weatherLeft}>
+              <Text style={styles.temperature}>{weather.temperature}</Text>
+              <Text style={styles.condition}>{weather.condition}</Text>
+              <Text style={styles.highLow}>{weather.highLow}</Text>
             </View>
+            <View style={styles.weatherRight}>
+              <Image
+                source={getWeatherIcon(weather.condition)}
+                style={{ width: 80, height: 80 }}
+                resizeMode="contain"
+              />
+            </View>
+          </View>
 
-            <View style={styles.divider} />
+          <View style={styles.weatherMeta}>
+            <View style={styles.weatherMetaItem}>
+              <Ionicons name="time-outline" size={16} color={COLORS.primaryBrown} />
+              <Text style={styles.weatherMetaText}>{nowClock}</Text>
+            </View>
+            <View style={styles.weatherMetaItem}>
+              <Ionicons name="refresh-outline" size={16} color={COLORS.primaryBrown} />
+              <Text style={styles.weatherMetaText}>Updated: {weather.updatedAt}</Text>
+            </View>
+          </View>
 
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.hourlyForecast}>
-              {weather.hourlyWeather.map((item, index) => {
-                const isActive = item.isNow || index === 0
-                return (
-                  <View key={index} style={[styles.hourlyItem, isActive && styles.hourlyItemActive]}>
-                    <Text style={[styles.hourlyTime, isActive && styles.hourlyTimeActive]}>
-                      {isActive ? "NOW" : item.time}
-                    </Text>
-                    <Ionicons name={item.icon} size={24} color={isActive ? COLORS.primaryGreen : COLORS.primaryBrown} />
-                    <Text style={[styles.hourlyTemp, isActive && styles.hourlyTempActive]}>{item.temp}°</Text>
-                  </View>
-                )
-              })}
-            </ScrollView>
+          <View style={styles.divider} />
+
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.hourlyForecast}>
+            {weather.hourlyWeather.map((item, index) => {
+              const isActive = item.isNow || index === 0
+              return (
+                <View key={index} style={[styles.hourlyItem, isActive && styles.hourlyItemActive]}>
+                  <Text style={[styles.hourlyTime, isActive && styles.hourlyTimeActive]}>
+                    {isActive ? "NOW" : item.time}
+                  </Text>
+                  <Ionicons name={item.icon} size={24} color={isActive ? COLORS.primaryGreen : COLORS.primaryBrown} />
+                  <Text style={[styles.hourlyTemp, isActive && styles.hourlyTempActive]}>{item.temp}°</Text>
+                </View>
+              )
+            })}
+          </ScrollView>
         </LinearGradient>
 
         <View style={styles.sectionHeader}>

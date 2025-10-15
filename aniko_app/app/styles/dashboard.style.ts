@@ -47,7 +47,7 @@ export const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 5,
-    marginBottom: 25
+    marginBottom: 25,
   },
 
   headerContent: {
@@ -58,10 +58,12 @@ export const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+    flexWrap: "wrap", // Added flex wrap for responsiveness
   },
 
   greetingContainer: {
     flex: 1,
+    minWidth: 150, // Added minimum width for responsiveness
   },
 
   greeting: {
@@ -115,18 +117,23 @@ export const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     marginBottom: 5,
+    flexWrap: "wrap", // Added flex wrap for responsiveness
+    gap: 8, // Added gap for better spacing when wrapped
   },
 
   weatherLocation: {
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
+    flex: 1, // Added flex for better responsiveness
+    minWidth: 120, // Added minimum width
   },
 
   weatherCity: {
     fontSize: 14,
     fontWeight: "600",
     color: COLORS.lightGreen,
+    flexShrink: 1, // Allow text to shrink if needed
   },
 
   changeLocationButton: {
@@ -143,6 +150,79 @@ export const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "600",
     color: COLORS.primaryGreen,
+  },
+
+  dropdownContainer: {
+    backgroundColor: COLORS.lightGreen,
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 20,
+  },
+
+  dropdownLabel: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: COLORS.textSecondary,
+    marginBottom: 8,
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+  },
+
+  dropdownButton: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    backgroundColor: COLORS.white,
+    borderRadius: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    marginBottom: 12,
+  },
+
+  dropdownButtonText: {
+    fontSize: 15,
+    fontWeight: "500",
+    color: COLORS.textPrimary,
+    flex: 1,
+  },
+
+  dropdownButtonPlaceholder: {
+    fontSize: 15,
+    fontWeight: "500",
+    color: COLORS.textSecondary,
+    flex: 1,
+  },
+
+  dropdownList: {
+    backgroundColor: COLORS.white,
+    borderRadius: 12,
+    maxHeight: 200,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    marginTop: 4,
+  },
+
+  dropdownItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.border,
+  },
+
+  dropdownItemLast: {
+    borderBottomWidth: 0,
+  },
+
+  dropdownItemText: {
+    fontSize: 15,
+    fontWeight: "500",
+    color: COLORS.textPrimary,
+    flex: 1,
+    marginLeft: 8,
   },
 
   // Inline Picker Styles
@@ -221,10 +301,12 @@ export const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     marginBottom: 20,
+    flexWrap: "wrap", // Added flex wrap for responsiveness
   },
 
   weatherLeft: {
     flex: 1,
+    minWidth: 150, // Added minimum width for responsiveness
   },
 
   temperature: {
@@ -253,11 +335,19 @@ export const styles = StyleSheet.create({
     alignItems: "center",
   },
 
+  weatherIcon: {
+    width: 80,
+    height: 80,
+    resizeMode: "contain",
+  },
+
   // Weather Meta
   weatherMeta: {
     flexDirection: "row",
     justifyContent: "space-between",
     marginBottom: 16,
+    flexWrap: "wrap", // Added flex wrap for responsiveness
+    gap: 8, // Added gap for better spacing
   },
 
   weatherMetaItem: {

@@ -87,11 +87,11 @@ const AdminContact: React.FC = () => {
 
     if (error) {
       setModalType("error");
-      setModalMessage("❌ Failed to delete message: " + error.message);
+      setModalMessage(" Failed to delete message: " + error.message);
     } else {
       setMessages((prev) => prev.filter((msg) => msg.id !== numericId));
       setModalType("success");
-      setModalMessage("✅ Message deleted successfully.");
+      setModalMessage("Message deleted successfully.");
     }
 
     setShowDeleteModal(false);
@@ -122,18 +122,18 @@ const AdminContact: React.FC = () => {
       const result = await response.json();
       if (result.success) {
         setModalType("success");
-        setModalMessage("✅ Reply sent successfully!");
+        setModalMessage("Reply sent successfully!");
         setShowReplyModal(false);
         setReplyMessage("");
         setReplySubject("Reply from Admin");
       } else {
         setModalType("error");
-        setModalMessage("❌ Failed to send reply: " + result.message);
+        setModalMessage("Failed to send reply: " + result.message);
       }
     } catch (err) {
-      console.error("❌ Error sending reply:", err);
+      console.error("Error sending reply:", err);
       setModalType("error");
-      setModalMessage("❌ Error sending reply. Check console for details.");
+      setModalMessage("Error sending reply. Check console for details.");
     }
   };
 
