@@ -1,5 +1,6 @@
 /*
-:root { --primary-green: #1D492C; 
+:root { 
+--primary-green: #1D492C; 
 --accent-green: #84cc16; 
 --pastel-green: #BDE08A; 
 --light-green: #f0fdf4; 
