@@ -4,6 +4,36 @@ import { View, Text, StyleSheet, TouchableOpacity } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
 import { useRouter } from "expo-router"
 import { handleImageSelection } from "../app/screens/ImagePicker"
+import { LinearGradient } from "expo-linear-gradient"
+
+export const COLORS = {
+  // Primary colors
+  primaryGreen: "#1D492C",
+  accentGreen: "#84cc16",
+  pastelGreen: "#BDE08A",
+  lightGreen: "#f0fdf4",
+  darkGreen: "#143820",
+  mutedGreen: "#4C6444",
+  grayText: "#666",
+  border: "#e0e0e0",
+  white: "#ffffff",
+  bgCOlor: "#cfc4b2ff",
+  primaryBrown: "#8A6440",
+  darkBrown: "#4D2D18",
+  accent: "#FF6F00",
+  accentLight: "#FFA726",
+  background: "#CBBA9E",
+  cardBackground: "#FFFFFF",
+  textPrimary: "#1A1A1A",
+  textSecondary: "#6B7280",
+  textLight: "#9CA3AF",
+
+  // Status colors
+  success: "#4CAF50",
+  warning: "#FFC107",
+  error: "#8a1c14ff",
+  info: "#2196F3",
+}
 
 export default function DiagnosisCard() {
   const router = useRouter()
@@ -16,9 +46,7 @@ export default function DiagnosisCard() {
 
   return (
     <TouchableOpacity style={styles.container} onPress={openCameraFlow} activeOpacity={0.7}>
-      <View style={styles.card}>
-        <View style={styles.gradientBar} />
-
+      <LinearGradient colors={[COLORS.lightGreen, COLORS.pastelGreen]} style={styles.card}>
         <View style={styles.content}>
           <View style={styles.iconWrapper}>
             <View style={styles.iconBackground}>
@@ -32,10 +60,10 @@ export default function DiagnosisCard() {
           </View>
 
           <View style={styles.arrowContainer}>
-            <Ionicons name="chevron-forward" size={22} color="#9CA3AF" />
+            <Ionicons name="chevron-forward" size={22} color={COLORS.mutedGreen} />
           </View>
         </View>
-      </View>
+      </LinearGradient>
     </TouchableOpacity>
   )
 }
@@ -56,11 +84,7 @@ const styles = StyleSheet.create({
     shadowRadius: 12,
     elevation: 4,
   },
-  gradientBar: {
-    height: 6,
-    width: "100%",
-    backgroundColor: "#2E7D32",
-  },
+
   content: {
     padding: 20,
     flex: 1,
@@ -72,8 +96,8 @@ const styles = StyleSheet.create({
   iconBackground: {
     width: 56,
     height: 56,
-    borderRadius: 16,
-    backgroundColor: "#E8F5E9",
+    borderRadius: 20,
+    backgroundColor: "#85ee8e4a",
     justifyContent: "center",
     alignItems: "center",
   },
@@ -84,7 +108,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 18,
     fontWeight: "800",
-    color: "#1A1A1A",
+    color: COLORS.primaryGreen,
     letterSpacing: 0.2,
   },
   subtitle: {
