@@ -1,4 +1,19 @@
 import { StyleSheet } from "react-native";
+const COLORS = {
+  primaryGreen: "#1D492C",
+  accentGreen: "#84cc16",
+  pastelGreen: "#BDE08A",
+  lightGreen: "#f0fdf4",
+  darkGreen: "#143820",
+  mutedGreen: "#4C6444",
+  error: "#8a1c14ff",
+  grayText: "#666",
+  border: "#e0e0e0",
+  white: "#ffffff",
+  bgCOlor: "#cfc4b2ff",
+  primaryBrown: "#8A6440",
+  darkBrown: "#4D2D18",
+};
 
 export default StyleSheet.create({
   container: {
@@ -8,34 +23,42 @@ export default StyleSheet.create({
     paddingTop: 60,
   },
   logo: {
-    height: 60,
+    height: 50,
     resizeMode: "contain",
     marginBottom: 30,
   },
   title: {
     fontSize: 40,
-    fontWeight: "bold",
+    fontWeight: "900",
     color: "white",
     textAlign: "center",
-    marginBottom: 10,
+    textShadowColor: COLORS.pastelGreen,
+    textShadowOffset: { width: 0, height: 2 }, 
+    textShadowRadius: 20,
   },
   row: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    marginBottom: 10,
+    marginBottom: 5,
+    alignSelf: "center"
   },
   logo2: {
     height: 50,
     width: 50,
     resizeMode: "contain",
-    marginRight: 8,
-    marginBottom: 15,
+    marginRight: 2,
+    marginBottom: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 2, height: 3 },
+    shadowOpacity: 0.5,
+    elevation: 5,
   },
   subtitle: {
     color: "#cce0cc",
     textAlign: "center",
-    marginBottom: 40,
+    marginBottom:70,
+    fontSize: 15
   },
   infoWrapper: {
     width: "90%",
@@ -44,13 +67,21 @@ export default StyleSheet.create({
   infoCard: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#d8d8d8ff",
+    backgroundColor: COLORS.lightGreen,
     borderRadius: 30,
-    paddingVertical: 10,
+    paddingVertical: 15,
     paddingHorizontal: 15,
     marginVertical: 8,
     width: "55%",
-    elevation: 3,
+    elevation: 20,
+    shadowColor: COLORS.accentGreen,
+    shadowOffset: { width: 10, height: 5 },
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
+  },
+  infoText: {
+    fontSize: 18,
+    color: COLORS.primaryGreen
   },
   leftCard: {
     alignSelf: "flex-start",
@@ -73,25 +104,29 @@ export default StyleSheet.create({
     height: 24,
     marginRight: 10,
   },
-  infoText: {
-    fontSize: 16,
-    color: "#333",
-  },
   bold: {
     fontWeight: "700",
   },
   getStartedButton: {
     position: "absolute",
-    bottom: 20,
+    bottom: 40,
     alignSelf: "center",
-    backgroundColor: "#1D4101",
+    backgroundColor: COLORS.pastelGreen,
     paddingVertical: 15,
-    paddingHorizontal: 60,
+    paddingHorizontal: 150,
     borderRadius: 25,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 5 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 5,
   },
   getStartedText: {
-    color: "white",
-    fontWeight: "bold",
+    color: COLORS.white,
+    fontWeight: 900,
     fontSize: 16,
+    textShadowColor: "rgba(0, 0, 0, 0.28)", 
+    textShadowOffset: { width: 2, height: 3 }, 
+    textShadowRadius: 5,
   },
 });

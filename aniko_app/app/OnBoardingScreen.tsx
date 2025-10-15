@@ -12,7 +12,7 @@ export default function OnboardingScreen() {
       {/* ✅ Hide the default header */}
       <Stack.Screen options={{ headerShown: false }} />
 
-      <LinearGradient colors={["#1a411fff", "#75b85aff"]} style={styles.container}>
+      <LinearGradient colors={["#11240fff", "#223619","#75b85aff"]} style={styles.container}>
         {/* Logo */}
         <Image source={require("../assets/logo3.png")} style={styles.logo} />
 
