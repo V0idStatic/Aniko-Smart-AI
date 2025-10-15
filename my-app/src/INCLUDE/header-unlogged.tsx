@@ -3,7 +3,7 @@
 import type React from "react"
 import { useEffect, useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
-import { auth } from "../firebase"
+import supabase from "../CONFIG/supabaseClient" // ✅ Changed from firebase
 import "bootstrap-icons/font/bootstrap-icons.css"
 import "bootstrap/dist/css/bootstrap.min.css"
 
@@ -34,11 +34,17 @@ const HeaderUnlogged: React.FC = () => {
     }
   }, [menuOpen])
 
-  const requireLogin = (e: React.MouseEvent, targetPath: string) => {
+  const requireLogin = async (e: React.MouseEvent, targetPath: string) => {
     e.preventDefault()
-    const user = auth.currentUser
-    if (!user) navigate("/login", { state: { redirectTo: targetPath } })
-    else navigate(targetPath)
+    
+    // ✅ Check Supabase session instead of Firebase
+    const { data: { session } } = await supabase.auth.getSession()
+    
+    if (!session?.user) {
+      navigate("/login", { state: { redirectTo: targetPath } })
+    } else {
+      navigate(targetPath)
+    }
   }
 
   return (

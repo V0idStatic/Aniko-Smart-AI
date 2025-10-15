@@ -1,4 +1,5 @@
 import { Routes, Route } from "react-router-dom";
+import Header from "./INCLUDE/Header"; // ✅ Import the smart header
 import Login from "./Pages/Login";
 import Home from "./Pages/home";
 import Compliance from "./Pages/compliance";
@@ -16,32 +17,34 @@ import AdminCMS from "./Pages/admin_cms";
 import AdminRegister from "./Pages/admin_register";
 import AuthCallback from "./Pages/AuthCallback";
 import Download from "./Pages/download";
-
-
-
 import Chatbox from "./Pages/Chatbox";
+
+// ✅ Layout wrapper for pages that should have a header
+const LayoutWithHeader = ({ children }: { children: React.ReactNode }) => (
+  <>
+    <Header />
+    {children}
+  </>
+);
 
 function App() {
   return (
     <Routes>
-      {/* Default Pages */}
-      <Route path="/" element={<Home />} />
-      <Route path="/home" element={<Home />} />
-      <Route path="/compliance" element={<Compliance />} />
-      <Route path="/testimonialSubmit" element={<TestimonialSubmit />} />
+      {/* Default Pages WITH Header */}
+      <Route path="/" element={<LayoutWithHeader><Home /></LayoutWithHeader>} />
+      <Route path="/home" element={<LayoutWithHeader><Home /></LayoutWithHeader>} />
+      <Route path="/compliance" element={<LayoutWithHeader><Compliance /></LayoutWithHeader>} />
+      <Route path="/testimonialSubmit" element={<LayoutWithHeader><TestimonialSubmit /></LayoutWithHeader>} />
+      <Route path="/query" element={<LayoutWithHeader><QueryComponent /></LayoutWithHeader>} />
+      <Route path="/dual-query" element={<LayoutWithHeader><DualQueryComponent /></LayoutWithHeader>} />
+      <Route path="/testimonialDisplay" element={<LayoutWithHeader><TestimonialDisplay /></LayoutWithHeader>} />
+      <Route path="/apiWeather" element={<LayoutWithHeader><ApiWeather /></LayoutWithHeader>} />
+      <Route path="/download" element={<LayoutWithHeader><Download /></LayoutWithHeader>} />
+      <Route path="/chat" element={<LayoutWithHeader><Chatbox /></LayoutWithHeader>} />
+
+      {/* Pages WITHOUT Header (Auth & Admin) */}
       <Route path="/login" element={<Login />} />
-      <Route path="/query" element={<QueryComponent />} />
-      <Route path="/dual-query" element={<DualQueryComponent />} />
-      <Route path="/testimonialDisplay" element={<TestimonialDisplay />} />
-      <Route path="/apiWeather" element={<ApiWeather />} />
       <Route path="/auth/callback" element={<AuthCallback />} />
-      <Route path="/download" element={<Download />} />
-
-
-      {/* ✅ Chatbot Page */}
-      <Route path="/chat" element={<Chatbox />} />
-
-      {/* Admin Pages */}
       <Route path="/admin_login" element={<AdminLogin />} />
       <Route path="/admin_home" element={<AdminHome />} />
       <Route path="/admin_testimonial" element={<AdminTestimonial />} />

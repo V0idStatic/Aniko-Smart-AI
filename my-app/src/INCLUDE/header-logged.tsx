@@ -6,18 +6,42 @@ import { Link, useNavigate } from "react-router-dom"
 import { HashLink } from "react-router-hash-link"
 import "bootstrap-icons/font/bootstrap-icons.css"
 import "bootstrap/dist/css/bootstrap.min.css"
-import { auth } from "../firebase"
-import { onAuthStateChanged, type User, signOut } from "firebase/auth"
+import supabase from "../CONFIG/supabaseClient" // ✅ Changed from firebase
+
+// ✅ Define Supabase User type
+interface SupabaseUser {
+  id: string
+  email?: string
+  user_metadata?: {
+    full_name?: string
+    avatar_url?: string
+  }
+}
 
 const Header: React.FC = () => {
   const navigate = useNavigate()
-  const [user, setUser] = useState<User | null>(null)
+  const [user, setUser] = useState<SupabaseUser | null>(null)
   const [menuOpen, setMenuOpen] = useState(false)
 
+  // ✅ Check Supabase auth state instead of Firebase
   useEffect(() => {
-    const unsub = onAuthStateChanged(auth, (u) => setUser(u))
-    return () => unsub()
+    // Check initial session
+    checkUser()
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user || null)
+    })
+
+    return () => {
+      subscription.unsubscribe()
+    }
   }, [])
+
+  const checkUser = async () => {
+    const { data: { session } } = await supabase.auth.getSession()
+    setUser(session?.user || null)
+  }
 
   // Close when clicking outside or pressing ESC
   useEffect(() => {
@@ -42,10 +66,11 @@ const Header: React.FC = () => {
     }
   }, [menuOpen])
 
+  // ✅ Use Supabase sign out instead of Firebase
   const handleLogout = async () => {
     const confirmed = window.confirm("Are you sure you want to logout?")
     if (confirmed) {
-      await signOut(auth)
+      await supabase.auth.signOut()
       setUser(null)
       navigate("/")
     }
@@ -144,14 +169,14 @@ const Header: React.FC = () => {
                     }}
                   >
                     <img
-                      src={user.photoURL || "/IMG/profile.png"}
+                      src={user.user_metadata?.avatar_url || "/IMG/profile.png"}
                       alt="Profile"
                       width="32"
                       height="32"
                       className="rounded-circle border border-light me-2"
                     />
                     <span className="fw-semibold user-name" style={{ color: "white" }}>
-                      {user.displayName || "User"}
+                      {user.user_metadata?.full_name || user.email?.split('@')[0] || "User"}
                     </span>
                   </button>
 
