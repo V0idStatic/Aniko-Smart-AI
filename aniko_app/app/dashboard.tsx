@@ -712,6 +712,26 @@ export default function Dashboard() {
     }
   }
 
+  const getHourlyWeatherImage = (iconName: keyof typeof Ionicons.glyphMap) => {
+    const iconString = String(iconName).toLowerCase()
+
+    if (iconString.includes("sunny")) {
+      return require("../assets/sunny.png")
+    } else if (iconString.includes("rainy") || iconString.includes("rain")) {
+      return require("../assets/rainy.png")
+    } else if (iconString.includes("cloud")) {
+      return require("../assets/cloudy.png")
+    } else if (iconString.includes("thunderstorm")) {
+      return require("../assets/thunderstorm.png")
+    } else if (iconString.includes("snow")) {
+      return require("../assets/cloudy.png")
+    } else if (iconString.includes("partly-sunny")) {
+      return require("../assets/cloudy.png")
+    } else {
+      return require("../assets/sunny.png")
+    }
+  }
+
   /* ===================== Effects ===================== */
 
   useEffect(() => {
@@ -1208,7 +1228,11 @@ export default function Dashboard() {
                   <Text style={[styles.hourlyTime, isActive && styles.hourlyTimeActive]}>
                     {isActive ? "NOW" : item.time}
                   </Text>
-                  <Ionicons name={item.icon} size={24} color={isActive ? COLORS.primaryGreen : COLORS.primaryBrown} />
+                  <Image
+                    source={getHourlyWeatherImage(item.icon)}
+                    style={{ width: 24, height: 24 }}
+                    resizeMode="contain"
+                  />
                   <Text style={[styles.hourlyTemp, isActive && styles.hourlyTempActive]}>{item.temp}°</Text>
                 </View>
               )
