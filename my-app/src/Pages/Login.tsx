@@ -42,6 +42,10 @@ const Login: React.FC = () => {
       setLoading(true);
       setError(null);
 
+      // ✅ Clear any existing session first
+      addDebug("🔵 Clearing existing session...");
+      await supabase.auth.signOut();
+
       addDebug("🔵 Current origin: " + window.location.origin);
       addDebug("🔵 Callback URL: " + `${window.location.origin}/auth/callback`);
 
@@ -53,8 +57,11 @@ const Login: React.FC = () => {
           redirectTo: `${window.location.origin}/auth/callback`,
           queryParams: {
             access_type: "offline",
-            prompt: "consent",
+            prompt: "select_account", // ✅ Forces Google account picker
+            // Add additional parameters to prevent caching
+            hd: "*", // Allow any domain
           },
+          skipBrowserRedirect: false,
         },
       });
 
@@ -71,7 +78,7 @@ const Login: React.FC = () => {
         addDebug("✅ Redirect URL received: " + data.url);
         addDebug("🔵 Redirecting to Google...");
 
-        // Immediate redirect - no timeout needed
+        // Immediate redirect
         window.location.href = data.url;
       } else {
         addDebug("⚠️ No redirect URL in response");
@@ -84,6 +91,21 @@ const Login: React.FC = () => {
       setError(errorMsg);
       alert("Login failed: " + errorMsg);
       setLoading(false);
+    }
+  };
+
+  // ✅ Add manual logout button for testing
+  const handleForceLogout = async () => {
+    try {
+      addDebug("🔴 Force logout initiated");
+      await supabase.auth.signOut();
+      // Clear local storage
+      localStorage.clear();
+      sessionStorage.clear();
+      addDebug("✅ Logout complete - please try logging in again");
+      window.location.reload();
+    } catch (error: any) {
+      addDebug("❌ Logout error: " + error.message);
     }
   };
 
@@ -157,73 +179,10 @@ const Login: React.FC = () => {
           {loading ? "Signing in..." : "Continue with Google"}
         </button>
 
-        {/* Debug Panel */}
-        <details style={{ marginTop: "30px" }}>
-          <summary
-            style={{
-              cursor: "pointer",
-              color: "#666",
-              fontSize: "14px",
-              fontWeight: "500",
-            }}
-          >
-            🔍 Show Debug Info
-          </summary>
-          <div
-            style={{
-              marginTop: "15px",
-              padding: "15px",
-              backgroundColor: "#f9f9f9",
-              borderRadius: "8px",
-              fontSize: "12px",
-              fontFamily: "monospace",
-              maxHeight: "300px",
-              overflowY: "auto",
-            }}
-          >
-            <p>
-              <strong>Current URL:</strong> {window.location.href}
-            </p>
-            <p>
-              <strong>Origin:</strong> {window.location.origin}
-            </p>
-            <p>
-              <strong>Callback:</strong> {window.location.origin}/auth/callback
-            </p>
-            <hr
-              style={{
-                margin: "10px 0",
-                border: "none",
-                borderTop: "1px solid #ddd",
-              }}
-            />
-            <p>
-              <strong>Debug Log:</strong>
-            </p>
-            {debugInfo.length === 0 ? (
-              <p style={{ color: "#999" }}>No logs yet</p>
-            ) : (
-              debugInfo.map((info, idx) => (
-                <p
-                  key={idx}
-                  style={{
-                    margin: "5px 0",
-                    color:
-                      info.includes("❌")
-                        ? "#c00"
-                        : info.includes("✅")
-                        ? "#0a0"
-                        : info.includes("⚠️")
-                        ? "#f90"
-                        : "#333",
-                  }}
-                >
-                  {info}
-                </p>
-              ))
-            )}
-          </div>
-        </details>
+      
+     
+
+     
       </div>
     </div>
   );
