@@ -55,13 +55,13 @@ export default function StatusCard({ status, color, cropName }: StatusCardProps)
     }
   }
 
-  const displayColor = status === "NO CROP" ? COLORS.mutedGreen : color
+  const displayColor = status === "NO CROP" ? COLORS.lightGreen : color
 
   return (
     <View style={styles.container}>
-      <LinearGradient colors={[COLORS.lightGreen, COLORS.pastelGreen]} style={styles.card}>
+      <LinearGradient colors={[COLORS.pastelGreen, COLORS.mutedGreen]} style={styles.card}>
         <View style={styles.content}>
-          <View style={[styles.iconContainer, { backgroundColor: `${displayColor}20` }]}>
+          <View style={[styles.iconContainer, { backgroundColor: `${displayColor}30` }]}>
             <Ionicons name={getStatusIcon()} size={32} color={COLORS.darkGreen} />
           </View>
 
@@ -118,7 +118,7 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 11,
     fontWeight: "700",
-    color: COLORS.mutedGreen,
+    color: COLORS.pastelGreen,
     letterSpacing: 1.2,
     textTransform: "uppercase",
   },
@@ -126,7 +126,7 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: "800",
     letterSpacing: 0.3,
-    color: COLORS.white
+    color: COLORS.lightGreen
   },
   cropName: {
     fontSize: 15,
@@ -137,7 +137,7 @@ const styles = StyleSheet.create({
   noCropHint: {
     fontSize: 13,
     fontWeight: "500",
-    color: COLORS.mutedGreen,
+    color: COLORS.pastelGreen,
     marginTop: 2,
   },
 })

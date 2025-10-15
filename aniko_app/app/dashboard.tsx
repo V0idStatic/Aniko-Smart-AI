@@ -1034,7 +1034,7 @@ export default function Dashboard() {
       </Modal>
 
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        <LinearGradient colors={[COLORS.mutedGreen, COLORS.pastelGreen, COLORS.mutedGreen]} style={styles.weatherCard}>
+        <LinearGradient colors={[COLORS.pastelGreen, COLORS.lightGreen, COLORS.pastelGreen]} style={styles.weatherCard}>
           <View style={styles.weatherHeader}>
             <View style={styles.weatherLocation}>
               <Ionicons name="location" size={20} color={COLORS.lightGreen} />
@@ -1042,7 +1042,7 @@ export default function Dashboard() {
             </View>
             <TouchableOpacity style={styles.changeLocationButton} onPress={() => setShowInlinePicker((s) => !s)}>
               <Text style={styles.changeLocationText}>Change</Text>
-              <Ionicons name="chevron-down" size={16} color={COLORS.primaryGreen} />
+              <Ionicons name="chevron-down" size={16} color={COLORS.primaryBrown} />
             </TouchableOpacity>
           </View>
 
@@ -1254,10 +1254,10 @@ export default function Dashboard() {
         </View>
 
         <TouchableOpacity onPress={() => router.push("/analysis")}>
-          <LinearGradient colors={[COLORS.primaryBrown, COLORS.darkBrown]} style={styles.chatbotCard}>
+          <LinearGradient colors={[COLORS.secondaryBrown, COLORS.primaryBrown]} style={styles.chatbotCard}>
             <View style={styles.chatbotIconWrapper}>
-              <LinearGradient colors={[COLORS.bgCOlor, COLORS.background]} style={styles.chatbotIconGradient}>
-                <Ionicons name="stats-chart" size={28} color="#fff" />
+              <LinearGradient colors={[COLORS.primaryBrown, COLORS.darkBrown]} style={styles.chatbotIconGradient}>
+                <Ionicons name="stats-chart" size={28} color={COLORS.bgCOlor} />
               </LinearGradient>
             </View>
             <View style={styles.chatbotContent}>

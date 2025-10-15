@@ -46,11 +46,11 @@ export default function DiagnosisCard() {
 
   return (
     <TouchableOpacity style={styles.container} onPress={openCameraFlow} activeOpacity={0.7}>
-      <LinearGradient colors={[COLORS.lightGreen, COLORS.pastelGreen]} style={styles.card}>
+      <LinearGradient colors={[COLORS.pastelGreen, COLORS.mutedGreen]} style={styles.card}>
         <View style={styles.content}>
           <View style={styles.iconWrapper}>
             <View style={styles.iconBackground}>
-              <Ionicons name="camera" size={32} color="#2E7D32" />
+              <Ionicons name="camera" size={32} color={COLORS.primaryGreen} />
             </View>
           </View>
 
@@ -99,7 +99,7 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 20,
-    backgroundColor: "#85ee8e4a",
+    backgroundColor: "#bee08a48",
     justifyContent: "center",
     alignItems: "center",
   },
@@ -110,13 +110,13 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 18,
     fontWeight: "800",
-    color: COLORS.primaryGreen,
+    color: COLORS.lightGreen,
     letterSpacing: 0.2,
   },
   subtitle: {
     fontSize: 14,
     fontWeight: "500",
-    color: "#6B7280",
+    color: COLORS.pastelGreen,
     lineHeight: 20,
   },
   arrowContainer: {
