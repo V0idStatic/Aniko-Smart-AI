@@ -14,6 +14,8 @@ import AdminUsers from "./Pages/admin_users";
 import AdminContact from "./Pages/admin_contact";
 import AdminCMS from "./Pages/admin_cms";
 import AdminRegister from "./Pages/admin_register";
+import Download from "./Pages/download";
+
 
 
 import Chatbox from "./Pages/Chatbox";
@@ -31,6 +33,8 @@ function App() {
       <Route path="/dual-query" element={<DualQueryComponent />} />
       <Route path="/testimonialDisplay" element={<TestimonialDisplay />} />
       <Route path="/apiWeather" element={<ApiWeather />} />
+      <Route path="/download" element={<Download />} />
+
 
       {/* ✅ Chatbot Page */}
       <Route path="/chat" element={<Chatbox />} />

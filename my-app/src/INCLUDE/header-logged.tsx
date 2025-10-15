@@ -99,9 +99,9 @@ const Header: React.FC = () => {
                 </Link>
               </li>
               <li className="nav-item">
-                <HashLink smooth className="nav-link" to="/#download" onClick={() => setMenuOpen(false)}>
+                <Link className="nav-link" to="/download" onClick={() => setMenuOpen(false)}>
                   <i className="bi bi-download me-2"></i>Download
-                </HashLink>
+                </Link>
               </li>
               <li className="nav-item">
                 <HashLink smooth className="nav-link" to="/#why-aniko" onClick={() => setMenuOpen(false)}>
@@ -139,7 +139,6 @@ const Header: React.FC = () => {
                     style={{
                       background: "transparent",
                       border: "none",
-                     
                       borderRadius: "50px",
                       padding: "8px 16px",
                     }}
@@ -267,8 +266,6 @@ const Header: React.FC = () => {
         .side-panel .nav-link:hover {
           background: rgba(189, 224, 138, 0.1);
         }
-
-      
 
         @keyframes fadeIn {
           from { opacity: 0; }
