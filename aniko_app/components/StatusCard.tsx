@@ -55,14 +55,14 @@ export default function StatusCard({ status, color, cropName }: StatusCardProps)
     }
   }
 
-  const displayColor = status === "NO CROP" ? COLORS.primaryBrown : color
+  const displayColor = status === "NO CROP" ? COLORS.mutedGreen : color
 
   return (
     <View style={styles.container}>
-      <LinearGradient colors={[COLORS.background, COLORS.primaryBrown]} style={styles.card}>
+      <LinearGradient colors={[COLORS.lightGreen, COLORS.pastelGreen]} style={styles.card}>
         <View style={styles.content}>
           <View style={[styles.iconContainer, { backgroundColor: `${displayColor}20` }]}>
-            <Ionicons name={getStatusIcon()} size={32} color={COLORS.darkBrown} />
+            <Ionicons name={getStatusIcon()} size={32} color={COLORS.darkGreen} />
           </View>
 
           <View style={styles.textContent}>
@@ -84,7 +84,9 @@ const styles = StyleSheet.create({
   },
   card: {
     flex: 1,
-    borderRadius: 20,
+    borderRadius: 10,
+    borderTopRightRadius: 55,
+    borderBottomLeftRadius: 55,
     overflow: "hidden",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
@@ -111,12 +113,12 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   textContent: {
-    gap: 6,
+    gap: 4,
   },
   label: {
     fontSize: 11,
     fontWeight: "700",
-    color: COLORS.darkBrown,
+    color: COLORS.mutedGreen,
     letterSpacing: 1.2,
     textTransform: "uppercase",
   },
@@ -129,13 +131,13 @@ const styles = StyleSheet.create({
   cropName: {
     fontSize: 15,
     fontWeight: "600",
-    color: COLORS.white,
-    marginTop: 2,
+    color: COLORS.primaryGreen,
+    marginTop: 1,
   },
   noCropHint: {
     fontSize: 13,
     fontWeight: "500",
-    color: COLORS.darkBrown,
+    color: COLORS.mutedGreen,
     marginTop: 2,
   },
 })

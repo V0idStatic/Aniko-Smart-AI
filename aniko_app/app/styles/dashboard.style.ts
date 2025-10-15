@@ -441,7 +441,7 @@ export const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: COLORS.pastelGreen,
-    borderRadius: 20,
+    borderRadius: 10,
     padding: 20,
     marginTop: 8,
     marginBottom: 24,

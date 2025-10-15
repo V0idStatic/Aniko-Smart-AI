@@ -1229,17 +1229,19 @@ export default function Dashboard() {
           <DiagnosisCard />
         </View>
 
-        <TouchableOpacity style={styles.chatbotCard} onPress={() => router.push("/analysis")}>
-          <View style={styles.chatbotIconWrapper}>
-            <LinearGradient colors={[COLORS.primaryGreen, COLORS.darkGreen]} style={styles.chatbotIconGradient}>
-              <Ionicons name="stats-chart" size={28} color="#fff" />
-            </LinearGradient>
-          </View>
-          <View style={styles.chatbotContent}>
-            <Text style={styles.chatbotTitle}>Analysis</Text>
-            <Text style={styles.chatbotSubtitle}>View detailed crop and weather analytics</Text>
-          </View>
-          <Ionicons name="chevron-forward" size={24} color={COLORS.primaryBrown} />
+        <TouchableOpacity onPress={() => router.push("/analysis")}>
+          <LinearGradient colors={[COLORS.primaryBrown, COLORS.darkBrown]} style={styles.chatbotCard}>
+            <View style={styles.chatbotIconWrapper}>
+              <LinearGradient colors={[COLORS.bgCOlor, COLORS.background]} style={styles.chatbotIconGradient}>
+                <Ionicons name="stats-chart" size={28} color="#fff" />
+              </LinearGradient>
+            </View>
+            <View style={styles.chatbotContent}>
+              <Text style={styles.chatbotTitle}>Analysis</Text>
+              <Text style={styles.chatbotSubtitle}>View detailed crop and weather analytics</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={24} color={COLORS.primaryBrown} />
+          </LinearGradient>
         </TouchableOpacity>
 
         <WeatherHistory weeklyWeather={weeklyWeather} />
