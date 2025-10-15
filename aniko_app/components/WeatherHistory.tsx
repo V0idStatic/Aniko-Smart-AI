@@ -1,5 +1,36 @@
 import { View, Text, StyleSheet, ScrollView, Image } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
+import { LinearGradient } from "expo-linear-gradient"
+
+export const COLORS = {
+  // Primary colors
+  primaryGreen: "#1D492C",
+  accentGreen: "#84cc16",
+  pastelGreen: "#BDE08A",
+  lightGreen: "#f0fdf4",
+  darkGreen: "#143820",
+  mutedGreen: "#4C6444",
+  grayText: "#666",
+  border: "#e0e0e0",
+  white: "#ffffff",
+  bgCOlor: "#cfc4b2ff",
+  primaryBrown: "#8A6440",
+  secondaryBrown: "#ecc096ff",
+  darkBrown: "#4D2D18",
+  accent: "#FF6F00",
+  accentLight: "#FFA726",
+  background: "#CBBA9E",
+  cardBackground: "#FFFFFF",
+  textPrimary: "#1A1A1A",
+  textSecondary: "#6B7280",
+  textLight: "#9CA3AF",
+
+  // Status colors
+  success: "#4CAF50",
+  warning: "#FFC107",
+  error: "#8a1c14ff",
+  info: "#2196F3",
+}
 
 interface DayWeatherData {
   day: string
@@ -24,7 +55,7 @@ export default function WeatherHistory({ weeklyWeather }: WeatherHistoryProps) {
   }
 
   return (
-    <View style={styles.container}>
+    <LinearGradient colors={[COLORS.pastelGreen, COLORS.lightGreen, COLORS.pastelGreen]} style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>7-Day Weather Forecast</Text>
         <Ionicons name="calendar-outline" size={20} color="#2E7D32" />
@@ -46,23 +77,21 @@ export default function WeatherHistory({ weeklyWeather }: WeatherHistoryProps) {
               <Text style={styles.status}>{day.status}</Text>
 
               <View style={styles.humidityRow}>
-                <Ionicons name="water" size={14} color="#6B7280" />
+                <Ionicons name="water" size={14} color={COLORS.primaryBrown} />
                 <Text style={styles.humidity}>{day.humidity}</Text>
               </View>
             </View>
-
-            <View style={[styles.statusIndicator, { backgroundColor: day.color }]} />
           </View>
         ))}
       </ScrollView>
-    </View>
+    </LinearGradient>
   )
 }
 
 const styles = StyleSheet.create({
   container: {
     backgroundColor: "#fff",
-    borderRadius: 20,
+    borderRadius: 30,
     padding: 20,
     marginBottom: 24,
     shadowColor: "#000",
@@ -80,7 +109,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 20,
     fontWeight: "700",
-    color: "#1A1A1A",
+    color: COLORS.mutedGreen,
   },
   scrollContent: {
     gap: 12,
@@ -88,7 +117,7 @@ const styles = StyleSheet.create({
   },
   dayCard: {
     width: 120,
-    backgroundColor: "#F9FAFB",
+    backgroundColor: COLORS.lightGreen,
     borderRadius: 16,
     padding: 16,
     borderWidth: 1,
@@ -102,7 +131,7 @@ const styles = StyleSheet.create({
   dayName: {
     fontSize: 15,
     fontWeight: "700",
-    color: "#1A1A1A",
+    color: COLORS.primaryBrown,
     textTransform: "uppercase",
     letterSpacing: 0.5,
   },
@@ -121,13 +150,13 @@ const styles = StyleSheet.create({
   },
   temperature: {
     fontSize: 22,
-    fontWeight: "800",
-    color: "#1A1A1A",
+    fontWeight: "900",
+    color: COLORS.mutedGreen,
   },
   status: {
     fontSize: 13,
     fontWeight: "600",
-    color: "#6B7280",
+    color: COLORS.pastelGreen,
     textAlign: "center",
   },
   humidityRow: {
@@ -139,7 +168,7 @@ const styles = StyleSheet.create({
   humidity: {
     fontSize: 12,
     fontWeight: "600",
-    color: "#6B7280",
+    color: COLORS.primaryBrown,
   },
   statusIndicator: {
     position: "absolute",

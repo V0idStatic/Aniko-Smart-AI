@@ -13,6 +13,7 @@ export const COLORS = {
   white: "#ffffff",
   bgCOlor: "#cfc4b2ff",
   primaryBrown: "#8A6440",
+  secondaryBrown: "#ecc096ff",
   darkBrown: "#4D2D18",
   accent: "#FF6F00",
   accentLight: "#FFA726",
@@ -117,23 +118,26 @@ export const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     marginBottom: 5,
-    flexWrap: "wrap", // Added flex wrap for responsiveness
-    gap: 8, // Added gap for better spacing when wrapped
+    flexWrap: "wrap", 
+    gap: 8,
   },
 
   weatherLocation: {
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
-    flex: 1, // Added flex for better responsiveness
-    minWidth: 120, // Added minimum width
+    flex: 1, 
+    minWidth: 120, 
   },
 
   weatherCity: {
     fontSize: 14,
     fontWeight: "600",
     color: COLORS.lightGreen,
-    flexShrink: 1, // Allow text to shrink if needed
+    flexShrink: 1, 
+    textShadowColor: "#00000028",
+    textShadowOffset: { width: 1, height: 2 }, 
+    textShadowRadius: 4, 
   },
 
   changeLocationButton: {
@@ -149,7 +153,7 @@ export const styles = StyleSheet.create({
   changeLocationText: {
     fontSize: 14,
     fontWeight: "600",
-    color: COLORS.primaryGreen,
+    color: COLORS.primaryBrown,
   },
 
   dropdownContainer: {
@@ -301,12 +305,12 @@ export const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     marginBottom: 20,
-    flexWrap: "wrap", // Added flex wrap for responsiveness
+    flexWrap: "wrap", 
   },
 
   weatherLeft: {
     flex: 1,
-    minWidth: 150, // Added minimum width for responsiveness
+    minWidth: 150, 
   },
 
   temperature: {
@@ -314,20 +318,29 @@ export const styles = StyleSheet.create({
     fontWeight: "700",
     color: COLORS.white,
     letterSpacing: -2,
+    textShadowColor: "#00000028",
+    textShadowOffset: { width: 1, height: 2 }, 
+    textShadowRadius: 4, 
   },
 
   condition: {
     fontSize: 18,
-    fontWeight: "500",
-    color: COLORS.lightGreen,
+    fontWeight: "700",
+    color: COLORS.pastelGreen,
     marginTop: 4,
+    textShadowColor: "#00000028",
+    textShadowOffset: { width: 1, height: 2 }, 
+    textShadowRadius: 4, 
   },
 
   highLow: {
     fontSize: 15,
-    fontWeight: "500",
-    color: COLORS.lightGreen,
+    fontWeight: "700",
+    color: COLORS.pastelGreen,
     marginTop: 8,
+    textShadowColor: "#00000028",
+    textShadowOffset: { width: 0, height: 2 }, 
+    textShadowRadius: 4, 
   },
 
   weatherRight: {
@@ -346,8 +359,8 @@ export const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     marginBottom: 16,
-    flexWrap: "wrap", // Added flex wrap for responsiveness
-    gap: 8, // Added gap for better spacing
+    flexWrap: "wrap", 
+    gap: 8, 
   },
 
   weatherMetaItem: {
@@ -358,13 +371,13 @@ export const styles = StyleSheet.create({
 
   weatherMetaText: {
     fontSize: 12,
-    color: COLORS.textSecondary,
+    color: COLORS.primaryBrown,
     fontWeight: "500",
   },
 
   divider: {
     height: 1,
-    backgroundColor: COLORS.mutedGreen,
+    backgroundColor: COLORS.pastelGreen,
     marginBottom: 16,
   },
 
@@ -390,23 +403,23 @@ export const styles = StyleSheet.create({
   hourlyTime: {
     fontSize: 13,
     fontWeight: "600",
-    color: COLORS.textSecondary,
+    color: COLORS.pastelGreen,
     marginBottom: 8,
   },
 
   hourlyTimeActive: {
-    color: COLORS.white,
+    color: COLORS.primaryBrown,
   },
 
   hourlyTemp: {
     fontSize: 16,
     fontWeight: "700",
-    color: COLORS.textPrimary,
+    color: COLORS.pastelGreen,
     marginTop: 8,
   },
 
   hourlyTempActive: {
-    color: COLORS.white,
+    color: COLORS.primaryBrown,
   },
 
   // Section Header
@@ -419,8 +432,8 @@ export const styles = StyleSheet.create({
 
   sectionTitle: {
     fontSize: 22,
-    fontWeight: "700",
-    color: COLORS.textPrimary,
+    fontWeight: "900",
+    color: COLORS.darkBrown,
   },
 
   sectionLink: {
@@ -441,7 +454,9 @@ export const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: COLORS.pastelGreen,
-    borderRadius: 20,
+    borderRadius: 5,
+    borderBottomRightRadius: 30,
+    borderBottomLeftRadius: 30,
     padding: 20,
     marginTop: 8,
     marginBottom: 24,
@@ -470,15 +485,15 @@ export const styles = StyleSheet.create({
 
   chatbotTitle: {
     fontSize: 18,
-    fontWeight: "700",
-    color: COLORS.textPrimary,
+    fontWeight: "900",
+    color: COLORS.darkBrown,
     marginBottom: 4,
   },
 
   chatbotSubtitle: {
     fontSize: 14,
-    color: COLORS.textSecondary,
-    fontWeight: "500",
+    color: COLORS.bgCOlor,
+    fontWeight: "400",
   },
 
   // Modal Styles

@@ -14,6 +14,7 @@ import AdminUsers from "./Pages/admin_users";
 import AdminContact from "./Pages/admin_contact";
 import AdminCMS from "./Pages/admin_cms";
 import AdminRegister from "./Pages/admin_register";
+import AuthCallback from "./Pages/AuthCallback";
 import Download from "./Pages/download";
 
 
@@ -33,6 +34,7 @@ function App() {
       <Route path="/dual-query" element={<DualQueryComponent />} />
       <Route path="/testimonialDisplay" element={<TestimonialDisplay />} />
       <Route path="/apiWeather" element={<ApiWeather />} />
+      <Route path="/auth/callback" element={<AuthCallback />} />
       <Route path="/download" element={<Download />} />
 
 
