@@ -17,6 +17,37 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 
+
+export const COLORS = {
+  // Primary colors
+  primaryGreen: "#1D492C",
+  accentGreen: "#84cc16",
+  pastelGreen: "#BDE08A",
+  lightGreen: "#f0fdf4",
+  darkGreen: "#143820",
+  mutedGreen: "#4C6444",
+  grayText: "#666",
+  border: "#e0e0e0",
+  white: "#ffffff",
+  bgCOlor: "#cfc4b2ff",
+  primaryBrown: "#8A6440",
+  secondaryBrown: "#ecc096ff",
+  darkBrown: "#4D2D18",
+  accent: "#FF6F00",
+  accentLight: "#FFA726",
+  background: "#CBBA9E",
+  cardBackground: "#FFFFFF",
+  textPrimary: "#1A1A1A",
+  textSecondary: "#6B7280",
+  textLight: "#9CA3AF",
+
+  // Status colors
+  success: "#4CAF50",
+  warning: "#FFC107",
+  error: "#8a1c14ff",
+  info: "#2196F3",
+}
+
 interface SensorData {
   temperature: number;
   moisture: number;
@@ -275,7 +306,7 @@ const NPKSensorDashboard: React.FC = () => {
       case 'optimal': return '#4CAF50';
       case 'good': return '#2196F3';
       case 'warning': return '#FF9800';
-      case 'danger': return '#F44336';
+      case 'danger': return COLORS.error;
       default: return '#9E9E9E';
     }
   };
@@ -328,7 +359,7 @@ const NPKSensorDashboard: React.FC = () => {
   return (
     <View style={styles.container}>
       {/* Header */}
-      <LinearGradient colors={["#1c4722", "#4d7f39"]} style={styles.header}>
+      <LinearGradient colors={[COLORS.primaryGreen, COLORS.darkGreen]} style={styles.header}>
         <TouchableOpacity 
           style={styles.backButton}
           onPress={() => router.back()}
@@ -530,9 +561,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingTop: 50,
+    paddingTop: 40,
     paddingBottom: 20,
     paddingHorizontal: 20,
+    borderBottomLeftRadius: 30,
+    borderBottomRightRadius: 30
   },
   backButton: {
     padding: 8,
@@ -551,7 +584,7 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   ipConfigPanel: {
-    backgroundColor: 'white',
+    backgroundColor: COLORS.lightGreen,
     borderRadius: 12,
     padding: 20,
     marginBottom: 20,
@@ -563,8 +596,9 @@ const styles = StyleSheet.create({
   },
   ipConfigTitle: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '700',
     marginBottom: 10,
+    color: COLORS.primaryGreen
   },
   ipInput: {
     borderWidth: 1,
@@ -575,9 +609,9 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   saveIPButton: {
-    backgroundColor: '#1c4722',
+    backgroundColor: COLORS.mutedGreen,
     padding: 12,
-    borderRadius: 8,
+    borderRadius: 20,
     alignItems: 'center',
     marginBottom: 15,
   },
@@ -586,7 +620,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   debugInfo: {
-    backgroundColor: '#f5f5f5',
+    backgroundColor: COLORS.lightGreen,
     padding: 10,
     borderRadius: 6,
     marginTop: 10,
@@ -597,7 +631,7 @@ const styles = StyleSheet.create({
     fontFamily: 'monospace',
   },
   connectionPanel: {
-    backgroundColor: 'white',
+    backgroundColor: COLORS.lightGreen,
     borderRadius: 12,
     padding: 20,
     marginBottom: 20,
@@ -623,7 +657,8 @@ const styles = StyleSheet.create({
   },
   connectionText: {
     fontSize: 16,
-    fontWeight: '500',
+    fontWeight: '700',
+    color: COLORS.primaryGreen
   },
   connectionSubText: {
     fontSize: 12,
@@ -631,7 +666,7 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   connectButton: {
-    backgroundColor: '#1c4722',
+    backgroundColor: COLORS.mutedGreen,
     paddingHorizontal: 20,
     paddingVertical: 10,
     borderRadius: 8,
@@ -640,7 +675,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#666',
   },
   disconnectButton: {
-    backgroundColor: '#F44336',
+    backgroundColor: COLORS.error,
   },
   connectButtonText: {
     color: 'white',
@@ -649,7 +684,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#1c4722',
+    color: COLORS.primaryBrown,
     marginBottom: 15,
   },
   sensorGrid: {
@@ -658,7 +693,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   sensorCard: {
-    backgroundColor: 'white',
+    backgroundColor: COLORS.lightGreen,
     borderRadius: 12,
     padding: 15,
     marginBottom: 15,
@@ -689,7 +724,7 @@ const styles = StyleSheet.create({
   sensorValue: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#1c4722',
+    color: COLORS.primaryGreen,
     marginBottom: 5,
   },
   sensorTitle: {
