@@ -1560,6 +1560,166 @@ const analysis = StyleSheet.create({
     fontSize: 12,
     color: '#666',
   },
+   minimalPlantCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    padding: 16,
+    marginVertical: 6,
+    marginHorizontal: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  minimalPlantIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: '#e8f5e9',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+  },
+  minimalPlantName: {
+    flex: 1,
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+  },
+
+  plantDetailIconContainer: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: '#e8f5e9',
+    alignItems: 'center',
+    justifyContent: 'center',
+    alignSelf: 'center',
+    marginBottom: 12,
+  },
+
+  plantDetailCategory: {
+    fontSize: 14,
+    color: '#666',
+    textAlign: 'center',
+    marginTop: 4,
+  },
+  // Replace/update these styles to fix overflow issues:
+
+
+detailedPlantCard: {
+  backgroundColor: '#fff',
+  borderRadius: 20,
+  padding: 20, // Reduced from 24
+  marginBottom: 16,
+  borderWidth: 1,
+  borderColor: '#e5e7eb',
+  shadowColor: '#000',
+  shadowOffset: { width: 0, height: 4 },
+  shadowOpacity: 0.1,
+  shadowRadius: 8,
+  elevation: 6,
+  maxWidth: '100%', // ✅ Prevent overflow
+},
+
+
+
+// CLEAN PARAMETER CARDS - FIXED
+parameterCard: {
+  backgroundColor: '#f9fafb',
+  borderRadius: 12,
+  padding: 14, // Reduced from 16
+  marginBottom: 10, // Reduced from 12
+  borderWidth: 1,
+  borderColor: '#e5e7eb',
+  maxWidth: '100%', // ✅ Prevent overflow
+  overflow: 'hidden', // ✅ Clip content
+},
+
+parameterHeader: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  gap: 8,
+  marginBottom: 10, // Reduced from 12
+},
+
+parameterTitle: {
+  fontSize: 15, // Reduced from 16
+  fontWeight: '600',
+  color: '#333',
+  flex: 1, // ✅ Allow text to shrink
+},
+
+parameterValues: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  justifyContent: 'space-around',
+  paddingTop: 8,
+  maxWidth: '100%', // ✅ Prevent overflow
+},
+
+parameterValueItem: {
+  flex: 1,
+  alignItems: 'center',
+  paddingHorizontal: 4, // ✅ Add padding
+},
+
+parameterLabel: {
+  fontSize: 11, // Reduced from 12
+  color: '#666',
+  marginBottom: 6, // Reduced from 8
+  textTransform: 'uppercase',
+  fontWeight: '500',
+  letterSpacing: 0.5,
+},
+
+parameterValue: {
+  fontSize: 20, // Reduced from 24
+  fontWeight: '700',
+  color: '#1c4722',
+},
+
+parameterDivider: {
+  width: 1,
+  height: 36, // Reduced from 40
+  backgroundColor: '#d1d5db',
+  marginHorizontal: 8, // Reduced from 16
+},
+
+// NPK CARD STYLES - FIXED
+npkCard: {
+  backgroundColor: '#f9fafb',
+  borderRadius: 12,
+  padding: 14, // Reduced from 16
+  marginTop: 8,
+  borderWidth: 1,
+  borderColor: '#e5e7eb',
+  maxWidth: '100%', // ✅ Prevent overflow
+  overflow: 'hidden', // ✅ Clip content
+},
+
+
+
+npkLabelContainer: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  gap: 8,
+  flex: 1, // ✅ Allow to shrink
+  maxWidth: '45%', // ✅ Prevent taking too much space
+},
+
+npkColorDot: {
+  width: 10, // Reduced from 12
+  height: 10,
+  borderRadius: 5,
+  flexShrink: 0, // ✅ Don't shrink the dot
+},
+  
 })
 
 export default analysis

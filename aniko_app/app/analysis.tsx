@@ -1515,6 +1515,22 @@ export default function Analysis() {
     }
   }, [selectedStatus])
 
+  // Add this simple helper function after your other helper functions (around line 1500):
+
+  const getCategoryIcon = (categoryKey: string): string => {
+    const categoryIcons: { [key: string]: string } = {
+      'all': 'apps-outline',
+      'vegetables': 'leaf-outline',
+      'fruits': 'nutrition-outline',
+      'grains': 'grain-outline',
+      'herbs': 'flower-outline',
+      'legumes': 'ellipse-outline',
+      'roots': 'fitness-outline',
+    }
+    
+    return categoryIcons[categoryKey] || 'leaf-outline'
+  }
+
   return (
     <>
       <Stack.Screen options={{ headerShown: false }} />
@@ -1749,7 +1765,7 @@ export default function Analysis() {
                     </View>
                   </View>
                 </>
-              )}
+                                                                                                         )}
             </View>
 
             <View style={styles.tableContainer}>
@@ -1910,10 +1926,10 @@ export default function Analysis() {
                   { key: 'all', name: 'All Plants', icon: 'apps-outline' },
                   { key: 'vegetables', name: 'Vegetables', icon: 'leaf-outline' },
                   { key: 'fruits', name: 'Fruits', icon: 'nutrition-outline' },
-                  { key: 'grains', name: 'Grains', icon: 'grain-outline' },
+                  { key: 'grains', name: 'Grains', icon: 'barcode-outline' },
                   { key: 'herbs', name: 'Herbs', icon: 'flower-outline' },
                   { key: 'legumes', name: 'Legumes', icon: 'ellipse-outline' },
-                  { key: 'roots', name: 'Root Crops', icon: 'fitness-outline' },
+                  { key: 'roots', name: 'Root Crops', icon: 'caret-down-circle-outline' },
                 ].map((category, index) => (
                   <TouchableOpacity
                     key={index}
@@ -1959,209 +1975,156 @@ export default function Analysis() {
                     onPress={() => setSelectedPlantDetail(null)}
                   >
                     <Ionicons name="arrow-back-outline" size={20} color="#1c4722" />
-                    <Text style={styles.backButtonText}>Back to Library</Text>
+                    <Text style={styles.backButtonText}>Back to Encyclopedia</Text>
                   </TouchableOpacity>
 
                   {/* Plant Details Card */}
-                  <View style={styles.plantDetailCard}>
+                  <View style={styles.detailedPlantCard}>
                     {/* Header */}
                     <View style={styles.plantDetailHeader}>
-                      <Ionicons name="leaf" size={40} color="#1c4722" />
+                      <View style={styles.plantDetailIconContainer}>
+                        <Ionicons 
+                          name={getCategoryIcon(selectedCategory) as any} 
+                          size={32} 
+                          color="#1c4722" 
+                        />
+                      </View>
                       <Text style={styles.plantDetailName}>{selectedPlantDetail.cropName}</Text>
+                      <Text style={styles.plantDetailCategory}>Growing Requirements</Text>
                     </View>
 
-                    {/* Optimal Temperature */}
+                    {/* Temperature Section - FIXED */}
                     {selectedPlantDetail.optimalTemp && (
-                      <View style={styles.statSection}>
-                        <View style={styles.statSectionHeader}>
-                          <Ionicons name="thermometer-outline" size={24} color="#e53935" />
-                          <Text style={styles.statSectionTitle}>Temperature Range</Text>
+                      <View style={styles.parameterCard}>
+                        <View style={styles.parameterHeader}>
+                          <Ionicons name="thermometer-outline" size={20} color="#e53935" />
+                          <Text style={styles.parameterTitle}>Temperature Range</Text>
                         </View>
-                        <View style={styles.rangeBar}>
-                          <View style={styles.rangeInfo}>
-                            <Text style={styles.rangeLabel}>Min</Text>
-                            <Text style={styles.rangeValue}>
-                              {selectedPlantDetail.optimalTemp.min}°C
-                            </Text>
+                        <View style={styles.parameterValues}>
+                          <View style={styles.parameterValueItem}>
+                            <Text style={styles.parameterLabel}>Minimum</Text>
+                            <Text style={styles.parameterValue}>{selectedPlantDetail.optimalTemp.min}°C</Text>
                           </View>
-                          <View style={styles.rangeBar}>
-                            <View
-                              style={[
-                                styles.rangeBarFill,
-                                { 
-                                  width: '100%', 
-                                  backgroundColor: '#ff5722' 
-                                },
-                              ]}
-                            />
-                          </View>
-                          <View style={styles.rangeInfo}>
-                            <Text style={styles.rangeLabel}>Max</Text>
-                            <Text style={styles.rangeValue}>
-                              {selectedPlantDetail.optimalTemp.max}°C
-                            </Text>
+                          <View style={styles.parameterDivider} />
+                          <View style={styles.parameterValueItem}>
+                            <Text style={styles.parameterLabel}>Maximum</Text>
+                            <Text style={styles.parameterValue}>{selectedPlantDetail.optimalTemp.max}°C</Text>
                           </View>
                         </View>
                       </View>
                     )}
 
-                    {/* Optimal Humidity */}
+                    {/* Humidity Section - FIXED */}
                     {selectedPlantDetail.optimalHumidity && (
-                      <View style={styles.statSection}>
-                        <View style={styles.statSectionHeader}>
-                          <Ionicons name="water-outline" size={24} color="#1976d2" />
-                          <Text style={styles.statSectionTitle}>Humidity Range</Text>
+                      <View style={styles.parameterCard}>
+                        <View style={styles.parameterHeader}>
+                          <Ionicons name="water-outline" size={20} color="#1976d2" />
+                          <Text style={styles.parameterTitle}>Humidity Range</Text>
                         </View>
-                        <View style={styles.rangeBar}>
-                          <View style={styles.rangeInfo}>
-                            <Text style={styles.rangeLabel}>Min</Text>
-                            <Text style={styles.rangeValue}>
-                              {selectedPlantDetail.optimalHumidity.min}%
-                            </Text>
+                        <View style={styles.parameterValues}>
+                          <View style={styles.parameterValueItem}>
+                            <Text style={styles.parameterLabel}>Minimum</Text>
+                            <Text style={styles.parameterValue}>{selectedPlantDetail.optimalHumidity.min}%</Text>
                           </View>
-                          <View style={styles.rangeBar}>
-                            <View
-                              style={[
-                                styles.rangeBarFill,
-                                { 
-                                  width: '100%', 
-                                  backgroundColor: '#2196f3' 
-                                },
-                              ]}
-                            />
-                          </View>
-                          <View style={styles.rangeInfo}>
-                            <Text style={styles.rangeLabel}>Max</Text>
-                            <Text style={styles.rangeValue}>
-                              {selectedPlantDetail.optimalHumidity.max}%
-                            </Text>
+                          <View style={styles.parameterDivider} />
+                          <View style={styles.parameterValueItem}>
+                            <Text style={styles.parameterLabel}>Maximum</Text>
+                            <Text style={styles.parameterValue}>{selectedPlantDetail.optimalHumidity.max}%</Text>
                           </View>
                         </View>
                       </View>
                     )}
 
-                    {/* pH Level */}
+                    {/* pH Level Section - FIXED */}
                     {selectedPlantDetail.optimalPH?.min && selectedPlantDetail.optimalPH?.max && (
-                      <View style={styles.statSection}>
-                        <View style={styles.statSectionHeader}>
-                          <Ionicons name="flask-outline" size={24} color="#9c27b0" />
-                          <Text style={styles.statSectionTitle}>pH Level</Text>
+                      <View style={styles.parameterCard}>
+                        <View style={styles.parameterHeader}>
+                          <Ionicons name="flask-outline" size={20} color="#9c27b0" />
+                          <Text style={styles.parameterTitle}>pH Level Range</Text>
                         </View>
-                        <View style={styles.rangeBar}>
-                          <View style={styles.rangeInfo}>
-                            <Text style={styles.rangeLabel}>Min</Text>
-                            <Text style={styles.rangeValue}>
-                              {selectedPlantDetail.optimalPH.min}
-                            </Text>
+                        <View style={styles.parameterValues}>
+                          <View style={styles.parameterValueItem}>
+                            <Text style={styles.parameterLabel}>Minimum</Text>
+                            <Text style={styles.parameterValue}>{selectedPlantDetail.optimalPH.min}</Text>
                           </View>
-                          <View style={styles.rangeBar}>
-                            <View
-                              style={[
-                                styles.rangeBarFill,
-                                { 
-                                  width: '100%', 
-                                  backgroundColor: '#9c27b0' 
-                                },
-                              ]}
-                            />
-                          </View>
-                          <View style={styles.rangeInfo}>
-                            <Text style={styles.rangeLabel}>Max</Text>
-                            <Text style={styles.rangeValue}>
-                              {selectedPlantDetail.optimalPH.max}
-                            </Text>
+                          <View style={styles.parameterDivider} />
+                          <View style={styles.parameterValueItem}>
+                            <Text style={styles.parameterLabel}>Maximum</Text>
+                            <Text style={styles.parameterValue}>{selectedPlantDetail.optimalPH.max}</Text>
                           </View>
                         </View>
                       </View>
                     )}
 
-                    {/* NPK Requirements */}
+                    {/* NPK Requirements - FIXED */}
                     {selectedPlantDetail.optimalNPK && (
-                      <View style={styles.npkContainer}>
-                        <Text style={styles.sectionTitle}>Nutrient Requirements (NPK)</Text>
-
-                        <View style={styles.npkChart}>
-                          {/* Nitrogen */}
-                          {selectedPlantDetail.optimalNPK.nitrogen.min && (
-                            <View style={styles.npkBar}>
-                              <View
-                                style={[
-                                  styles.npkFill,
-                                  {
-                                    height: `${Math.min(100, (selectedPlantDetail.optimalNPK.nitrogen.max || 100) / 2)}%`,
-                                    backgroundColor: '#4CAF50',
-                                  },
-                                ]}
-                              />
-                              <Text style={styles.npkValue}>
-                                {selectedPlantDetail.optimalNPK.nitrogen.min}-
-                                {selectedPlantDetail.optimalNPK.nitrogen.max}
-                              </Text>
-                              <Text style={styles.npkLabel}>Nitrogen (ppm)</Text>
-                            </View>
-                          )}
-
-                          {/* Phosphorus */}
-                          {selectedPlantDetail.optimalNPK.phosphorus.min && (
-                            <View style={styles.npkBar}>
-                              <View
-                                style={[
-                                  styles.npkFill,
-                                  {
-                                    height: `${Math.min(100, (selectedPlantDetail.optimalNPK.phosphorus.max || 100) / 2)}%`,
-                                    backgroundColor: '#FF9800',
-                                  },
-                                ]}
-                              />
-                              <Text style={styles.npkValue}>
-                                {selectedPlantDetail.optimalNPK.phosphorus.min}-
-                                {selectedPlantDetail.optimalNPK.phosphorus.max}
-                              </Text>
-                              <Text style={styles.npkLabel}>Phosphorus (ppm)</Text>
-                            </View>
-                          )}
-
-                          {/* Potassium */}
-                          {selectedPlantDetail.optimalNPK.potassium.min && (
-                            <View style={styles.npkBar}>
-                              <View
-                                style={[
-                                  styles.npkFill,
-                                  {
-                                    height: `${Math.min(100, (selectedPlantDetail.optimalNPK.potassium.max || 100) / 2)}%`,
-                                    backgroundColor: '#2196F3',
-                                  },
-                                ]}
-                              />
-                              <Text style={styles.npkValue}>
-                                {selectedPlantDetail.optimalNPK.potassium.min}-
-                                {selectedPlantDetail.optimalNPK.potassium.max}
-                              </Text>
-                              <Text style={styles.npkLabel}>Potassium (ppm)</Text>
-                            </View>
-                          )}
+                      <View style={styles.npkCard}>
+                        <View style={styles.parameterHeader}>
+                          <Ionicons name="nutrition-outline" size={20} color="#4caf50" />
+                          <Text style={styles.parameterTitle}>NPK Requirements (ppm)</Text>
                         </View>
+
+                        {/* Nitrogen */}
+                        {selectedPlantDetail.optimalNPK.nitrogen.min && (
+                          <View style={styles.npkRow}>
+                            <View style={styles.npkLabelContainer}>
+                              <View style={[styles.npkColorDot, { backgroundColor: '#4CAF50' }]} />
+                              <Text style={styles.npkLabel}>Nitrogen (N)</Text>
+                            </View>
+                            <Text style={styles.npkValue} numberOfLines={1}>
+                              {selectedPlantDetail.optimalNPK.nitrogen.min} - {selectedPlantDetail.optimalNPK.nitrogen.max}
+                            </Text>
+                          </View>
+                        )}
+
+                        {/* Phosphorus */}
+                        {selectedPlantDetail.optimalNPK.phosphorus.min && (
+                          <View style={styles.npkRow}>
+                            <View style={styles.npkLabelContainer}>
+                              <View style={[styles.npkColorDot, { backgroundColor: '#FF9800' }]} />
+                              <Text style={styles.npkLabel}>Phosphorus (P)</Text>
+                            </View>
+                            <Text style={styles.npkValue} numberOfLines={1}>
+                              {selectedPlantDetail.optimalNPK.phosphorus.min} - {selectedPlantDetail.optimalNPK.phosphorus.max}
+                            </Text>
+                          </View>
+                        )}
+
+                        {/* Potassium */}
+                        {selectedPlantDetail.optimalNPK.potassium.min && (
+                          <View style={styles.npkRow}>
+                            <View style={styles.npkLabelContainer}>
+                              <View style={[styles.npkColorDot, { backgroundColor: '#2196F3' }]} />
+                              <Text style={styles.npkLabel}>Potassium (K)</Text>
+                            </View>
+                            <Text style={styles.npkValue} numberOfLines={1}>
+                              {selectedPlantDetail.optimalNPK.potassium.min} - {selectedPlantDetail.optimalNPK.potassium.max}
+                            </Text>
+                          </View>
+                        )}
                       </View>
                     )}
 
-                    {/* Best Planting Months */}
-                    <View style={styles.plantingMonthsSection}>
-                      <View style={styles.statSectionHeader}>
-                        <Ionicons name="calendar-outline" size={24} color="#4caf50" />
-                        <Text style={styles.statSectionTitle}>Best Planting Months</Text>
+                    {/* Best Planting Months - FIXED */}
+                    {selectedPlantDetail.bestMonths && selectedPlantDetail.bestMonths.length > 0 && (
+                      <View style={styles.plantingMonthsSection}>
+                        <View style={styles.parameterHeader}>
+                          <Ionicons name="calendar-outline" size={20} color="#4caf50" />
+                          <Text style={styles.parameterTitle}>Best Planting Months</Text>
+                        </View>
+                        <View style={styles.monthsContainer}>
+                          {selectedPlantDetail.bestMonths.map((month, idx) => (
+                            <View key={idx} style={styles.monthChip}>
+                              <Text style={styles.monthText}>
+                                {new Date(2024, month - 1, 1).toLocaleString('default', {
+                                  month: 'short',
+                                })}
+                              </Text>
+                            </View>
+                          ))}
+                        </View>
                       </View>
-                      <View style={styles.monthsContainer}>
-                        {selectedPlantDetail.bestMonths.map((month, idx) => (
-                          <View key={idx} style={styles.monthChip}>
-                            <Text style={styles.monthText}>
-                              {new Date(2024, month - 1, 1).toLocaleString('default', {
-                                month: 'short',
-                              })}
-                            </Text>
-                          </View>
-                        ))}
-                      </View>
-                    </View>
+                    )}
                   </View>
                 </View>
               ) : (
@@ -2180,19 +2143,19 @@ export default function Analysis() {
                   {getCurrentCategoryRecommendations().map((plant, index) => (
                     <TouchableOpacity
                       key={index}
-                      style={styles.plantCard}
+                      style={styles.minimalPlantCard}
                       onPress={() => setSelectedPlantDetail(plant)}
-                      activeOpacity={0.7}
+                      activeOpacity={0.8}
                     >
-                      <View style={styles.plantCardHeader}>
-                        <Ionicons name="leaf" size={32} color="#1c4722" />
-                        <View style={styles.plantCardInfo}>
-                          <Text style={styles.plantCardName}>{plant.cropName}</Text>
-                       
-                        </View>
-                        <Ionicons name="chevron-forward-outline" size={20} color="#666" />
+                      <View style={styles.minimalPlantIcon}>
+                        <Ionicons 
+                          name={getCategoryIcon(selectedCategory) as any} 
+                          size={28} 
+                          color="#1c4722" 
+                        />
                       </View>
-                   
+                      <Text style={styles.minimalPlantName}>{plant.cropName}</Text>
+                      <Ionicons name="chevron-forward-outline" size={16} color="#999" />
                     </TouchableOpacity>
                   ))}
 
