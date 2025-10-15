@@ -68,6 +68,7 @@ export default function Dashboard() {
     setCropParameters,
     sensorData,
     setSensorData,
+    isSensorConnected,
   } = useAppContext()
 
   const [cropsStatus] = useState("Good")
@@ -82,6 +83,10 @@ export default function Dashboard() {
   const [showHistoryModal, setShowHistoryModal] = useState(false)
   const [selectedDayHistory, setSelectedDayHistory] = useState<DailyMonitoringData | null>(null)
   const [weeklyMonitoringData, setWeeklyMonitoringData] = useState<DailyMonitoringData[]>([])
+
+  // New state variables for real-time data
+  const [lastUpdateTime, setLastUpdateTime] = useState<Date | null>(null)
+  const [isLiveDataActive, setIsLiveDataActive] = useState(false)
 
   // Derive categories and plants from crops data
   const originalCategories = Array.from(new Set(crops.map((c) => c.crop_categories)))
@@ -138,7 +143,12 @@ export default function Dashboard() {
 
   // Load crop parameters for sensor monitoring
   const loadCropParameters = async (cropName: string) => {
-    if (!cropName) return
+    if (!cropName) {
+      setCropParameters(null)
+      return
+    }
+
+    console.log('📥 Loading crop parameters for:', cropName)
 
     try {
       const { data, error } = await supabase
@@ -148,17 +158,17 @@ export default function Dashboard() {
         .single()
 
       if (error) {
-        console.error("DB crop parameters error:", error)
+        console.error("❌ Error loading parameters:", error)
         setCropParameters(null)
         return
       }
 
       if (data) {
+        console.log('✅ Parameters loaded successfully')
         setCropParameters(data)
-        console.log("Loaded crop parameters for:", cropName, data)
       }
     } catch (err) {
-      console.error("Failed to load crop parameters:", err)
+      console.error("❌ Exception loading parameters:", err)
       setCropParameters(null)
     }
   }
@@ -540,33 +550,74 @@ export default function Dashboard() {
     loadCropsFromDb()
   }, [])
 
-  // Load crop parameters when a crop is selected
+  // Initialize data only once on mount
   useEffect(() => {
-    if (selectedCrop) {
-      loadCropParameters(selectedCrop.crop_name)
-    }
-  }, [selectedCrop])
-
-  // Fetch ESP32 sensor data when user is available
-  useEffect(() => {
-    const loadSensorAndHistory = async () => {
+    const initializeData = async () => {
       const userId = currentUser?.id || (user as User)?.id
-      if (userId) {
-        console.log("🚀 Loading ESP32 sensor data and history for user:", userId)
+      if (!userId) return
 
-        // Try to fetch real ESP32 sensor data first
-        await fetchESP32SensorData(userId)
+      console.log("🚀 Initializing plant dashboard (one-time setup)")
 
-        // Load sensor history (real or mock)
-        const historyData = await generateWeeklyMonitoringData()
-        setWeeklyMonitoringData(historyData)
+      // Load initial sensor data from database
+      await fetchESP32SensorData(userId)
+
+      // Load weekly history
+      const historyData = await generateWeeklyMonitoringData()
+      setWeeklyMonitoringData(historyData)
+    }
+
+    initializeData()
+  }, []) // Empty array - runs only once!
+
+  // SEPARATE useEffect for crop parameter loading (runs only when crop name changes)
+  useEffect(() => {
+    if (!selectedCrop?.crop_name) {
+      console.log('⚠️ No crop selected')
+      setCropParameters(null)
+      return
+    }
+
+    console.log('🌱 Loading parameters for:', selectedCrop.crop_name)
+    
+    // Load crop parameters without blocking sensor updates
+    const loadParams = async () => {
+      try {
+        const { data, error } = await supabase
+          .from("denormalized_crop_parameter")
+          .select("*")
+          .eq("crop_name", selectedCrop.crop_name)
+          .single()
+
+        if (!error && data) {
+          console.log('✅ Parameters loaded for:', selectedCrop.crop_name)
+          setCropParameters(data)
+        }
+      } catch (err) {
+        console.error("Failed to load parameters:", err)
       }
     }
 
-    if ((currentUser || user) && selectedCrop) {
-      loadSensorAndHistory()
+    loadParams()
+  }, [selectedCrop?.crop_name]) // Only re-run when crop NAME changes
+
+  // Simplified sensor data tracking useEffect
+  useEffect(() => {
+    console.log('📊 Sensor data or connection status changed')
+    console.log('  - Connected:', isSensorConnected)
+    console.log('  - Data present:', !!sensorData)
+    
+    setIsLiveDataActive(isSensorConnected)
+    
+    if (isSensorConnected && sensorData) {
+      setLastUpdateTime(new Date())
+      console.log('✅ Live data active - last update:', new Date().toLocaleTimeString())
     }
-  }, [currentUser, user, selectedCrop, cropParameters])
+  }, [isSensorConnected, sensorData]) // React to sensor changes
+
+  // Log modal state changes (for debugging)
+  useEffect(() => {
+    console.log('📋 Plant modal state:', showPlantModal ? 'OPEN' : 'CLOSED')
+  }, [showPlantModal])
 
   const getLastLoggedInUser = async () => {
     try {
@@ -624,12 +675,18 @@ export default function Dashboard() {
   }
 
   const handlePlantSelect = async (crop: CropData) => {
-    console.log("Plant selected:", crop)
-    setSelectedCrop(crop) // Use global setter
+    console.log('🌱 Plant selected:', crop.crop_name)
+    
+    // Update selected crop
+    setSelectedCrop(crop)
+    
+    // Close modal (THIS WAS THE BUG - was setShowIPInput instead!)
     setShowPlantModal(false)
-
-    // Load crop parameters for sensor monitoring
-    await loadCropParameters(crop.crop_name)
+    
+    // Load parameters in background
+    setTimeout(async () => {
+      await loadCropParameters(crop.crop_name)
+    }, 100) // Small delay to let modal close animation complete
   }
 
   return (
@@ -647,6 +704,30 @@ export default function Dashboard() {
           </View>
 
           <View style={styles.headerIcons}>
+            {/* Live Status Indicator */}
+            {isLiveDataActive && (
+              <View style={{ flexDirection: 'row', alignItems: 'center', marginRight: 12, backgroundColor: 'rgba(76, 175, 80, 0.2)', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 12 }}>
+                <View style={{
+                  width: 8,
+                  height: 8,
+                  borderRadius: 4,
+                  backgroundColor: '#4CAF50',
+                  marginRight: 4,
+                }} />
+                <Text style={{ color: 'white', fontSize: 10, fontWeight: '600' }}>LIVE</Text>
+              </View>
+            )}
+            
+            {/* Last Update Time */}
+            {lastUpdateTime && (
+              <View style={{ marginRight: 12 }}>
+                <Text style={{ color: 'white', fontSize: 9, opacity: 0.8 }}>Updated</Text>
+                <Text style={{ color: 'white', fontSize: 10, fontWeight: '600' }}>
+                  {lastUpdateTime.toLocaleTimeString()}
+                </Text>
+              </View>
+            )}
+            
             <TouchableOpacity onPress={handleRefreshSensorData} style={{ marginRight: 12 }}>
               <Ionicons name="refresh-outline" size={22} color="white" />
             </TouchableOpacity>

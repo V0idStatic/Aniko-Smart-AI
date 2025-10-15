@@ -16,6 +16,8 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useFocusEffect } from '@react-navigation/native'
+import { useCallback } from 'react'
 
 
 export const COLORS = {
@@ -249,6 +251,43 @@ const NPKSensorDashboard: React.FC = () => {
     setConnectionStatus('Disconnected');
     setSensorData(null);
   };
+
+  // Start/stop fetching based on connection status only
+  useEffect(() => {
+    if (!isSensorConnected) {
+      console.log('⚠️ Not connected - stopping fetch')
+      if (fetchIntervalRef.current) {
+        clearInterval(fetchIntervalRef.current)
+        fetchIntervalRef.current = null
+      }
+      return
+    }
+    
+    console.log('✅ Connected - starting continuous fetch')
+    
+    // Clear any existing interval
+    if (fetchIntervalRef.current) {
+      clearInterval(fetchIntervalRef.current)
+      fetchIntervalRef.current = null
+    }
+    
+    // Start fetching immediately
+    fetchSensorData()
+    
+    // Set up continuous fetching
+    const intervalId = setInterval(() => {
+      fetchSensorData()
+    }, 3000)
+    fetchIntervalRef.current = intervalId as unknown as number
+    
+    console.log('📡 Fetch interval started, ID:', fetchIntervalRef.current)
+    
+    // DON'T cleanup on unmount - let it keep running!
+    return () => {
+      console.log('⚠️ Component cleanup but keeping interval active')
+      // Don't clear interval here - only clear when explicitly disconnecting
+    }
+  }, [isSensorConnected]) // Only depend on connection status
 
   // Clean up interval on component unmount
   useEffect(() => {
