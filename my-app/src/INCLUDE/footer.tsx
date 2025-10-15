@@ -48,7 +48,7 @@ const Footer: React.FC = () => {
           <div className="col-lg-3 col-md-6 mb-4">
             <div className="footer-links">
               <ul>
-                <li><a href="#download">Download</a></li>
+                <li><a href="download">Download</a></li>
                 <li><a href="#why-aniko">Why Aniko</a></li>
                 <li><a href="#team">Team</a></li>
               
