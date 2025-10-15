@@ -1,100 +1,159 @@
-import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
-import { HashLink } from "react-router-hash-link"; // ✅ Smooth scrolling
-import "bootstrap-icons/font/bootstrap-icons.css";
-import "bootstrap/dist/css/bootstrap.min.css";
-import { auth } from "../firebase";
-import { onAuthStateChanged, User, signOut } from "firebase/auth";
+"use client"
+
+import type React from "react"
+import { useEffect, useState } from "react"
+import { Link, useNavigate } from "react-router-dom"
+import { HashLink } from "react-router-hash-link"
+import "bootstrap-icons/font/bootstrap-icons.css"
+import "bootstrap/dist/css/bootstrap.min.css"
+import { auth } from "../firebase"
+import { onAuthStateChanged, type User, signOut } from "firebase/auth"
 
 const Header: React.FC = () => {
-  const [user, setUser] = useState<User | null>(null);
+  const navigate = useNavigate()
+  const [user, setUser] = useState<User | null>(null)
+  const [menuOpen, setMenuOpen] = useState(false)
 
   useEffect(() => {
-    const unsub = onAuthStateChanged(auth, (u) => setUser(u));
-    return () => unsub();
-  }, []);
+    const unsub = onAuthStateChanged(auth, (u) => setUser(u))
+    return () => unsub()
+  }, [])
+
+  // Close when clicking outside or pressing ESC
+  useEffect(() => {
+    const handleOutsideClick = (e: MouseEvent) => {
+      const navbar = document.getElementById("navbarNav")
+      const toggler = document.querySelector(".navbar-toggler")
+      if (menuOpen && navbar && !navbar.contains(e.target as Node) && !toggler?.contains(e.target as Node)) {
+        setMenuOpen(false)
+      }
+    }
+
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setMenuOpen(false)
+    }
+
+    document.addEventListener("click", handleOutsideClick)
+    document.addEventListener("keydown", handleEscape)
+
+    return () => {
+      document.removeEventListener("click", handleOutsideClick)
+      document.removeEventListener("keydown", handleEscape)
+    }
+  }, [menuOpen])
 
   const handleLogout = async () => {
-    const confirmed = window.confirm("Are you sure you want to logout?");
+    const confirmed = window.confirm("Are you sure you want to logout?")
     if (confirmed) {
-      await signOut(auth);
-      setUser(null);
+      await signOut(auth)
+      setUser(null)
+      navigate("/")
     }
-  };
+  }
 
   return (
     <header className="floating-header">
       <nav className="navbar navbar-expand-lg">
         <div className="container-fluid">
+          {/* Logo */}
           <Link className="navbar-brand" to="/">
-            <img
-              src="/PICTURES/Logo-hr.png"
-              alt="Aniko Logo"
-              height="30"
-              className="d-inline-block align-text-top"
-            />
+            <img src="/PICTURES/Logo-hr.png" alt="Aniko Logo" height="30" className="d-inline-block align-text-top" />
           </Link>
 
+          {/* Burger Button */}
           <button
-            className="navbar-toggler"
+            className="navbar-toggler border-0"
             type="button"
-            data-bs-toggle="collapse"
-            data-bs-target="#navbarNav"
+            onClick={() => setMenuOpen(!menuOpen)}
+            aria-expanded={menuOpen}
+            aria-label="Toggle navigation"
           >
-            <span className="navbar-toggler-icon"></span>
+            <i className="bi bi-list text-light fs-2"></i>
           </button>
 
-          <div className="collapse navbar-collapse" id="navbarNav">
-            <ul className="navbar-nav gap-3 mx-auto text-center">
+          <div className={`side-panel ${menuOpen ? "open" : ""}`} id="navbarNav">
+            {/* Close button inside panel */}
+            <button className="close-btn" onClick={() => setMenuOpen(false)} aria-label="Close menu">
+              <i className="bi bi-x-lg"></i>
+            </button>
+
+            <ul className="navbar-nav gap-3 text-center">
               <li className="nav-item">
-                <Link className="nav-link" to="/">Home</Link>
+                <Link className="nav-link" to="/" onClick={() => setMenuOpen(false)}>
+                  <i className="bi bi-house-door me-2"></i>Home
+                </Link>
               </li>
               <li className="nav-item">
-                <HashLink smooth className="nav-link" to="/#about">About</HashLink>
+                <HashLink smooth className="nav-link" to="/#about" onClick={() => setMenuOpen(false)}>
+                  <i className="bi bi-info-circle me-2"></i>About
+                </HashLink>
               </li>
               <li className="nav-item">
-                <HashLink smooth className="nav-link" to="/#features">Features</HashLink>
+                <HashLink smooth className="nav-link" to="/#features" onClick={() => setMenuOpen(false)}>
+                  <i className="bi bi-star me-2"></i>Features
+                </HashLink>
               </li>
               <li className="nav-item">
-                <Link className="nav-link" to="/testimonialDisplay">Testimonial</Link>
+                <Link className="nav-link" to="/testimonialDisplay" onClick={() => setMenuOpen(false)}>
+                  <i className="bi bi-chat-quote me-2"></i>Testimonial
+                </Link>
               </li>
               <li className="nav-item">
-                <HashLink smooth className="nav-link" to="/#download">Download</HashLink>
+                <HashLink smooth className="nav-link" to="/#download" onClick={() => setMenuOpen(false)}>
+                  <i className="bi bi-download me-2"></i>Download
+                </HashLink>
               </li>
               <li className="nav-item">
-                <HashLink smooth className="nav-link" to="/#why-aniko">Why Aniko</HashLink>
+                <HashLink smooth className="nav-link" to="/#why-aniko" onClick={() => setMenuOpen(false)}>
+                  <i className="bi bi-question-circle me-2"></i>Why Aniko
+                </HashLink>
               </li>
               <li className="nav-item">
-                <HashLink smooth className="nav-link" to="/#team">Team</HashLink>
+                <HashLink smooth className="nav-link" to="/#team" onClick={() => setMenuOpen(false)}>
+                  <i className="bi bi-people me-2"></i>Team
+                </HashLink>
               </li>
               <li className="nav-item">
-                <Link className="nav-link" to="/compliance">Compliance</Link>
+                <Link className="nav-link" to="/compliance" onClick={() => setMenuOpen(false)}>
+                  <i className="bi bi-shield-check me-2"></i>Compliance
+                </Link>
               </li>
             </ul>
 
-            {/* Right Side */}
-            <div className="ms-lg-auto text-center mt-3 mt-lg-0">
+            <div className="mt-4">
               {!user ? (
-                <Link to="/login" className="btn btn-outline-light px-4 rounded-pill">
+                <Link
+                  to="/login"
+                  className="btn btn-outline-light w-100 rounded-pill"
+                  onClick={() => setMenuOpen(false)}
+                >
                   <i className="bi bi-box-arrow-in-right me-2"></i>Login
                 </Link>
               ) : (
                 <div className="dropdown">
                   <button
-                    className="btn d-flex align-items-center dropdown-toggle profile-btn"
+                    className="btn d-flex align-items-start dropdown-toggle profile-btn w-100 justify-content-center"
                     id="profileDropdown"
                     data-bs-toggle="dropdown"
                     aria-expanded="false"
-                    style={{ background: "transparent", border: "none", color: "white" }}
+                    style={{
+                      background: "transparent",
+                      border: "none",
+                   
+                      borderRadius: "50px",
+                      padding: "8px 16px",
+                    }}
                   >
                     <img
                       src={user.photoURL || "/IMG/profile.png"}
                       alt="Profile"
-                      width="40"
-                      height="40"
+                      width="32"
+                      height="32"
                       className="rounded-circle border border-light me-2"
                     />
-                    <span className="fw-semibold user-name">{user.displayName || "User"}</span>
+                    <span className="fw-semibold user-name" style={{ color: "white" }}>
+                      {user.displayName || "User"}
+                    </span>
                   </button>
 
                   <ul className="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown">
@@ -111,6 +170,9 @@ const Header: React.FC = () => {
         </div>
       </nav>
 
+      {/* Backdrop when side panel open */}
+      {menuOpen && <div className="backdrop" onClick={() => setMenuOpen(false)}></div>}
+
       <style>{`
         .floating-header {
           background: #112822;
@@ -126,112 +188,186 @@ const Header: React.FC = () => {
           transform: translateX(-50%);
           z-index: 1060;
         }
+
         .floating-header .nav-link {
           color: #fff !important;
           font-weight: 500;
           transition: 0.3s;
         }
+
         .floating-header .nav-link:hover {
           color: #BDE08A !important;
         }
-        .dropdown-menu {
-          border-radius: 12px;
-          box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+
+        .floating-header .btn-outline-light {
+          border: 2px solid #BDE08A;
+          color: #BDE08A;
+          font-weight: 600;
+          transition: all 0.3s ease;
+        }
+
+        .floating-header .btn-outline-light:hover {
+          background: #BDE08A;
+          color: #112822;
+        }
+
+        /* Side Panel Styles */
+        .side-panel {
+          position: fixed;
+          top: 0;
+          right: -320px;
+          width: 320px;
+          height: 100vh;
           background: #112822;
-          border: 1px solid rgba(189, 224, 138, 0.2);
+          padding: 80px 30px 30px;
+          box-shadow: -4px 0 20px rgba(0, 0, 0, 0.3);
+          transition: right 0.3s ease-in-out;
+          z-index: 1070;
+          overflow-y: auto;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
         }
-        .dropdown-item {
-          color: white;
+
+        .side-panel.open {
+          right: 0;
         }
-        .dropdown-item:hover {
+
+        .side-panel .close-btn {
+          position: absolute;
+          top: 20px;
+          right: 20px;
+          background: transparent;
+          border: none;
+          color: #BDE08A;
+          font-size: 1.5rem;
+          cursor: pointer;
+          padding: 5px;
+          transition: transform 0.2s;
+        }
+
+        .side-panel .close-btn:hover {
+          transform: rotate(90deg);
+          color: #fff;
+        }
+
+        .side-panel .nav-item {
+          margin-bottom: 8px;
+        }
+
+        .side-panel .nav-link {
+          padding: 12px 16px;
+          border-radius: 8px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: all 0.2s;
+        }
+
+        .side-panel .nav-link:hover {
           background: rgba(189, 224, 138, 0.1);
-          color: white;
         }
-        
-        @media (max-width: 991.98px) {
-          .navbar-collapse {
-            position: fixed;
-            top: 70px;
-            right: -280px;
-            width: 280px;
+
+      
+
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+
+        /* Desktop: Show normal navbar */
+        @media (min-width: 992px) {
+          .navbar-toggler {
+            display: none;
+          }
+
+          .side-panel {
+            position: static;
+            width: auto;
             height: auto;
-            max-height: calc(100vh - 80px);
-            background: #112822;
-            padding: 20px;
-            border-radius: 15px 0 0 15px;
-            box-shadow: -4px 0 12px rgba(0,0,0,0.3);
-            transition: right 0.3s ease-in-out;
-            z-index: 1050;
-            overflow-y: auto;
-          }
-          
-          .navbar-collapse.show {
-            right: 0;
-          }
-          
-          .navbar-collapse.collapsing {
-            right: -280px;
-            transition: right 0.3s ease-in-out;
-            height: auto;
-          }
-          
-          .navbar-nav {
-            text-align: left;
-            align-items: flex-start;
-          }
-          
-          .navbar-nav .nav-link {
-            padding: 10px 14px;
-            border-radius: 8px;
-            margin-bottom: 6px;
-            font-size: 14px;
-          }
-          
-          .navbar-nav .nav-link:hover {
-            background: rgba(189, 224, 138, 0.1);
-          }
-          
-          .ms-lg-auto {
-            margin-left: 0 !important;
-            margin-top: 20px !important;
-            padding-top: 20px;
-            border-top: 1px solid rgba(189, 224, 138, 0.2);
-          }
-          
-          .profile-btn {
-            width: 100%;
-            justify-content: flex-start !important;
-            padding: 10px 14px !important;
-            border-radius: 8px !important;
-          }
-          
-          .profile-btn:hover {
-            background: rgba(189, 224, 138, 0.1) !important;
-          }
-          
-          .user-name {
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            max-width: 150px;
-          }
-          
-          .dropdown-menu {
-            position: static !important;
-            transform: none !important;
-            width: 100%;
-            margin-top: 8px !important;
+            padding: 0;
             box-shadow: none;
-            border: 1px solid rgba(189, 224, 138, 0.2);
+            background: transparent;
+            display: flex !important;
+            align-items: flex-start;
+            flex-direction: row;
+            overflow: visible;
+            flex: 1;
           }
-          
-          .dropdown-item {
-            padding: 10px 14px;
+
+          .side-panel .close-btn {
+            display: none;
+          }
+
+          .side-panel .navbar-nav {
+            flex-direction: row;
+            margin: 0 auto;
+            justify-content: center;
+          }
+
+          .side-panel .nav-item {
+            margin-bottom: 0;
+          }
+
+          .side-panel .nav-link {
+            padding: 8px 12px;
+          }
+
+          .side-panel .nav-link:hover {
+            background: transparent;
+            padding-left: 12px;
+          }
+
+          .side-panel .nav-link i {
+            display: none;
+          }
+
+          .side-panel .mt-4 {
+            margin-top: 0 !important;
+            margin-left: auto;
+          }
+
+          .side-panel .btn,
+          .side-panel .profile-btn {
+            width: auto !important;
+            padding: 8px 24px;
+          }
+
+          .backdrop {
+            display: none;
+          }
+        }
+
+        /* Medium Screens (992px - 1202px) */
+        /* Extended the range from 1081px to 1202px for smaller nav and button sizes */
+        @media (min-width: 992px) and (max-width: 1202px) {
+          .floating-header {
+            padding: 8px 16px;
+          }
+
+          .floating-header .navbar-brand img {
+            height: 26px;
+          }
+
+          .floating-header .nav-link {
+            font-size: 14px;
+            padding: 6px 10px;
+          }
+
+          .floating-header .btn-outline-light,
+          .floating-header .profile-btn {
+            padding: 6px 18px;
+            font-size: 14px;
+            border-width: 1.5px;
+          }
+
+          .navbar-nav.gap-3 {
+            gap: 0.75rem !important;
           }
         }
       `}</style>
     </header>
-  );
-};
+  )
+}
 
-export default Header;
+export default Header

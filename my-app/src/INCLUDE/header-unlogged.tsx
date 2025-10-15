@@ -1,79 +1,136 @@
-import React from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { auth } from "../firebase"; // ✅ adjust path if needed
-import "bootstrap-icons/font/bootstrap-icons.css";
-import "bootstrap/dist/css/bootstrap.min.css";
+"use client"
+
+import type React from "react"
+import { useEffect, useState } from "react"
+import { Link, useNavigate } from "react-router-dom"
+import { auth } from "../firebase"
+import "bootstrap-icons/font/bootstrap-icons.css"
+import "bootstrap/dist/css/bootstrap.min.css"
 
 const HeaderUnlogged: React.FC = () => {
-  const navigate = useNavigate();
+  const navigate = useNavigate()
+  const [menuOpen, setMenuOpen] = useState(false)
+
+  // Close when clicking outside or pressing ESC
+  useEffect(() => {
+    const handleOutsideClick = (e: MouseEvent) => {
+      const navbar = document.getElementById("navbarNav")
+      const toggler = document.querySelector(".navbar-toggler")
+      if (menuOpen && navbar && !navbar.contains(e.target as Node) && !toggler?.contains(e.target as Node)) {
+        setMenuOpen(false)
+      }
+    }
+
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setMenuOpen(false)
+    }
+
+    document.addEventListener("click", handleOutsideClick)
+    document.addEventListener("keydown", handleEscape)
+
+    return () => {
+      document.removeEventListener("click", handleOutsideClick)
+      document.removeEventListener("keydown", handleEscape)
+    }
+  }, [menuOpen])
 
   const requireLogin = (e: React.MouseEvent, targetPath: string) => {
-    e.preventDefault();
-    const user = auth.currentUser;
-    if (!user) {
-      // Not logged in → send to login
-      navigate("/login", { state: { redirectTo: targetPath } });
-    } else {
-      // Already logged in → go to target page
-      navigate(targetPath);
-    }
-  };
+    e.preventDefault()
+    const user = auth.currentUser
+    if (!user) navigate("/login", { state: { redirectTo: targetPath } })
+    else navigate(targetPath)
+  }
 
   return (
     <header className="floating-header">
       <nav className="navbar navbar-expand-lg">
         <div className="container-fluid">
+          {/* Logo */}
           <Link className="navbar-brand" to="/">
-            <img
-              src="/PICTURES/Logo-hr.png"
-              alt="Aniko Logo"
-              height="30"
-              className="d-inline-block align-text-top"
-            />
+            <img src="/PICTURES/Logo-hr.png" alt="Aniko Logo" height="30" className="d-inline-block align-text-top" />
           </Link>
 
+          {/* Burger Button */}
           <button
-            className="navbar-toggler"
+            className="navbar-toggler border-0"
             type="button"
-            data-bs-toggle="collapse"
-            data-bs-target="#navbarNav"
+            onClick={() => setMenuOpen(!menuOpen)}
+            aria-expanded={menuOpen}
+            aria-label="Toggle navigation"
           >
-            <span className="navbar-toggler-icon"></span>
+            <i className="bi bi-list text-light fs-2"></i>
           </button>
 
-          <div className="collapse navbar-collapse" id="navbarNav">
-            <ul className="navbar-nav gap-3 mx-auto text-center">
-              <li className="nav-item"><Link className="nav-link" to="/">Home</Link></li>
-              <li className="nav-item"><a className="nav-link" href="#about">About</a></li>
-              <li className="nav-item"><a className="nav-link" href="#features">Features</a></li>
-                <li className="nav-item"><a className="nav-link" href="testimonialDisplay">Testimonial</a></li>
+          <div className={`side-panel ${menuOpen ? "open" : ""}`} id="navbarNav">
+            {/* Close button inside panel */}
+            <button className="close-btn" onClick={() => setMenuOpen(false)} aria-label="Close menu">
+              <i className="bi bi-x-lg"></i>
+            </button>
 
+            <ul className="navbar-nav gap-3 text-center">
+              <li className="nav-item">
+                <Link className="nav-link" to="/" onClick={() => setMenuOpen(false)}>
+                  <i className="bi bi-house-door me-2"></i>Home
+                </Link>
+              </li>
+              <li className="nav-item">
+                <a className="nav-link" href="#about" onClick={() => setMenuOpen(false)}>
+                  <i className="bi bi-info-circle me-2"></i>About
+                </a>
+              </li>
+              <li className="nav-item">
+                <a className="nav-link" href="#features" onClick={() => setMenuOpen(false)}>
+                  <i className="bi bi-star me-2"></i>Features
+                </a>
+              </li>
+              <li className="nav-item">
+                <a className="nav-link" href="testimonialDisplay" onClick={() => setMenuOpen(false)}>
+                  <i className="bi bi-chat-quote me-2"></i>Testimonial
+                </a>
+              </li>
+              <li className="nav-item">
+                <a className="nav-link" href="#download" onClick={() => setMenuOpen(false)}>
+                  <i className="bi bi-download me-2"></i>Download
+                </a>
+              </li>
+              <li className="nav-item">
+                <a className="nav-link" href="#why-aniko" onClick={() => setMenuOpen(false)}>
+                  <i className="bi bi-question-circle me-2"></i>Why Aniko
+                </a>
+              </li>
+              <li className="nav-item">
+                <a className="nav-link" href="#team" onClick={() => setMenuOpen(false)}>
+                  <i className="bi bi-people me-2"></i>Team
+                </a>
+              </li>
 
-              <li className="nav-item"><a className="nav-link" href="#download">Download</a></li>
-              <li className="nav-item"><a className="nav-link" href="#why-aniko">Why Aniko</a></li>
-              <li className="nav-item"><a className="nav-link" href="#team">Team</a></li>
-
-              {/* Require login for Compliance */}
+              {/* Requires login */}
               <li className="nav-item">
                 <a
                   className="nav-link"
                   href="/compliance"
-                  onClick={(e) => requireLogin(e, "/compliance")}
+                  onClick={(e) => {
+                    requireLogin(e, "/compliance")
+                    setMenuOpen(false)
+                  }}
                 >
-                  Compliance
+                  <i className="bi bi-shield-check me-2"></i>Compliance
                 </a>
               </li>
             </ul>
 
-            {/* LOGIN BUTTON on the right side */}
-            <div className="ms-lg-auto text-center mt-3 mt-lg-0">
-              <Link to="/login" className="btn btn-outline-light px-4 rounded-pill">
-                <i className="bi box-arrow-in-right me-2"></i>Login
+            {/* Login Button */}
+            <div className="mt-4">
+              <Link to="/login" className="btn btn-outline-light w-100 rounded-pill" onClick={() => setMenuOpen(false)}>
+                <i className="bi bi-box-arrow-in-right me-2"></i>Login
               </Link>
             </div>
           </div>
         </div>
       </nav>
+
+      {/* Backdrop when side panel open */}
+      {menuOpen && <div className="backdrop" onClick={() => setMenuOpen(false)}></div>}
 
       <style>{`
         .floating-header {
@@ -90,71 +147,188 @@ const HeaderUnlogged: React.FC = () => {
           transform: translateX(-50%);
           z-index: 1060;
         }
+
         .floating-header .nav-link {
           color: #fff !important;
           font-weight: 500;
           transition: 0.3s;
         }
+
         .floating-header .nav-link:hover {
           color: #BDE08A !important;
         }
+
         .floating-header .btn-outline-light {
           border: 2px solid #BDE08A;
           color: #BDE08A;
           font-weight: 600;
           transition: all 0.3s ease;
         }
+
         .floating-header .btn-outline-light:hover {
           background: #BDE08A;
           color: #112822;
         }
-        
-        @media (max-width: 991.98px) {
-          .navbar-collapse {
-            position: fixed;
-            top: 70px;
-            right: -250px;
-            width: 250px;
+
+        /* Side Panel Styles */
+        .side-panel {
+          position: fixed;
+          top: 0;
+          right: -320px;
+          width: 320px;
+          height: 100vh;
+          background: #112822;
+          padding: 80px 30px 30px;
+          box-shadow: -4px 0 20px rgba(0, 0, 0, 0.3);
+          transition: right 0.3s ease-in-out;
+          z-index: 1070;
+          overflow-y: auto;
+          /* Added flexbox centering for side panel content */
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+        }
+
+        .side-panel.open {
+          right: 0;
+        }
+
+        .side-panel .close-btn {
+          position: absolute;
+          top: 20px;
+          right: 20px;
+          background: transparent;
+          border: none;
+          color: #BDE08A;
+          font-size: 1.5rem;
+          cursor: pointer;
+          padding: 5px;
+          transition: transform 0.2s;
+        }
+
+        .side-panel .close-btn:hover {
+          transform: rotate(90deg);
+          color: #fff;
+        }
+
+        .side-panel .nav-item {
+          margin-bottom: 8px;
+        }
+
+        .side-panel .nav-link {
+          padding: 12px 16px;
+          border-radius: 8px;
+          display: flex;
+          align-items: center;
+          /* Center the content within each nav link */
+          justify-content: center;
+          transition: all 0.2s;
+        }
+
+        .side-panel .nav-link:hover {
+          background: rgba(189, 224, 138, 0.1);
+          /* Removed left padding shift on hover to maintain center alignment */
+        }
+
+      
+
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+
+        /* Desktop: Show normal navbar */
+        @media (min-width: 992px) {
+          .navbar-toggler {
+            display: none;
+          }
+
+          .side-panel {
+            position: static;
+            width: auto;
             height: auto;
-            max-height: calc(100vh - 80px);
-            background: #112822;
-            padding: 20px;
-            border-radius: 15px 0 0 15px;
-            box-shadow: -4px 0 12px rgba(0,0,0,0.3);
-            transition: right 0.3s ease-in-out;
-            z-index: 1050;
-            overflow-y: auto;
+            padding: 0;
+            box-shadow: none;
+            background: transparent;
+            display: flex !important;
+            align-items: center;
+            flex-direction: row;
+            overflow: visible;
+            /* Added flex: 1 to allow navbar to take full width */
+            flex: 1;
           }
-          
-          .navbar-collapse.show {
-            right: 0;
+
+          .side-panel .close-btn {
+            display: none;
           }
-          
-          .navbar-collapse.collapsing {
-            right: -250px;
-            transition: right 0.3s ease-in-out;
-            height: auto;
+
+          .side-panel .navbar-nav {
+            flex-direction: row;
+            /* Centered the navigation items horizontally */
+            margin: 0 auto;
+            justify-content: center;
           }
-          
-          .navbar-nav {
-            text-align: left;
-            align-items: flex-start;
+
+          .side-panel .nav-item {
+            margin-bottom: 0;
           }
-          
-          .navbar-nav .nav-link {
-            padding: 10px 14px;
-            border-radius: 8px;
-            margin-bottom: 6px;
+
+          .side-panel .nav-link {
+            padding: 8px 12px;
+          }
+
+          .side-panel .nav-link:hover {
+            background: transparent;
+            padding-left: 12px;
+          }
+
+          .side-panel .nav-link i {
+            display: none;
+          }
+
+          .side-panel .mt-4 {
+            margin-top: 0 !important;
+            margin-left: auto;
+          }
+
+          .side-panel .btn {
+            width: auto !important;
+            padding: 8px 24px;
+          }
+
+          .backdrop {
+            display: none;
+          }
+        }
+
+        /* Medium Screens (992px - 1081px): Slightly smaller navs and buttons */
+        @media (min-width: 992px) and (max-width: 1081px) {
+          .floating-header {
+            padding: 8px 16px;
+          }
+
+          .floating-header .navbar-brand img {
+            height: 26px;
+          }
+
+          .floating-header .nav-link {
             font-size: 14px;
+            padding: 6px 10px;
           }
-          
-          .navbar-nav .nav-link:hover {
-            background: rgba(189, 224, 138, 0.1);
+
+          .floating-header .btn-outline-light {
+            padding: 6px 18px;
+            font-size: 14px;
+            border-width: 1.5px;
+          }
+
+          .navbar-nav.gap-3 {
+            gap: 0.75rem !important;
           }
         }
       `}</style>
     </header>
-  );
-};
+  )
+}
 
-export default HeaderUnlogged;
+export default HeaderUnlogged
