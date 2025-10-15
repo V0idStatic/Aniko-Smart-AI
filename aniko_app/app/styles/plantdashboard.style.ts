@@ -1,12 +1,40 @@
 import { StyleSheet } from "react-native"
 
+
+export const COLORS = {
+  primaryGreen: "#1D492C",
+  accentGreen: "#84cc16",
+  pastelGreen: "#BDE08A",
+  lightGreen: "#f0fdf4",
+  darkGreen: "#143820",
+  mutedGreen: "#4C6444",
+  grayText: "#666",
+  border: "#e0e0e0",
+  white: "#ffffff",
+  bgCOlor: "#cfc4b2ff",
+  primaryBrown: "#8A6440",
+  secondaryBrown: "#ecc096ff",
+  darkBrown: "#4D2D18",
+  accent: "#FF6F00",
+  accentLight: "#FFA726",
+  background: "#CBBA9E",
+  cardBackground: "#FFFFFF",
+  textPrimary: "#1A1A1A",
+  textSecondary: "#6B7280",
+  textLight: "#9CA3AF",
+
+  // Status colors
+  success: "#4CAF50",
+  warning: "#FFC107",
+  error: "#8a1c14ff",
+  info: "#2196F3",
+}
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#CBBA9E",
   },
 
-  // Header Styles
   headerBackground: {
     paddingTop: 50,
     paddingBottom: 40,
@@ -33,7 +61,9 @@ export const styles = StyleSheet.create({
 
   plantCard: {
     backgroundColor: "#1c4722",
-    borderRadius: 24,
+    borderRadius: 5,
+    borderTopRightRadius: 30,
+    borderBottomLeftRadius: 30,
     marginBottom: 24,
     elevation: 8,
     shadowColor: "#000",
@@ -51,7 +81,7 @@ export const styles = StyleSheet.create({
   plantName: {
     fontSize: 24,
     fontWeight: "800",
-    color: "white",
+    color: COLORS.lightGreen,
     marginBottom: 16,
     letterSpacing: 0.5,
   },
@@ -71,12 +101,11 @@ export const styles = StyleSheet.create({
   },
   findPlantsButton: {
     marginTop: 20,
-    backgroundColor: "rgba(255, 255, 255, 0.9)",
+    backgroundColor: COLORS.lightGreen,
     paddingVertical: 12,
     paddingHorizontal: 24,
-    borderRadius: 16,
+    borderRadius: 20,
     alignSelf: "flex-start",
-    elevation: 2,
   },
   findPlantsText: {
     color: "#1c4722",
@@ -93,19 +122,18 @@ export const styles = StyleSheet.create({
   sectionTitle: {
     marginBottom: 16,
     fontSize: 20,
-    fontWeight: "800",
-    color: "#2D5016",
+    fontWeight: "900",
+    color: COLORS.darkBrown,
     marginLeft: 4,
     letterSpacing: 0.3,
   },
 
   // Condition Card Styles - Redesigned
   conditionCard: {
-    backgroundColor: "white",
+    backgroundColor: "#8a644056",
     borderRadius: 24,
     padding: 20,
     marginBottom: 16,
-    elevation: 4,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
@@ -141,7 +169,7 @@ export const styles = StyleSheet.create({
   },
   conditionSubtitle: {
     fontSize: 12,
-    color: "#666",
+    color: COLORS.primaryBrown,
     marginTop: 8,
     fontWeight: "500",
   },
@@ -168,7 +196,7 @@ export const styles = StyleSheet.create({
   },
   metricLabel: {
     fontSize: 11,
-    color: "#666",
+    color: COLORS.primaryBrown,
     fontWeight: "600",
     textTransform: "uppercase",
     letterSpacing: 0.8,
@@ -181,7 +209,7 @@ export const styles = StyleSheet.create({
   },
   metricRange: {
     fontSize: 11,
-    color: "#999",
+    color: COLORS.darkBrown,
     fontStyle: "italic",
   },
   metricStatus: {
@@ -194,11 +222,10 @@ export const styles = StyleSheet.create({
 
   // Soil Moisture Card - Completely Redesigned
   soilMoistureCard: {
-    backgroundColor: "white",
+    backgroundColor: "#8a644056",
     borderRadius: 24,
     padding: 20,
     marginBottom: 16,
-    elevation: 4,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
@@ -208,13 +235,11 @@ export const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 20,
+    marginBottom: 10,
     paddingBottom: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: "#E8E8E8",
   },
   soilMoistureTitle: {
-    color: "#2D5016",
+    color: COLORS.primaryBrown,
     fontWeight: "800",
     fontSize: 14,
     letterSpacing: 0.3,
@@ -390,11 +415,10 @@ export const styles = StyleSheet.create({
 
   // History Card - Redesigned
   historyCard: {
-    backgroundColor: "white",
+    backgroundColor: "#8a644056",
     borderRadius: 24,
     padding: 20,
     marginTop: 16,
-    elevation: 4,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
@@ -408,7 +432,7 @@ export const styles = StyleSheet.create({
     gap: 12,
   },
   historyTitle: {
-    color: "#2D5016",
+    color: COLORS.primaryBrown,
     fontWeight: "800",
     fontSize: 18,
     letterSpacing: 0.3,
@@ -422,7 +446,7 @@ export const styles = StyleSheet.create({
   legendItem: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#F8FFF4",
+    backgroundColor: COLORS.lightGreen,
     paddingHorizontal: 10,
     paddingVertical: 6,
     borderRadius: 12,
@@ -514,7 +538,7 @@ export const styles = StyleSheet.create({
     padding: 20,
   },
   plantModalContainer: {
-    backgroundColor: "#fff",
+    backgroundColor: COLORS.lightGreen,
     borderRadius: 24,
     padding: 24,
     maxHeight: "85%",
@@ -524,14 +548,14 @@ export const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: "800",
     marginBottom: 16,
-    color: "#2D5016",
+    color: COLORS.primaryGreen,
     letterSpacing: 0.3,
   },
   selectionLabel: {
     fontSize: 13,
     fontWeight: "700",
     marginBottom: 10,
-    color: "#2D5016",
+    color: COLORS.primaryGreen,
     textTransform: "uppercase",
     letterSpacing: 0.8,
   },
@@ -624,9 +648,9 @@ export const styles = StyleSheet.create({
   },
   closeModalBtn: {
     marginTop: 16,
-    backgroundColor: "#4d7f39",
+    backgroundColor: COLORS.mutedGreen,
     paddingVertical: 14,
-    borderRadius: 16,
+    borderRadius: 20,
     alignItems: "center",
     elevation: 2,
   },

@@ -11,6 +11,8 @@ import { LinearGradient } from "expo-linear-gradient"
 
 // Import styles from a separate file
 import { styles } from "./styles/plantdashboard.style"
+import { COLORS } from "./styles/plantdashboard.style"
+
 import FooterNavigation from "../components/FooterNavigation"
 
 interface User {
@@ -482,7 +484,7 @@ export default function Dashboard() {
     const badCount = statuses.filter((s) => s.status === "Bad").length
     const warningCount = statuses.filter((s) => s.status === "Warning").length
 
-    if (badCount > 0) return { status: "Bad", color: "#F44336" }
+    if (badCount > 0) return { status: "Bad", color: COLORS.error }
     if (warningCount > 0) return { status: "Warning", color: "#FFC107" }
     return { status: "Good", color: "#4CAF50" }
   }
@@ -633,7 +635,7 @@ export default function Dashboard() {
   return (
     <View style={styles.container}>
       {/* Header Background */}
-      <LinearGradient colors={["#1c4722", "#4d7f39"]} style={styles.headerBackground}>
+      <LinearGradient colors={[COLORS.primaryGreen, COLORS.darkGreen]} style={styles.headerBackground}>
         <View style={styles.headerTop}>
           <View>
             <Text style={styles.greeting}>Good Morning,</Text>
@@ -895,7 +897,7 @@ export default function Dashboard() {
       </Modal>
 
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        <View style={styles.plantCard}>
+        <LinearGradient colors={[COLORS.mutedGreen, COLORS.pastelGreen, COLORS.mutedGreen]} style={styles.plantCard}>
           <View style={styles.plantCardContent}>
             <View style={styles.plantTextWrapper}>
               <Text style={styles.plantName}>{selectedCrop?.crop_name || "Select a Plant"}</Text>
@@ -916,7 +918,7 @@ export default function Dashboard() {
               </TouchableOpacity>
             </View>
           </View>
-        </View>
+        </LinearGradient>
 
         <Text style={styles.sectionTitle}>Plant Condition</Text>
 
@@ -983,7 +985,7 @@ export default function Dashboard() {
                             cropParameters.temperature_min,
                             cropParameters.temperature_max,
                           ).color
-                        : "#666",
+                        : COLORS.primaryBrown,
                   },
                 ]}
               >
