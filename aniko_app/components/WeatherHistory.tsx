@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, ScrollView } from "react-native"
+import { View, Text, StyleSheet, ScrollView, Image } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
 
 interface DayWeatherData {
@@ -14,13 +14,13 @@ interface WeatherHistoryProps {
 }
 
 export default function WeatherHistory({ weeklyWeather }: WeatherHistoryProps) {
-  const getWeatherIcon = (status: string) => {
+  const getWeatherImage = (status: string) => {
     const statusLower = status.toLowerCase()
-    if (statusLower.includes("rain")) return "rainy"
-    if (statusLower.includes("hot")) return "sunny"
-    if (statusLower.includes("fair")) return "partly-sunny"
-    if (statusLower.includes("cloud")) return "cloudy"
-    return "partly-sunny"
+    if (statusLower.includes("rain")) return require("../assets/rainy.png")
+    if (statusLower.includes("hot") || statusLower.includes("sunny")) return require("../assets/sunny.png")
+    if (statusLower.includes("cloud")) return require("../assets/cloudy.png")
+    if (statusLower.includes("thunder") || statusLower.includes("storm")) return require("../assets/thunderstorm.png")
+    return require("../assets/sunny.png")
   }
 
   return (
@@ -38,7 +38,7 @@ export default function WeatherHistory({ weeklyWeather }: WeatherHistoryProps) {
             </View>
 
             <View style={[styles.iconContainer, { backgroundColor: `${day.color}15` }]}>
-              <Ionicons name={getWeatherIcon(day.status)} size={32} color={day.color} />
+              <Image source={getWeatherImage(day.status)} style={styles.weatherImage} resizeMode="contain" />
             </View>
 
             <View style={styles.dayInfo}>
@@ -149,5 +149,9 @@ const styles = StyleSheet.create({
     height: 4,
     borderBottomLeftRadius: 16,
     borderBottomRightRadius: 16,
+  },
+  weatherImage: {
+    width: 40,
+    height: 40,
   },
 })
