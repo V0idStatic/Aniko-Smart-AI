@@ -1,7 +1,5 @@
 import React, { useEffect, useState } from "react";
 import "../CSS/home.css";
-import HeaderUnlogged from "../INCLUDE/header-unlogged";
-import HeaderLogged from "../INCLUDE/header-logged";
 import Footer from "../INCLUDE/footer";
 import TeamMembers from "./team";
 import Hero from "./hero";
@@ -53,9 +51,6 @@ const Home: React.FC = () => {
 
   return (
     <div className="home-wrapper" style={{ paddingTop: "80px" }}>
-      {/* ✅ Switch header depending on login state */}
-      {user ? <HeaderLogged /> : <HeaderUnlogged />}
-
       {/* HERO SECTION */}
       <section
         className="hero"

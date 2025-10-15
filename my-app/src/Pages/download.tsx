@@ -6,6 +6,7 @@ import { auth } from "../firebase"
 import { onAuthStateChanged, type User } from "firebase/auth"
 import HeaderLogged from "../INCLUDE/header-logged"
 import HeaderUnlogged from "../INCLUDE/header-unlogged"
+import Footer from "../INCLUDE/footer";
 
 const Download: React.FC = () => {
   const [user, setUser] = useState<User | null>(null)
@@ -239,11 +240,6 @@ const Download: React.FC = () => {
           padding: 0 20px;
         }
 
-        .row {
-          display: flex;
-          flex-wrap: wrap;
-          margin: 0 -15px;
-        }
 
         .col-lg-6, .col-lg-4, .col-lg-3, .col-md-6, .col-md-4 {
           padding: 0 15px;
@@ -268,10 +264,11 @@ const Download: React.FC = () => {
         /* Hero Section */
         .download-hero {
           background: linear-gradient(135deg, #1D492C, #84cc16);
-          padding: 100px 20px;
+          padding: 100px 40px;
           color: white;
           position: relative;
           overflow: hidden;
+         
         }
 
         .download-hero::before {
@@ -679,9 +676,13 @@ const Download: React.FC = () => {
           }
         }
       `}</style>
+           <Footer />
       </div>
+      
     </>
+    
   )
+  
 }
 
 export default Download
