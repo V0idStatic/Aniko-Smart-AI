@@ -15,6 +15,8 @@ import AdminContact from "./Pages/admin_contact";
 import AdminCMS from "./Pages/admin_cms";
 import AdminRegister from "./Pages/admin_register";
 import AuthCallback from "./Pages/AuthCallback";
+import Download from "./Pages/download";
+
 
 
 import Chatbox from "./Pages/Chatbox";
@@ -33,6 +35,8 @@ function App() {
       <Route path="/testimonialDisplay" element={<TestimonialDisplay />} />
       <Route path="/apiWeather" element={<ApiWeather />} />
       <Route path="/auth/callback" element={<AuthCallback />} />
+      <Route path="/download" element={<Download />} />
+
 
       {/* ✅ Chatbot Page */}
       <Route path="/chat" element={<Chatbox />} />

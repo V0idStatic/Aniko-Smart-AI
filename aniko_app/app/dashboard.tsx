@@ -1034,7 +1034,7 @@ export default function Dashboard() {
       </Modal>
 
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        <LinearGradient colors={[COLORS.mutedGreen, COLORS.pastelGreen, COLORS.mutedGreen]} style={styles.weatherCard}>
+        <LinearGradient colors={[COLORS.pastelGreen, COLORS.lightGreen, COLORS.pastelGreen]} style={styles.weatherCard}>
           <View style={styles.weatherHeader}>
             <View style={styles.weatherLocation}>
               <Ionicons name="location" size={20} color={COLORS.lightGreen} />
@@ -1042,7 +1042,7 @@ export default function Dashboard() {
             </View>
             <TouchableOpacity style={styles.changeLocationButton} onPress={() => setShowInlinePicker((s) => !s)}>
               <Text style={styles.changeLocationText}>Change</Text>
-              <Ionicons name="chevron-down" size={16} color={COLORS.primaryGreen} />
+              <Ionicons name="chevron-down" size={16} color={COLORS.primaryBrown} />
             </TouchableOpacity>
           </View>
 
@@ -1253,17 +1253,19 @@ export default function Dashboard() {
           <DiagnosisCard />
         </View>
 
-        <TouchableOpacity style={styles.chatbotCard} onPress={() => router.push("/analysis")}>
-          <View style={styles.chatbotIconWrapper}>
-            <LinearGradient colors={[COLORS.primaryGreen, COLORS.darkGreen]} style={styles.chatbotIconGradient}>
-              <Ionicons name="stats-chart" size={28} color="#fff" />
-            </LinearGradient>
-          </View>
-          <View style={styles.chatbotContent}>
-            <Text style={styles.chatbotTitle}>Analysis</Text>
-            <Text style={styles.chatbotSubtitle}>View detailed crop and weather analytics</Text>
-          </View>
-          <Ionicons name="chevron-forward" size={24} color={COLORS.primaryBrown} />
+        <TouchableOpacity onPress={() => router.push("/analysis")}>
+          <LinearGradient colors={[COLORS.secondaryBrown, COLORS.primaryBrown]} style={styles.chatbotCard}>
+            <View style={styles.chatbotIconWrapper}>
+              <LinearGradient colors={[COLORS.primaryBrown, COLORS.darkBrown]} style={styles.chatbotIconGradient}>
+                <Ionicons name="stats-chart" size={28} color={COLORS.bgCOlor} />
+              </LinearGradient>
+            </View>
+            <View style={styles.chatbotContent}>
+              <Text style={styles.chatbotTitle}>Analysis</Text>
+              <Text style={styles.chatbotSubtitle}>View detailed crop and weather analytics</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={24} color={COLORS.primaryBrown} />
+          </LinearGradient>
         </TouchableOpacity>
 
         <WeatherHistory weeklyWeather={weeklyWeather} />
