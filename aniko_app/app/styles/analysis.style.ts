@@ -1,5 +1,35 @@
 import { StyleSheet } from "react-native"
 
+export const COLORS = {
+  // Primary colors
+  primaryGreen: "#1D492C",
+  accentGreen: "#84cc16",
+  pastelGreen: "#BDE08A",
+  lightGreen: "#f0fdf4",
+  darkGreen: "#143820",
+  mutedGreen: "#4C6444",
+  grayText: "#666",
+  border: "#e0e0e0",
+  white: "#ffffff",
+  bgCOlor: "#cfc4b2ff",
+  primaryBrown: "#8A6440",
+  secondaryBrown: "#ecc096ff",
+  darkBrown: "#4D2D18",
+  accent: "#FF6F00",
+  accentLight: "#FFA726",
+  background: "#CBBA9E",
+  cardBackground: "#FFFFFF",
+  textPrimary: "#1A1A1A",
+  textSecondary: "#6B7280",
+  textLight: "#9CA3AF",
+
+  // Status colors
+  success: "#4CAF50",
+  warning: "#FFC107",
+  error: "#8a1c14ff",
+  info: "#2196F3",
+}
+
 /**
  * Professional Styles for Aniko Smart AI App
  * Enhanced with refined color palette, typography hierarchy, and consistent spacing
@@ -34,14 +64,14 @@ const analysis = StyleSheet.create({
   },
 
   headerTitle: {
-    color: "white",
+    color: COLORS.lightGreen,
     fontSize: 28,
     fontWeight: "700",
     letterSpacing: 0.5,
   },
 
   headerSubtitle: {
-    color: "white",
+    color: COLORS.pastelGreen,
     fontSize: 15,
     opacity: 0.95,
     marginTop: 6,
@@ -54,11 +84,11 @@ const analysis = StyleSheet.create({
     marginTop: -20,
     marginHorizontal: 20,
     backgroundColor: "white",
-    borderRadius: 16, // More consistent with other cards
-    elevation: 4, // Refined elevation
+    borderRadius: 16, 
+    elevation: 4, 
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08, // Softer, more professional shadow
+    shadowOpacity: 0.08, 
     shadowRadius: 8,
     overflow: "hidden",
   },
@@ -75,8 +105,8 @@ const analysis = StyleSheet.create({
   },
 
   activeTab: {
-    borderBottomColor: "#1c4722",
-    backgroundColor: "#F0F9F4", // Softer active background
+    borderBottomColor: COLORS.mutedGreen,
+    backgroundColor: COLORS.lightGreen,
   },
 
   tabText: {
@@ -96,25 +126,26 @@ const analysis = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 18,
     borderRadius: 24,
-    backgroundColor: "#F1F5F9", // Better neutral color
+    backgroundColor: "#f1f5f984", 
     marginRight: 10,
-    borderWidth: 1.5, // Slightly thicker border
-    borderColor: "#E2E8F0", // Professional border color
+    borderWidth: 1.5, 
+    borderColor: "#f1f5f984", 
   },
 
   activeTimeRange: {
-    backgroundColor: "#1c4722",
-    borderColor: "#1c4722",
-    elevation: 3, // Better elevation
+    backgroundColor: COLORS.mutedGreen,
+    borderColor: "none",
+    borderWidth: 0,
+    elevation: 3,
     shadowColor: "#1c4722",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25, // Stronger shadow for active state
+    shadowOpacity: 0.25, 
     shadowRadius: 4,
   },
 
   timeRangeText: {
     fontSize: 14,
-    color: "#475569", // Professional text color
+    color: "#475569", 
     fontWeight: "600",
   },
 
@@ -131,12 +162,12 @@ const analysis = StyleSheet.create({
     backgroundColor: "#F0F9F4", // Consistent with theme
     borderRadius: 20,
     borderWidth: 1.5,
-    borderColor: "#1c4722",
+    borderColor: COLORS.darkBrown,
   },
 
   expandButtonText: {
     fontSize: 12,
-    color: "#1c4722",
+    color: COLORS.darkBrown,
     fontWeight: "700",
     marginLeft: 4,
   },
@@ -144,12 +175,12 @@ const analysis = StyleSheet.create({
   refreshButton: {
     padding: 10,
     borderRadius: 24,
-    backgroundColor: "#1c4722", // Consistent with theme
-    borderWidth: 1.5, // Consistent border width
-    borderColor: "#1c4722", // Professional border
-    alignItems: "center", // Centers content horizontally
-    justifyContent: "center", // Centers content vertically
-    flexDirection: "row", // Ensures icon + text are aligned in a row
+    backgroundColor: COLORS.mutedGreen, 
+    borderWidth: 1.5, 
+    borderColor: "#1c4722", 
+    alignItems: "center",
+    justifyContent: "center",
+    flexDirection: "row",
   },
 
   refreshButtonText: {
@@ -181,11 +212,10 @@ const analysis = StyleSheet.create({
 
   // ===== CARD STYLES =====
   chartContainer: {
-    backgroundColor: "white",
+    backgroundColor: "#f0fdf476",
     borderRadius: 16,
     padding: 20, // Consistent spacing
     marginBottom: 20,
-    elevation: 2, // Refined elevation
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.06, // Softer shadow
@@ -194,13 +224,14 @@ const analysis = StyleSheet.create({
     borderColor: "#E2E8F0", // Professional border
   },
 
-  statCard: {
+  statCard1: {
     width: "48%",
-    backgroundColor: "white",
-    borderRadius: 16,
+    backgroundColor: COLORS.lightGreen,
+    borderRadius: 5,
+    borderTopRightRadius: 30,
+    borderBottomLeftRadius: 30,
     padding: 20, // Consistent spacing
     alignItems: "center",
-    elevation: 2, // Refined elevation
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.06, // Softer shadow
@@ -208,7 +239,21 @@ const analysis = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#E2E8F0", // Professional border
   },
-
+  statCard2: {
+    width: "48%",
+    backgroundColor: COLORS.lightGreen,
+    borderRadius: 5,
+    borderTopLeftRadius: 30,
+    borderBottomRightRadius: 30,
+    padding: 20, // Consistent spacing
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06, // Softer shadow
+    shadowRadius: 8,
+    borderWidth: 1,
+    borderColor: "#E2E8F0", // Professional border
+  },
   recommendationCard: {
     backgroundColor: "#fff",
     borderRadius: 16,
@@ -225,7 +270,9 @@ const analysis = StyleSheet.create({
 
   weatherPredictionCard: {
     backgroundColor: "#FAFBFC", // Professional background
-    borderRadius: 16,
+    borderRadius: 5,
+    borderTopRightRadius: 30,
+    borderBottomLeftRadius: 30,
     padding: 20,
     marginBottom: 20,
     elevation: 2,
@@ -239,12 +286,11 @@ const analysis = StyleSheet.create({
 
   categoryCard: {
     width: 120,
-    backgroundColor: "white",
+    backgroundColor: "#f0fdf481",
     borderRadius: 16,
     padding: 16,
     marginRight: 15,
     alignItems: "center",
-    elevation: 2, // Refined elevation
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.06, // Softer shadow
@@ -254,7 +300,7 @@ const analysis = StyleSheet.create({
   },
 
   activeCategoryCard: {
-    borderColor: "#1c4722",
+    borderColor: COLORS.lightGreen,
     backgroundColor: "#F0F9F4", // Consistent active background
     elevation: 4, // Higher elevation when active
     shadowOpacity: 0.12,
@@ -264,7 +310,7 @@ const analysis = StyleSheet.create({
   sectionTitle: {
     fontSize: 18, // Better hierarchy
     fontWeight: "700",
-    color: "#1E293B", // Professional dark color
+    color: COLORS.darkBrown, // Professional dark color
     marginBottom: 16, // Consistent spacing
     letterSpacing: 0.3,
   },
@@ -273,13 +319,13 @@ const analysis = StyleSheet.create({
     fontSize: 18, // Better hierarchy
     fontWeight: "700",
     marginBottom: 16, // Consistent spacing
-    color: "#1E293B", // Professional dark color
+    color: COLORS.primaryBrown, // Professional dark color
     letterSpacing: 0.3,
   },
 
   chartSubtitle: {
     fontSize: 12,
-    color: "#1E293B", // Professional gray
+    color: COLORS.primaryBrown, // Professional gray
     fontStyle: "italic",
     marginBottom: 10,
     textAlign: "center",
@@ -287,7 +333,7 @@ const analysis = StyleSheet.create({
 
   subtitle: {
     fontSize: 14,
-    color: "#1E293B", // Professional gray
+    color: COLORS.primaryBrown, // Professional gray
     marginBottom: 16, // Consistent spacing
     lineHeight: 20,
   },
@@ -314,6 +360,7 @@ const analysis = StyleSheet.create({
     color: "#334155", // Professional color
     marginBottom: 8,
     marginTop: 10,
+    alignItems: "center"
   },
 
   noDataText: {
@@ -375,11 +422,10 @@ const analysis = StyleSheet.create({
 
   // ===== TABLE STYLES =====
   tableContainer: {
-    backgroundColor: "white",
+    backgroundColor: "#f0fdf476",
     borderRadius: 16,
     padding: 16,
     marginBottom: 20,
-    elevation: 2, // Refined elevation
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.06, // Softer shadow
@@ -389,7 +435,7 @@ const analysis = StyleSheet.create({
   },
 
   weatherRecordCard: {
-    backgroundColor: "#FAFBFC",
+    backgroundColor: COLORS.lightGreen,
     borderRadius: 12,
     padding: 16,
     marginBottom: 10,
@@ -399,7 +445,6 @@ const analysis = StyleSheet.create({
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.04,
     shadowRadius: 4,
-    elevation: 1,
   },
 
   weatherRecordHeader: {
@@ -515,13 +560,13 @@ const analysis = StyleSheet.create({
     paddingHorizontal: 20,
     borderRadius: 12,
     marginTop: 10,
-    borderWidth: 1.5,
-    borderColor: "#1c4722",
+    borderWidth: 0,
+    borderColor: "none",
   },
 
   showMoreText: {
     fontSize: 14,
-    color: "#1c4722",
+    color: COLORS.lightGreen,
     fontWeight: "700",
     marginLeft: 6,
   },
@@ -579,7 +624,7 @@ const analysis = StyleSheet.create({
 
   statTitle: {
     fontSize: 13,
-    color: "#64748B", // Professional gray
+    color: COLORS.primaryBrown, // Professional gray
     marginTop: 10,
     marginBottom: 4,
     fontWeight: "500",
@@ -606,7 +651,7 @@ const analysis = StyleSheet.create({
   predictionValue: {
     fontWeight: "700",
     fontSize: 18,
-    color: "#1E293B", // Professional dark color
+    color: COLORS.primaryGreen, // Professional dark color
     marginTop: 4,
     letterSpacing: 0.3,
   },
@@ -701,10 +746,12 @@ const analysis = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: 18,
     paddingVertical: 14,
-    backgroundColor: "#F8FAFC", // Professional background
-    borderRadius: 16,
-    borderWidth: 1.5, // Consistent border width
-    borderColor: "#E2E8F0", // Professional border
+    backgroundColor: COLORS.lightGreen, // Professional background
+    borderRadius: 5,
+    borderTopRightRadius: 25,
+    borderBottomLeftRadius: 25,
+    borderWidth: 0, // Consistent border width
+    borderColor: "none", // Professional border
     minWidth: 140,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
@@ -714,8 +761,8 @@ const analysis = StyleSheet.create({
   },
 
   activeStatusItemCard: {
-    backgroundColor: "#F0F9F4", // Consistent active background
-    borderColor: "#1c4722",
+    backgroundColor: COLORS.lightGreen, // Consistent active background
+    borderColor: COLORS.mutedGreen,
     borderWidth: 2,
     shadowOpacity: 0.12,
     shadowRadius: 6,
@@ -768,21 +815,21 @@ const analysis = StyleSheet.create({
     shadowOpacity: 0.06, // Softer shadow
     shadowRadius: 8,
     elevation: 2, // Refined elevation
-    borderWidth: 1,
-    borderColor: "#E2E8F0", // Professional border
+    borderWidth: 0,
+    borderColor: "none", // Professional border
   },
 
   categorySummaryTitle: {
     fontSize: 20, // Better hierarchy
     fontWeight: "700",
-    color: "#1c4722",
+    color: COLORS.lightGreen,
     marginBottom: 6,
     letterSpacing: 0.3,
   },
 
   categorySummarySubtitle: {
     fontSize: 14,
-    color: "#64748B", // Professional gray
+    color: COLORS.lightGreen, // Professional gray
     fontWeight: "500",
   },
 
@@ -794,7 +841,7 @@ const analysis = StyleSheet.create({
   timeRangeLabel: {
     fontSize: 14,
     fontWeight: "700",
-    color: "#334155", // Professional color
+    color: COLORS.primaryBrown, // Professional color
     marginBottom: 12,
   },
 
@@ -997,14 +1044,14 @@ const analysis = StyleSheet.create({
   listTitle: {
     fontSize: 20, // Better hierarchy
     fontWeight: "700",
-    color: "#1c4722",
+    color: COLORS.darkBrown,
     marginBottom: 6,
     letterSpacing: 0.3,
   },
 
   listSubtitle: {
     fontSize: 13,
-    color: "#64748B", // Professional gray
+    color: COLORS.primaryBrown, // Professional gray
     marginBottom: 16,
     fontWeight: "500",
   },
@@ -1013,7 +1060,7 @@ const analysis = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    backgroundColor: "#fff",
+    backgroundColor: COLORS.lightGreen,
     borderRadius: 14,
     padding: 16,
     marginBottom: 12,
@@ -1041,7 +1088,7 @@ const analysis = StyleSheet.create({
   plantListName: {
     fontSize: 16,
     fontWeight: "700",
-    color: "#1c4722",
+    color: COLORS.primaryGreen,
     flex: 1,
     letterSpacing: 0.3,
   },
@@ -1513,7 +1560,7 @@ const analysis = StyleSheet.create({
   },
   gridSubtitle: {
     fontSize: 14,
-    color: '#666',
+    color: COLORS.primaryBrown,
     marginBottom: 16,
   },
   plantCard: {
@@ -1567,7 +1614,9 @@ const analysis = StyleSheet.create({
     padding: 16,
     marginVertical: 6,
     marginHorizontal: 16,
-    borderRadius: 12,
+    borderRadius: 5,
+    borderTopRightRadius: 30,
+    borderBottomLeftRadius: 30,
     borderWidth: 1,
     borderColor: '#e0e0e0',
     shadowColor: '#000',

@@ -14,6 +14,8 @@ import { LineChart } from "react-native-chart-kit"
 
 // Import shared styles
 import SharedStyles from "./styles/analysis.style"
+import {COLORS} from "./styles/analysis.style"
+
 
 // Import Lucide icons
 import { AlertTriangle, Calendar, Lightbulb, Thermometer } from "lucide-react-native"
@@ -436,25 +438,46 @@ export default function Analysis() {
 
   // Update the chart configuration for better readability
   const chartConfig = {
-    backgroundColor: "#e26a00",
-    backgroundGradientFrom: "#1c4722",
-    backgroundGradientTo: "#4d7f39",
+    backgroundColor: COLORS.darkBrown,
+    backgroundGradientFrom: COLORS.pastelGreen,        // top: soft green
+    backgroundGradientFromOpacity: 1,
+    backgroundGradientTo: COLORS.lightGreen,           // bottom: lighter green
+    backgroundGradientToOpacity: 0.9,
+
     decimalPlaces: 1,
-    color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-    labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+
+    color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`, // white data line
+    labelColor: (opacity = 1) => `rgba(40, 40, 40, ${opacity})`, // darker axis text for contrast
+
     style: {
       borderRadius: 16,
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.15,
+      shadowRadius: 8,
     },
+
     propsForDots: {
-      r: "4",
-      strokeWidth: "2",
-      stroke: "#ffa726",
+      r: "5",
+      strokeWidth: "3",
+      stroke: COLORS.primaryBrown, // warm accent
+      fill: "#FFF",                // white center for contrast
     },
-    // Improved label formatting
+
+    propsForBackgroundLines: {
+      stroke: "rgba(255, 255, 255, 0.2)", // subtle gridlines
+      strokeDasharray: "", // solid lines (remove dashes)
+    },
+
+    // Optional gradient line (makes the temperature line pop)
+    fillShadowGradientFrom: "rgba(255, 255, 255, 0.15)",
+    fillShadowGradientTo: "rgba(255, 255, 255, 0.05)",
+
     formatXLabel: (value: string) => {
-      return value.length > 8 ? value.substring(0, 8) + "..." : value
+      return value.length > 8 ? value.substring(0, 8) + "..." : value;
     },
-  }
+  };
+
 
   // Add this function before the return statement
   const handleRefreshWeatherData = async () => {
@@ -1536,7 +1559,7 @@ export default function Analysis() {
       <Stack.Screen options={{ headerShown: false }} />
       <View style={styles.container}>
       {/* Header */}
-      <LinearGradient colors={["#1c4722", "#4d7f39"]} style={styles.headerBackground}>
+      <LinearGradient colors={[COLORS.primaryGreen, COLORS.darkGreen]} style={styles.headerBackground}>
         <View style={styles.headerTop}>
           <View>
             <Text style={styles.headerTitle}>Analysis Dashboard</Text>
@@ -1590,7 +1613,7 @@ export default function Analysis() {
             <View style={styles.timeRangeContainer}>
               <View style={styles.sectionHeader}>
                 <Text style={styles.sectionTitle}>Weather for {selectedLocation?.city || "Unknown Location"}</Text>
-                <TouchableOpacity
+                <TouchableOpacity 
                   style={styles.refreshButton}
                   onPress={handleRefreshWeatherData}
                   disabled={loadingWeather}
@@ -1647,7 +1670,7 @@ export default function Analysis() {
                   <Ionicons
                     name={expandedChart === "weather" ? "contract-outline" : "expand-outline"}
                     size={20}
-                    color="#1c4722"
+                    color={COLORS.darkBrown}
                   />
                   <Text style={styles.expandButtonText}>{expandedChart === "weather" ? "Shrink" : "Expand"}</Text>
                 </TouchableOpacity>
@@ -1706,7 +1729,7 @@ export default function Analysis() {
               {weatherData.length > 0 && (
                 <>
                   <View style={styles.statsRow}>
-                    <View style={styles.statCard}>
+                    <View style={styles.statCard1}>
                       <Ionicons name="thermometer-outline" size={28} color="#e53935" />
                       <Text style={styles.statTitle}>Avg. Temperature</Text>
                       <Text style={styles.statValue}>
@@ -1714,7 +1737,7 @@ export default function Analysis() {
                       </Text>
                     </View>
 
-                    <View style={styles.statCard}>
+                    <View style={styles.statCard2}>
                       <Ionicons name="thermometer" size={28} color="#ff5722" />
                       <Text style={styles.statTitle}>Max Temperature</Text>
                       <Text style={styles.statValue}>
@@ -1724,7 +1747,7 @@ export default function Analysis() {
                   </View>
 
                   <View style={styles.statsRow}>
-                    <View style={styles.statCard}>
+                    <View style={styles.statCard1}>
                       <Ionicons name="water-outline" size={28} color="#1976d2" />
                       <Text style={styles.statTitle}>Avg. Humidity</Text>
                       <Text style={styles.statValue}>
@@ -1732,7 +1755,7 @@ export default function Analysis() {
                       </Text>
                     </View>
 
-                    <View style={styles.statCard}>
+                    <View style={styles.statCard2}>
                       <Ionicons name="rainy-outline" size={28} color="#29b6f6" />
                       <Text style={styles.statTitle}>Total Rainfall</Text>
                       <Text style={styles.statValue}>
@@ -1742,7 +1765,7 @@ export default function Analysis() {
                   </View>
 
                   <View style={styles.statsRow}>
-                    <View style={styles.statCard}>
+                    <View style={styles.statCard1}>
                       <Ionicons name="sunny-outline" size={28} color="#ffa000" />
                       <Text style={styles.statTitle}>Clear Days</Text>
                       <Text style={styles.statValue}>
@@ -1753,7 +1776,7 @@ export default function Analysis() {
                       </Text>
                     </View>
 
-                    <View style={styles.statCard}>
+                    <View style={styles.statCard2}>
                       <Ionicons name="rainy" size={28} color="#2196f3" />
                       <Text style={styles.statTitle}>Rainy Days</Text>
                       <Text style={styles.statValue}>
@@ -1772,7 +1795,7 @@ export default function Analysis() {
               <View style={styles.sectionHeader}>
                 <Text style={styles.sectionTitle}>Daily Weather Record</Text>
                 <TouchableOpacity style={styles.expandButton} onPress={() => setShowAllRecords(!showAllRecords)}>
-                  <Ionicons name={showAllRecords ? "chevron-up" : "chevron-down"} size={16} color="#1c4722" />
+                  <Ionicons name={showAllRecords ? "chevron-up" : "chevron-down"} size={16} color={COLORS.darkBrown} />
                   <Text style={styles.expandButtonText}>{showAllRecords ? "Show Less" : "Show All"}</Text>
                 </TouchableOpacity>
                            </View>
@@ -1904,9 +1927,12 @@ export default function Analysis() {
 
               {/* Show More Button */}
               {!showAllRecords && weatherData.length > 5 && (
-                <TouchableOpacity style={styles.showMoreButton} onPress={() => setShowAllRecords(true)}>
-                  <Ionicons name="chevron-down-circle" size={18} color="#1c4722" />
-                  <Text style={styles.showMoreText}>Show {weatherData.length - 5} More Records</Text>
+                <TouchableOpacity onPress={() => setShowAllRecords(true)}>
+                  <LinearGradient colors={[COLORS.pastelGreen, COLORS.primaryGreen]} style={styles.showMoreButton}>
+                     <Ionicons name="chevron-down-circle" size={18} color={COLORS.lightGreen} />
+                     <Text style={styles.showMoreText}>Show {weatherData.length - 5} More Records</Text>
+                  </LinearGradient>
+                 
                 </TouchableOpacity>
               )}
             </View>
@@ -2143,19 +2169,20 @@ export default function Analysis() {
                   {getCurrentCategoryRecommendations().map((plant, index) => (
                     <TouchableOpacity
                       key={index}
-                      style={styles.minimalPlantCard}
                       onPress={() => setSelectedPlantDetail(plant)}
                       activeOpacity={0.8}
                     >
-                      <View style={styles.minimalPlantIcon}>
-                        <Ionicons 
-                          name={getCategoryIcon(selectedCategory) as any} 
-                          size={28} 
-                          color="#1c4722" 
-                        />
-                      </View>
-                      <Text style={styles.minimalPlantName}>{plant.cropName}</Text>
-                      <Ionicons name="chevron-forward-outline" size={16} color="#999" />
+                      <LinearGradient colors={[COLORS.pastelGreen, COLORS.lightGreen]} style={styles.minimalPlantCard}>                      
+                        <View style={styles.minimalPlantIcon}>
+                          <Ionicons 
+                            name={getCategoryIcon(selectedCategory) as any} 
+                            size={28} 
+                            color="#1c4722" 
+                          />
+                        </View>
+                        <Text style={styles.minimalPlantName}>{plant.cropName}</Text>
+                        <Ionicons name="chevron-forward-outline" size={16} color="#999" />
+                      </LinearGradient>
                     </TouchableOpacity>
                   ))}
 
@@ -2205,7 +2232,7 @@ export default function Analysis() {
               <>
                 {/* Next Month Weather Prediction */}
                 {plantRecommendations.length > 0 && (
-                  <View style={styles.weatherPredictionCard}>
+                  <LinearGradient colors={[COLORS.pastelGreen, COLORS.lightGreen, COLORS.pastelGreen]} style={styles.weatherPredictionCard}>
                     <Text style={[styles.cardTitle, { textAlign: "center" }]}>Next Month Weather Forecast</Text>
                     <View style={styles.predictionStats}>
                       <View style={styles.predictionStat}>
@@ -2249,7 +2276,7 @@ export default function Analysis() {
                         Risk Level: {plantRecommendations[0]?.predictedWeather.nextMonth.riskLevel.toUpperCase()}
                       </Text>
                     </View>
-                  </View>
+                  </LinearGradient>
                 )}
 
                 {/* Category Selection */}
@@ -2287,7 +2314,7 @@ export default function Analysis() {
 
                 {/* Enhanced Clickable Status Summary - HORIZONTAL SCROLL VERSION */}
                 {selectedCategory && plantCategories[selectedCategory] && (
-                  <View style={styles.categorySummary}>
+                  <LinearGradient colors={[COLORS.mutedGreen, COLORS.pastelGreen, COLORS.mutedGreen]} style={styles.categorySummary}>
                     <Text style={styles.categorySummaryTitle}>
                       {getCategoryInfo(selectedCategory).name} Recommendations
                     </Text>
@@ -2432,7 +2459,7 @@ export default function Analysis() {
                         </TouchableOpacity>
                       )}
                     </ScrollView>
-                  </View>
+                  </LinearGradient>
                 )}
 
                 {/* Plant Recommendations List for Selected Category */}
