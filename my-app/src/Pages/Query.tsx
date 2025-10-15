@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { supabase } from "../firebase"; // 
+import supabase from "../CONFIG/supabaseClient";
 
 // Define User type for better type safety
 interface User {
-  uid: string;
+  auth_id: string;  // Changed from uid
   username: string;
   email: string;
   profile_picture?: string;
@@ -64,7 +64,7 @@ const QueryComponent: React.FC = () => {
           console.log("User updated:", payload.new);
           setUsers((prevUsers) =>
             prevUsers.map((user) =>
-              user.uid === (payload.new as User).uid ? (payload.new as User) : user
+              user.auth_id === (payload.new as User).auth_id ? (payload.new as User) : user
             )
           );
         }
@@ -79,7 +79,7 @@ const QueryComponent: React.FC = () => {
         (payload) => {
           console.log("User deleted:", payload.old);
           setUsers((prevUsers) =>
-            prevUsers.filter((user) => user.uid !== (payload.old as User).uid)
+            prevUsers.filter((user) => user.auth_id !== (payload.old as User).auth_id)
           );
         }
       )
@@ -97,7 +97,7 @@ const QueryComponent: React.FC = () => {
       {error && <p style={{ color: "red" }}>{error}</p>}
       <ul>
         {users.map((user) => (
-          <li key={user.uid}>
+          <li key={user.auth_id}>
             <p>{user.profile_picture}</p>
             <p>{user.username}</p>
             <p>{user.email}</p>
