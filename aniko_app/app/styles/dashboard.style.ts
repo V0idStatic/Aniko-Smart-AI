@@ -1,20 +1,23 @@
 import { StyleSheet } from "react-native"
 
-export const colors = {
+export const COLORS = {
   // Primary colors
-  primary: "#2E7D32",
-  primaryDark: "#1B5E20",
-  primaryLight: "#4CAF50",
-
-  // Accent colors
+  primaryGreen: "#1D492C",
+  accentGreen: "#84cc16",
+  pastelGreen: "#BDE08A",
+  lightGreen: "#f0fdf4",
+  darkGreen: "#143820",
+  mutedGreen: "#4C6444",
+  grayText: "#666",
+  border: "#e0e0e0",
+  white: "#ffffff",
+  bgCOlor: "#cfc4b2ff",
+  primaryBrown: "#8A6440",
+  darkBrown: "#4D2D18",
   accent: "#FF6F00",
   accentLight: "#FFA726",
-
-  // Background colors
   background: "#CBBA9E",
   cardBackground: "#FFFFFF",
-
-  // Text colors
   textPrimary: "#1A1A1A",
   textSecondary: "#6B7280",
   textLight: "#9CA3AF",
@@ -22,44 +25,29 @@ export const colors = {
   // Status colors
   success: "#4CAF50",
   warning: "#FFC107",
-  error: "#F44336",
+  error: "#8a1c14ff",
   info: "#2196F3",
-
-  // Neutral colors
-  white: "#FFFFFF",
-  gray100: "#F3F4F6",
-  gray200: "#E5E7EB",
-  gray300: "#D1D5DB",
-  gray400: "#9CA3AF",
-  gray500: "#6B7280",
-  gray600: "#4B5563",
-  gray700: "#374151",
-  gray800: "#1F2937",
-  gray900: "#111827",
-
-  // Border colors
-  border: "#E5E7EB",
-  borderLight: "#F3F4F6",
 }
 
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: COLORS.bgCOlor,
   },
 
   // Header Styles
   header: {
-    paddingTop: 50,
-    paddingBottom: 24,
+    paddingTop: 20,
+    paddingBottom: 10,
     paddingHorizontal: 20,
-    borderBottomLeftRadius: 24,
-    borderBottomRightRadius: 24,
+    borderBottomLeftRadius: 25,
+    borderBottomRightRadius: 25,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
+    shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 5,
+    marginBottom: 25
   },
 
   headerContent: {
@@ -78,15 +66,15 @@ export const styles = StyleSheet.create({
 
   greeting: {
     fontSize: 14,
-    color: "rgba(255, 255, 255, 0.9)",
+    color: COLORS.lightGreen,
     fontWeight: "500",
     marginBottom: 4,
   },
 
   username: {
     fontSize: 24,
-    fontWeight: "700",
-    color: colors.white,
+    fontWeight: "900",
+    color: COLORS.lightGreen,
     letterSpacing: 0.5,
   },
 
@@ -113,7 +101,6 @@ export const styles = StyleSheet.create({
 
   // Weather Card Styles
   weatherCard: {
-    backgroundColor: colors.cardBackground,
     borderRadius: 20,
     padding: 20,
     marginBottom: 24,
@@ -121,14 +108,13 @@ export const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
     shadowRadius: 12,
-    elevation: 3,
   },
 
   weatherHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 20,
+    marginBottom: 5,
   },
 
   weatherLocation: {
@@ -138,9 +124,9 @@ export const styles = StyleSheet.create({
   },
 
   weatherCity: {
-    fontSize: 18,
+    fontSize: 14,
     fontWeight: "600",
-    color: colors.textPrimary,
+    color: COLORS.lightGreen,
   },
 
   changeLocationButton: {
@@ -149,19 +135,19 @@ export const styles = StyleSheet.create({
     gap: 4,
     paddingVertical: 6,
     paddingHorizontal: 12,
-    backgroundColor: colors.gray100,
+    backgroundColor: "#f0fdf484",
     borderRadius: 12,
   },
 
   changeLocationText: {
     fontSize: 14,
     fontWeight: "600",
-    color: colors.primary,
+    color: COLORS.primaryGreen,
   },
 
   // Inline Picker Styles
   inlinePicker: {
-    backgroundColor: colors.gray100,
+    backgroundColor: COLORS.lightGreen,
     borderRadius: 16,
     padding: 16,
     marginBottom: 20,
@@ -170,7 +156,7 @@ export const styles = StyleSheet.create({
   inlinePickerLabel: {
     fontSize: 13,
     fontWeight: "600",
-    color: colors.textSecondary,
+    color: COLORS.textSecondary,
     marginBottom: 8,
     textTransform: "uppercase",
     letterSpacing: 0.5,
@@ -183,30 +169,30 @@ export const styles = StyleSheet.create({
   inlineChip: {
     paddingVertical: 8,
     paddingHorizontal: 16,
-    backgroundColor: colors.white,
+    backgroundColor: COLORS.white,
     borderRadius: 20,
     marginRight: 8,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: COLORS.darkBrown,
   },
 
   inlineChipActive: {
-    backgroundColor: colors.primary,
-    borderColor: colors.primary,
+    backgroundColor: COLORS.primaryGreen,
+    borderColor: COLORS.primaryGreen,
   },
 
   inlineChipText: {
     fontSize: 14,
     fontWeight: "500",
-    color: colors.textPrimary,
+    color: COLORS.textPrimary,
   },
 
   inlineChipTextActive: {
-    color: colors.white,
+    color: COLORS.white,
   },
 
   inlineCityList: {
-    backgroundColor: colors.white,
+    backgroundColor: COLORS.white,
     borderRadius: 12,
     padding: 8,
     marginTop: 8,
@@ -219,13 +205,13 @@ export const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 12,
     borderBottomWidth: 1,
-    borderBottomColor: colors.borderLight,
+    borderBottomColor: COLORS.primaryBrown,
   },
 
   inlineCityText: {
     fontSize: 15,
     fontWeight: "500",
-    color: colors.textPrimary,
+    color: COLORS.textPrimary,
     flex: 1,
   },
 
@@ -244,21 +230,21 @@ export const styles = StyleSheet.create({
   temperature: {
     fontSize: 56,
     fontWeight: "700",
-    color: colors.textPrimary,
+    color: COLORS.white,
     letterSpacing: -2,
   },
 
   condition: {
     fontSize: 18,
     fontWeight: "500",
-    color: colors.textSecondary,
+    color: COLORS.lightGreen,
     marginTop: 4,
   },
 
   highLow: {
     fontSize: 15,
     fontWeight: "500",
-    color: colors.textLight,
+    color: COLORS.lightGreen,
     marginTop: 8,
   },
 
@@ -282,13 +268,13 @@ export const styles = StyleSheet.create({
 
   weatherMetaText: {
     fontSize: 12,
-    color: colors.textSecondary,
+    color: COLORS.textSecondary,
     fontWeight: "500",
   },
 
   divider: {
     height: 1,
-    backgroundColor: colors.border,
+    backgroundColor: COLORS.mutedGreen,
     marginBottom: 16,
   },
 
@@ -303,34 +289,34 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 16,
     marginRight: 8,
     borderRadius: 16,
-    backgroundColor: colors.gray100,
+    backgroundColor: "#f0fdf4a4",
     minWidth: 70,
   },
 
   hourlyItemActive: {
-    backgroundColor: colors.primary,
+    backgroundColor: COLORS.lightGreen,
   },
 
   hourlyTime: {
     fontSize: 13,
     fontWeight: "600",
-    color: colors.textSecondary,
+    color: COLORS.textSecondary,
     marginBottom: 8,
   },
 
   hourlyTimeActive: {
-    color: colors.white,
+    color: COLORS.white,
   },
 
   hourlyTemp: {
     fontSize: 16,
     fontWeight: "700",
-    color: colors.textPrimary,
+    color: COLORS.textPrimary,
     marginTop: 8,
   },
 
   hourlyTempActive: {
-    color: colors.white,
+    color: COLORS.white,
   },
 
   // Section Header
@@ -344,13 +330,13 @@ export const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 22,
     fontWeight: "700",
-    color: colors.textPrimary,
+    color: COLORS.textPrimary,
   },
 
   sectionLink: {
     fontSize: 14,
     fontWeight: "600",
-    color: colors.primary,
+    color: COLORS.primaryGreen,
   },
 
   // Crop Row
@@ -364,7 +350,7 @@ export const styles = StyleSheet.create({
   chatbotCard: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: colors.cardBackground,
+    backgroundColor: COLORS.pastelGreen,
     borderRadius: 20,
     padding: 20,
     marginTop: 8,
@@ -395,13 +381,13 @@ export const styles = StyleSheet.create({
   chatbotTitle: {
     fontSize: 18,
     fontWeight: "700",
-    color: colors.textPrimary,
+    color: COLORS.textPrimary,
     marginBottom: 4,
   },
 
   chatbotSubtitle: {
     fontSize: 14,
-    color: colors.textSecondary,
+    color: COLORS.textSecondary,
     fontWeight: "500",
   },
 
@@ -413,7 +399,7 @@ export const styles = StyleSheet.create({
   },
 
   modalContainer: {
-    backgroundColor: colors.white,
+    backgroundColor: COLORS.white,
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     paddingTop: 24,
@@ -432,14 +418,14 @@ export const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 24,
     fontWeight: "700",
-    color: colors.textPrimary,
+    color: COLORS.textPrimary,
   },
 
   modalCloseButton: {
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: colors.gray100,
+    backgroundColor: COLORS.textSecondary,
     justifyContent: "center",
     alignItems: "center",
   },
@@ -447,7 +433,7 @@ export const styles = StyleSheet.create({
   selectorLabel: {
     fontSize: 13,
     fontWeight: "600",
-    color: colors.textSecondary,
+    color: COLORS.textSecondary,
     marginBottom: 12,
     textTransform: "uppercase",
     letterSpacing: 0.5,
@@ -460,7 +446,7 @@ export const styles = StyleSheet.create({
   chip: {
     paddingVertical: 10,
     paddingHorizontal: 20,
-    backgroundColor: colors.gray100,
+    backgroundColor: COLORS.textSecondary,
     borderRadius: 24,
     marginRight: 10,
     borderWidth: 2,
@@ -468,18 +454,18 @@ export const styles = StyleSheet.create({
   },
 
   chipActive: {
-    backgroundColor: colors.primary,
-    borderColor: colors.primary,
+    backgroundColor: COLORS.primaryGreen,
+    borderColor: COLORS.primaryGreen,
   },
 
   chipText: {
     fontSize: 15,
     fontWeight: "600",
-    color: colors.textPrimary,
+    color: COLORS.textPrimary,
   },
 
   chipTextActive: {
-    color: colors.white,
+    color: COLORS.white,
   },
 
   locationList: {
@@ -493,7 +479,7 @@ export const styles = StyleSheet.create({
     gap: 12,
     paddingVertical: 16,
     paddingHorizontal: 16,
-    backgroundColor: colors.gray100,
+    backgroundColor: COLORS.textSecondary,
     borderRadius: 12,
     marginBottom: 8,
   },
@@ -505,13 +491,13 @@ export const styles = StyleSheet.create({
   locationItemText: {
     fontSize: 16,
     fontWeight: "600",
-    color: colors.textPrimary,
+    color: COLORS.textPrimary,
     marginBottom: 4,
   },
 
   locationItemCoords: {
     fontSize: 12,
-    color: colors.textSecondary,
+    color: COLORS.textSecondary,
     fontWeight: "500",
   },
 })

@@ -3,7 +3,7 @@
 import { useRef } from "react"
 import { View, Animated, PanResponder, StyleSheet, Dimensions, Image } from "react-native"
 import { LinearGradient } from "expo-linear-gradient"
-import { colors } from "../app/styles/dashboard.style"
+import { COLORS } from "../app/styles/dashboard.style"
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window")
 const BUTTON_SIZE = 64
@@ -86,7 +86,7 @@ export default function DraggableAIButton({ onPress }: DraggableAIButtonProps) {
       {...panResponder.panHandlers}
     >
       <View style={styles.button}>
-        <LinearGradient colors={[colors.primary, colors.primaryDark]} style={styles.gradient}>
+        <LinearGradient colors={[COLORS.primaryGreen, COLORS.darkGreen]} style={styles.gradient}>
           <Image source={require("../assets/logo.png")} style={styles.logo} resizeMode="contain" />
         </LinearGradient>
         <View style={styles.badge}>
@@ -136,7 +136,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     borderWidth: 2,
-    borderColor: colors.primary,
+    borderColor: COLORS.primaryGreen,
   },
   badgeDot: {
     width: 8,
