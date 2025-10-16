@@ -204,7 +204,7 @@ const NPKSensorDashboard: React.FC = () => {
         setShowIPInput(false);
         
         // Set up interval and store the reference
-        fetchIntervalRef.current = setInterval(fetchSensorData, 3000);
+        fetchIntervalRef.current = setInterval(fetchSensorData, 5000);
         
         // Fetch initial data immediately
         await fetchSensorData();
@@ -542,7 +542,7 @@ const NPKSensorDashboard: React.FC = () => {
                 Live from Arduino NPK Sensor
               </Text>
               <Text style={styles.lastUpdatedSubtitle}>
-                Updates every 3 seconds
+                Updates every 5 seconds
               </Text>
               {!!dbStatus && <Text style={[styles.lastUpdatedSubtitle,{marginTop:8}]}>Database status: {dbStatus}</Text>}
             </View>
