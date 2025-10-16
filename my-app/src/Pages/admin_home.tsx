@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import AdminHeader from "../INCLUDE/admin-sidebar";
 import supabase from "../CONFIG/supabaseClient";
+import supabaseAdmin from "../CONFIG/supabaseAdmin";
 import "../CSS/admin_home.css";
 import {
   LineChart,
@@ -37,51 +38,71 @@ const AdminHome: React.FC = () => {
 
   const fetchDashboard = async () => {
     try {
-      const { count: users, error: usersError } = await supabase
-        .from("users")
-        .select("*", { count: "exact", head: true });
-      if (usersError) throw usersError;
-      setUserCount(users || 0);
+      // ✅ Use supabaseAdmin to fetch auth users
+      console.log("🔄 Fetching users from Supabase Auth...");
+      const { data: { users }, error: usersError } = await supabaseAdmin.auth.admin.listUsers();
+      
+      if (usersError) {
+        console.error("❌ Error fetching users:", usersError);
+        setUserCount(0);
+      } else {
+        console.log("✅ Successfully fetched users:", users?.length || 0);
+        setUserCount(users?.length || 0);
+        
+        // ✅ Process registrations for the last 7 days
+        if (users && users.length > 0) {
+          const sevenDaysAgo = new Date();
+          sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 6);
 
+          const dailyCounts: Record<string, number> = {};
+          
+          // Initialize all 7 days with 0 count
+          for (let i = 0; i < 7; i++) {
+            const d = new Date();
+            d.setDate(d.getDate() - (6 - i));
+            const label = d.toLocaleDateString("en-US", {
+              month: "short",
+              day: "numeric",
+            });
+            dailyCounts[label] = 0;
+          }
+
+          // Count users registered in the last 7 days
+          users.forEach((user) => {
+            const userDate = new Date(user.created_at);
+            if (userDate >= sevenDaysAgo) {
+              const label = userDate.toLocaleDateString("en-US", {
+                month: "short",
+                day: "numeric",
+              });
+              if (dailyCounts[label] !== undefined) {
+                dailyCounts[label] += 1;
+              }
+            }
+          });
+
+          const chartData = Object.entries(dailyCounts).map(([date, count]) => ({
+            date,
+            registrations: count,
+          }));
+          setRegistrations(chartData);
+          console.log("📊 Registration chart data:", chartData);
+        }
+      }
+
+      // Fetch testimonials count
       const { count: testimonials, error: testimonialsError } = await supabase
         .from("testimonials")
         .select("*", { count: "exact", head: true })
         .eq("status", "approved");
-      if (testimonialsError) throw testimonialsError;
-      setTestimonialCount(testimonials || 0);
-
-      const sevenDaysAgo = new Date();
-      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 6);
-      const { data, error } = await supabase
-        .from("users")
-        .select("created_at")
-        .gte("created_at", sevenDaysAgo.toISOString());
-      if (error) throw error;
-
-      const dailyCounts: Record<string, number> = {};
-      for (let i = 0; i < 7; i++) {
-        const d = new Date();
-        d.setDate(d.getDate() - (6 - i));
-        const label = d.toLocaleDateString("en-US", {
-          month: "short",
-          day: "numeric",
-        });
-        dailyCounts[label] = 0;
+      
+      if (testimonialsError) {
+        console.error("❌ Error fetching testimonials:", testimonialsError);
+      } else {
+        setTestimonialCount(testimonials || 0);
+        console.log("✅ Testimonials count:", testimonials);
       }
 
-      data?.forEach((user) => {
-        const label = new Date(user.created_at).toLocaleDateString("en-US", {
-          month: "short",
-          day: "numeric",
-        });
-        if (dailyCounts[label] !== undefined) dailyCounts[label] += 1;
-      });
-
-      const chartData = Object.entries(dailyCounts).map(([date, count]) => ({
-        date,
-        registrations: count,
-      }));
-      setRegistrations(chartData);
     } catch (err) {
       console.error("❌ Error fetching dashboard data:", err);
     }
@@ -96,6 +117,7 @@ const AdminHome: React.FC = () => {
         .limit(5);
       if (error) throw error;
       setContactMessages(data || []);
+      console.log("✅ Contact messages fetched:", data?.length || 0);
     } catch (err) {
       console.error("❌ Error fetching contact messages:", err);
     }
@@ -111,6 +133,7 @@ const AdminHome: React.FC = () => {
         .limit(5);
       if (error) throw error;
       setPendingTestimonials(data || []);
+      console.log("✅ Pending testimonials fetched:", data?.length || 0);
     } catch (err) {
       console.error("❌ Error fetching pending testimonials:", err);
     }
@@ -127,7 +150,7 @@ const AdminHome: React.FC = () => {
       <AdminHeader />
       <div style={{ marginLeft: "290px", padding: "20px" }}>
         <h1 className="adminHome-header">Welcome, Admin!</h1>
-        <h6 className="adminHome-subheader">Steamline Your Operations</h6>
+        <h6 className="adminHome-subheader">Streamline Your Operations</h6>
 
         {/* Dashboard Cards */}
         <div className="row mt-4">
@@ -164,8 +187,7 @@ const AdminHome: React.FC = () => {
           <div className="col-md-6 mb-3">
             <div className="card p-3 shadow-sm adminHome-regCard">
               <h5>
-                <i className="bi bi-clipboard-data"></i>Registrations (Past 7
-                Days)
+                <i className="bi bi-clipboard-data"></i> Registrations (Past 7 Days)
               </h5>
               <ResponsiveContainer width="100%" height={300}>
                 <LineChart data={registrations}>
@@ -188,7 +210,7 @@ const AdminHome: React.FC = () => {
           <div className="col-md-6 mb-3">
             <div className="card p-3 shadow-sm adminHome-accCard">
               <h5>
-                <i className="bi bi-person-lines-fill"></i>Accounts Overview
+                <i className="bi bi-person-lines-fill"></i> Accounts Overview
               </h5>
               <ResponsiveContainer width="100%" height={300}>
                 <PieChart>
@@ -236,7 +258,7 @@ const AdminHome: React.FC = () => {
           <div className="col-12">
             <div className="card p-3 shadow-sm adminHome-tableCard">
               <div className="d-flex justify-content-between align-items-center mb-3">
-                <h5><i className="bi bi-inbox"></i>Recent Contact Messages</h5>
+                <h5><i className="bi bi-inbox"></i> Recent Contact Messages</h5>
                 <button
                   className="btn btn-sm btn-primary"
                   onClick={() => navigate("/admin_contact")}
@@ -285,7 +307,7 @@ const AdminHome: React.FC = () => {
           <div className="col-12">
             <div className="card p-3 shadow-sm adminHome-tableCard">
               <div className="d-flex justify-content-between align-items-center mb-3">
-                <h5><i className="bi bi-chat-dots"></i>Pending Testimonials</h5>
+                <h5><i className="bi bi-chat-dots"></i> Pending Testimonials</h5>
                 <button
                   className="btn btn-sm btn-primary"
                   onClick={() => navigate("/admin_testimonial")}

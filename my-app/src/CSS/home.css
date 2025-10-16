@@ -252,7 +252,10 @@ body {
 }
 
 .stats-section {
-  margin: -17rem;
+  margin-top: -5rem;
+  margin-bottom: -13rem;
+  position: relative;
+  z-index: 10;
 }
 
 .mobile-stats-section {
@@ -261,18 +264,19 @@ body {
 
 .stat-box {
   text-align: center;
-  padding: 50px 30px;
+  padding: 45px 30px;
   background: var(--light-green);
   border-radius: 0;
-  border-top-right-radius: 100px !important;
-  border-bottom-left-radius: 100px !important;
-  box-shadow: var(--shadow-soft);
+  border-top-right-radius: 80px !important;
+  border-bottom-left-radius: 80px !important;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   height: 100%;
   border: 2px solid var(--primary-green) !important;
   position: relative;
   overflow: hidden;
   z-index: 100 !important;
+  max-width: 100%;
 }
 
 .stat-box::before {
@@ -292,16 +296,16 @@ body {
 }
 
 .stat-box:hover {
-  transform: translateY(-12px) scale(1.02);
-  box-shadow: 0 20px 40px rgba(21, 128, 61, 0.15);
+  transform: translateY(-10px) scale(1.02);
+  box-shadow: 0 20px 40px rgba(21, 128, 61, 0.2);
   border-color: var(--accent-green);
 }
 
 .stat-box img {
-  width: 90px;
-  height: 90px;
+  width: 80px;
+  height: 80px;
   object-fit: contain;
-  margin-bottom: 28px;
+  margin-bottom: 20px;
   filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1));
   transition: all 0.3s ease;
 }
@@ -311,15 +315,14 @@ body {
 }
 
 .stat-box p {
-  font-size: 1.15rem;
+  font-size: 1.1rem;
   color: var(--dark-gray);
   margin: 0 auto;
-  line-height: 1.7;
-  max-width: 300px;
+  line-height: 1.6;
+  max-width: 100%;
   font-weight: 400 !important;
   font-family: "Lexend" !important; 
 }
-
 .farmer-section {
   background: var(--gradient-primary) !important;
   background-size: cover;

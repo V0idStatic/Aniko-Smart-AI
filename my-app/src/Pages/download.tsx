@@ -2,27 +2,43 @@
 
 import type React from "react"
 import { useEffect, useState } from "react"
-import { auth } from "../firebase"
-import { onAuthStateChanged, type User } from "firebase/auth"
+import supabase from "../CONFIG/supabaseClient"
 import HeaderLogged from "../INCLUDE/header-logged"
 import HeaderUnlogged from "../INCLUDE/header-unlogged"
-import Footer from "../INCLUDE/footer";
+import Footer from "../INCLUDE/footer"
 
 const Download: React.FC = () => {
-  const [user, setUser] = useState<User | null>(null)
+  const [user, setUser] = useState<any>(null)
 
+  // ✅ Use Supabase auth instead of Firebase
   useEffect(() => {
-    const unsub = onAuthStateChanged(auth, (u) => setUser(u))
-    return () => unsub()
+    // Check current session
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession()
+      setUser(session?.user || null)
+    }
+
+    checkSession()
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user || null)
+    })
+
+    return () => {
+      subscription.unsubscribe()
+    }
   }, [])
 
   return (
     <>
+      {/* ✅ Conditionally render header based on Supabase auth state */}
       {user ? <HeaderLogged /> : <HeaderUnlogged />}
+      
       <div className="download-page-wrapper" style={{ paddingTop: "80px" }}>
         {/* Hero Section */}
         <section className="download-hero">
-          <div className="container">
+          <div className="container ">
             <div className="row align-items-center">
               <div className="col-lg-6 text-center text-lg-start">
                 <h1 className="download-hero-title">Get Started with Aniko</h1>
@@ -43,7 +59,7 @@ const Download: React.FC = () => {
                 </a>
               </div>
               <div className="col-lg-6 text-center mt-4 mt-lg-0">
-                <img src="/PICTURES/github.png" alt="Aniko App" className="img-fluid download-hero-img" />
+                <img src="/PICTURES/device1.png" alt="Aniko App" className="img-fluid download-hero-img" />
               </div>
             </div>
           </div>
@@ -57,7 +73,7 @@ const Download: React.FC = () => {
               Follow these simple steps to get Aniko up and running on your device
             </p>
 
-            <div className="row mt-5">
+            <div className="row mt-5 g-4">
               <div className="col-md-4">
                 <div className="step-card">
                   <div className="step-number">1</div>
@@ -95,576 +111,478 @@ const Download: React.FC = () => {
                 </div>
               </div>
             </div>
-
-            {/* Additional Setup */}
-            <div className="setup-info mt-5">
-              <div className="row">
-                <div className="col-lg-6">
-                  <div className="info-box">
-                    <h4>
-                      <svg className="inline-icon" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94L14.4 2.81c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z" />
-                      </svg>
-                      System Requirements
-                    </h4>
-                    <ul>
-                      <li>Node.js 14.x or higher</li>
-                      <li>npm or yarn package manager</li>
-                      <li>Modern web browser (Chrome, Firefox, Safari)</li>
-                      <li>Stable internet connection</li>
-                    </ul>
-                  </div>
-                </div>
-                <div className="col-lg-6">
-                  <div className="info-box">
-                    <h4>
-                      <svg className="inline-icon" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M17 1.01L7 1c-1.1 0-2 .9-2 2v18c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V3c0-1.1-.9-1.99-2-1.99zM17 19H7V5h10v14z" />
-                      </svg>
-                      Mobile App
-                    </h4>
-                    <ul>
-                      <li>Android 8.0 or higher</li>
-                      <li>iOS 12.0 or higher</li>
-                      <li>Bluetooth 4.0+ for device pairing</li>
-                      <li>Location services enabled</li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-            </div>
           </div>
         </section>
 
-        {/* Getting Started Section */}
-        <section className="getting-started">
+        {/* Getting Started Guide */}
+        <section className="getting-started-guide">
           <div className="container">
             <h2 className="section-title text-center">Getting Started Guide</h2>
-            <div className="row mt-5 g-3">
+            <p className="section-subtitle text-center">Learn the basics to make the most of Aniko</p>
+
+            <div className="row mt-5 g-4">
               <div className="col-md-6">
                 <div className="guide-card">
                   <div className="guide-icon">
-                    <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M15 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm-9-2V7H4v3H1v2h3v3h2v-3h3v-2H6zm9 4c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
-                    </svg>
+                    <i className="bi bi-person-circle"></i>
                   </div>
-                  <h5>Create Account</h5>
-                  <p>Sign up with your email and set up your farmer profile</p>
+                  <h4>Create Your Account</h4>
+                  <p>Sign up with your email or social media account to access all features and save your data.</p>
                 </div>
               </div>
 
               <div className="col-md-6">
                 <div className="guide-card">
                   <div className="guide-icon">
-                    <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
-                    </svg>
+                    <i className="bi bi-gear"></i>
                   </div>
-                  <h5>Connect Device</h5>
-                  <p>Pair your soil monitoring device via Bluetooth or WiFi</p>
+                  <h4>Configure Settings</h4>
+                  <p>Set up your farm profile, add your fields, and configure monitoring preferences.</p>
                 </div>
               </div>
 
               <div className="col-md-6">
                 <div className="guide-card">
                   <div className="guide-icon">
-                    <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
-                    </svg>
+                    <i className="bi bi-wifi"></i>
                   </div>
-                  <h5>Set Location</h5>
-                  <p>Mark your field locations and assign devices to zones</p>
+                  <h4>Connect Sensors</h4>
+                  <p>Pair your soil monitoring sensors with the app to start receiving real-time data.</p>
                 </div>
               </div>
 
               <div className="col-md-6">
                 <div className="guide-card">
                   <div className="guide-icon">
-                    <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z" />
-                    </svg>
+                    <i className="bi bi-graph-up"></i>
                   </div>
-                  <h5>Monitor & Grow</h5>
-                  <p>Start receiving real-time data and AI-powered insights</p>
+                  <h4>Monitor & Analyze</h4>
+                  <p>View live data, track trends, and get AI-powered recommendations for better yields.</p>
                 </div>
               </div>
             </div>
           </div>
         </section>
+
+        {/* System Requirements */}
+        <section className="system-requirements">
+          <div className="container">
+            <h2 className="section-title text-center">System Requirements</h2>
+            <p className="section-subtitle text-center">Ensure your device meets these minimum specifications</p>
+
+            <div className="row mt-5">
+              <div className="col-md-6">
+                <div className="requirement-card">
+                  <h4>
+                    <i className="bi bi-phone me-2"></i>Mobile Requirements
+                  </h4>
+                  <ul>
+                    <li>Android 8.0 or higher / iOS 12.0 or higher</li>
+                    <li>Minimum 2GB RAM</li>
+                    <li>50MB free storage space</li>
+                    <li>Internet connection for real-time updates</li>
+                    <li>Bluetooth 4.0+ for sensor connectivity</li>
+                  </ul>
+                </div>
+              </div>
+
+              <div className="col-md-6">
+                <div className="requirement-card">
+                  <h4>
+                    <i className="bi bi-laptop me-2"></i>Desktop Requirements
+                  </h4>
+                  <ul>
+                    <li>Windows 10+, macOS 10.14+, or Linux</li>
+                    <li>Minimum 4GB RAM</li>
+                    <li>100MB free storage space</li>
+                    <li>Modern web browser (Chrome, Firefox, Safari, Edge)</li>
+                    <li>Stable internet connection</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+     
 
         {/* Support Section */}
         <section className="support-section">
           <div className="container">
-            <div className="support-box">
+            <div className="support-box text-center">
               <h3>Need Help?</h3>
-              <p>Our team is here to support you every step of the way</p>
-              <div className="support-links">
-                <a href="#" className="support-link">
-                  <svg className="me-2" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M18 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 4h5v8l-2.5-1.5L6 12V4z" />
-                  </svg>
-                  Documentation
+              <p>Our support team is here to assist you with installation, setup, and troubleshooting.</p>
+              <div className="support-buttons mt-4">
+                <a href="/compliance" className="btn btn-outline-primary me-3">
+                  <i className="bi bi-chat-dots me-2"></i>Contact Support
                 </a>
-                <a href="#" className="support-link">
-                  <svg className="me-2" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z" />
-                  </svg>
-                  FAQ
-                </a>
-                <a href="#" className="support-link">
-                  <svg className="me-2" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6V9zm8 5H6v-2h8v2zm4-6H6V6h12v2z" />
-                  </svg>
-                  Community Forum
-                </a>
-                <a href="#" className="support-link">
-                  <svg className="me-2" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" />
-                  </svg>
-                  Contact Support
+                <a href="#" className="btn btn-outline-secondary">
+                  <i className="bi bi-file-text me-2"></i>View Documentation
                 </a>
               </div>
             </div>
           </div>
         </section>
+      </div>
 
-        <style>{`
+      {/* ✅ Footer moved outside the wrapper for proper placement */}
+      <Footer />
+
+      <style>{`
+        /* Import Google Fonts - matching home.tsx */
+        @import url('https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&family=Zalando+Sans+Expanded:ital,wght@0,200..900;1,200..900&display=swap');
+
         .download-page-wrapper {
-          background: #cfc4b2;
-          min-height: 100vh;
+          background: #CFC4B2;
+          min-height: calc(100vh - 80px);
+          margin-top: -80px;
+          font-family: 'Lexend', system-ui, sans-serif;
+          color: #374151;
         }
+  
 
-        .container {
-          max-width: 1200px;
-          margin: 0 auto;
-          padding: 0 20px;
-        }
-
-
-        .col-lg-6, .col-lg-4, .col-lg-3, .col-md-6, .col-md-4 {
-          padding: 0 15px;
-        }
-
-        .col-lg-6 { flex: 0 0 50%; max-width: 50%; }
-        .col-lg-4 { flex: 0 0 33.333%; max-width: 33.333%; }
-        .col-lg-3 { flex: 0 0 25%; max-width: 25%; }
-        .col-md-6 { flex: 0 0 50%; max-width: 50%; }
-        .col-md-4 { flex: 0 0 33.333%; max-width: 33.333%; }
-
-        .g-4 { gap: 1.5rem; }
-        .mt-4 { margin-top: 1.5rem; }
-        .mt-5 { margin-top: 3rem; }
-        .mb-4 { margin-bottom: 1.5rem; }
-        .me-2 { margin-right: 0.5rem; }
-        .text-center { text-align: center; }
-        .text-lg-start { text-align: left; }
-        .align-items-center { align-items: center; }
-        .img-fluid { max-width: 100%; height: auto; }
-
-        /* Hero Section */
         .download-hero {
-          background: linear-gradient(135deg, #1D492C, #84cc16);
-          padding: 100px 40px;
+          padding: 120px 20px 100px;
+          background: linear-gradient(135deg, #1d492c 0%, #2e7d32 100%);
           color: white;
           position: relative;
           overflow: hidden;
-         
-        }
-
-        .download-hero::before {
-          content: '';
-          position: absolute;
-          top: -50%;
-          right: -50%;
-          width: 200%;
-          height: 200%;
-          background: radial-gradient(circle, rgba(189, 224, 138, 0.1) 0%, transparent 70%);
-          animation: rotate 30s linear infinite;
-        }
-
-        @keyframes rotate {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
         }
 
         .download-hero-title {
           font-family: 'Zalando Sans Expanded', sans-serif;
-          font-size: 3.5rem;
+          font-size: clamp(2.5rem, 5vw, 4rem);
           font-weight: 800;
-          margin-bottom: 24px;
+          margin-bottom: 32px;
+          letter-spacing: -0.02em;
+          line-height: 1.1;
+          color: #f0fdf4;
           text-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
 
         .download-hero-subtitle {
-          font-size: 1.3rem;
-          margin-bottom: 32px;
-          line-height: 1.7;
+          font-family: 'Lexend', sans-serif;
+          font-size: clamp(1.2rem, 3vw, 1.5rem);
+          font-weight: 300;
+          margin-bottom: 40px;
           opacity: 0.95;
+          line-height: 1.7;
+          color: rgba(255, 255, 255, 0.95);
         }
 
         .download-primary-btn {
           display: inline-flex;
           align-items: center;
-          background: white;
-          color: #1D492C;
-          padding: 16px 40px;
-          border-radius: 50px;
+          gap: 16px;
+          padding: 20px 40px;
+          background: #bde08a;
+          color: #1d492c;
           text-decoration: none;
+          border-radius: 60px;
+          font-family: 'Lexend', sans-serif;
           font-weight: 700;
-          font-size: 1.1rem;
-          box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
-          transition: all 0.3s ease;
+          font-size: 1.2rem;
+          transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+          box-shadow: 0 8px 25px rgba(189, 224, 138, 0.4);
+          border: 2px solid rgba(255, 255, 255, 0.2);
+          position: relative;
+          overflow: hidden;
+        }
+
+        .download-primary-btn::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: -100%;
+          width: 100%;
+          height: 100%;
+          background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+          transition: left 0.6s;
+        }
+
+        .download-primary-btn:hover::before {
+          left: 100%;
         }
 
         .download-primary-btn:hover {
-          transform: translateY(-4px);
-          box-shadow: 0 12px 35px rgba(0, 0, 0, 0.3);
-          color: #1D492C;
+          background: #a8d176;
+          transform: translateY(-4px) scale(1.02);
+          box-shadow: 0 12px 35px rgba(189, 224, 138, 0.5);
+          color: #143820;
         }
 
         .download-hero-img {
           max-width: 400px;
           filter: drop-shadow(0 15px 35px rgba(0, 0, 0, 0.3));
-          animation: float 6s ease-in-out infinite;
+          transition: all 0.4s ease;
         }
 
-        @keyframes float {
-          0%, 100% { transform: translateY(0px); }
-          50% { transform: translateY(-20px); }
+        .download-hero-img:hover {
+          transform: scale(1.05);
         }
 
-        /* Device Highlights */
-        .device-highlights {
-          padding: 100px 20px;
-          background: white;
+        .installation-guide,
+        .getting-started-guide,
+        .system-requirements,
+        .support-section {
+          padding: 80px 0;
         }
 
         .section-title {
           font-family: 'Zalando Sans Expanded', sans-serif;
-          font-size: 3rem;
+          font-size: clamp(2.5rem, 5vw, 3.5rem);
           font-weight: 800;
-          color: #1D492C;
-          margin-bottom: 16px;
+          color: #4D2D18;
+          margin-bottom: 24px;
+          letter-spacing: -0.02em;
+          position: relative;
+        }
+
+        .section-title::after {
+          content: '';
+          position: absolute;
+          bottom: -12px;
+          left: 50%;
+          transform: translateX(-50%);
+          width: 80px;
+          height: 4px;
+          background: linear-gradient(135deg, #1d492c, #84cc16);
+          border-radius: 2px;
         }
 
         .section-subtitle {
+          font-family: 'Lexend', sans-serif;
           font-size: 1.2rem;
-          color: #6b7280;
-          max-width: 800px;
-          margin: 0 auto 40px;
+          font-weight: 300;
+          color: #8A6440;
+          margin-bottom: 3rem;
+          line-height: 1.8;
         }
 
-        .highlight-card {
-          background: #f0fdf4;
-          border: 2px solid #84cc16;
-          border-radius: 20px;
-          padding: 40px 30px;
-          text-align: center;
-          height: 100%;
-          transition: all 0.3s ease;
-        }
-
-        .highlight-card:hover {
-          transform: translateY(-8px);
-          box-shadow: 0 15px 35px rgba(132, 204, 22, 0.2);
-        }
-
-        .highlight-icon {
-          width: 80px;
-          height: 80px;
-          background: linear-gradient(135deg, #1D492C, #84cc16);
-          border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          margin: 0 auto 24px;
-          font-size: 2rem;
-          color: white;
-        }
-
-        .highlight-card h4 {
-          font-size: 1.4rem;
-          font-weight: 700;
-          color: #1D492C;
-          margin-bottom: 12px;
-        }
-
-        .highlight-card p {
-          color: #6b7280;
-          line-height: 1.6;
-          margin: 0;
-        }
-
-        .device-features-box {
-          background: linear-gradient(135deg, #1D492C, #143820);
-          border-radius: 30px;
-          padding: 60px;
-          color: white;
-        }
-
-        .device-img {
-          max-width: 400px;
-          filter: drop-shadow(0 10px 25px rgba(0, 0, 0, 0.3));
-        }
-
-        .features-title {
-          font-family: 'Zalando Sans Expanded', sans-serif;
-          font-size: 2.5rem;
-          font-weight: 800;
-          margin-bottom: 32px;
-        }
-
-        .features-list {
-          list-style: none;
-          padding: 0;
-          font-size: 1.1rem;
-        }
-
-        .features-list li {
-          margin-bottom: 16px;
-          display: flex;
-          align-items: center;
-        }
-
-        .check-icon {
-          color: #BDE08A;
-          margin-right: 12px;
-          flex-shrink: 0;
-        }
-
-        /* Installation Guide */
-        .installation-guide {
-          padding: 100px 20px;
-          background: #f9fafb;
-        }
-
-        .step-card {
+        .step-card,
+        .guide-card,
+        .requirement-card {
           background: white;
+          padding: 50px 32px;
           border-radius: 20px;
-          padding: 40px 30px;
-          text-align: center;
+          border-top-right-radius: 80px;
+          border-bottom-left-radius: 80px;
+          box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+          transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
           height: 100%;
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-          transition: all 0.3s ease;
+          border: 2px solid #84cc16;
+          position: relative;
+          overflow: hidden;
         }
 
-        .step-card:hover {
-          transform: translateY(-8px);
-          box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+        /* ✅ Removed all green line hover effects (::before pseudo-elements) */
+
+        .step-card:hover,
+        .guide-card:hover,
+        .requirement-card:hover {
+          transform: translateY(-12px) scale(1.02);
+          box-shadow: 0 20px 40px rgba(21, 128, 61, 0.15);
+          border-color: #84cc16;
+        }
+
+        .step-card h4,
+        .guide-card h4 {
+          font-family: 'Lexend', sans-serif;
+          font-size: 1.5rem;
+          font-weight: 700;
+          color: #1d492c;
+          margin-bottom: 15px;
+        }
+
+        .step-card p,
+        .guide-card p {
+          font-family: 'Lexend', sans-serif;
+          font-size: 1.05rem;
+          font-weight: 400;
+          color: #374151;
+          line-height: 1.7;
+          margin-bottom: 20px;
         }
 
         .step-number {
           width: 60px;
           height: 60px;
-          background: linear-gradient(135deg, #1D492C, #84cc16);
+          background: linear-gradient(135deg, #1d492c, #2e7d32);
+          color: white;
           border-radius: 50%;
           display: flex;
           align-items: center;
           justify-content: center;
-          margin: 0 auto 24px;
-          font-size: 1.8rem;
-          font-weight: 800;
-          color: white;
-        }
-
-        .step-card h4 {
+          font-family: 'Lexend', sans-serif;
           font-size: 1.5rem;
           font-weight: 700;
-          color: #1D492C;
-          margin-bottom: 16px;
-        }
-
-        .step-card p {
-          color: #6b7280;
-          margin-bottom: 24px;
+          margin-bottom: 20px;
+          box-shadow: 0 4px 15px rgba(29, 73, 44, 0.3);
         }
 
         .code-block {
           background: #1e293b;
-          border-radius: 12px;
-          padding: 16px;
-          text-align: left;
+          color: #10b981;
+          padding: 15px;
+          border-radius: 8px;
+          font-family: 'Courier New', monospace;
+          font-size: 0.9rem;
+          overflow-x: auto;
+          box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
         }
 
         .code-block code {
-          color: #BDE08A;
+          color: #10b981;
           font-family: 'Courier New', monospace;
-          font-size: 0.9rem;
-        }
-
-        .setup-info {
-          margin-top: 60px;
-        }
-
-        .info-box {
-          background: white;
-          border-radius: 20px;
-          padding: 40px;
-          height: 100%;
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-        }
-
-        .info-box h4 {
-          font-size: 1.5rem;
-          font-weight: 700;
-          color: #1D492C;
-          margin-bottom: 24px;
-          display: flex;
-          align-items: center;
-        }
-
-        .inline-icon {
-          margin-right: 12px;
-        }
-
-        .info-box ul {
-          list-style: none;
-          padding: 0;
-        }
-
-        .info-box li {
-          padding: 12px 0;
-          border-bottom: 1px solid #e5e7eb;
-          color: #6b7280;
-        }
-
-        .info-box li:last-child {
-          border-bottom: none;
-        }
-
-        /* Getting Started */
-        .getting-started {
-          padding: 100px 20px;
-          background: white;
-        }
-
-        .guide-card {
-          background: #f0fdf4;
-          border-radius: 20px;
-          padding: 40px 30px;
-          text-align: center;
-          height: 100%;
-          transition: all 0.3s ease;
-        }
-
-        .guide-card:hover {
-          transform: translateY(-8px);
-          box-shadow: 0 15px 35px rgba(132, 204, 22, 0.15);
         }
 
         .guide-icon {
-          width: 70px;
-          height: 70px;
-          background: linear-gradient(135deg, #1D492C, #84cc16);
-          border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          margin: 0 auto 20px;
-          font-size: 1.8rem;
-          color: white;
+          font-size: 3rem;
+          color: #2e7d32;
+          margin-bottom: 20px;
         }
 
-        .guide-card h5 {
-          font-size: 1.3rem;
+        .requirement-card h4 {
+          font-family: 'Lexend', sans-serif;
+          font-size: 1.4rem;
           font-weight: 700;
-          color: #1D492C;
-          margin-bottom: 12px;
+          color: #1d492c;
+          margin-bottom: 20px;
         }
 
-        .guide-card p {
-          color: #6b7280;
-          margin: 0;
+        .requirement-card ul {
+          list-style: none;
+          padding-left: 0;
         }
 
-        /* Support Section */
-        .support-section {
-          padding: 100px 20px;
-          background: #f9fafb;
+        .requirement-card ul li {
+          font-family: 'Lexend', sans-serif;
+          font-size: 1.05rem;
+          font-weight: 400;
+          color: #374151;
+          padding: 12px 0;
+          border-bottom: 1px solid #f0f0f0;
+          line-height: 1.7;
+        }
+
+        .requirement-card ul li:last-child {
+          border-bottom: none;
         }
 
         .support-box {
-          background: linear-gradient(135deg, #1D492C, #84cc16);
-          border-radius: 30px;
-          padding: 60px;
-          text-align: center;
+          background: linear-gradient(135deg, #1d492c, #2e7d32);
           color: white;
+          padding: 60px 40px;
+          border-radius: 32px;
+          box-shadow: 0 20px 40px rgba(21, 128, 61, 0.2);
+          position: relative;
+          overflow: hidden;
+        }
+
+        .support-box::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="support-pattern" width="30" height="30" patternUnits="userSpaceOnUse"><circle cx="15" cy="15" r="1" fill="rgba(255,255,255,0.1)"/></pattern></defs><rect width="100" height="100" fill="url(%23support-pattern)"/></svg>') repeat;
         }
 
         .support-box h3 {
           font-family: 'Zalando Sans Expanded', sans-serif;
           font-size: 2.5rem;
           font-weight: 800;
-          margin-bottom: 16px;
+          margin-bottom: 1rem;
+          letter-spacing: -0.02em;
+          text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+          position: relative;
+          z-index: 2;
         }
 
         .support-box p {
+          font-family: 'Lexend', sans-serif;
           font-size: 1.2rem;
-          margin-bottom: 40px;
+          font-weight: 300;
           opacity: 0.95;
+          line-height: 1.8;
+          position: relative;
+          z-index: 2;
         }
 
-        .support-links {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 20px;
-          justify-content: center;
+        .support-buttons {
+          position: relative;
+          z-index: 2;
         }
 
-        .support-link {
-          background: white;
-          color: #1D492C;
-          padding: 14px 32px;
-          border-radius: 50px;
-          text-decoration: none;
+        .support-buttons .btn {
+          font-family: 'Lexend', sans-serif;
+          padding: 15px 30px;
           font-weight: 600;
-          transition: all 0.3s ease;
-          display: inline-flex;
-          align-items: center;
+          border-radius: 50px;
+          transition: all 0.4s ease;
+          font-size: 1rem;
         }
 
-        .support-link:hover {
-          transform: translateY(-4px);
-          box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
-          color: #1D492C;
+        .support-buttons .btn-outline-primary {
+          color: white;
+          border-color: white;
+          border-width: 2px;
         }
 
-        /* Responsive */
+        .support-buttons .btn-outline-primary:hover {
+          background: white;
+          color: #1d492c;
+          transform: translateY(-2px);
+          box-shadow: 0 8px 20px rgba(255, 255, 255, 0.3);
+        }
+
+        .support-buttons .btn-outline-secondary {
+          color: white;
+          border-color: rgba(255, 255, 255, 0.5);
+          border-width: 2px;
+        }
+
+        .support-buttons .btn-outline-secondary:hover {
+          background: rgba(255, 255, 255, 0.2);
+          border-color: white;
+          transform: translateY(-2px);
+        }
+
         @media (max-width: 991px) {
-          .col-lg-6, .col-lg-4, .col-lg-3 {
-            flex: 0 0 100%;
-            max-width: 100%;
-          }
-          
-          .text-lg-start {
-            text-align: center;
-          }
-        }
-
-        @media (max-width: 768px) {
-          .col-md-6, .col-md-4 {
-            flex: 0 0 100%;
-            max-width: 100%;
+          .download-hero {
+            padding: 80px 20px 60px;
           }
 
           .download-hero-title {
             font-size: 2.5rem;
+            margin-bottom: 24px;
           }
 
           .download-hero-subtitle {
             font-size: 1.1rem;
+            margin-bottom: 32px;
+          }
+
+          .download-primary-btn {
+            padding: 16px 32px;
+            font-size: 1rem;
           }
 
           .section-title {
             font-size: 2rem;
+            margin-bottom: 20px;
           }
 
-          .device-features-box {
-            padding: 40px 30px;
+          .section-subtitle {
+            font-size: 1rem;
+            margin-bottom: 2rem;
           }
 
-          .features-title {
-            font-size: 2rem;
+          .step-card,
+          .guide-card,
+          .requirement-card {
+            padding: 40px 25px;
           }
 
           .support-box {
@@ -674,15 +592,33 @@ const Download: React.FC = () => {
           .support-box h3 {
             font-size: 2rem;
           }
+
+          .support-box p {
+            font-size: 1rem;
+          }
+        }
+
+        @media (max-width: 768px) {
+          .download-hero {
+            padding: 60px 20px 40px;
+          }
+
+          .installation-guide,
+          .getting-started-guide,
+          .system-requirements,
+          .support-section {
+            padding: 60px 0;
+          }
+
+          .step-card,
+          .guide-card,
+          .requirement-card {
+            padding: 30px 20px;
+          }
         }
       `}</style>
-           <Footer />
-      </div>
-      
     </>
-    
   )
-  
 }
 
 export default Download

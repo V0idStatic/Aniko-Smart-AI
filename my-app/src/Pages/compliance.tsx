@@ -5,14 +5,12 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import HeaderLogged from "../INCLUDE/header-logged";
 import HeaderUnlogged from "../INCLUDE/header-unlogged";
 import Footer from "../INCLUDE/footer";
-import { auth } from "../firebase";
-import { onAuthStateChanged, User } from "firebase/auth";
-import supabase from "../CONFIG/supabaseClient"; // ✅ Supabase client
-import Modal from "bootstrap/js/dist/modal"; // ✅ direct import for modal
+import supabase from "../CONFIG/supabaseClient";
+import Modal from "bootstrap/js/dist/modal";
 import "bootstrap/dist/js/bootstrap.bundle.min.js";
 
 const Compliance: React.FC = () => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<any>(null);
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -25,22 +23,37 @@ const Compliance: React.FC = () => {
   const [submitting, setSubmitting] = useState(false);
   const [modalMessage, setModalMessage] = useState("");
 
+  // ✅ Use Supabase auth instead of Firebase
   useEffect(() => {
-    const unsub = onAuthStateChanged(auth, (u) => setUser(u));
-    return () => unsub();
+    // Check current session
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      setUser(session?.user || null);
+    };
+
+    checkSession();
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user || null);
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
   // ✅ Autofill email + name if user logged in
   useEffect(() => {
     if (user) {
+      const fullName = user.user_metadata?.full_name || "";
+      const nameParts = fullName.split(" ");
+      
       setFormData((prev) => ({
         ...prev,
         email: user.email || "",
-        firstName: user.displayName ? user.displayName.split(" ")[0] : prev.firstName,
-        lastName:
-          user.displayName && user.displayName.split(" ").length > 1
-            ? user.displayName.split(" ").slice(1).join(" ")
-            : prev.lastName,
+        firstName: nameParts[0] || prev.firstName,
+        lastName: nameParts.length > 1 ? nameParts.slice(1).join(" ") : prev.lastName,
       }));
     }
   }, [user]);
@@ -74,16 +87,18 @@ const Compliance: React.FC = () => {
       ]);
 
       if (error) {
-        console.error(" Error inserting message:", error);
-        setModalMessage(" Failed to send message. Please try again.");
+        console.error("❌ Error inserting message:", error);
+        setModalMessage("❌ Failed to send message. Please try again.");
       } else {
-        setModalMessage(" Your message has been successfully sent!");
+        setModalMessage("✅ Your message has been successfully sent!");
+        
+        // Reset form but keep user info if logged in
+        const fullName = user?.user_metadata?.full_name || "";
+        const nameParts = fullName.split(" ");
+        
         setFormData({
-          firstName: user?.displayName ? user.displayName.split(" ")[0] : "",
-          lastName:
-            user?.displayName && user.displayName.split(" ").length > 1
-              ? user.displayName.split(" ").slice(1).join(" ")
-              : "",
+          firstName: nameParts[0] || "",
+          lastName: nameParts.length > 1 ? nameParts.slice(1).join(" ") : "",
           email: user?.email || "",
           phone: "",
           subject: "",
@@ -105,6 +120,7 @@ const Compliance: React.FC = () => {
 
   return (
     <div className="page-wrapper">
+      {/* ✅ Conditionally render header based on Supabase auth state */}
       {user ? <HeaderLogged /> : <HeaderUnlogged />}
 
       <div className="main-content">
@@ -179,7 +195,7 @@ const Compliance: React.FC = () => {
                         onChange={handleChange}
                         placeholder="First Name"
                         required
-                        readOnly={!!user && !!user.displayName}
+                        readOnly={!!user && !!user.user_metadata?.full_name}
                       />
                       <label htmlFor="firstName">First Name</label>
                     </div>
@@ -195,7 +211,7 @@ const Compliance: React.FC = () => {
                         onChange={handleChange}
                         placeholder="Last Name"
                         required
-                        readOnly={!!user && !!user.displayName}
+                        readOnly={!!user && !!user.user_metadata?.full_name}
                       />
                       <label htmlFor="lastName">Last Name</label>
                     </div>

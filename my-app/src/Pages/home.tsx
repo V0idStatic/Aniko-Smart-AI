@@ -70,7 +70,7 @@ const Home: React.FC = () => {
                 AI-powered plant diagnosis, and climate pattern analysis.
                 Join thousands of farmers growing smarter with Aniko.
               </p>
-              <a href="#download" className="hero-cta">
+              <a href="download" className="hero-cta">
                 <span>Download Free App</span>
                 <svg
                   width="20"

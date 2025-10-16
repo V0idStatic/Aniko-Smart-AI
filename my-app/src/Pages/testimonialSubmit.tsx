@@ -4,19 +4,32 @@ import "../CSS/testimonialSubmit.css";
 import HeaderLogged from "../INCLUDE/header-logged";
 import HeaderUnlogged from "../INCLUDE/header-unlogged";
 import Footer from "../INCLUDE/footer";
-import { auth } from "../firebase";
-import { onAuthStateChanged, User } from "firebase/auth";
 import supabase from "../CONFIG/supabaseClient";
 import Modal from "bootstrap/js/dist/modal";
 
 const TestimonialSubmit: React.FC = () => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<any>(null);
   const [testimonialText, setTestimonialText] = useState("");
   const [charCount, setCharCount] = useState(0);
 
+  // ✅ Use Supabase auth instead of Firebase
   useEffect(() => {
-    const unsub = onAuthStateChanged(auth, (u) => setUser(u));
-    return () => unsub();
+    // Check current session
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      setUser(session?.user || null);
+    };
+
+    checkSession();
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user || null);
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
   const handleSubmit = async () => {
@@ -28,7 +41,7 @@ const TestimonialSubmit: React.FC = () => {
     try {
       const { error } = await supabase.from("testimonials").insert([
         {
-          user_id: user.uid,
+          user_id: user.id, // ✅ Changed from user.uid to user.id (Supabase format)
           testimonial: testimonialText,
           status: "pending",
         },
@@ -55,7 +68,7 @@ const TestimonialSubmit: React.FC = () => {
 
   return (
     <div className="testimonialCol-container">
-      {/* ✅ Conditional Header */}
+      {/* ✅ Conditionally render header based on Supabase auth state */}
       {user ? <HeaderLogged /> : <HeaderUnlogged />}
 
       <div className="row testimonialCol-row align-items-stretch g-0">
