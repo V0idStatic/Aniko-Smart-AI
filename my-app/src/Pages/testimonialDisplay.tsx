@@ -2,98 +2,173 @@
 
 import type React from "react"
 import { useEffect, useState } from "react"
-import { onAuthStateChanged, type User } from "firebase/auth"
-import { auth } from "../firebase" // adjust path if needed
 import supabase from "../CONFIG/supabaseClient"
+import supabaseAdmin from "../CONFIG/supabaseAdmin"
 import HeaderLogged from "../INCLUDE/header-logged"
 import HeaderUnlogged from "../INCLUDE/header-unlogged"
 import Footer from "../INCLUDE/footer"
 import { useNavigate } from "react-router-dom"
 
-type UserRow = {
-  uid: string
-  username?: string | null
-  email?: string | null
-  profile_picture?: string | null
-}
+type AuthUser = {
+  id: string;
+  email?: string;
+  user_metadata?: {
+    full_name?: string;
+    avatar_url?: string;
+    [key: string]: any;
+  };
+};
 
 type RawTestimonial = {
-  id: string
-  testimonial: string
-  status?: string | null
-  created_at?: string | null
-  user_id?: string | null
-}
+  id: string;
+  testimonial: string;
+  status?: string | null;
+  created_at?: string | null;
+  user_id?: string | null;
+};
 
 type TestimonialRow = {
-  id: string
-  testimonial: string
-  status?: string | null
-  created_at?: string | null
-  users: {
-    username?: string | null
-    email?: string | null
-    profile_picture?: string | null
-  } | null
-}
+  id: string;
+  testimonial: string;
+  status?: string | null;
+  created_at?: string | null;
+  user: {
+    name?: string;
+    email?: string;
+    avatar?: string;
+  } | null;
+};
 
 const TestimonialDisplay: React.FC = () => {
-  const [authUser, setAuthUser] = useState<User | null>(null)
+  const [authUser, setAuthUser] = useState<any>(null)
   const [data, setData] = useState<TestimonialRow[]>([])
   const [loading, setLoading] = useState(true)
   const [visibleCount, setVisibleCount] = useState(9)
   const navigate = useNavigate()
 
+  // ✅ Use Supabase auth instead of Firebase
   useEffect(() => {
-    const unsub = onAuthStateChanged(auth, (user) => setAuthUser(user))
-    return () => unsub()
+    // Check current session
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession()
+      setAuthUser(session?.user || null)
+    }
+
+    checkSession()
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setAuthUser(session?.user || null)
+    })
+
+    return () => {
+      subscription.unsubscribe()
+    }
   }, [])
 
   useEffect(() => {
     const fetchTestimonials = async () => {
       setLoading(true)
-      const { data: tData, error: tErr } = await supabase
-        .from("testimonials")
-        .select("id, testimonial, status, created_at, user_id")
-        .eq("status", "approved")
-        .order("created_at", { ascending: false })
+      
+      try {
+        console.log("🔄 Starting to fetch testimonials...");
+        
+        // Fetch approved testimonials
+        const { data: tData, error: tErr } = await supabase
+          .from("testimonials")
+          .select("id, testimonial, status, created_at, user_id")
+          .eq("status", "approved")
+          .order("created_at", { ascending: false });
 
-      if (tErr) {
-        console.error("Error fetching testimonials:", tErr)
-        setData([])
-        setLoading(false)
-        return
-      }
-
-      const testimonials = (tData as RawTestimonial[]) ?? []
-      const userIds = Array.from(new Set(testimonials.map((t) => t.user_id).filter(Boolean) as string[]))
-
-      let usersMap: Record<string, UserRow> = {}
-      if (userIds.length) {
-        const { data: uData, error: uErr } = await supabase
-          .from("users")
-          .select("uid, username, email, profile_picture")
-          .in("uid", userIds)
-
-        if (!uErr && uData) {
-          usersMap = (uData as UserRow[]).reduce<Record<string, UserRow>>((acc, u) => {
-            acc[u.uid] = u
-            return acc
-          }, {})
+        if (tErr) {
+          console.error("❌ Error fetching testimonials:", tErr);
+          setData([]);
+          setLoading(false);
+          return;
         }
+
+        const testimonials = (tData as RawTestimonial[]) ?? [];
+        console.log("✅ Fetched testimonials:", testimonials.length);
+
+        if (!testimonials.length) {
+          console.log("⚠️ No testimonials found");
+          setData([]);
+          setLoading(false);
+          return;
+        }
+
+        // Fetch ALL auth users using supabaseAdmin
+        console.log("🔄 Fetching all auth users...");
+        const { data: { users: authUsers }, error: uErr } = await supabaseAdmin.auth.admin.listUsers();
+
+        if (uErr) {
+          console.error("❌ Error fetching auth users:", uErr);
+          // Still show testimonials but without user info
+          const combined: TestimonialRow[] = testimonials.map((t) => ({
+            id: t.id,
+            testimonial: t.testimonial,
+            status: t.status ?? null,
+            created_at: t.created_at ?? null,
+            user: null,
+          }));
+          setData(combined);
+          setLoading(false);
+          return;
+        }
+
+        console.log("✅ Fetched auth users:", authUsers?.length || 0);
+
+        // Create a map of user ID to user data
+        const usersMap: Record<string, AuthUser> = {};
+        if (authUsers) {
+          authUsers.forEach((authUser) => {
+            const cleanId = authUser.id.trim();
+            usersMap[cleanId] = authUser as AuthUser;
+            console.log(`👤 Mapped user: ${cleanId} -> ${authUser.email}`);
+          });
+        }
+
+        // Combine testimonials with user data
+        const combined: TestimonialRow[] = testimonials.map((t) => {
+          const cleanUserId = t.user_id?.trim();
+          const matchedAuthUser = cleanUserId ? usersMap[cleanUserId] : null;
+          
+          if (matchedAuthUser) {
+            console.log(`✅ Found user for testimonial ${t.id}:`, {
+              name: matchedAuthUser.user_metadata?.full_name,
+              email: matchedAuthUser.email,
+              avatar: matchedAuthUser.user_metadata?.avatar_url
+            });
+          } else {
+            console.log(`❌ No user found for testimonial ${t.id} with user_id: "${cleanUserId}"`);
+          }
+          
+          const userData = matchedAuthUser
+            ? {
+                name: matchedAuthUser.user_metadata?.full_name || matchedAuthUser.email?.split("@")[0] || "Anonymous",
+                email: matchedAuthUser.email || "No email",
+                avatar: matchedAuthUser.user_metadata?.avatar_url ?? undefined,
+              }
+            : null;
+          
+          return {
+            id: t.id,
+            testimonial: t.testimonial,
+            status: t.status ?? null,
+            created_at: t.created_at ?? null,
+            user: userData,
+          };
+        });
+
+        console.log("✅ Final combined data:", combined);
+        setData(combined);
+      } catch (err) {
+        console.error("❌ Error in fetchTestimonials:", err);
+        setData([]);
+      } finally {
+        setLoading(false);
       }
-
-      const combined: TestimonialRow[] = testimonials.map((t) => ({
-        id: t.id,
-        testimonial: t.testimonial,
-        status: t.status ?? null,
-        created_at: t.created_at ?? null,
-        users: t.user_id ? (usersMap[t.user_id] ?? null) : null,
-      }))
-
-      setData(combined)
-      setLoading(false)
-    }
+    };
 
     fetchTestimonials()
   }, [])
@@ -226,9 +301,10 @@ const TestimonialDisplay: React.FC = () => {
         .testDisplay-userDetails {
             display: flex;
             font-family: "Lexend"; 
+            align-items: center;
         }
 
-        .testDisplay-card img {
+        .testDisplay-userProfile {
             width: 50px;
             height: 50px;
             border-radius: 50%;
@@ -236,31 +312,58 @@ const TestimonialDisplay: React.FC = () => {
             margin-bottom: 1rem;
         }
 
-        .testDisplay-card h5 {
-            margin: 0 0 0.25rem;
-            font-size: 1.1rem;
-            text-align: left !important;
-            margin-left: 1rem;
-            color: var(--dark-brown);
-            font-weight: bold !important; 
+        .testDisplay-defaultAvatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: var(--pastel-green);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
         }
 
-        .testDisplay-card small {
+        .testDisplay-defaultAvatar i {
+            font-size: 30px;
+            color: var(--primary-green);
+        }
+
+        .testDisplay-nameDeets {
+            margin-left: 1rem;
+            text-align: left;
+        }
+
+        .testDisplay-username {
+            margin: 0 0 0.25rem;
+            font-size: 1.1rem;
+            color: var(--dark-brown);
+            font-weight: bold !important; 
+            font-family: "Lexend";
+        }
+
+        .testDisplay-email {
             display: block;
             color: var(--primary-brown);
             font-family: "Lexend";
-            margin-bottom: 0.75rem;
-            text-align: left !important;
-            margin-left: 1rem;
+            font-size: 0.9rem;
         }
 
-        .testDisplay-card p {
+        .testDisplay-text {
             font-size: 0.95rem;
             line-height: 1.4;
             color: var(--primary-green);
             font-family: "Lexend";
             text-align: left !important;
             margin-top: 1.55rem;  
+        }
+
+        .testDisplay-date {
+            display: block;
+            margin-top: 1rem;
+            color: var(--dark-gray);
+            font-size: 0.85rem;
+            text-align: right;
+            font-family: "Lexend";
         }
 
         .testDisplay-view-more-container {
@@ -326,20 +429,24 @@ const TestimonialDisplay: React.FC = () => {
                 margin-bottom: 1.5rem;
             }
 
-            .testDisplay-card img {
+            .testDisplay-userProfile, .testDisplay-defaultAvatar {
                 width: 40px;
                 height: 40px;
             }
 
-            .testDisplay-card h5 {
+            .testDisplay-defaultAvatar i {
+                font-size: 24px;
+            }
+
+            .testDisplay-username {
                 font-size: 0.95rem;
             }
 
-            .testDisplay-card small {
+            .testDisplay-email {
                 font-size: 0.75rem;
             }
 
-            .testDisplay-card p {
+            .testDisplay-text {
                 font-size: 0.85rem;
             }
 
@@ -383,20 +490,24 @@ const TestimonialDisplay: React.FC = () => {
                 margin-bottom: 2rem;
             }
 
-            .testDisplay-card img {
+            .testDisplay-userProfile, .testDisplay-defaultAvatar {
                 width: 45px;
                 height: 45px;
             }
 
-            .testDisplay-card h5 {
+            .testDisplay-defaultAvatar i {
+                font-size: 26px;
+            }
+
+            .testDisplay-username {
                 font-size: 1rem;
             }
 
-            .testDisplay-card small {
+            .testDisplay-email {
                 font-size: 0.8rem;
             }
 
-            .testDisplay-card p {
+            .testDisplay-text {
                 font-size: 0.9rem;
             }
 
@@ -440,20 +551,24 @@ const TestimonialDisplay: React.FC = () => {
                 margin-bottom: 2.25rem;
             }
 
-            .testDisplay-card img {
+            .testDisplay-userProfile, .testDisplay-defaultAvatar {
                 width: 48px;
                 height: 48px;
             }
 
-            .testDisplay-card h5 {
+            .testDisplay-defaultAvatar i {
+                font-size: 28px;
+            }
+
+            .testDisplay-username {
                 font-size: 1.05rem;
             }
 
-            .testDisplay-card small {
+            .testDisplay-email {
                 font-size: 0.85rem;
             }
 
-            .testDisplay-card p {
+            .testDisplay-text {
                 font-size: 0.92rem;
             }
 
@@ -497,20 +612,24 @@ const TestimonialDisplay: React.FC = () => {
                 margin-bottom: 2.5rem;
             }
 
-            .testDisplay-card img {
+            .testDisplay-userProfile, .testDisplay-defaultAvatar {
                 width: 50px;
                 height: 50px;
             }
 
-            .testDisplay-card h5 {
+            .testDisplay-defaultAvatar i {
+                font-size: 30px;
+            }
+
+            .testDisplay-username {
                 font-size: 1.08rem;
             }
 
-            .testDisplay-card small {
+            .testDisplay-email {
                 font-size: 0.88rem;
             }
 
-            .testDisplay-card p {
+            .testDisplay-text {
                 font-size: 0.94rem;
             }
 
@@ -554,20 +673,24 @@ const TestimonialDisplay: React.FC = () => {
                 margin-bottom: 2.75rem;
             }
 
-            .testDisplay-card img {
+            .testDisplay-userProfile, .testDisplay-defaultAvatar {
                 width: 50px;
                 height: 50px;
             }
 
-            .testDisplay-card h5 {
+            .testDisplay-defaultAvatar i {
+                font-size: 30px;
+            }
+
+            .testDisplay-username {
                 font-size: 1.09rem;
             }
 
-            .testDisplay-card small {
+            .testDisplay-email {
                 font-size: 0.9rem;
             }
 
-            .testDisplay-card p {
+            .testDisplay-text {
                 font-size: 0.95rem;
             }
 
@@ -611,20 +734,24 @@ const TestimonialDisplay: React.FC = () => {
                 margin-bottom: 2.85rem;
             }
 
-            .testDisplay-card img {
+            .testDisplay-userProfile, .testDisplay-defaultAvatar {
                 width: 50px;
                 height: 50px;
             }
 
-            .testDisplay-card h5 {
+            .testDisplay-defaultAvatar i {
+                font-size: 30px;
+            }
+
+            .testDisplay-username {
                 font-size: 1.095rem;
             }
 
-            .testDisplay-card small {
+            .testDisplay-email {
                 font-size: 0.92rem;
             }
 
-            .testDisplay-card p {
+            .testDisplay-text {
                 font-size: 0.95rem;
             }
 
@@ -643,7 +770,9 @@ const TestimonialDisplay: React.FC = () => {
         }
       `}</style>
 
+      {/* ✅ Conditionally render header based on Supabase auth state */}
       {authUser ? <HeaderLogged /> : <HeaderUnlogged />}
+      
       <main>
         <section className="testDisplay-section">
           <h2>Hear Directly From Our Users</h2>
@@ -671,16 +800,35 @@ const TestimonialDisplay: React.FC = () => {
                 {data.slice(0, visibleCount).map((t) => (
                   <div className="testDisplay-card" key={t.id}>
                     <div className="testDisplay-userDetails">
-                      <img
-                        src={t.users?.profile_picture || "/PICTURES/default-avatar.png" || "/placeholder.svg"}
-                        alt={t.users?.username || "User"}
-                      />
-                      <div>
-                        <h5>{t.users?.username ?? "Unknown User"}</h5>
-                        <small>{t.users?.email ?? "No email"}</small>
+                      {t.user?.avatar ? (
+                        <img
+                          src={t.user.avatar}
+                          alt={t.user.name || "User"}
+                          className="testDisplay-userProfile"
+                          onError={(e) => {
+                            e.currentTarget.src = "/PICTURES/default-avatar.png";
+                          }}
+                        />
+                      ) : (
+                        <div className="testDisplay-userProfile testDisplay-defaultAvatar">
+                          <i className="bi bi-person-circle"></i>
+                        </div>
+                      )}
+                      <div className="testDisplay-nameDeets">
+                        <h5 className="testDisplay-username">{t.user?.name ?? "Anonymous User"}</h5>
+                        <small className="testDisplay-email">{t.user?.email ?? "No email"}</small>
                       </div>
                     </div>
-                    <p>"{t.testimonial}"</p>
+                    <p className="testDisplay-text">"{t.testimonial}"</p>
+                    {t.created_at && (
+                      <small className="testDisplay-date">
+                        {new Date(t.created_at).toLocaleDateString("en-US", {
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                        })}
+                      </small>
+                    )}
                   </div>
                 ))}
               </div>

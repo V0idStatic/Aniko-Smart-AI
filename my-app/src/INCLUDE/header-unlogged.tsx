@@ -3,7 +3,8 @@
 import type React from "react"
 import { useEffect, useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
-import supabase from "../CONFIG/supabaseClient" // ✅ Changed from firebase
+import { HashLink } from "react-router-hash-link"
+import supabase from "../CONFIG/supabaseClient"
 import "bootstrap-icons/font/bootstrap-icons.css"
 import "bootstrap/dist/css/bootstrap.min.css"
 
@@ -11,7 +12,6 @@ const HeaderUnlogged: React.FC = () => {
   const navigate = useNavigate()
   const [menuOpen, setMenuOpen] = useState(false)
 
-  // Close when clicking outside or pressing ESC
   useEffect(() => {
     const handleOutsideClick = (e: MouseEvent) => {
       const navbar = document.getElementById("navbarNav")
@@ -37,7 +37,6 @@ const HeaderUnlogged: React.FC = () => {
   const requireLogin = async (e: React.MouseEvent, targetPath: string) => {
     e.preventDefault()
     
-    // ✅ Check Supabase session instead of Firebase
     const { data: { session } } = await supabase.auth.getSession()
     
     if (!session?.user) {
@@ -51,12 +50,10 @@ const HeaderUnlogged: React.FC = () => {
     <header className="floating-header">
       <nav className="navbar navbar-expand-lg">
         <div className="container-fluid">
-          {/* Logo */}
           <Link className="navbar-brand" to="/">
             <img src="/PICTURES/Logo-hr.png" alt="Aniko Logo" height="30" className="d-inline-block align-text-top" />
           </Link>
 
-          {/* Burger Button */}
           <button
             className="navbar-toggler border-0"
             type="button"
@@ -68,7 +65,6 @@ const HeaderUnlogged: React.FC = () => {
           </button>
 
           <div className={`side-panel ${menuOpen ? "open" : ""}`} id="navbarNav">
-            {/* Close button inside panel */}
             <button className="close-btn" onClick={() => setMenuOpen(false)} aria-label="Close menu">
               <i className="bi bi-x-lg"></i>
             </button>
@@ -80,37 +76,36 @@ const HeaderUnlogged: React.FC = () => {
                 </Link>
               </li>
               <li className="nav-item">
-                <a className="nav-link" href="#about" onClick={() => setMenuOpen(false)}>
+                <HashLink smooth className="nav-link" to="/#about" onClick={() => setMenuOpen(false)}>
                   <i className="bi bi-info-circle me-2"></i>About
-                </a>
+                </HashLink>
               </li>
               <li className="nav-item">
-                <a className="nav-link" href="#features" onClick={() => setMenuOpen(false)}>
+                <HashLink smooth className="nav-link" to="/#features" onClick={() => setMenuOpen(false)}>
                   <i className="bi bi-star me-2"></i>Features
-                </a>
+                </HashLink>
               </li>
               <li className="nav-item">
-                <a className="nav-link" href="testimonialDisplay" onClick={() => setMenuOpen(false)}>
+                <Link className="nav-link" to="/testimonialDisplay" onClick={() => setMenuOpen(false)}>
                   <i className="bi bi-chat-quote me-2"></i>Testimonial
-                </a>
+                </Link>
               </li>
               <li className="nav-item">
-                <a className="nav-link" href="#download" onClick={() => setMenuOpen(false)}>
+                <Link className="nav-link" to="/download" onClick={() => setMenuOpen(false)}>
                   <i className="bi bi-download me-2"></i>Download
-                </a>
+                </Link>
               </li>
               <li className="nav-item">
-                <a className="nav-link" href="#why-aniko" onClick={() => setMenuOpen(false)}>
+                <HashLink smooth className="nav-link" to="/#why-aniko" onClick={() => setMenuOpen(false)}>
                   <i className="bi bi-question-circle me-2"></i>Why Aniko
-                </a>
+                </HashLink>
               </li>
               <li className="nav-item">
-                <a className="nav-link" href="#team" onClick={() => setMenuOpen(false)}>
+                <HashLink smooth className="nav-link" to="/#team" onClick={() => setMenuOpen(false)}>
                   <i className="bi bi-people me-2"></i>Team
-                </a>
+                </HashLink>
               </li>
 
-              {/* Requires login */}
               <li className="nav-item">
                 <a
                   className="nav-link"
@@ -125,7 +120,6 @@ const HeaderUnlogged: React.FC = () => {
               </li>
             </ul>
 
-            {/* Login Button */}
             <div className="mt-4">
               <Link to="/login" className="btn btn-outline-light w-100 rounded-pill" onClick={() => setMenuOpen(false)}>
                 <i className="bi bi-box-arrow-in-right me-2"></i>Login
@@ -135,7 +129,6 @@ const HeaderUnlogged: React.FC = () => {
         </div>
       </nav>
 
-      {/* Backdrop when side panel open */}
       {menuOpen && <div className="backdrop" onClick={() => setMenuOpen(false)}></div>}
 
       <style>{`
@@ -176,7 +169,6 @@ const HeaderUnlogged: React.FC = () => {
           color: #112822;
         }
 
-        /* Side Panel Styles */
         .side-panel {
           position: fixed;
           top: 0;
@@ -189,7 +181,6 @@ const HeaderUnlogged: React.FC = () => {
           transition: right 0.3s ease-in-out;
           z-index: 1070;
           overflow-y: auto;
-          /* Added flexbox centering for side panel content */
           display: flex;
           flex-direction: column;
           align-items: center;
@@ -226,24 +217,30 @@ const HeaderUnlogged: React.FC = () => {
           border-radius: 8px;
           display: flex;
           align-items: center;
-          /* Center the content within each nav link */
           justify-content: center;
           transition: all 0.2s;
         }
 
         .side-panel .nav-link:hover {
           background: rgba(189, 224, 138, 0.1);
-          /* Removed left padding shift on hover to maintain center alignment */
         }
 
-      
+        .backdrop {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100vw;
+          height: 100vh;
+          background: rgba(0, 0, 0, 0.5);
+          z-index: 1065;
+          animation: fadeIn 0.3s;
+        }
 
         @keyframes fadeIn {
           from { opacity: 0; }
           to { opacity: 1; }
         }
 
-        /* Desktop: Show normal navbar */
         @media (min-width: 992px) {
           .navbar-toggler {
             display: none;
@@ -260,7 +257,6 @@ const HeaderUnlogged: React.FC = () => {
             align-items: center;
             flex-direction: row;
             overflow: visible;
-            /* Added flex: 1 to allow navbar to take full width */
             flex: 1;
           }
 
@@ -270,7 +266,6 @@ const HeaderUnlogged: React.FC = () => {
 
           .side-panel .navbar-nav {
             flex-direction: row;
-            /* Centered the navigation items horizontally */
             margin: 0 auto;
             justify-content: center;
           }
@@ -307,7 +302,6 @@ const HeaderUnlogged: React.FC = () => {
           }
         }
 
-        /* Medium Screens (992px - 1081px): Slightly smaller navs and buttons */
         @media (min-width: 992px) and (max-width: 1081px) {
           .floating-header {
             padding: 8px 16px;

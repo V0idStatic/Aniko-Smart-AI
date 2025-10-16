@@ -6,9 +6,8 @@ import { Link, useNavigate } from "react-router-dom"
 import { HashLink } from "react-router-hash-link"
 import "bootstrap-icons/font/bootstrap-icons.css"
 import "bootstrap/dist/css/bootstrap.min.css"
-import supabase from "../CONFIG/supabaseClient" // ✅ Changed from firebase
+import supabase from "../CONFIG/supabaseClient"
 
-// ✅ Define Supabase User type
 interface SupabaseUser {
   id: string
   email?: string
@@ -23,12 +22,9 @@ const Header: React.FC = () => {
   const [user, setUser] = useState<SupabaseUser | null>(null)
   const [menuOpen, setMenuOpen] = useState(false)
 
-  // ✅ Check Supabase auth state instead of Firebase
   useEffect(() => {
-    // Check initial session
     checkUser()
 
-    // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user || null)
     })
@@ -43,7 +39,6 @@ const Header: React.FC = () => {
     setUser(session?.user || null)
   }
 
-  // Close when clicking outside or pressing ESC
   useEffect(() => {
     const handleOutsideClick = (e: MouseEvent) => {
       const navbar = document.getElementById("navbarNav")
@@ -66,7 +61,6 @@ const Header: React.FC = () => {
     }
   }, [menuOpen])
 
-  // ✅ Use Supabase sign out instead of Firebase
   const handleLogout = async () => {
     const confirmed = window.confirm("Are you sure you want to logout?")
     if (confirmed) {
@@ -80,12 +74,10 @@ const Header: React.FC = () => {
     <header className="floating-header">
       <nav className="navbar navbar-expand-lg">
         <div className="container-fluid">
-          {/* Logo */}
           <Link className="navbar-brand" to="/">
             <img src="/PICTURES/Logo-hr.png" alt="Aniko Logo" height="30" className="d-inline-block align-text-top" />
           </Link>
 
-          {/* Burger Button */}
           <button
             className="navbar-toggler border-0"
             type="button"
@@ -97,7 +89,6 @@ const Header: React.FC = () => {
           </button>
 
           <div className={`side-panel ${menuOpen ? "open" : ""}`} id="navbarNav">
-            {/* Close button inside panel */}
             <button className="close-btn" onClick={() => setMenuOpen(false)} aria-label="Close menu">
               <i className="bi bi-x-lg"></i>
             </button>
@@ -194,7 +185,6 @@ const Header: React.FC = () => {
         </div>
       </nav>
 
-      {/* Backdrop when side panel open */}
       {menuOpen && <div className="backdrop" onClick={() => setMenuOpen(false)}></div>}
 
       <style>{`
@@ -235,7 +225,6 @@ const Header: React.FC = () => {
           color: #112822;
         }
 
-        /* Side Panel Styles */
         .side-panel {
           position: fixed;
           top: 0;
@@ -292,12 +281,22 @@ const Header: React.FC = () => {
           background: rgba(189, 224, 138, 0.1);
         }
 
+        .backdrop {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100vw;
+          height: 100vh;
+          background: rgba(0, 0, 0, 0.5);
+          z-index: 1065;
+          animation: fadeIn 0.3s;
+        }
+
         @keyframes fadeIn {
           from { opacity: 0; }
           to { opacity: 1; }
         }
 
-        /* Desktop: Show normal navbar */
         @media (min-width: 992px) {
           .navbar-toggler {
             display: none;
@@ -360,8 +359,6 @@ const Header: React.FC = () => {
           }
         }
 
-        /* Medium Screens (992px - 1202px) */
-        /* Extended the range from 1081px to 1202px for smaller nav and button sizes */
         @media (min-width: 992px) and (max-width: 1202px) {
           .floating-header {
             padding: 8px 16px;
