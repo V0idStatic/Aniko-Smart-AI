@@ -74,6 +74,35 @@ export const styles = StyleSheet.create({
   },
   plantCardContent: {
     padding: 24,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  plantImageWrapper: {
+    width: 80,
+    height: 80,
+    borderRadius: 12,
+    marginRight: 16,
+    overflow: 'hidden',
+  },
+  plantImage: {
+    width: '100%',
+    height: '100%',
+  },
+  plantImagePlaceholder: {
+    width: '100%',
+    height: '100%',
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.2)',
+  },
+  plantImagePlaceholderText: {
+    color: 'rgba(255,255,255,0.6)',
+    fontSize: 10,
+    fontWeight: '500',
+    marginTop: 4,
   },
   plantTextWrapper: {
     flex: 1,
@@ -881,4 +910,884 @@ export const styles = StyleSheet.create({
     color: "#666",
     fontWeight: "600",
   },
+
+  // Live Plant Suggestions Styles
+  liveSuggestionsCard: {
+    backgroundColor: COLORS.white,
+    borderRadius: 16,
+    padding: 20,
+    marginVertical: 10,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+  liveSuggestionsHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  liveSuggestionsTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: COLORS.primaryGreen,
+  },
+  liveSuggestionsSubtitle: {
+    fontSize: 14,
+    color: COLORS.textSecondary,
+    marginBottom: 15,
+  },
+  expandButton: {
+    padding: 8,
+  },
+  suggestionsContent: {
+    marginTop: 10,
+  },
+  suggestionSection: {
+    marginBottom: 20,
+  },
+  suggestionSectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  suggestionSectionTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginLeft: 8,
+  },
+  suggestionScroll: {
+    flexDirection: 'row',
+  },
+  suggestionPlantCard: {
+    backgroundColor: COLORS.lightGreen,
+    borderRadius: 12,
+    padding: 12,
+    marginRight: 12,
+    minWidth: 140,
+    maxWidth: 160,
+  },
+  compatibleCard: {
+    borderWidth: 2,
+    borderColor: '#4CAF50',
+  },
+  incompatibleCard: {
+    borderWidth: 2,
+    borderColor: '#FF9800',
+  },
+  suggestionPlantName: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: COLORS.primaryGreen,
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  compatibilityScore: {
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  scoreText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: COLORS.textPrimary,
+    marginBottom: 4,
+  },
+  scoreStars: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+  },
+  suggestionLocation: {
+    fontSize: 11,
+    color: COLORS.textSecondary,
+    textAlign: 'center',
+  },
+
+  // New Live Suggestions Styles (for compatibility analysis)
+  liveSuggestionsMainContainer: {
+    backgroundColor: 'white',
+    borderRadius: 16,
+    padding: 16,
+    marginHorizontal: 16,
+    marginBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  liveCompatibilityCard: {
+    width: 120,
+    padding: 12,
+    marginRight: 12,
+    borderRadius: 12,
+    borderWidth: 1,
+    alignItems: 'center',
+  },
+  compatiblePlantCard: {
+    backgroundColor: '#e8f5e8',
+    borderColor: '#4CAF50',
+  },
+  incompatiblePlantCard: {
+    backgroundColor: '#fff8e1',
+    borderColor: '#FF8C00',
+  },
+  liveCompatibilityRating: {
+    flexDirection: 'row',
+    marginBottom: 4,
+  },
+  liveCompatibilityScore: {
+    fontSize: 10,
+    color: COLORS.textSecondary,
+    textAlign: 'center',
+  },
+  collapsedCompatibilityHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    backgroundColor: '#f5f5f5',
+    borderRadius: 8,
+    marginBottom: 8,
+  },
+  collapsedCompatibilityText: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: COLORS.primaryGreen,
+  },
+
+  // ===== ENHANCED CATEGORY & FILTER STYLES =====
+  categoryTabsContainer: {
+    marginTop: 16,
+    marginBottom: 12,
+  },
+  categoryTabsScroll: {
+    paddingHorizontal: 4,
+  },
+  categoryTab: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    marginRight: 10,
+    backgroundColor: '#f8f9fa',
+    borderRadius: 20,
+    borderWidth: 1.5,
+    borderColor: '#e9ecef',
+  },
+  categoryTabActive: {
+    backgroundColor: COLORS.primaryGreen,
+    borderColor: COLORS.primaryGreen,
+  },
+  categoryTabText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: COLORS.primaryGreen,
+    marginLeft: 6,
+  },
+  categoryTabTextActive: {
+    color: 'white',
+    fontWeight: '700',
+  },
+
+  // Status Filter Styles
+  statusFilterContainer: {
+    flexDirection: 'row',
+    paddingHorizontal: 4,
+    marginBottom: 16,
+  },
+  statusFilterTab: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    marginRight: 8,
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    borderWidth: 1.5,
+  },
+  statusFilterTabActive: {
+    backgroundColor: COLORS.primaryGreen,
+  },
+  statusFilterText: {
+    fontSize: 12,
+    fontWeight: '600',
+    marginLeft: 4,
+  },
+  statusFilterTextActive: {
+    color: 'white',
+    fontWeight: '700',
+  },
+
+  // Plant Suggestions Grid
+  plantSuggestionsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    paddingHorizontal: 4,
+  },
+  plantSuggestionCard: {
+    width: '48%',
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 12,
+    borderWidth: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 2,
+  },
+  plantCardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  plantCompatibilityStars: {
+    flexDirection: 'row',
+  },
+  plantSuggestionName: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: COLORS.primaryGreen,
+    marginBottom: 4,
+  },
+  plantSuggestionScore: {
+    fontSize: 11,
+    color: COLORS.textSecondary,
+    marginBottom: 6,
+  },
+  plantLocationInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  plantLocationText: {
+    fontSize: 10,
+    color: COLORS.textSecondary,
+    marginLeft: 4,
+  },
+
+  // No Results Styles
+  noResultsContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 40,
+  },
+  noResultsTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: COLORS.textSecondary,
+    marginTop: 12,
+    marginBottom: 4,
+  },
+  noResultsText: {
+    fontSize: 13,
+    color: COLORS.textLight,
+    textAlign: 'center',
+    lineHeight: 18,
+    paddingHorizontal: 20,
+  },
+
+  // ===== ANALYSIS PAGE MATCHING STYLES =====
+  scrollView: {
+    flex: 1,
+  },
+  location: {
+    fontSize: 14,
+    color: '#E0E0E0',
+    marginTop: 4,
+  },
+  statusIndicator: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  statusConnected: {
+    backgroundColor: COLORS.success,
+  },
+  statusDisconnected: {
+    backgroundColor: COLORS.error,
+  },
+  statusChecking: {
+    backgroundColor: COLORS.warning,
+  },
+  statusText: {
+    fontSize: 12,
+    color: 'white',
+    marginLeft: 4,
+    fontWeight: '600',
+  },
+  sensorContainer: {
+    backgroundColor: '#fff',
+    margin: 16,
+    borderRadius: 16,
+    padding: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  sensorHeader: {
+    marginBottom: 16,
+  },
+  sensorTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: COLORS.primaryGreen,
+    marginBottom: 4,
+  },
+  lastUpdate: {
+    fontSize: 12,
+    color: COLORS.textSecondary,
+  },
+  sensorGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+  },
+  sensorCard: {
+    width: '48%',
+    backgroundColor: '#f8f9fa',
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 12,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#e9ecef',
+  },
+  sensorLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: COLORS.textSecondary,
+    marginTop: 4,
+    textAlign: 'center',
+  },
+  sensorValue: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: COLORS.primaryGreen,
+    marginTop: 2,
+    textAlign: 'center',
+  },
+
+  // Category Container (matching analysis page)
+  categoryContainer: {
+    marginBottom: 20,
+  },
+  categoryScrollView: {
+    marginTop: 10,
+  },
+  categoryCard: {
+    width: 120,
+    backgroundColor: "#f0fdf481",
+    borderRadius: 16,
+    padding: 16,
+    marginRight: 15,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    borderWidth: 2,
+    borderColor: "#E2E8F0",
+  },
+  activeCategoryCard: {
+    borderColor: COLORS.lightGreen,
+    backgroundColor: "#F0F9F4",
+    elevation: 4,
+    shadowOpacity: 0.12,
+  },
+  categoryIconContainer: {
+    marginBottom: 10,
+  },
+  categoryName: {
+    fontSize: 13,
+    fontWeight: "700",
+    color: "#334155",
+    textAlign: "center",
+    marginTop: 6,
+  },
+  activeCategoryName: {
+    color: "#1c4722",
+  },
+  categoryCount: {
+    fontSize: 11,
+    color: "#64748B",
+    marginTop: 3,
+    fontWeight: "500",
+  },
+
+  // Status Summary (matching analysis page)
+  categorySummary: {
+    marginHorizontal: 16,
+    marginBottom: 16,
+    borderRadius: 16,
+    padding: 16,
+  },
+  categorySummaryTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: 'white',
+    marginBottom: 4,
+    textAlign: 'center',
+  },
+  categorySummarySubtitle: {
+    fontSize: 13,
+    color: 'rgba(255,255,255,0.9)',
+    textAlign: 'center',
+    marginBottom: 16,
+  },
+  statusSummaryScroll: {
+    marginTop: 8,
+  },
+  statusSummaryScrollContent: {
+    paddingHorizontal: 4,
+  },
+  statusSummaryItemCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    borderRadius: 12,
+    padding: 12,
+    marginRight: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.3)',
+  },
+  activeStatusItemCard: {
+    backgroundColor: 'rgba(255,255,255,0.9)',
+    borderColor: 'rgba(255,255,255,0.8)',
+  },
+  statusDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    marginRight: 8,
+  },
+  statusTextContainer: {
+    flex: 1,
+  },
+  statusSummaryText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: 'rgba(255,255,255,0.9)',
+  },
+  activeStatusText: {
+    color: '#1c4722',
+    fontWeight: '700',
+  },
+  statusCount: {
+    fontSize: 11,
+    color: 'rgba(255,255,255,0.7)',
+    marginTop: 2,
+  },
+  checkmark: {
+    marginLeft: 8,
+  },
+
+  // Detailed View (matching analysis page)
+  detailView: {
+    marginTop: 10,
+    marginHorizontal: 16,
+  },
+  backButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#F0F9F4",
+    borderRadius: 24,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    marginBottom: 15,
+    alignSelf: "flex-start",
+    borderWidth: 1.5,
+    borderColor: "#D1E7DD",
+  },
+  backButtonText: {
+    fontSize: 14,
+    color: "#1c4722",
+    fontWeight: "700",
+    marginLeft: 6,
+  },
+  detailedRecommendationCard: {
+    backgroundColor: "#fff",
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 18,
+    elevation: 3,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 10,
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
+  },
+  cardHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 16,
+  },
+  plantInfo: {
+    flex: 1,
+  },
+  plantDetailName: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: COLORS.primaryGreen,
+    marginBottom: 4,
+  },
+  statusBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
+    alignSelf: 'flex-start',
+    marginTop: 4,
+  },
+  statusBadgeText: {
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  locationInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  locationText: {
+    fontSize: 14,
+    color: COLORS.textSecondary,
+    marginLeft: 4,
+  },
+  compatibilitySection: {
+    marginBottom: 16,
+  },
+  compatibilityTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: COLORS.primaryGreen,
+    marginBottom: 8,
+  },
+  compatibilityScoreContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  scoreDetailText: {
+    fontSize: 14,
+    color: COLORS.textSecondary,
+  },
+  scoreStarsContainer: {
+    flexDirection: 'row',
+  },
+  parameterComparison: {
+    borderTopWidth: 1,
+    borderTopColor: '#E2E8F0',
+    paddingTop: 16,
+  },
+  sectionSubtitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: COLORS.primaryGreen,
+    marginBottom: 12,
+  },
+  parameterRow: {
+    marginBottom: 12,
+  },
+  parameterLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: COLORS.textPrimary,
+    marginBottom: 4,
+  },
+  parameterValue: {
+    fontSize: 13,
+    color: COLORS.textSecondary,
+    lineHeight: 18,
+  },
+
+  // List View (matching analysis page)
+  recommendationsList: {
+    marginHorizontal: 16,
+  },
+  listHeader: {
+    marginBottom: 16,
+  },
+  listTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: COLORS.primaryGreen,
+    marginBottom: 4,
+  },
+  listSubtitle: {
+    fontSize: 14,
+    color: COLORS.textSecondary,
+  },
+  recommendationCard: {
+    backgroundColor: "#fff",
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 12,
+    elevation: 2,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
+  },
+  compatibilityInfo: {
+    alignItems: 'flex-end',
+  },
+  statusIndicatorBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
+    marginTop: 8,
+  },
+  statusIndicatorText: {
+    fontSize: 12,
+    color: 'white',
+    fontWeight: '600',
+    marginLeft: 4,
+  },
+
+  // Loading
+  loadingContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 40,
+  },
+  loadingText: {
+    marginTop: 12,
+    fontSize: 14,
+    color: COLORS.textSecondary,
+  },
+
+  // Chart Container
+  chartContainer: {
+    backgroundColor: "#f0fdf476",
+    borderRadius: 16,
+    padding: 20,
+    marginHorizontal: 16,
+    marginBottom: 20,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
+  },
+  chartTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    marginBottom: 8,
+    color: COLORS.primaryBrown,
+    letterSpacing: 0.3,
+  },
+  chartSubtitle: {
+    fontSize: 14,
+    color: COLORS.textSecondary,
+    marginBottom: 16,
+  },
+
+
+  // LIVE PLANT MATCHING STYLES
+  liveMatchesCard: {
+    backgroundColor: COLORS.cardBackground,
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 16,
+    shadowColor: COLORS.accentGreen,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 6,
+    borderWidth: 2,
+    borderColor: COLORS.accentGreen,
+    // Enhanced visual prominence for top position
+    borderTopWidth: 4,
+    borderTopColor: COLORS.primaryGreen,
+  },
+  liveMatchesHeader: {
+    marginBottom: 15,
+  },
+  liveMatchesTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: COLORS.textPrimary,
+    marginBottom: 4,
+  },
+  liveMatchesSubtitle: {
+    fontSize: 12,
+    color: COLORS.textSecondary,
+    fontStyle: "italic",
+  },
+  toggleMatchesButton: {
+    backgroundColor: COLORS.accentGreen,
+    borderRadius: 12,
+    padding: 12,
+    alignItems: "center",
+    marginBottom: 15,
+    shadowColor: COLORS.accentGreen,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  toggleMatchesText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "white",
+    marginBottom: 2,
+  },
+  matchesCount: {
+    fontSize: 11,
+    color: "rgba(255, 255, 255, 0.9)",
+    fontWeight: "500",
+  },
+  matchesScrollView: {
+    marginBottom: 15,
+  },
+  plantMatchCard: {
+    backgroundColor: "white",
+    borderRadius: 12,
+    padding: 16,
+    marginRight: 12,
+    minWidth: 200,
+    maxWidth: 220,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  goodMatchCard: {
+    borderLeftWidth: 4,
+    borderLeftColor: COLORS.success,
+  },
+  warningMatchCard: {
+    borderLeftWidth: 4,
+    borderLeftColor: COLORS.warning,
+  },
+  matchScoreBadge: {
+    position: "absolute",
+    top: 8,
+    right: 8,
+    backgroundColor: COLORS.success,
+    borderRadius: 12,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    minWidth: 40,
+    alignItems: "center",
+  },
+  matchScoreText: {
+    fontSize: 11,
+    fontWeight: "700",
+    color: "white",
+  },
+  plantMatchName: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: COLORS.textPrimary,
+    marginBottom: 4,
+    marginRight: 50, // Space for score badge
+  },
+  plantMatchCategory: {
+    fontSize: 11,
+    color: COLORS.textSecondary,
+    marginBottom: 8,
+    fontStyle: "italic",
+  },
+  matchReasonsContainer: {
+    marginBottom: 10,
+  },
+  matchReason: {
+    fontSize: 10,
+    color: COLORS.textSecondary,
+    marginBottom: 2,
+    lineHeight: 14,
+  },
+  matchStatusBadge: {
+    backgroundColor: "rgba(76, 175, 80, 0.1)",
+    borderRadius: 8,
+    padding: 6,
+    alignItems: "center",
+  },
+  matchStatusText: {
+    fontSize: 10,
+    fontWeight: "600",
+    color: COLORS.success,
+  },
+  liveMatchesStats: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    paddingTop: 15,
+    borderTopWidth: 1,
+    borderTopColor: COLORS.border,
+  },
+  statItem: {
+    alignItems: "center",
+  },
+  statNumber: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: COLORS.success,
+    marginBottom: 2,
+  },
+  statLabel: {
+    fontSize: 10,
+    color: COLORS.textSecondary,
+    fontWeight: "500",
+  },
+
+  // Additional styles for analysis-style design
+  liveCategoryChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 20,
+    borderWidth: 1,
+  },
+  liveCategoryChipText: {
+    fontSize: 12,
+    fontWeight: '500',
+  },
+  liveStatusFilter: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  liveStatusFilterText: {
+    fontSize: 12,
+    fontWeight: '500',
+  },
+  liveRecommendationCard: {
+    backgroundColor: COLORS.cardBackground,
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 12,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  livePlantName: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: COLORS.textPrimary,
+  },
+  livePlantCategory: {
+    fontSize: 12,
+    color: COLORS.textSecondary,
+    marginTop: 2,
+  },
+
 })

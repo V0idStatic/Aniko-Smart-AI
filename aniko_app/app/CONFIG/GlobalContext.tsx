@@ -17,6 +17,8 @@ interface CropData {
     crop_region: string;
     crop_province: string;
     crop_city: string;
+    image_url?: string; // Optional plant image URL
+    picture?: string;   // Handle database alias field
 }
 
 // Crop parameter type for sensor monitoring
@@ -39,6 +41,8 @@ interface CropParameter {
     soil_moisture_min: number;
     soil_moisture_max: number;
     crop_id: number;
+    image_url?: string; // Optional plant image URL
+    picture?: string;   // Handle database alias field
 }
 
 // Sensor data type from sensor dashboard
