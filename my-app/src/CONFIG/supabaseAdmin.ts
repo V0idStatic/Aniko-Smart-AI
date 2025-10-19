@@ -1,10 +1,14 @@
 import { createClient } from "@supabase/supabase-js";
 
-const supabaseUrl = "https://cmzhjmfeukwievsgeqoo.supabase.co";
+const supabaseUrl = process.env.REACT_APP_SUPABASE_URL || "https://cmzhjmfeukwievsgeqoo.supabase.co";
 
-// ⚠️ Get this from: Supabase Dashboard > Settings > API > service_role key
-// This key has FULL admin access - keep it secret!
-const supabaseServiceRoleKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNtemhqbWZldWt3aWV2c2dlcW9vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1NjQ3NjE0MywiZXhwIjoyMDcyMDUyMTQzfQ.seuB_V029uWXOeVcdZMPHezDfgHaJ-TMTBccu_8bx_w"; // 🔴 Replace with your actual service_role key
+// ⚠️ IMPORTANT: Never commit service_role key to Git!
+// Get this from: Supabase Dashboard > Settings > API > service_role key
+const supabaseServiceRoleKey = process.env.REACT_APP_SUPABASE_SERVICE_ROLE_KEY || "";
+
+if (!supabaseServiceRoleKey) {
+  console.error("❌ Missing REACT_APP_SUPABASE_SERVICE_ROLE_KEY environment variable!");
+}
 
 const supabaseAdmin = createClient(supabaseUrl, supabaseServiceRoleKey, {
   auth: {

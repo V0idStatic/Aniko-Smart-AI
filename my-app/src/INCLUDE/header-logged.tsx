@@ -148,7 +148,7 @@ const Header: React.FC = () => {
               ) : (
                 <div className="dropdown">
                   <button
-                    className="btn d-flex align-items-start dropdown-toggle profile-btn w-100 justify-content-center"
+                    className="btn d-flex align-items-center dropdown-toggle profile-btn w-100 justify-content-center"
                     id="profileDropdown"
                     data-bs-toggle="dropdown"
                     aria-expanded="false"
@@ -310,7 +310,7 @@ const Header: React.FC = () => {
             box-shadow: none;
             background: transparent;
             display: flex !important;
-            align-items: flex-start;
+            align-items: center;
             flex-direction: row;
             overflow: visible;
             flex: 1;
