@@ -110,13 +110,13 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 18,
     fontWeight: "800",
-    color: COLORS.lightGreen,
+    color: COLORS.primaryGreen,
     letterSpacing: 0.2,
   },
   subtitle: {
     fontSize: 14,
     fontWeight: "500",
-    color: COLORS.pastelGreen,
+    color: COLORS.mutedGreen,
     lineHeight: 20,
   },
   arrowContainer: {

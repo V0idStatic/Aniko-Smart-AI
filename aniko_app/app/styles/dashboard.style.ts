@@ -492,7 +492,7 @@ export const styles = StyleSheet.create({
 
   chatbotSubtitle: {
     fontSize: 14,
-    color: COLORS.bgCOlor,
+    color: COLORS.primaryGreen,
     fontWeight: "400",
   },
 

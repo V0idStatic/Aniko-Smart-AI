@@ -32,22 +32,22 @@ export default function OnboardingScreen() {
         <View style={styles.infoWrapper}>
           <View style={[styles.infoCard, styles.leftCard, styles.tiltLeft]}>
             <Image source={require("../assets/growth.png")} style={styles.icon} />
-            <Text style={styles.infoText}>
-              <Text style={styles.bold}>Growth:</Text> 12cm
+            <Text style={styles.infoText} numberOfLines={1}>
+              <Text style={styles.bold}>PH Level:</Text> 5
             </Text>
           </View>
 
           <View style={[styles.infoCard, styles.rightCard, styles.tiltRight]}>
             <Image source={require("../assets/calcium.png")} style={styles.icon} />
-            <Text style={styles.infoText}>
-              <Text style={styles.bold}>Calcium:</Text> 80%
+            <Text style={styles.infoText} numberOfLines={1}>
+              <Text style={styles.bold}>Nitrogen:</Text> 110 ppm
             </Text>
           </View>
 
           <View style={[styles.infoCard, styles.leftCard]}>
             <Image source={require("../assets/phosphorus.png")} style={styles.icon} />
-            <Text style={styles.infoText}>
-              <Text style={styles.bold}>Phosphorus:</Text> 40%
+            <Text style={styles.infoText} numberOfLines={1}>
+              <Text style={styles.bold}>Phosphorus:</Text> 70 ppm
             </Text>
           </View>
         </View>
@@ -57,7 +57,7 @@ export default function OnboardingScreen() {
           style={styles.getStartedButton}
           onPress={() => router.push("/dashboard")}
         >
-          <Text style={styles.getStartedText}>Get Started</Text>
+          <Text style={styles.getStartedText} numberOfLines={1}>Get Started</Text>
         </TouchableOpacity>
       </LinearGradient>
     </>

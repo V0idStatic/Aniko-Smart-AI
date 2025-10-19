@@ -36,6 +36,7 @@ interface DailyMonitoringData {
   date: string
   day: string
   plantName: string
+  plants?: string[] // Array of plants tracked on this day
   monitoringDuration: number // in hours
   sessionsCount: number
   avgTemperature: number
@@ -71,6 +72,8 @@ export default function Dashboard() {
     sensorData,
     setSensorData,
     isSensorConnected,
+    arduinoIP,
+    setArduinoIP,
   } = useAppContext()
 
   const [cropsStatus] = useState("Good")
@@ -87,6 +90,11 @@ export default function Dashboard() {
   const [selectedDayHistory, setSelectedDayHistory] = useState<DailyMonitoringData | null>(null)
   const [weeklyMonitoringData, setWeeklyMonitoringData] = useState<DailyMonitoringData[]>([])
 
+  // Plant tracking history selection state
+  const [availableTrackedPlants, setAvailableTrackedPlants] = useState<string[]>([])
+  const [selectedHistoryPlant, setSelectedHistoryPlant] = useState<string>("")
+  const [isLoadingPlantData, setIsLoadingPlantData] = useState(false)
+
   // Enhanced state variables for real-time data tracking
   const [lastUpdateTime, setLastUpdateTime] = useState<Date | null>(null)
   const [isLiveDataActive, setIsLiveDataActive] = useState(false)
@@ -96,7 +104,6 @@ export default function Dashboard() {
   const liveUpdateIntervalRef = useRef<any>(null) // Reference for live update interval
 
   // Arduino connection state for plant dashboard
-  const [arduinoIP, setArduinoIP] = useState('192.168.18.56') // Same IP as sensor page
   const dashboardFetchIntervalRef = useRef<any>(null)
 
   // Live plant matching state - Updated to match analysis design
@@ -162,6 +169,19 @@ export default function Dashboard() {
   const sortedPlants = getSortedPlants()
 
   const handleDayClick = (dayData: DailyMonitoringData) => {
+    console.log('📅 DAY CLICKED - Debug Information:')
+    console.log('  📊 Clicked Day Data:', {
+      date: dayData.date,
+      day: dayData.day,
+      plantName: dayData.plantName,
+      availablePlants: dayData.plants,
+      sessionsCount: dayData.sessionsCount,
+      overallStatus: dayData.overallStatus
+    })
+    console.log('  🌱 Plants tracked on this day:', dayData.plants)
+    console.log('  📈 Hourly readings count:', dayData.hourlyReadings?.length || 0)
+    console.log('  ✅ Opening history modal for:', dayData.date)
+    
     setSelectedDayHistory(dayData)
     setShowHistoryModal(true)
   }
@@ -256,7 +276,7 @@ export default function Dashboard() {
     }
   }
 
-  // Generate real sensor-based monitoring history for last 7 days
+  // Generate real sensor-based monitoring history for last 7 days with crop tracking details
   const generateWeeklyMonitoringData = async (): Promise<DailyMonitoringData[]> => {
     if (!currentUser && !user) {
       console.log("📭 No user available for sensor history")
@@ -270,56 +290,158 @@ export default function Dashboard() {
     }
 
     try {
-      // Get the last 7 days of data
-      const today = new Date()
-      const sevenDaysAgo = new Date(today)
-      sevenDaysAgo.setDate(today.getDate() - 6)
+      // Get the last 7 days based on Philippines timezone
+      const now = new Date()
+      
+      // Convert to Philippines timezone (UTC+8)
+      const phOffset = 8 * 60 // Philippines is UTC+8
+      const phNow = new Date(now.getTime() + (phOffset * 60 * 1000))
+      
+      // Get today in PH timezone
+      const phToday = new Date(phNow.getFullYear(), phNow.getMonth(), phNow.getDate())
+      
+      // Get 7 days ago in PH timezone  
+      const sevenDaysAgo = new Date(phToday)
+      sevenDaysAgo.setDate(phToday.getDate() - 6)
 
-      console.log("📊 Fetching sensor history from:", sevenDaysAgo.toISOString(), "to:", today.toISOString())
+      console.log("📊Philippines Timezone - Fetching sensor history from:", sevenDaysAgo.toISOString(), "to:", phToday.toISOString())
+      console.log("🇵🇭 PH Current Time:", phNow.toLocaleString('en-PH'))
+      console.log("📅 Date Range (PH):", sevenDaysAgo.toLocaleDateString('en-PH'), "to", phToday.toLocaleDateString('en-PH'))
 
+      // Fetch crop sensor comparisons (your tracking table)
+      const { data: cropTrackingHistory, error: trackingError } = await supabase
+        .from("crop_sensor_comparisons")
+        .select("*")
+        .eq("user_id", userId)
+        .gte("measured_at", sevenDaysAgo.toISOString())
+        .lte("measured_at", phToday.toISOString())
+        .order("measured_at", { ascending: true })
+
+      // Also fetch ESP32 readings as fallback
       const { data: sensorHistory, error } = await supabase
         .from("esp32_readings")
         .select("*")
         .eq("user_id", userId)
         .gte("measured_at", sevenDaysAgo.toISOString())
-        .lte("measured_at", today.toISOString())
+        .lte("measured_at", phToday.toISOString())
         .order("measured_at", { ascending: true })
+
+      if (trackingError) {
+        console.error("❌ Error fetching crop tracking history:", trackingError)
+      }
+
+      console.log("📊 Found crop tracking records:", cropTrackingHistory?.length || 0)
+      console.log("📊 Found ESP32 records:", sensorHistory?.length || 0)
 
       if (error) {
         console.error("❌ Error fetching sensor history:", error)
         return generateMockWeeklyData() // Fallback to mock data
       }
 
-      if (!sensorHistory || sensorHistory.length === 0) {
-        console.log("📭 No sensor history found, using mock data for demo")
+      // Use crop tracking data if available, otherwise fall back to ESP32 readings
+      const primaryData = cropTrackingHistory && cropTrackingHistory.length > 0 ? cropTrackingHistory : sensorHistory
+      const dataSource = cropTrackingHistory && cropTrackingHistory.length > 0 ? "crop_tracking" : "esp32_readings"
+
+      if (!primaryData || primaryData.length === 0) {
+        console.log("📭 No tracking history found, using mock data for demo")
         return generateMockWeeklyData() // Fallback to mock data
       }
 
-      console.log("✅ Found real sensor history:", sensorHistory.length, "readings")
+      console.log(`✅ Found real ${dataSource} history:`, primaryData.length, "records")
+      console.log("🗓️ FIXED DAY TRACKING: Data will be grouped by actual day of week recorded, not shifted by current time")
+      
+      if (cropTrackingHistory && cropTrackingHistory.length > 0) {
+        const trackedCrops = [...new Set(cropTrackingHistory.map(record => record.crop_name).filter(Boolean))]
+        console.log("🌱 Crops tracked in this period:", trackedCrops)
+        
+        // Update available tracked plants for selection
+        setAvailableTrackedPlants(trackedCrops)
+        
+        // Auto-select current crop if available, otherwise select first tracked plant
+        if (!selectedHistoryPlant || !trackedCrops.includes(selectedHistoryPlant)) {
+          if (selectedCrop && trackedCrops.includes(selectedCrop.crop_name)) {
+            setSelectedHistoryPlant(selectedCrop.crop_name)
+          } else if (trackedCrops.length > 0) {
+            setSelectedHistoryPlant(trackedCrops[0])
+          }
+        }
+      } else {
+        setAvailableTrackedPlants([])
+      }
 
-      // Group readings by day
-      const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
+      // ALWAYS SHOW ALL 7 DAYS - Create complete 7-day structure first
       const weekData: DailyMonitoringData[] = []
-
-      // Create day buckets for last 7 days
-      for (let i = 6; i >= 0; i--) {
-        const currentDate = new Date(today)
-        currentDate.setDate(today.getDate() - i)
-        const dayName = dayNames[currentDate.getDay()]
-        const dateString = currentDate.toISOString().split("T")[0]
-
-        // Filter readings for this specific day
-        const dayReadings = sensorHistory.filter((reading) => {
-          const readingDate = new Date(reading.measured_at).toISOString().split("T")[0]
-          return readingDate === dateString
+      
+      // Create a map to store actual data by date
+      const dataByDate = new Map<string, any[]>()
+      
+      // Group existing data by actual date recorded (in PH timezone)
+      if (primaryData && primaryData.length > 0) {
+        primaryData.forEach(reading => {
+          const recordedDate = new Date(reading.measured_at)
+          // Convert to PH timezone for grouping
+          const phRecordedDate = new Date(recordedDate.getTime() + (8 * 60 * 60 * 1000))
+          const dateString = phRecordedDate.toISOString().split("T")[0] // YYYY-MM-DD format
+          
+          if (!dataByDate.has(dateString)) {
+            dataByDate.set(dateString, [])
+          }
+          dataByDate.get(dateString)!.push(reading)
         })
+      }
 
-        if (dayReadings.length === 0) {
-          // No data for this day - create placeholder
+      // Generate ALL 7 days (today back to 6 days ago) in PH timezone
+      const allSevenDays: string[] = []
+      for (let i = 6; i >= 0; i--) {
+        const dayDate = new Date(phToday)
+        dayDate.setDate(phToday.getDate() - i)
+        const dateString = dayDate.toISOString().split("T")[0]
+        allSevenDays.push(dateString)
+      }
+
+      console.log('📅 ALL 7 DAYS TO SHOW (PH timezone):', {
+        dateRange: `${allSevenDays[0]} to ${allSevenDays[allSevenDays.length - 1]}`,
+        allDates: allSevenDays,
+        datesWithData: allSevenDays.map(date => ({
+          date,
+          dayName: new Date(date + 'T00:00:00.000Z').toLocaleDateString('en-US', { weekday: 'short' }),
+          displayFormat: new Date(date + 'T00:00:00.000Z').toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+          hasData: dataByDate.has(date),
+          recordCount: dataByDate.get(date)?.length || 0
+        }))
+      })
+
+      // Process ALL 7 days (whether they have data or not)
+      allSevenDays.forEach(dateString => {
+        const dayReadings = dataByDate.get(dateString) || [] // Empty array if no data
+        const date = new Date(dateString + 'T00:00:00.000Z') // Ensure consistent parsing
+        const dayName = date.toLocaleDateString('en-US', { weekday: 'short' }) // Get day name (Mon, Tue, etc.)
+        
+        // Get all plants available for this day BEFORE filtering by selected plant
+        let dayPlants: string[] = []
+        if (dataSource === "crop_tracking") {
+          const trackedCrops = [...new Set(dayReadings.map(r => r.crop_name).filter(Boolean))]
+          dayPlants = trackedCrops
+        } else {
+          // For ESP32 data, use current selected crop
+          if (selectedCrop?.crop_name) {
+            dayPlants = [selectedCrop.crop_name]
+          }
+        }
+
+        // Now filter by selected plant for calculations (but keep dayPlants full list)
+        let filteredReadings = dayReadings
+        if (dataSource === "crop_tracking" && selectedHistoryPlant) {
+          filteredReadings = dayReadings.filter(reading => reading.crop_name === selectedHistoryPlant)
+        }
+
+        if (filteredReadings.length === 0) {
+          // No data for this day/plant combination - create placeholder but keep full plants list
           weekData.push({
-            date: dateString,
+            date: dateString, // Use actual date string
             day: dayName,
-            plantName: selectedCrop?.crop_name || "No Plant Selected",
+            plantName: selectedHistoryPlant || selectedCrop?.crop_name || "No Plant Selected",
+            plants: dayPlants, // Keep full list of plants available for this day
             monitoringDuration: 0,
             sessionsCount: 0,
             avgTemperature: 0,
@@ -332,56 +454,170 @@ export default function Dashboard() {
             statusColor: "#9E9E9E",
             hourlyReadings: [],
           })
-          continue
+          return // Skip to next date
         }
 
-        // Calculate daily averages from real sensor data
-        const avgTemp = dayReadings.reduce((sum, r) => sum + (r.temp_c || 0), 0) / dayReadings.length
-        const avgHumidity = dayReadings.reduce((sum, r) => sum + (r.moisture_pct || 0), 0) / dayReadings.length
-        const avgPh = dayReadings.reduce((sum, r) => sum + (r.ph_level || 0), 0) / dayReadings.length
-        const avgNitrogen = dayReadings.reduce((sum, r) => sum + (r.nitrogen_ppm || 0), 0) / dayReadings.length
-        const avgPotassium = dayReadings.reduce((sum, r) => sum + (r.potassium_ppm || 0), 0) / dayReadings.length
-        const avgPhosphorus = dayReadings.reduce((sum, r) => sum + (r.phosphorus_ppm || 0), 0) / dayReadings.length
+        // Determine plant name for display
+        let dayPlantName = selectedHistoryPlant || selectedCrop?.crop_name || "No Plant Selected"
+        if (dataSource === "crop_tracking") {
+          if (selectedHistoryPlant) {
+            dayPlantName = selectedHistoryPlant
+          } else if (dayPlants.length === 1) {
+            dayPlantName = dayPlants[0]
+          } else if (dayPlants.length > 1) {
+            dayPlantName = `${dayPlants.length} Different Plants`
+          }
+        }
 
-        // Convert readings to hourly format for timeline
-        const hourlyReadings = dayReadings.map((reading) => ({
-          timestamp: new Date(reading.measured_at).toLocaleTimeString("en-US", {
-            hour: "2-digit",
-            minute: "2-digit",
-            hour12: false,
-          }),
-          temperature: reading.temp_c || 0,
-          humidity: reading.moisture_pct || 0,
-          ph: reading.ph_level || 0,
-          nitrogen: reading.nitrogen_ppm || 0,
-          potassium: reading.potassium_ppm || 0,
-          phosphorus: reading.phosphorus_ppm || 0,
-        }))
+        // Calculate daily averages - handle both crop tracking and ESP32 data formats
+        let avgTemp, avgHumidity, avgPh, avgNitrogen, avgPotassium, avgPhosphorus
 
-        // Determine status based on crop parameters and real sensor readings
+        if (dataSource === "crop_tracking") {
+          // Use crop sensor comparison data
+          avgTemp = filteredReadings.reduce((sum, r) => sum + (r.current_temperature || 0), 0) / filteredReadings.length
+          avgHumidity = filteredReadings.reduce((sum, r) => sum + (r.current_moisture || 0), 0) / filteredReadings.length
+          avgPh = filteredReadings.reduce((sum, r) => sum + (r.current_ph || 0), 0) / filteredReadings.length
+          avgNitrogen = filteredReadings.reduce((sum, r) => sum + (r.current_nitrogen || 0), 0) / filteredReadings.length
+          avgPotassium = filteredReadings.reduce((sum, r) => sum + (r.current_potassium || 0), 0) / filteredReadings.length
+          avgPhosphorus = filteredReadings.reduce((sum, r) => sum + (r.current_phosphorus || 0), 0) / filteredReadings.length
+        } else {
+          // Use ESP32 readings data
+          avgTemp = filteredReadings.reduce((sum, r) => sum + (r.temp_c || 0), 0) / filteredReadings.length
+          avgHumidity = filteredReadings.reduce((sum, r) => sum + (r.moisture_pct || 0), 0) / filteredReadings.length
+          avgPh = filteredReadings.reduce((sum, r) => sum + (r.ph_level || 0), 0) / filteredReadings.length
+          avgNitrogen = filteredReadings.reduce((sum, r) => sum + (r.nitrogen_ppm || 0), 0) / filteredReadings.length
+          avgPotassium = filteredReadings.reduce((sum, r) => sum + (r.potassium_ppm || 0), 0) / filteredReadings.length
+          avgPhosphorus = filteredReadings.reduce((sum, r) => sum + (r.phosphorus_ppm || 0), 0) / filteredReadings.length
+        }
+
+        // Convert readings to 5-minute interval timeline (matching sensor reading intervals)
+        const hourlyReadings: Array<{
+          timestamp: string
+          temperature: number
+          humidity: number
+          ph: number
+          nitrogen: number
+          potassium: number
+          phosphorus: number
+          cropName?: string
+          overallStatus?: string
+        }> = []
+        
+        // Filter readings to 5-minute intervals to match optimized sensor intervals
+        if (filteredReadings.length > 0) {
+          console.log(`📊 Processing ${filteredReadings.length} readings, filtering to 5-minute intervals`)
+          
+          // Group readings by 5-minute intervals
+          const intervalMap = new Map()
+          
+          filteredReadings.forEach((reading) => {
+            const readingTime = new Date(reading.measured_at)
+            // Round down to nearest 5-minute interval
+            const minutes = readingTime.getMinutes()
+            const roundedMinutes = Math.floor(minutes / 5) * 5
+            readingTime.setMinutes(roundedMinutes, 0, 0) // Set seconds and milliseconds to 0
+            
+            const intervalKey = readingTime.getTime()
+            
+            // Store only the latest reading in each 5-minute interval
+            if (!intervalMap.has(intervalKey) || new Date(reading.measured_at) > new Date(intervalMap.get(intervalKey).measured_at)) {
+              intervalMap.set(intervalKey, reading)
+            }
+          })
+          
+          // Convert filtered readings to timeline format
+          Array.from(intervalMap.values())
+            .sort((a, b) => new Date(a.measured_at).getTime() - new Date(b.measured_at).getTime())
+            .forEach((reading) => {
+              const timestamp = new Date(reading.measured_at).toLocaleTimeString("en-US", {
+                hour: "2-digit",
+                minute: "2-digit",
+                hour12: false,
+              })
+
+              if (dataSource === "crop_tracking") {
+                hourlyReadings.push({
+                  timestamp,
+                  temperature: reading.current_temperature || 0,
+                  humidity: reading.current_moisture || 0,
+                  ph: reading.current_ph || 0,
+                  nitrogen: reading.current_nitrogen || 0,
+                  potassium: reading.current_potassium || 0,
+                  phosphorus: reading.current_phosphorus || 0,
+                  cropName: reading.crop_name || "Unknown", // Add crop name for tracking
+                  overallStatus: reading.overall_status || "Unknown"
+                })
+              } else {
+                hourlyReadings.push({
+                  timestamp,
+                  temperature: reading.temp_c || 0,
+                  humidity: reading.moisture_pct || 0,
+                  ph: reading.ph_level || 0,
+                  nitrogen: reading.nitrogen_ppm || 0,
+                  potassium: reading.potassium_ppm || 0,
+                  phosphorus: reading.phosphorus_ppm || 0,
+                })
+              }
+            })
+          
+          console.log(`✅ Filtered to ${hourlyReadings.length} readings at 5-minute intervals for timeline`)
+        }
+
+        // Determine status based on data source
         let overallStatus: "Good" | "Warning" | "Bad" = "Good"
         let statusColor = "#4CAF50"
 
-        if (cropParameters) {
-          const tempStatus = getSensorStatus(avgTemp, cropParameters.temperature_min, cropParameters.temperature_max)
-          const phStatus = getSensorStatus(avgPh, cropParameters.ph_level_min, cropParameters.ph_level_max)
-          const moistureStatus = getSensorStatus(avgHumidity, cropParameters.moisture_min, cropParameters.moisture_max)
-
-          const badCount = [tempStatus, phStatus, moistureStatus].filter((s) => s.status === "Bad").length
-          const warningCount = [tempStatus, phStatus, moistureStatus].filter((s) => s.status === "Warning").length
-
-          if (badCount > 0) {
+        if (dataSource === "crop_tracking") {
+          // Use pre-calculated overall status from crop tracking table
+          const statusCounts = {
+            Good: filteredReadings.filter(r => r.overall_status === "Good").length,
+            Warning: filteredReadings.filter(r => r.overall_status === "Warning").length,
+            Bad: filteredReadings.filter(r => r.overall_status === "Bad").length
+          }
+          
+          // Determine predominant status for the day
+          if (statusCounts.Bad > 0) {
             overallStatus = "Bad"
             statusColor = "#F44336"
-          } else if (warningCount > 0) {
-            overallStatus = "Warning"
+          } else if (statusCounts.Warning > 0) {
+            overallStatus = "Warning" 
             statusColor = "#FFC107"
+          } else {
+            overallStatus = "Good"
+            statusColor = "#4CAF50"
+          }
+        } else if (cropParameters) {
+          // Calculate status from ESP32 readings using all 6 sensors
+          const sensorStatuses = [
+            getSensorStatus(avgTemp, cropParameters.temperature_min, cropParameters.temperature_max),
+            getSensorStatus(avgPh, cropParameters.ph_level_min, cropParameters.ph_level_max),
+            getSensorStatus(avgHumidity, cropParameters.moisture_min, cropParameters.moisture_max),
+            getSensorStatus(avgNitrogen, cropParameters.nitrogen_min, cropParameters.nitrogen_max),
+            getSensorStatus(avgPotassium, cropParameters.potassium_min, cropParameters.potassium_max),
+            getSensorStatus(avgPhosphorus, cropParameters.phosphorus_min, cropParameters.phosphorus_max),
+          ]
+
+          // Use balanced logic: count how many sensors are "Good"
+          const goodSensorCount = sensorStatuses.filter((s) => s.status === "Good").length
+
+          if (goodSensorCount <= 2) {
+            // Only 1-2 sensors good = Bad
+            overallStatus = "Bad"
+            statusColor = "#F44336"
+          } else if (goodSensorCount <= 4) {
+            // 3-4 sensors good = Warning
+            overallStatus = "Warning" 
+            statusColor = "#FFC107"
+          } else {
+            // 5-6 sensors good = Good
+            overallStatus = "Good"
+            statusColor = "#4CAF50"
           }
         }
 
         // Calculate monitoring duration and sessions
-        const firstReading = dayReadings[0]
-        const lastReading = dayReadings[dayReadings.length - 1]
+        const firstReading = filteredReadings[0]
+        const lastReading = filteredReadings[filteredReadings.length - 1]
         const durationHours =
           firstReading && lastReading
             ? (new Date(lastReading.measured_at).getTime() - new Date(firstReading.measured_at).getTime()) /
@@ -389,11 +625,12 @@ export default function Dashboard() {
             : 0
 
         weekData.push({
-          date: dateString,
+          date: dateString, // Use the actual date string
           day: dayName,
-          plantName: selectedCrop?.crop_name || "No Plant Selected",
+          plantName: dayPlantName, // Use the determined plant name for this day
+          plants: dayPlants, // Array of ALL plants tracked on this day (not filtered)
           monitoringDuration: Math.max(0, durationHours),
-          sessionsCount: dayReadings.length,
+          sessionsCount: filteredReadings.length,
           avgTemperature: avgTemp,
           avgHumidity: avgHumidity,
           avgPh: avgPh,
@@ -404,7 +641,7 @@ export default function Dashboard() {
           statusColor,
           hourlyReadings,
         })
-      }
+      }) // End of sortedDates.forEach
 
       return weekData
     } catch (err) {
@@ -415,18 +652,21 @@ export default function Dashboard() {
 
   // Fallback function for mock data when no real data exists
   const generateMockWeeklyData = (): DailyMonitoringData[] => {
-    console.log("📝 Generating mock sensor data for development/demo")
-    const today = new Date()
+    console.log("📝 Generating mock sensor data for development/demo (PH timezone)")
     const weekData: DailyMonitoringData[] = []
-    const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
 
-    // Generate data for last 7 days (today + 6 days ago)
+    // Get Philippines timezone dates
+    const now = new Date()
+    const phOffset = 8 * 60 // Philippines is UTC+8
+    const phNow = new Date(now.getTime() + (phOffset * 60 * 1000))
+    const phToday = new Date(phNow.getFullYear(), phNow.getMonth(), phNow.getDate())
+
+    // Generate mock data for the last 7 days (including today) in PH timezone
     for (let i = 6; i >= 0; i--) {
-      const currentDate = new Date(today)
-      currentDate.setDate(today.getDate() - i)
-
-      const dayName = dayNames[currentDate.getDay()]
-      const dateString = currentDate.toISOString().split("T")[0]
+      const dayDate = new Date(phToday)
+      dayDate.setDate(phToday.getDate() - i)
+      const dateString = dayDate.toISOString().split("T")[0]
+      const dayName = dayDate.toLocaleDateString('en-US', { weekday: 'short' })
 
       // Use current sensor data as base for realistic values
       const baseSensorData = sensorData || {
@@ -471,19 +711,28 @@ export default function Dashboard() {
       let statusColor = "#4CAF50"
 
       if (cropParameters) {
-        const tempStatus = getSensorStatus(avgTemp, cropParameters.temperature_min, cropParameters.temperature_max)
-        const phStatus = getSensorStatus(avgPh, cropParameters.ph_level_min, cropParameters.ph_level_max)
-        const moistureStatus = getSensorStatus(avgHumidity, cropParameters.moisture_min, cropParameters.moisture_max)
+        // Check all 6 sensors for mock data status calculation
+        const mockSensorStatuses = [
+          getSensorStatus(avgTemp, cropParameters.temperature_min, cropParameters.temperature_max),
+          getSensorStatus(avgPh, cropParameters.ph_level_min, cropParameters.ph_level_max),
+          getSensorStatus(avgHumidity, cropParameters.moisture_min, cropParameters.moisture_max),
+          getSensorStatus(avgNitrogen, cropParameters.nitrogen_min, cropParameters.nitrogen_max),
+          getSensorStatus(avgPotassium, cropParameters.potassium_min, cropParameters.potassium_max),
+          getSensorStatus(avgPhosphorus, cropParameters.phosphorus_min, cropParameters.phosphorus_max),
+        ]
 
-        const badCount = [tempStatus, phStatus, moistureStatus].filter((s) => s.status === "Bad").length
-        const warningCount = [tempStatus, phStatus, moistureStatus].filter((s) => s.status === "Warning").length
+        // Use balanced logic for mock data too
+        const goodMockSensorCount = mockSensorStatuses.filter((s) => s.status === "Good").length
 
-        if (badCount > 0) {
+        if (goodMockSensorCount <= 2) {
           overallStatus = "Bad"
           statusColor = "#F44336"
-        } else if (warningCount > 0) {
+        } else if (goodMockSensorCount <= 4) {
           overallStatus = "Warning"
           statusColor = "#FFC107"
+        } else {
+          overallStatus = "Good"
+          statusColor = "#4CAF50"
         }
       }
 
@@ -521,23 +770,38 @@ export default function Dashboard() {
       getSensorStatus(sensorData.temperature, cropParameters.temperature_min, cropParameters.temperature_max),
       getSensorStatus(sensorData.ph, cropParameters.ph_level_min, cropParameters.ph_level_max),
       getSensorStatus(sensorData.moisture, cropParameters.moisture_min, cropParameters.moisture_max),
+      getSensorStatus(sensorData.nitrogen, cropParameters.nitrogen_min, cropParameters.nitrogen_max),
+      getSensorStatus(sensorData.potassium, cropParameters.potassium_min, cropParameters.potassium_max),
+      getSensorStatus(sensorData.phosphorus, cropParameters.phosphorus_min, cropParameters.phosphorus_max),
     ]
 
-    const badCount = statuses.filter((s) => s.status === "Bad").length
-    const warningCount = statuses.filter((s) => s.status === "Warning").length
+    // Count how many sensors are in "Good" status
+    const goodCount = statuses.filter((s) => s.status === "Good").length
+    const totalSensors = statuses.length // Should be 6 sensors
 
-    // Enhanced status with live data context
-    if (badCount > 0) return { 
-      status: isLiveDataActive ? "Bad (Live)" : "Bad", 
-      color: COLORS.error 
-    }
-    if (warningCount > 0) return { 
-      status: isLiveDataActive ? "Warning (Live)" : "Warning", 
-      color: "#FFC107" 
-    }
-    return { 
-      status: isLiveDataActive ? "Good (Live)" : "Good", 
-      color: "#4CAF50" 
+    console.log(`🌱 Plant Health Status: ${goodCount}/${totalSensors} sensors are Good`)
+
+    // Enhanced status with live data context and balanced logic
+    const livePrefix = isLiveDataActive ? " (Live)" : ""
+    
+    if (goodCount <= 2) {
+      // Only 1-2 sensors are good = Bad
+      return { 
+        status: `Bad${livePrefix}`, 
+        color: COLORS.error 
+      }
+    } else if (goodCount <= 4) {
+      // 3-4 sensors are good = Warning
+      return { 
+        status: `Warning${livePrefix}`, 
+        color: "#FFC107" 
+      }
+    } else {
+      // 5-6 sensors are good = Good
+      return { 
+        status: `Good${livePrefix}`, 
+        color: "#4CAF50" 
+      }
     }
   }
 
@@ -908,6 +1172,81 @@ export default function Dashboard() {
     }
   }
 
+  // Save current sensor data and crop comparison to database
+  const saveCropSensorComparison = async () => {
+    const userId = currentUser?.id || (user as User)?.id
+    if (!userId || !sensorData || !selectedCrop || !cropParameters) {
+      console.log("❌ Cannot save comparison - missing data")
+      return
+    }
+
+    try {
+      console.log("💾 Saving crop sensor comparison for:", selectedCrop.crop_name)
+      
+      // Determine overall status based on ALL 6 sensor readings vs crop parameters
+      const allSensorStatuses = [
+        getSensorStatus(sensorData.temperature, cropParameters.temperature_min, cropParameters.temperature_max),
+        getSensorStatus(sensorData.moisture, cropParameters.moisture_min, cropParameters.moisture_max),
+        getSensorStatus(sensorData.ph, cropParameters.ph_level_min, cropParameters.ph_level_max),
+        getSensorStatus(sensorData.nitrogen, cropParameters.nitrogen_min, cropParameters.nitrogen_max),
+        getSensorStatus(sensorData.potassium, cropParameters.potassium_min, cropParameters.potassium_max),
+        getSensorStatus(sensorData.phosphorus, cropParameters.phosphorus_min, cropParameters.phosphorus_max),
+      ]
+      
+      // Use balanced logic for database saving
+      const goodSensorsCount = allSensorStatuses.filter(s => s.status === "Good").length
+      
+      let overallStatus = "Good"
+      if (goodSensorsCount <= 2) {
+        overallStatus = "Bad"
+      } else if (goodSensorsCount <= 4) {
+        overallStatus = "Warning" 
+      } else {
+        overallStatus = "Good"
+      }
+
+      const comparisonData = {
+        user_id: userId,
+        crop_name: selectedCrop.crop_name,
+        measured_at: new Date().toISOString(),
+        // Current sensor values
+        current_temperature: sensorData.temperature,
+        current_moisture: sensorData.moisture,
+        current_ph: sensorData.ph,
+        current_nitrogen: sensorData.nitrogen,
+        current_phosphorus: sensorData.phosphorus,
+        current_potassium: sensorData.potassium,
+        // Optimal ranges for this crop
+        optimal_temp_min: cropParameters.temperature_min,
+        optimal_temp_max: cropParameters.temperature_max,
+        optimal_moisture_min: cropParameters.moisture_min,
+        optimal_moisture_max: cropParameters.moisture_max,
+        optimal_ph_min: cropParameters.ph_level_min,
+        optimal_ph_max: cropParameters.ph_level_max,
+        optimal_nitrogen_min: cropParameters.nitrogen_min,
+        optimal_nitrogen_max: cropParameters.nitrogen_max,
+        optimal_phosphorus_min: cropParameters.phosphorus_min,
+        optimal_phosphorus_max: cropParameters.phosphorus_max,
+        optimal_potassium_min: cropParameters.potassium_min,
+        optimal_potassium_max: cropParameters.potassium_max,
+        overall_status: overallStatus,
+        created_at: new Date().toISOString()
+      }
+
+      const { error } = await supabase
+        .from('crop_sensor_comparisons')
+        .insert(comparisonData)
+
+      if (error) {
+        console.error("❌ Error saving crop comparison:", error)
+      } else {
+        console.log("✅ Crop sensor comparison saved successfully")
+      }
+    } catch (err) {
+      console.error("❌ Failed to save crop comparison:", err)
+    }
+  }
+
   // Handle refresh ESP32 data manually
   const handleRefreshSensorData = async () => {
     const userId = currentUser?.id || (user as User)?.id
@@ -1208,28 +1547,29 @@ export default function Dashboard() {
   // CRITICAL: INDEPENDENT Arduino fetching for plant dashboard
   useEffect(() => {
     console.log('🔥 STARTING INDEPENDENT ARDUINO FETCHING FOR PLANT DASHBOARD')
+    console.log('🔗 Using Arduino IP from Global Context:', arduinoIP)
     
     if (dashboardFetchIntervalRef.current) {
       clearInterval(dashboardFetchIntervalRef.current)
       dashboardFetchIntervalRef.current = null
     }
     
-    console.log('🚀 Plant dashboard will fetch DIRECTLY from Arduino every 3 seconds')
+    console.log('🚀 Plant dashboard will fetch DIRECTLY from Arduino every 5 minutes')
     console.log('📡 This is INDEPENDENT of sensor page - dashboard gets its OWN fresh data')
     
     // Start fetching immediately
     fetchArduinoSensorData()
     
-    // Set up continuous Arduino fetching for plant dashboard
+    // Set up continuous Arduino fetching for plant dashboard (every 5 minutes)
     const interval = setInterval(() => {
-      console.log('🔄 PLANT DASHBOARD: Fetching fresh Arduino data (independent of sensor page)')
+      console.log('🔄 PLANT DASHBOARD: Fetching fresh Arduino data from', arduinoIP)
       fetchArduinoSensorData()
-    }, 3000) // Fetch from Arduino every 3 seconds (same as sensor page)
+    }, 5 * 60 * 1000) // Every 5 minutes as recommended
     
     dashboardFetchIntervalRef.current = interval
     
     console.log('✅ PLANT DASHBOARD: Independent Arduino fetching started')
-    console.log('🎯 Dashboard now gets FRESH data directly from Arduino every 3 seconds!')
+    console.log('🎯 Dashboard now gets FRESH data directly from Arduino every 5 minutes!')
     
     return () => {
       console.log('🛑 PLANT DASHBOARD: Stopping independent Arduino fetching')
@@ -1238,7 +1578,7 @@ export default function Dashboard() {
         dashboardFetchIntervalRef.current = null
       }
     }
-  }, []) // Run once and keep running
+  }, [arduinoIP]) // Re-run when Arduino IP changes from sensor page
 
   // CRITICAL: Continuous live monitoring - works on ANY screen
   useEffect(() => {
@@ -1408,6 +1748,29 @@ export default function Dashboard() {
     cropParameters
   ])
 
+  // AUTO-SAVE CROP TRACKING - Save sensor comparison every 30 seconds when monitoring
+  useEffect(() => {
+    if (!isSensorConnected || !sensorData || !selectedCrop || !cropParameters) return
+
+    console.log('💾 Setting up auto-save for crop tracking')
+    
+    // Save immediately when conditions are met
+    saveCropSensorComparison()
+    
+    // Set up periodic saving every 30 seconds
+    const autoSaveInterval = setInterval(() => {
+      if (isSensorConnected && sensorData && selectedCrop && cropParameters) {
+        console.log('💾 AUTO-SAVE: Saving crop sensor comparison')
+        saveCropSensorComparison()
+      }
+    }, 30000) // Save every 30 seconds
+    
+    return () => {
+      console.log('🛑 Clearing crop tracking auto-save interval')
+      clearInterval(autoSaveInterval)
+    }
+  }, [selectedCrop?.crop_name, isSensorConnected]) // Re-setup when crop changes or connection changes
+
   // Log modal state changes (for debugging)
   useEffect(() => {
     console.log('📋 Plant modal state:', showPlantModal ? 'OPEN' : 'CLOSED')
@@ -1514,15 +1877,7 @@ export default function Dashboard() {
           <View style={styles.headerIcons}>
     
             
-            {/* Last Update Time */}
-            {lastUpdateTime && (
-              <View style={{ marginRight: 12 }}>
-                <Text style={{ color: 'white', fontSize: 9, opacity: 0.8 }}>Updated</Text>
-                <Text style={{ color: 'white', fontSize: 10, fontWeight: '600' }}>
-                  {lastUpdateTime.toLocaleTimeString()}
-                </Text>
-              </View>
-            )}
+    
             
             <TouchableOpacity onPress={handleRefreshSensorData} style={{ marginRight: 12 }}>
               <Ionicons name="refresh-outline" size={22} color="white" />
@@ -1690,11 +2045,112 @@ export default function Dashboard() {
                     <Text style={styles.historyModalDate}>
                       {selectedDayHistory.day} - {selectedDayHistory.date}
                     </Text>
+                    {selectedDayHistory.plants && selectedDayHistory.plants.length > 1 && (
+                      <Text style={[styles.historyModalDate, { fontSize: 12, color: COLORS.primaryGreen, marginTop: 4 }]}>
+                        🌱 Currently viewing: {selectedHistoryPlant || "All Plants Combined"}
+                      </Text>
+                    )}
                   </View>
                   <TouchableOpacity style={styles.historyCloseBtn} onPress={() => setShowHistoryModal(false)}>
                     <Ionicons name="close" size={24} color="#666" />
                   </TouchableOpacity>
                 </View>
+
+                {/* Plant Selection for this day */}
+                {selectedDayHistory?.plants && selectedDayHistory.plants.length > 1 && (
+                  <View style={[styles.historySummaryCard, { marginBottom: 15, backgroundColor: '#f8f9fa' }]}>
+                    <Text style={[styles.historySectionTitle, { fontSize: 14, marginBottom: 8 }]}>
+                      Plants tracked this day: {isLoadingPlantData ? "🔄 Loading..." : ""}
+                    </Text>
+                    <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginTop: 8 }}>
+                      <View style={{ flexDirection: 'row', paddingHorizontal: 4 }}>
+                        {/* "All Plants" option */}
+                        <TouchableOpacity
+                          disabled={isLoadingPlantData}
+                          style={{
+                            paddingVertical: 8,
+                            paddingHorizontal: 16,
+                            marginHorizontal: 4,
+                            borderRadius: 20,
+                            backgroundColor: (!selectedHistoryPlant || selectedHistoryPlant === "") ? COLORS.primaryGreen : '#f0f0f0',
+                            borderWidth: 1,
+                            borderColor: (!selectedHistoryPlant || selectedHistoryPlant === "") ? COLORS.primaryGreen : '#e0e0e0',
+                            opacity: isLoadingPlantData ? 0.6 : 1,
+                          }}
+                          onPress={async () => {
+                            // Clear plant selection to show all plants for this day
+                            setIsLoadingPlantData(true);
+                            setSelectedHistoryPlant("");
+                            
+                            const currentDate = selectedDayHistory.date;
+                            const newWeeklyData = await generateWeeklyMonitoringData();
+                            setWeeklyMonitoringData(newWeeklyData);
+                            
+                            const updatedDayData = newWeeklyData.find(day => day.date === currentDate);
+                            if (updatedDayData) {
+                              setSelectedDayHistory(updatedDayData);
+                            }
+                            setIsLoadingPlantData(false);
+                          }}
+                        >
+                          <Text style={{
+                            color: (!selectedHistoryPlant || selectedHistoryPlant === "") ? 'white' : COLORS.textPrimary,
+                            fontSize: 12,
+                            fontWeight: '600',
+                          }}>
+                            All Plants
+                          </Text>
+                        </TouchableOpacity>
+                        
+                        {/* Individual plant options */}
+                        {selectedDayHistory.plants.map((plantName, plantIndex) => (
+                          <TouchableOpacity
+                            key={plantIndex}
+                            disabled={isLoadingPlantData}
+                            style={{
+                              paddingVertical: 8,
+                              paddingHorizontal: 16,
+                              marginHorizontal: 4,
+                              borderRadius: 20,
+                              backgroundColor: selectedHistoryPlant === plantName ? COLORS.primaryGreen : '#f0f0f0',
+                              borderWidth: 1,
+                              borderColor: selectedHistoryPlant === plantName ? COLORS.primaryGreen : '#e0e0e0',
+                              opacity: isLoadingPlantData ? 0.6 : 1,
+                            }}
+                            onPress={async () => {
+                              // Update selected plant for this specific day without closing modal
+                              setIsLoadingPlantData(true);
+                              setSelectedHistoryPlant(plantName);
+                              
+                              // Show loading state briefly
+                              const currentDate = selectedDayHistory.date;
+                              
+                              // Regenerate data for this specific day with new plant selection
+                              const newWeeklyData = await generateWeeklyMonitoringData();
+                              setWeeklyMonitoringData(newWeeklyData);
+                              
+                              // Find and update the current day's data with new plant selection
+                              const updatedDayData = newWeeklyData.find(day => day.date === currentDate);
+                              
+                              if (updatedDayData) {
+                                setSelectedDayHistory(updatedDayData);
+                              }
+                              setIsLoadingPlantData(false);
+                            }}
+                          >
+                            <Text style={{
+                              color: selectedHistoryPlant === plantName ? 'white' : COLORS.textPrimary,
+                              fontSize: 12,
+                              fontWeight: '600',
+                            }}>
+                              {plantName}
+                            </Text>
+                          </TouchableOpacity>
+                        ))}
+                      </View>
+                    </ScrollView>
+                  </View>
+                )}
 
                 {/* Plant & Status Summary */}
                 <View style={styles.historySummaryCard}>
@@ -1725,7 +2181,7 @@ export default function Dashboard() {
                       <Text style={styles.historyMetricValue}>{selectedDayHistory.avgTemperature.toFixed(1)}°C</Text>
                     </View>
                     <View style={styles.historyMetricItem}>
-                      <Text style={styles.historyMetricLabel}>Humidity</Text>
+                      <Text style={styles.historyMetricLabel}>Soil Moisture</Text>
                       <Text style={styles.historyMetricValue}>{selectedDayHistory.avgHumidity.toFixed(1)}%</Text>
                     </View>
                     <View style={styles.historyMetricItem}>
@@ -1836,7 +2292,7 @@ export default function Dashboard() {
                 <TouchableOpacity 
                   onPress={() => analyzeLivePlantMatches()}
                   style={{ 
-                    backgroundColor: COLORS.accentGreen, 
+                    backgroundColor: COLORS.primaryGreen, 
                     borderRadius: 8, 
                     padding: 8,
                     opacity: 0.9
@@ -1853,7 +2309,7 @@ export default function Dashboard() {
               onPress={() => setShowLiveMatches(!showLiveMatches)}
             >
               <Text style={styles.toggleMatchesText}>
-                {showLiveMatches ? '🔽 Collapse Recommendations' : ' View Plant Recommendations'}
+                {showLiveMatches ? ' Collapse Recommendations' : ' View Plant Recommendations'}
               </Text>
               <Text style={styles.matchesCount}>
                 {liveMatchingPlants.goodMatches.length + liveMatchingPlants.badMatches.length > 0 
@@ -1879,8 +2335,8 @@ export default function Dashboard() {
                         style={[
                           styles.liveCategoryChip,
                           {
-                            backgroundColor: isSelected ? COLORS.accentGreen : 'rgba(132, 204, 22, 0.1)',
-                            borderColor: isSelected ? COLORS.accentGreen : 'rgba(132, 204, 22, 0.3)',
+                            backgroundColor: isSelected ? COLORS.primaryGreen : 'rgba(132, 204, 22, 0.1)',
+                            borderColor: isSelected ? COLORS.primaryGreen : 'rgba(132, 204, 22, 0.1)',
                             marginRight: 8
                           }
                         ]}
@@ -1889,12 +2345,12 @@ export default function Dashboard() {
                         <Ionicons
                           name={getLiveCategoryIcon(category) as any}
                           size={14}
-                          color={isSelected ? 'white' : COLORS.accentGreen}
+                          color={isSelected ? 'white' : COLORS.primaryGreen}
                           style={{ marginRight: 4 }}
                         />
                         <Text style={[
                           styles.liveCategoryChipText,
-                          { color: isSelected ? 'white' : COLORS.accentGreen }
+                          { color: isSelected ? 'white' : COLORS.primaryGreen }
                         ]}>
                           {categoryInfo.name} ({categoryInfo.count})
                         </Text>
@@ -2062,7 +2518,7 @@ export default function Dashboard() {
                             ))}
                             <TouchableOpacity
                               style={{
-                                backgroundColor: COLORS.accentGreen,
+                                backgroundColor: COLORS.primaryGreen,
                                 borderRadius: 8,
                                 padding: 8,
                                 alignItems: 'center',
@@ -2151,18 +2607,13 @@ export default function Dashboard() {
 
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 15 }}>
           <Text style={styles.sectionTitle}>Plant Condition</Text>
-          {isLiveDataActive && (
-            <View style={{ 
-              backgroundColor: 'rgba(76, 175, 80, 0.1)', 
-              paddingHorizontal: 8, 
-              paddingVertical: 4, 
-              borderRadius: 12,
-              borderWidth: 1,
-              borderColor: 'rgba(76, 175, 80, 0.3)'
-            }}>
+          
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
         
-            </View>
-          )}
+
+            {/* Save Tracking Button */}
+            
+          </View>
         </View>
 
         <View style={styles.conditionCard}>
@@ -2257,47 +2708,34 @@ export default function Dashboard() {
               </Text>
             </View>
 
-            {/* Humidity */}
+            {/* Electrical Conductivity */}
             <View style={styles.metricCard}>
               <View style={styles.metricHeader}>
-                <Ionicons name="water-outline" size={20} color="#4FC3F7" style={{ marginRight: 8 }} />
-                <Text style={styles.metricLabel}>Humidity</Text>
+                <Ionicons name="flash-outline" size={20} color="#4FC3F7" style={{ marginRight: 8 }} />
+                <Text style={styles.metricLabel}>EC Level</Text>
               </View>
               <Text
                 style={[
                   styles.metricValue,
                   {
-                    color:
-                      sensorData && cropParameters
-                        ? getSensorStatus(sensorData.moisture, cropParameters.moisture_min, cropParameters.moisture_max)
-                            .color
-                        : "#666",
+                    color: "#4FC3F7",
                   },
                 ]}
               >
-                {sensorData ? sensorData.moisture.toFixed(0) : "—"}%
+                {sensorData ? sensorData.ec.toFixed(1) : "—"} μS/cm
               </Text>
-              {cropParameters && (
-                <Text style={styles.metricRange}>
-                  Range: {cropParameters.moisture_min}-{cropParameters.moisture_max}%
-                </Text>
-              )}
+              <Text style={styles.metricRange}>
+                Electrical Conductivity
+              </Text>
               <Text
                 style={[
                   styles.metricStatus,
                   {
-                    color:
-                      sensorData && cropParameters
-                        ? getSensorStatus(sensorData.moisture, cropParameters.moisture_min, cropParameters.moisture_max)
-                            .color
-                        : "#666",
+                    color: "#4FC3F7",
                   },
                 ]}
               >
-                {sensorData && cropParameters
-                  ? getSensorStatus(sensorData.moisture, cropParameters.moisture_min, cropParameters.moisture_max)
-                      .status
-                  : "Unknown"}
+                Monitoring
               </Text>
             </View>
 
@@ -2630,10 +3068,12 @@ export default function Dashboard() {
                 onPress={() => handleDayClick(item)}
                 activeOpacity={0.7}
               >
-                {/* Clean DAY BOX - Just day and status */}
+                {/* Clean DAY BOX - Just day and status with enhanced date format */}
                 <View style={[styles.cleanDayBox, { backgroundColor: item.statusColor }]}>
                   <Text style={styles.cleanDayText}>{item.day}</Text>
-                  <Text style={styles.cleanDateText}>{new Date(item.date).getDate()}</Text>
+                  <Text style={styles.cleanDateText}>
+                    {new Date(item.date).toLocaleDateString('en-PH', {  day: 'numeric' })}
+                  </Text>
                   <Text style={styles.cleanStatusText}>{item.overallStatus}</Text>
                 </View>
               </TouchableOpacity>

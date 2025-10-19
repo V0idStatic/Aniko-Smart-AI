@@ -78,13 +78,12 @@ interface ReadingRow {
 const { width } = Dimensions.get('window');
 
 const NPKSensorDashboard: React.FC = () => {
-  // Use global context for sensor state
-  const { sensorData, setSensorData, isSensorConnected, setIsSensorConnected } = useAppContext();
+  // Use global context for sensor state and Arduino IP
+  const { sensorData, setSensorData, isSensorConnected, setIsSensorConnected, arduinoIP, setArduinoIP } = useAppContext();
   
   const [recentReadings, setRecentReadings] = useState<ReadingRow[]>([]);
   const [dbStatus, setDbStatus] = useState<string>('');
   const [connectionStatus, setConnectionStatus] = useState('Disconnected');
-  const [arduinoIP, setArduinoIP] = useState('192.168.18.56'); // Default IP 192.168.18.34 - wireless ip
   const [showIPInput, setShowIPInput] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
   const fetchIntervalRef = useRef<number | null>(null);
@@ -205,8 +204,8 @@ const NPKSensorDashboard: React.FC = () => {
         setIsSensorConnected(true);
         setShowIPInput(false);
         
-        // Set up interval and store the reference
-        fetchIntervalRef.current = setInterval(fetchSensorData, 5000);
+        // Set up interval and store the reference (every 5 minutes)
+        fetchIntervalRef.current = setInterval(fetchSensorData, 5 * 60 * 1000);
         
         // Fetch initial data immediately
         await fetchSensorData();
@@ -276,10 +275,10 @@ const NPKSensorDashboard: React.FC = () => {
     // Start fetching immediately
     fetchSensorData()
     
-    // Set up continuous fetching
+    // Set up continuous fetching (every 5 minutes)
     const intervalId = setInterval(() => {
       fetchSensorData()
-    }, 3000)
+    }, 5 * 60 * 1000)
     fetchIntervalRef.current = intervalId as unknown as number
     
     console.log('📡 Fetch interval started, ID:', fetchIntervalRef.current)
@@ -537,28 +536,7 @@ const NPKSensorDashboard: React.FC = () => {
               />
             </View>
 
-            {/* Last Updated */}
-            <View style={styles.lastUpdated}>
-              <Text style={styles.lastUpdatedTitle}>Data Source</Text>
-              <Text style={styles.lastUpdatedTime}>
-                Live from Arduino NPK Sensor
-              </Text>
-              <Text style={styles.lastUpdatedSubtitle}>
-                Updates every 5 seconds
-              </Text>
-              {!!dbStatus && <Text style={[styles.lastUpdatedSubtitle,{marginTop:8}]}>Database status: {dbStatus}</Text>}
-            </View>
-            {/* Recent DB readings */}
-            {recentReadings.length > 0 && (
-              <View style={styles.lastUpdated}>
-                <Text style={styles.lastUpdatedTitle}>Recent Stored Readings</Text>
-                {recentReadings.slice(0,6).map(r => (
-                  <Text key={r.id} style={styles.lastUpdatedSubtitle}>
-                    {new Date(r.measured_at).toLocaleTimeString()} | T {r.temp_c ?? '-'}°C | M {r.moisture_pct ?? '-'}% | pH {r.ph_level ?? '-'}
-                  </Text>
-                ))}
-              </View>
-            )}
+           
           </>
         )}
 

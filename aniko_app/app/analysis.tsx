@@ -2016,7 +2016,7 @@ export default function Analysis() {
                         />
                       </View>
                       <Text style={styles.plantDetailName}>{selectedPlantDetail.cropName}</Text>
-                      <Text style={styles.plantDetailCategory}>Growing Requirements</Text>
+                     
                     </View>
 
                     {/* Temperature Section - FIXED */}

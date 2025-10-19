@@ -77,6 +77,10 @@ interface AppContextType {
     // Sensor connection state
     isSensorConnected: boolean;
     setIsSensorConnected: (connected: boolean) => void;
+    
+    // Arduino IP address (shared between sensor page and plant dashboard)
+    arduinoIP: string;
+    setArduinoIP: (ip: string) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -99,6 +103,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     const [cropParameters, setCropParameters] = useState<CropParameter | null>(null);
     const [sensorData, setSensorData] = useState<SensorData | null>(null);
     const [isSensorConnected, setIsSensorConnected] = useState(false);
+    const [arduinoIP, setArduinoIP] = useState<string>('192.168.18.56'); // Default IP
 
     // Log state changes for debugging
     useEffect(() => {
@@ -123,7 +128,10 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
         }
     }, [sensorData]);
 
-    const value: AppContextType = {
+  useEffect(() => {
+    console.log('🔗 Global Arduino IP Updated:', arduinoIP);
+    console.log('📡 Both sensor page and plant dashboard will now use:', arduinoIP);
+  }, [arduinoIP]);    const value: AppContextType = {
         selectedLocation,
         setSelectedLocation,
         selectedCrop,
@@ -134,6 +142,8 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
         setSensorData,
         isSensorConnected,
         setIsSensorConnected,
+        arduinoIP,
+        setArduinoIP,
     };
 
     return (
