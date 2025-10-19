@@ -1630,7 +1630,7 @@ export const styles = StyleSheet.create({
     fontStyle: "italic",
   },
   toggleMatchesButton: {
-    backgroundColor: COLORS.accentGreen,
+    backgroundColor: COLORS.primaryGreen,
     borderRadius: 12,
     padding: 12,
     alignItems: "center",

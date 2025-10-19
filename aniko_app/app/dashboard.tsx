@@ -911,16 +911,21 @@ export default function Dashboard() {
       getSensorStatus(sensorData.phosphorus, cropParameters.phosphorus_min, cropParameters.phosphorus_max),
     ]
 
-    const badCount = statuses.filter((s) => s.status === "Bad").length
-    const warningCount = statuses.filter((s) => s.status === "Warning").length
+    // Count how many sensors are in "Good" status
+    const goodCount = statuses.filter((s) => s.status === "Good").length
+    const totalSensors = statuses.length // Should be 6 (temp, ph, moisture, nitrogen, potassium, phosphorus)
 
-    if (badCount > 0) {
+    console.log(`🌱 Crop Status Calculation: ${goodCount}/${totalSensors} sensors are Good`)
+
+    // New balanced logic: Status based on how many sensors are "Good"
+    if (goodCount <= 2) {
+      // Only 1-2 sensors are good (4-5 are bad/warning) = BAD
       return { status: "BAD", color: "#F44336" }
-    } else if (warningCount > 1) {
+    } else if (goodCount <= 4) {
+      // 3-4 sensors are good (2-3 are bad/warning) = WARNING  
       return { status: "WARNING", color: "#FFC107" }
-    } else if (warningCount === 1) {
-      return { status: "FAIR", color: "#FF9800" }
     } else {
+      // 5-6 sensors are good (0-1 are bad/warning) = GOOD
       return { status: "GOOD", color: "#4CAF50" }
     }
   }
