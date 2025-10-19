@@ -17,7 +17,12 @@
     --gradient-secondary-light: linear-gradient(135deg, var(--pastel-green), var(--light-green));
     --gradient-brown: linear-gradient(135deg, var(--primary-brown), var(--dark-brown));
     --gradient-brown-light: linear-gradient(135deg, var(--primary-brown), #c9b29e);
+}
 
+/* Fix for burger menu */
+main {
+    position: relative;
+    z-index: 1 !important;
 }
 
 .testDisplay-section {
@@ -26,7 +31,10 @@
     font-family: system-ui, sans-serif;
     min-height: 100vh;
     margin: 0 !important;
+    position: relative;
+    z-index: 1 !important;
 }
+
 .testDisplay-section h2 {
     text-align: center;
     font-weight: 700;
@@ -68,6 +76,8 @@
         box-shadow 0.4s ease,
         color 0.3s ease;
     font-family: "Lexend";
+    position: relative;
+    z-index: 1 !important;
 }
 
 .testimonialSubmit-headerBtn:hover {
@@ -89,6 +99,8 @@
     gap: 1.5rem;
     max-width: 1200px;
     margin: 0 auto;
+    position: relative;
+    z-index: 1 !important;
 }
 
 @media (min-width: 768px) {
@@ -103,7 +115,6 @@
     }
 }
 
-
 .testDisplay-card {
     background-color: var(--light-green);
     border-radius: 80px;
@@ -113,6 +124,8 @@
     text-align: center;
     transition: transform 0.2s ease;
     margin-bottom: 3rem;
+    position: relative;
+    z-index: 1 !important;
 }
 
 .testDisplay-card:hover {
@@ -162,6 +175,8 @@
 .testDisplay-view-more-container {
     text-align: center;
     margin-top: 2rem;
+    position: relative;
+    z-index: 1 !important;
 }
 
 .testDisplay-view-more-btn {

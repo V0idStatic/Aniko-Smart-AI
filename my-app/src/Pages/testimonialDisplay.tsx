@@ -217,6 +217,8 @@ const TestimonialDisplay: React.FC = () => {
             font-family: system-ui, sans-serif;
             min-height: 100vh;
             margin: 0 !important;
+            position: relative;
+            z-index: 1;
         }
 
         .testDisplay-section h2 {
@@ -281,6 +283,8 @@ const TestimonialDisplay: React.FC = () => {
             gap: 1.5rem;
             max-width: 1200px;
             margin: 0 auto;
+            position: relative;
+            z-index: 1;
         }
 
         .testDisplay-card {
@@ -369,6 +373,8 @@ const TestimonialDisplay: React.FC = () => {
         .testDisplay-view-more-container {
             text-align: center;
             margin-top: 2rem;
+            position: relative;
+            z-index: 1;
         }
 
         .testDisplay-view-more-btn {
