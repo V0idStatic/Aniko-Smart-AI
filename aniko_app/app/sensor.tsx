@@ -119,8 +119,10 @@ const NPKSensorDashboard: React.FC = () => {
           nitrogen: data.nitrogen || 0,
           phosphorus: data.phosphorus || 0,
           potassium: data.potassium || 0,
-          timestamp: data.timestamp || Date.now()
+          timestamp: Date.now() // Always use current timestamp to force updates
         };
+        
+        console.log('🔄 Updating global sensor data:', normalized);
         setSensorData(normalized);
 
         // Insert into database for current user
@@ -204,7 +206,7 @@ const NPKSensorDashboard: React.FC = () => {
         setShowIPInput(false);
         
         // Set up interval and store the reference
-        fetchIntervalRef.current = setInterval(fetchSensorData, 3000);
+        fetchIntervalRef.current = setInterval(fetchSensorData, 5000);
         
         // Fetch initial data immediately
         await fetchSensorData();
@@ -515,7 +517,7 @@ const NPKSensorDashboard: React.FC = () => {
               <SensorCard
                 title="Nitrogen (N)"
                 value={sensorData.nitrogen}
-                unit="%"
+                unit=" ppm"
                 type="nitrogen"
                 icon="leaf-outline"
               />
@@ -542,7 +544,7 @@ const NPKSensorDashboard: React.FC = () => {
                 Live from Arduino NPK Sensor
               </Text>
               <Text style={styles.lastUpdatedSubtitle}>
-                Updates every 3 seconds
+                Updates every 5 seconds
               </Text>
               {!!dbStatus && <Text style={[styles.lastUpdatedSubtitle,{marginTop:8}]}>Database status: {dbStatus}</Text>}
             </View>
