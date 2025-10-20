@@ -460,7 +460,7 @@ export default function SignUpScreen() {
               </TouchableOpacity>
 
               <TouchableOpacity
-                onPress={() => router.replace("/Login")}
+                onPress={() => router.replace("/")}
                 style={styles.footerContainer}
               >
                 <Text style={styles.footerText}>

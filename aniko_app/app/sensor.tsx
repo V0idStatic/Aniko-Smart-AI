@@ -86,7 +86,7 @@ const NPKSensorDashboard: React.FC = () => {
   const [connectionStatus, setConnectionStatus] = useState('Disconnected');
   const [showIPInput, setShowIPInput] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
-  const fetchIntervalRef = useRef<number | null>(null);
+  const fetchIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const router = useRouter();
 
   // Fetch data from Arduino
@@ -279,7 +279,7 @@ const NPKSensorDashboard: React.FC = () => {
     const intervalId = setInterval(() => {
       fetchSensorData()
     }, 5 * 60 * 1000)
-    fetchIntervalRef.current = intervalId as unknown as number
+    fetchIntervalRef.current = intervalId
     
     console.log('📡 Fetch interval started, ID:', fetchIntervalRef.current)
     

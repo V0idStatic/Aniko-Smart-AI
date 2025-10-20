@@ -127,7 +127,7 @@ export default function Login() {
         email: userData.email,
       })
 
-      router.push("/OnBoardingScreen")
+      router.replace("/OnBoardingScreen") 
 
     } catch (err) {
       console.error("❌ Login error:", err)

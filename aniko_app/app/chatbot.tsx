@@ -534,7 +534,7 @@ export default function Chatbot({ userId }: ChatbotProps) {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${process.env.EXPO_PUBLIC_OPENROUTER_API_KEY}`,
+            Authorization: `Bearer `,
           },
           body: JSON.stringify({
             model: "gpt-3.5-turbo",
@@ -593,7 +593,7 @@ export default function Chatbot({ userId }: ChatbotProps) {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${process.env.EXPO_PUBLIC_OPENROUTER_API_KEY}`,
+          Authorization: `Bearer `,
         },
         body: JSON.stringify({
           model: "gpt-3.5-turbo",

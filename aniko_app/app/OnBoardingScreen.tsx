@@ -55,7 +55,7 @@ export default function OnboardingScreen() {
         {/* Get Started Button */}
         <TouchableOpacity
           style={styles.getStartedButton}
-          onPress={() => router.push("/dashboard")}
+          onPress={() => router.replace("/dashboard")}
         >
           <Text style={styles.getStartedText} numberOfLines={1}>Get Started</Text>
         </TouchableOpacity>

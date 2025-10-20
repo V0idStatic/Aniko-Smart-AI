@@ -168,7 +168,7 @@ export default function Dashboard() {
         onPress: async () => {
           try {
             const { error } = await supabase.auth.signOut()
-            if (!error) router.replace("/Login")
+            if (!error) router.replace("/")
           } catch (error) {
             console.error("Logout error:", error)
           }
