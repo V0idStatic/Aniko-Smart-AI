@@ -3,6 +3,7 @@ import supabase from "./CONFIG/supaBase"; // Import Supabase client
 import { getCurrentUser } from './CONFIG/currentUser';
 import { useAppContext } from './CONFIG/GlobalContext';
 import type { SensorData as GlobalSensorData } from './CONFIG/GlobalContext';
+import { testNetworkConnectivity, showNetworkDiagnostics } from './utils/NetworkDiagnostics';
 import {
   View,
   Text,
@@ -426,72 +427,182 @@ const NPKSensorDashboard: React.FC = () => {
 
       console.log('🚀 CONNECT BUTTON PRESSED - Starting connection test');
       console.log('🎯 Target Arduino IP:', arduinoIP);
-      console.log('🌐 Full URL:', `http://${arduinoIP}/api/status`);
+      console.log('🌐 Full Status URL:', `http://${arduinoIP}/api/status`);
+      console.log('🌐 Full Sensor URL:', `http://${arduinoIP}/api/sensor-data`);
       console.log('📱 App attempting fetch to Arduino...');
 
-      // First, let's try a simple fetch without timeout to see what happens
+      // Enhanced fetch with proper timeout and error handling
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => {
+        console.log('⏰ Request timed out after 15 seconds');
+        controller.abort();
+      }, 15000); // 15 second timeout
+
+      console.log('📡 Making HTTP request to Arduino status endpoint...');
+      
       const response = await fetch(`http://${arduinoIP}/api/status`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
+          'Cache-Control': 'no-cache',
+          'User-Agent': 'AniKo-Mobile-App/1.0.0',
         },
+        signal: controller.signal,
       });
 
-      console.log('📡 Response received from Arduino:');
-      console.log('   Status:', response.status);
+      clearTimeout(timeoutId);
+
+      console.log('📡 Arduino Status Response received:');
+      console.log('   Status Code:', response.status);
       console.log('   Status Text:', response.statusText);
-      console.log('   OK:', response.ok);
+      console.log('   Response OK:', response.ok);
+      console.log('   Response Type:', response.type);
+      console.log('   Response URL:', response.url);
       console.log('   Headers:', Object.fromEntries(response.headers.entries()));
 
-      if (response.ok) {
-        const data = await response.json();
-        console.log('📦 Status data received from Arduino:', data);
-        
-        setConnectionStatus('Connected');
-        setIsSensorConnected(true);
-        setShowIPInput(false);
-        
-        // Set up interval and store the reference (every 10 seconds for testing)
-        fetchIntervalRef.current = setInterval(fetchSensorData, 10 * 1000); // Changed to 10 seconds for testing
-        
-        // Fetch initial data immediately
-        console.log('🔄 Fetching initial sensor data...');
-        await fetchSensorData();
-        
-        Alert.alert('Success', 'Connected to Arduino NPK sensor!');
-      } else {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      if (!response.ok) {
+        throw new Error(`HTTP Error: ${response.status} ${response.statusText}`);
       }
+
+      const statusData = await response.json();
+      console.log('📦 Arduino Status Data:', JSON.stringify(statusData, null, 2));
+
+      // Verify it's our Arduino device
+      const isAnikoDevice = statusData.device === 'ANIKO_SMART_AI_SENSOR' || 
+                           statusData.device_type === 'ANIKO_SMART_AI_SENSOR';
+      
+      if (!isAnikoDevice) {
+        throw new Error('Device response invalid: Not an ANIKO Arduino sensor');
+      }
+
+      console.log('✅ Status endpoint verified, testing sensor data endpoint...');
+
+      // Test sensor data endpoint
+      const sensorController = new AbortController();
+      const sensorTimeoutId = setTimeout(() => {
+        console.log('⏰ Sensor request timed out');
+        sensorController.abort();
+      }, 10000);
+
+      const sensorResponse = await fetch(`http://${arduinoIP}/api/sensor-data`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        signal: sensorController.signal,
+      });
+
+      clearTimeout(sensorTimeoutId);
+
+      console.log('📊 Sensor Data Response:');
+      console.log('   Status Code:', sensorResponse.status);
+      console.log('   Response OK:', sensorResponse.ok);
+
+      if (!sensorResponse.ok) {
+        console.warn('⚠️ Sensor endpoint failed, but status works');
+      } else {
+        const sensorData = await sensorResponse.json();
+        console.log('📊 Sensor Data Preview:', Object.keys(sensorData));
+        console.log('🌡️ Sample readings:', {
+          temperature: sensorData.temperature,
+          moisture: sensorData.moisture,
+          ph: sensorData.ph
+        });
+      }
+
+      // ✅ SUCCESS - Connection established
+      console.log('✅ CONNECTION SUCCESSFUL - Setting up Arduino communication');
+      setConnectionStatus('Connected');
+      setIsSensorConnected(true);
+      setShowIPInput(false);
+      
+      // Set up interval for regular data fetching (every 30 seconds)
+      console.log('⏰ Setting up data fetch interval (30 seconds)');
+      fetchIntervalRef.current = setInterval(fetchSensorData, 30 * 1000);
+      
+      // Fetch initial data immediately
+      console.log('🔄 Fetching initial sensor data...');
+      await fetchSensorData();
+      
+      Alert.alert(
+        'Success! 🎉', 
+        `Connected to Arduino NPK sensor!\n\n✅ Device: ${statusData.device || statusData.device_type}\n✅ IP: ${statusData.ip || arduinoIP}\n✅ Status: Online\n\nSensor data will update every 30 seconds.`
+      );
+
     } catch (error: any) {
       console.error('❌ CONNECTION FAILED:');
-      console.error('   Error type:', error.constructor.name);
-      console.error('   Error message:', error.message);
-      console.error('   Full error:', error);
+      console.error('   Error Name:', error.name);
+      console.error('   Error Message:', error.message);
+      console.error('   Error Stack:', error.stack);
       
       setConnectionStatus('Connection Failed');
       setIsSensorConnected(false);
       
-      let errorMessage = 'Unknown error occurred';
+      let userMessage = 'Unknown connection error';
+      let troubleshooting = '';
       
-      if (error.message.includes('Network request failed')) {
-        errorMessage = 'Network request failed - check WiFi connection';
-        console.log('🔍 Network request failed - possible causes:');
-        console.log('   1. Arduino not responding');
-        console.log('   2. Different WiFi networks');
-        console.log('   3. Firewall blocking request');
-        console.log('   4. Wrong IP address');
-      } else if (error.message.includes('timeout')) {
-        errorMessage = 'Connection timeout - Arduino may be unreachable';
+      // Enhanced error analysis
+      if (error.name === 'AbortError') {
+        userMessage = 'Connection timeout - Arduino took too long to respond';
+        troubleshooting = `
+🔧 Troubleshooting:
+• Arduino might be busy or overloaded
+• Try restarting Arduino
+• Check Arduino Serial Monitor for "WiFi connected" message
+• Verify IP is still ${arduinoIP}`;
+      } else if (error.message.includes('Network request failed')) {
+        userMessage = 'Network request failed - Cannot reach Arduino';
+        troubleshooting = `
+� Troubleshooting:
+• Check WiFi: Both devices must be on same network
+• Verify Arduino IP: ${arduinoIP}
+• Test in browser: http://${arduinoIP}/api/status
+• Check router settings (disable AP Isolation)
+• Try restarting WiFi on phone`;
+      } else if (error.message.includes('fetch')) {
+        userMessage = 'HTTP request was blocked or failed';
+        troubleshooting = `
+🔧 Troubleshooting:
+• App might be blocking HTTP requests
+• Try using different network
+• Check app permissions
+• Restart the mobile app
+• Update app.json network security config`;
+      } else if (error.message.includes('JSON')) {
+        userMessage = 'Arduino sent invalid response';
+        troubleshooting = `
+🔧 Troubleshooting:
+• Arduino responded but data is corrupted
+• Check Arduino Serial Monitor for errors
+• Try restarting Arduino
+• Check Arduino firmware version`;
       } else if (error.message.includes('HTTP')) {
-        errorMessage = `Server error: ${error.message}`;
+        userMessage = `Server error: ${error.message}`;
+        troubleshooting = `
+🔧 Troubleshooting:
+• Arduino returned error status
+• Check Arduino Serial Monitor
+• Verify Arduino firmware is working
+• Try restarting Arduino`;
       } else {
-        errorMessage = error.message;
+        userMessage = error.message;
+        troubleshooting = `
+🔧 Troubleshooting:
+• Unknown error occurred
+• Check console logs for details
+• Try restarting both devices
+• Verify network connection`;
       }
       
       Alert.alert(
-        'Connection Failed', 
-        `Cannot connect to Arduino at ${arduinoIP}\n\nError: ${errorMessage}\n\nMake sure:\n1. Arduino is powered on\n2. Connected to same WiFi\n3. IP address is correct\n4. Both devices on same network`
+        'Connection Failed ❌', 
+        `${userMessage}\n${troubleshooting}\n\n🔍 Technical Details:\nTarget: ${arduinoIP}\nError: ${error.message}`,
+        [
+          { text: 'Retry', onPress: () => setTimeout(testConnection, 1000) },
+          { text: 'Cancel', style: 'cancel' }
+        ]
       );
     } finally {
       setIsConnecting(false);
@@ -850,7 +961,41 @@ const NPKSensorDashboard: React.FC = () => {
           </TouchableOpacity>
           
           {/* Quick Test Known IP Button */}
-        
+          <TouchableOpacity
+            style={styles.quickTestButton}
+            onPress={async () => {
+              try {
+                console.log('🧪 QUICK TEST - Testing 192.168.18.56 directly...');
+                const response = await fetch('http://192.168.18.56/api/status', {
+                  method: 'GET',
+                  headers: { 'Content-Type': 'application/json' },
+                });
+                console.log('✅ Quick test response:', response.status);
+                const data = await response.json();
+                console.log('📦 Quick test data:', data);
+                Alert.alert('Quick Test Result', `Status: ${response.status}\nDevice: ${data.device || data.device_type || 'Unknown'}`);
+              } catch (error: any) {
+                console.error('❌ Quick test failed:', error);
+                Alert.alert('Quick Test Failed', `Error: ${error.message}\n\nThis helps diagnose if the issue is with the connection logic or network.`);
+              }
+            }}
+          >
+            <View style={styles.scanningRow}>
+              <Ionicons name="flash" size={16} color="white" />
+              <Text style={styles.saveIPButtonText}>🧪 Quick Test 192.168.18.56</Text>
+            </View>
+          </TouchableOpacity>
+
+          {/* Network Diagnostics Button */}
+          <TouchableOpacity
+            style={[styles.quickTestButton, { backgroundColor: '#FF6B6B' }]}
+            onPress={() => showNetworkDiagnostics(arduinoIP)}
+          >
+            <View style={styles.scanningRow}>
+              <Ionicons name="analytics" size={16} color="white" />
+              <Text style={styles.saveIPButtonText}>🔍 Network Diagnostics</Text>
+            </View>
+          </TouchableOpacity>
           
           {/* Discovered Devices */}
           {showDiscoveredDevices && (
