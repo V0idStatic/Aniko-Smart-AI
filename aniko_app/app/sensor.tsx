@@ -710,7 +710,7 @@ const NPKSensorDashboard: React.FC = () => {
 
         {/* WiFi Configuration Panel */}
         <View style={styles.ipConfigPanel}>
-          <Text style={styles.ipConfigTitle}>📶 WiFi Configuration</Text>
+          <Text style={styles.ipConfigTitle}> WiFi Configuration</Text>
           <Text style={styles.discoverySubtitle}>
             Configure Arduino WiFi settings remotely
           </Text>
@@ -777,7 +777,7 @@ const NPKSensorDashboard: React.FC = () => {
 
         {/* Arduino Discovery Panel */}
         <View style={styles.ipConfigPanel}>
-          <Text style={styles.ipConfigTitle}>🔍 Arduino Discovery</Text>
+          <Text style={styles.ipConfigTitle}> Arduino Discovery</Text>
           <Text style={styles.discoverySubtitle}>
             Automatically find ANIKO Arduino devices on your network
           </Text>
