@@ -111,7 +111,9 @@ const NPKSensorDashboard: React.FC = () => {
   // Fetch data from Arduino
   const fetchSensorData = async () => {
     try {
-      console.log(`Fetching sensor data from: http://${arduinoIP}/api/sensor-data`);
+      console.log('📊 FETCH SENSOR DATA CALLED');
+      console.log('🎯 Fetching from URL:', `http://${arduinoIP}/api/sensor-data`);
+      console.log('🔗 Arduino IP:', arduinoIP);
       
       const response = await fetch(`http://${arduinoIP}/api/sensor-data`, {
         method: 'GET',
@@ -122,12 +124,14 @@ const NPKSensorDashboard: React.FC = () => {
         // Remove AbortController for now to simplify debugging
       });
 
-      console.log('Response status:', response.status);
-      console.log('Response headers:', response.headers);
+      console.log('📡 SENSOR DATA RESPONSE:');
+      console.log('   Status:', response.status);
+      console.log('   OK:', response.ok);
+      console.log('   Headers:', Object.fromEntries(response.headers.entries()));
 
       if (response.ok) {
         const data = await response.json();
-        console.log('Received sensor data:', data);
+        console.log('📦 SENSOR DATA RECEIVED:', data);
         
         const normalized: SensorData = {
           temperature: data.temperature || 0,
@@ -141,10 +145,17 @@ const NPKSensorDashboard: React.FC = () => {
         };
         
         console.log('🔄 Updating global sensor data:', normalized);
+        console.log('🌡️ Temperature:', normalized.temperature);
+        console.log('💧 Moisture:', normalized.moisture);
+        console.log('🧪 pH:', normalized.ph);
+        console.log('🌿 NPK:', normalized.nitrogen, normalized.phosphorus, normalized.potassium);
         setSensorData(normalized);
 
         // Insert into database for current user
+        console.log('💾 PREPARING DATABASE INSERT...');
         const current = getCurrentUser();
+        console.log('👤 Current User:', current);
+        
         if (current) {
           const insertPayload = {
             user_id: current.id,
@@ -158,14 +169,23 @@ const NPKSensorDashboard: React.FC = () => {
             potassium_ppm: normalized.potassium,
             // humidity_pct intentionally omitted (not in sensorData yet)
           };
+          
+          console.log('📦 Insert Payload:', insertPayload);
+          console.log('🏪 Inserting into esp32_readings table...');
+          
           const { error: insertError } = await supabase.from('esp32_readings').insert(insertPayload);
           if (insertError) {
-            console.log('Insert error:', insertError.message);
+            console.error('❌ DATABASE INSERT ERROR:', insertError);
+            console.log('   Error message:', insertError.message);
+            console.log('   Error details:', insertError.details);
+            console.log('   Error hint:', insertError.hint);
             setDbStatus('Insert failed: ' + insertError.message);
           } else {
+            console.log('✅ DATABASE INSERT SUCCESSFUL');
             setDbStatus('Inserted at ' + new Date().toLocaleTimeString());
           }
         } else {
+          console.log('⚠️ NO USER SESSION - Cannot store reading');
           setDbStatus('No current user in session; cannot store reading');
         }
         
@@ -174,16 +194,31 @@ const NPKSensorDashboard: React.FC = () => {
           setConnectionStatus('Connected');
         }
       } else {
+        console.error('❌ SENSOR DATA HTTP ERROR:', response.status, response.statusText);
+        const errorText = await response.text().catch(() => 'Unable to read error response');
+        console.log('📄 Error Response Body:', errorText);
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
     } catch (error: any) {
-      console.error('Error fetching sensor data:', error);
-      console.error('Error details:', error.message);
+      console.error('💥 SENSOR DATA FETCH ERROR:', error);
+      console.log('   Error type:', typeof error);
+      console.log('   Error name:', error.name);
+      console.log('   Error message:', error.message);
+      console.log('   Error stack:', error.stack);
+      
+      // Check if it's a network error specifically
+      if (error.name === 'TypeError' || error.message.includes('Network request failed')) {
+        console.log('🌐 NETWORK ERROR DETECTED - Arduino unreachable');
+      }
       
       if (isSensorConnected) {
+        console.log('🔌 Setting sensor as DISCONNECTED');
         setIsSensorConnected(false);
         setConnectionStatus('Connection Lost');
         Alert.alert('Connection Error', `Lost connection to Arduino sensor: ${error.message}`);
+      } else {
+        console.log('⚠️ Sensor was already disconnected, updating status');
+        setConnectionStatus('Connection Failed');
       }
     }
   };
@@ -389,7 +424,10 @@ const NPKSensorDashboard: React.FC = () => {
         fetchIntervalRef.current = null;
       }
 
-      console.log(`Testing connection to: http://${arduinoIP}/api/status`);
+      console.log('🚀 CONNECT BUTTON PRESSED - Starting connection test');
+      console.log('🎯 Target Arduino IP:', arduinoIP);
+      console.log('🌐 Full URL:', `http://${arduinoIP}/api/status`);
+      console.log('📱 App attempting fetch to Arduino...');
 
       // First, let's try a simple fetch without timeout to see what happens
       const response = await fetch(`http://${arduinoIP}/api/status`, {
@@ -400,20 +438,25 @@ const NPKSensorDashboard: React.FC = () => {
         },
       });
 
-      console.log('Status response:', response.status, response.statusText);
+      console.log('📡 Response received from Arduino:');
+      console.log('   Status:', response.status);
+      console.log('   Status Text:', response.statusText);
+      console.log('   OK:', response.ok);
+      console.log('   Headers:', Object.fromEntries(response.headers.entries()));
 
       if (response.ok) {
         const data = await response.json();
-        console.log('Status data received:', data);
+        console.log('📦 Status data received from Arduino:', data);
         
         setConnectionStatus('Connected');
         setIsSensorConnected(true);
         setShowIPInput(false);
         
-        // Set up interval and store the reference (every 5 minutes)
-        fetchIntervalRef.current = setInterval(fetchSensorData, 5 * 60 * 1000);
+        // Set up interval and store the reference (every 10 seconds for testing)
+        fetchIntervalRef.current = setInterval(fetchSensorData, 10 * 1000); // Changed to 10 seconds for testing
         
         // Fetch initial data immediately
+        console.log('🔄 Fetching initial sensor data...');
         await fetchSensorData();
         
         Alert.alert('Success', 'Connected to Arduino NPK sensor!');
@@ -421,9 +464,10 @@ const NPKSensorDashboard: React.FC = () => {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
     } catch (error: any) {
-      console.error('Connection test failed:', error);
-      console.error('Error type:', error.constructor.name);
-      console.error('Error message:', error.message);
+      console.error('❌ CONNECTION FAILED:');
+      console.error('   Error type:', error.constructor.name);
+      console.error('   Error message:', error.message);
+      console.error('   Full error:', error);
       
       setConnectionStatus('Connection Failed');
       setIsSensorConnected(false);
@@ -432,6 +476,11 @@ const NPKSensorDashboard: React.FC = () => {
       
       if (error.message.includes('Network request failed')) {
         errorMessage = 'Network request failed - check WiFi connection';
+        console.log('🔍 Network request failed - possible causes:');
+        console.log('   1. Arduino not responding');
+        console.log('   2. Different WiFi networks');
+        console.log('   3. Firewall blocking request');
+        console.log('   4. Wrong IP address');
       } else if (error.message.includes('timeout')) {
         errorMessage = 'Connection timeout - Arduino may be unreachable';
       } else if (error.message.includes('HTTP')) {
