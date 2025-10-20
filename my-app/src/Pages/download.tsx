@@ -77,39 +77,35 @@ const Download: React.FC = () => {
               <div className="col-md-4">
                 <div className="step-card">
                   <div className="step-number">1</div>
-                  <h4>Clone from GitHub</h4>
-                  <p>Visit our GitHub repository and clone the project to your local machine</p>
-                  <div className="code-block">
-                    <code>git clone https://github.com/your-repo/aniko-app.git</code>
-                  </div>
+                  <h4>Tap the Download from Github Button</h4>
+                  <p>It will proceed you to the github repository of AniKo</p>
+                 
                 </div>
               </div>
 
               <div className="col-md-4">
                 <div className="step-card">
                   <div className="step-number">2</div>
-                  <h4>Install Dependencies</h4>
-                  <p>Navigate to the project directory and install all required packages</p>
-                  <div className="code-block">
-                    <code>
-                      cd aniko-app
-                      <br />
-                      npm install
-                    </code>
-                  </div>
+                  <h4>Tap the Download button.</h4>
+                  <p> Wait for the file to finish downloading. (Check your browser’s downloads or notification tray.)</p>
+              
                 </div>
-              </div>
+              </div>  
 
               <div className="col-md-4">
                 <div className="step-card">
                   <div className="step-number">3</div>
-                  <h4>Run the Application</h4>
-                  <p>Start the development server and access the app in your browser</p>
-                  <div className="code-block">
-                    <code>npm start</code>
-                  </div>
+                  <h4>Install the APK </h4>
+                  <p>Locate the downloaded APK file on your device and tap to install (After that you are ready to go)</p>
+
                 </div>
               </div>
+
+            
+
+              
+
+              
             </div>
           </div>
         </section>

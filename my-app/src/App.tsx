@@ -18,6 +18,7 @@ import AdminRegister from "./Pages/admin_register";
 import AuthCallback from "./Pages/AuthCallback";
 import Download from "./Pages/download";
 import Chatbox from "./Pages/Chatbox";
+import HowToUse from "./Pages/HowToUse";
 
 // ✅ Layout wrapper for pages that should have a header
 const LayoutWithHeader = ({ children }: { children: React.ReactNode }) => (
@@ -41,6 +42,7 @@ function App() {
       <Route path="/apiWeather" element={<LayoutWithHeader><ApiWeather /></LayoutWithHeader>} />
       <Route path="/download" element={<LayoutWithHeader><Download /></LayoutWithHeader>} />
       <Route path="/chat" element={<LayoutWithHeader><Chatbox /></LayoutWithHeader>} />
+      <Route path="/how-to-use" element={<LayoutWithHeader><HowToUse /></LayoutWithHeader>} />
 
       {/* Pages WITHOUT Header (Auth & Admin) */}
       <Route path="/login" element={<Login />} />

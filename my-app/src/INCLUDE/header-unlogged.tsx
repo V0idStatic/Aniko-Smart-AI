@@ -69,21 +69,45 @@ const HeaderUnlogged: React.FC = () => {
               <i className="bi bi-x-lg"></i>
             </button>
 
-            <ul className="navbar-nav gap-3 text-center">
+            <ul className="navbar-nav gap-3 text-center mx-auto">
               <li className="nav-item">
                 <Link className="nav-link" to="/" onClick={() => setMenuOpen(false)}>
                   <i className="bi bi-house-door me-2"></i>Home
                 </Link>
               </li>
-              <li className="nav-item">
-                <HashLink smooth className="nav-link" to="/#about" onClick={() => setMenuOpen(false)}>
+              <li className="nav-item dropdown">
+                <a
+                  className="nav-link dropdown-toggle"
+                  href="#"
+                  id="aboutDropdown"
+                  role="button"
+                  data-bs-toggle="dropdown"
+                  aria-expanded="false"
+                >
                   <i className="bi bi-info-circle me-2"></i>About
-                </HashLink>
-              </li>
-              <li className="nav-item">
-                <HashLink smooth className="nav-link" to="/#features" onClick={() => setMenuOpen(false)}>
-                  <i className="bi bi-star me-2"></i>Features
-                </HashLink>
+                </a>
+                <ul className="dropdown-menu" aria-labelledby="aboutDropdown">
+                  <li>
+                    <HashLink smooth className="dropdown-item" to="/#features" onClick={() => setMenuOpen(false)}>
+                      <i className="bi bi-star me-2"></i>Features
+                    </HashLink>
+                  </li>
+                  <li>
+                    <HashLink smooth className="dropdown-item" to="/#why-aniko" onClick={() => setMenuOpen(false)}>
+                      <i className="bi bi-question-circle me-2"></i>Why Aniko
+                    </HashLink>
+                  </li>
+                  <li>
+                    <HashLink smooth className="dropdown-item" to="/#team" onClick={() => setMenuOpen(false)}>
+                      <i className="bi bi-people me-2"></i>Team
+                    </HashLink>
+                  </li>
+                  <li>
+                    <Link className="dropdown-item" to="/how-to-use" onClick={() => setMenuOpen(false)}>
+                      <i className="bi bi-book me-2"></i>How to Use
+                    </Link>
+                  </li>
+                </ul>
               </li>
               <li className="nav-item">
                 <Link className="nav-link" to="/testimonialDisplay" onClick={() => setMenuOpen(false)}>
@@ -95,17 +119,6 @@ const HeaderUnlogged: React.FC = () => {
                   <i className="bi bi-download me-2"></i>Download
                 </Link>
               </li>
-              <li className="nav-item">
-                <HashLink smooth className="nav-link" to="/#why-aniko" onClick={() => setMenuOpen(false)}>
-                  <i className="bi bi-question-circle me-2"></i>Why Aniko
-                </HashLink>
-              </li>
-              <li className="nav-item">
-                <HashLink smooth className="nav-link" to="/#team" onClick={() => setMenuOpen(false)}>
-                  <i className="bi bi-people me-2"></i>Team
-                </HashLink>
-              </li>
-
               <li className="nav-item">
                 <a
                   className="nav-link"
@@ -266,7 +279,8 @@ const HeaderUnlogged: React.FC = () => {
 
           .side-panel .navbar-nav {
             flex-direction: row;
-            margin: 0 auto;
+            margin-left: auto;
+            margin-right: 20%;
             justify-content: center;
           }
 
