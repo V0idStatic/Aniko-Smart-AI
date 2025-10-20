@@ -297,14 +297,45 @@ const NPKSensorDashboard: React.FC = () => {
             
             console.log(`📤 Response from ${testIP}${endpoint}:`, data);
             
-            // Check multiple ways to identify ANIKO Arduino
+            // Add debug logging for your specific IP
+            if (testIP === '192.168.18.56') {
+              console.log('🔍 DEBUG: Testing known Arduino IP:', testIP);
+              console.log('📤 Arduino response:', JSON.stringify(data, null, 2));
+              console.log('🔍 device_type check:', data.device_type === 'ANIKO_SMART_AI_SENSOR');
+              console.log('🔍 device_name check:', data.device_name?.includes('ANIKO'));
+            }
+            
+            // Check multiple ways to identify ANIKO Arduino - FIXED DETECTION LOGIC
             const isAnikoArduino = data && (
+              // Primary check - device_type field
               data.device_type === 'ANIKO_SMART_AI_SENSOR' ||
+              
+              // Secondary check - device field  
               data.device === 'ANIKO_SMART_AI_SENSOR' ||
-              data.device_name?.includes('ANIKO') ||
-              data.device_name?.includes('Smart AI') ||
-              (typeof data === 'string' && data.includes('ANIKO'))
+              
+              // Device name checks
+              (data.device_name && (
+                data.device_name.includes('ANIKO') ||
+                data.device_name.includes('Smart AI') ||
+                data.device_name.includes('NPK Sensor')
+              )) ||
+              
+              // Status check - if it's online and has device_type
+              (data.status === 'online' && data.device_type) ||
+              
+              // Fallback - check if any field contains ANIKO
+              Object.values(data).some(value => 
+                typeof value === 'string' && (
+                  value.includes('ANIKO') || 
+                  value.includes('Smart AI') ||
+                  value.includes('NPK Sensor')
+                )
+              )
             );
+            
+            if (testIP === '192.168.18.56') {
+              console.log('🔍 Detection result:', isAnikoArduino);
+            }
             
             if (isAnikoArduino) {
               console.log(`✅ Found ANIKO Arduino at: ${testIP}`);
