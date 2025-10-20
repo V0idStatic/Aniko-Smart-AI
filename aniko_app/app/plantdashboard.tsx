@@ -351,7 +351,7 @@ export default function Dashboard() {
       console.log("🗓️ FIXED DAY TRACKING: Data will be grouped by actual day of week recorded, not shifted by current time")
       
       if (cropTrackingHistory && cropTrackingHistory.length > 0) {
-        const trackedCrops = [...new Set(cropTrackingHistory.map(record => record.crop_name).filter(Boolean))]
+        const trackedCrops = [...new Set(cropTrackingHistory.map((record: any) => record.crop_name).filter(Boolean))] as string[]
         console.log("🌱 Crops tracked in this period:", trackedCrops)
         
         // Update available tracked plants for selection
@@ -362,7 +362,7 @@ export default function Dashboard() {
           if (selectedCrop && trackedCrops.includes(selectedCrop.crop_name)) {
             setSelectedHistoryPlant(selectedCrop.crop_name)
           } else if (trackedCrops.length > 0) {
-            setSelectedHistoryPlant(trackedCrops[0])
+            setSelectedHistoryPlant(trackedCrops[0] as string)
           }
         }
       } else {

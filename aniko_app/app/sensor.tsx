@@ -11,13 +11,21 @@ import {
   ScrollView,
   Alert,
   Dimensions,
-  TextInput
+  TextInput,
+  ActivityIndicator
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useFocusEffect } from '@react-navigation/native'
+// Optional navigation import - will work without it
+// import { useFocusEffect } from '@react-navigation/native'
 import { useCallback } from 'react'
+
+// Network discovery (if available - you may need to install react-native-network-info)
+// import { NetworkInfo } from 'react-native-network-info';
+
+// Note: For full UDP discovery, you would need: npm install react-native-udp
+// For now, we'll use network scanning approach
 
 
 export const COLORS = {
@@ -88,6 +96,17 @@ const NPKSensorDashboard: React.FC = () => {
   const [isConnecting, setIsConnecting] = useState(false);
   const fetchIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const router = useRouter();
+
+  // Arduino Discovery State
+  const [discoveredArduinos, setDiscoveredArduinos] = useState<string[]>([]);
+  const [isScanning, setIsScanning] = useState(false);
+  const [showDiscoveredDevices, setShowDiscoveredDevices] = useState(false);
+
+  // WiFi Configuration State
+  const [showWiFiConfig, setShowWiFiConfig] = useState(false);
+  const [wifiSSID, setWiFiSSID] = useState('');
+  const [wifiPassword, setWiFiPassword] = useState('');
+  const [isConfiguringWiFi, setIsConfiguringWiFi] = useState(false);
 
   // Fetch data from Arduino
   const fetchSensorData = async () => {
@@ -167,6 +186,162 @@ const NPKSensorDashboard: React.FC = () => {
         Alert.alert('Connection Error', `Lost connection to Arduino sensor: ${error.message}`);
       }
     }
+  };
+
+  // Arduino Discovery Function - Scans network for ANIKO Arduino devices
+  const discoverArduinos = async () => {
+    setIsScanning(true);
+    setDiscoveredArduinos([]);
+    setShowDiscoveredDevices(true);
+    
+    console.log('🔍 Scanning for ANIKO Arduino devices...');
+    console.log('📱 Known Arduino IP from Serial Monitor:', arduinoIP);
+    
+    try {
+      // First, try the current arduinoIP if it's set
+      if (arduinoIP && arduinoIP !== '192.168.1.100') {
+        console.log('🎯 Testing known Arduino IP first:', arduinoIP);
+        await testSpecificIP(arduinoIP);
+      }
+
+      // Determine network ranges based on current Arduino IP or scan common ones
+      let networkRanges = [];
+      
+      if (arduinoIP && arduinoIP !== '192.168.1.100') {
+        // Extract network from known Arduino IP
+        const ipParts = arduinoIP.split('.');
+        if (ipParts.length === 4) {
+          const baseNetwork = `${ipParts[0]}.${ipParts[1]}.${ipParts[2]}.`;
+          networkRanges = [baseNetwork];
+          console.log('🌐 Scanning network based on known Arduino:', baseNetwork);
+        }
+      } else {
+        // Scan common network ranges
+        networkRanges = [
+          '192.168.1.',    // Most common home router default
+          '192.168.0.',    // Alternative home router default
+          '192.168.18.',   // Your current network
+          '192.168.4.',    // ESP32 AP mode default
+          '10.0.0.',       // Some router defaults
+          '172.16.0.'      // Some corporate networks
+        ];
+        console.log('🌐 Scanning common network ranges');
+      }
+
+      const scanPromises = [];
+      
+      // Scan each network range with extended IP range
+      for (const baseIP of networkRanges) {
+        // Scan broader Arduino IP range (1-254 but in chunks for performance)
+        for (let i = 1; i <= 254; i++) {
+          const testIP = baseIP + i;
+          
+          // Skip if we already tested this IP
+          if (testIP === arduinoIP) continue;
+          
+          scanPromises.push(testSpecificIP(testIP));
+        }
+      }
+      
+      // Wait for all scans to complete (with timeout)
+      console.log(`🔄 Starting scan of ${scanPromises.length} IP addresses...`);
+      await Promise.allSettled(scanPromises);
+      
+    } catch (error) {
+      console.error('❌ Error during Arduino discovery:', error);
+    } finally {
+      setIsScanning(false);
+      console.log('🔍 Arduino scan completed');
+      console.log(`✅ Found ${discoveredArduinos.length} ANIKO Arduino(s)`);
+    }
+  };
+
+  // Helper function to test a specific IP
+  const testSpecificIP = async (testIP: string) => {
+    try {
+      console.log(`🔍 Testing IP: ${testIP}`);
+      
+      // Try multiple endpoints to identify Arduino
+      const endpoints = ['/api/device-info', '/api/status', '/'];
+      
+      for (const endpoint of endpoints) {
+        try {
+          const response = await Promise.race([
+            fetch(`http://${testIP}${endpoint}`, { 
+              method: 'GET',
+              headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+              }
+            }),
+            new Promise((_, reject) => 
+              setTimeout(() => reject(new Error('timeout')), 3000) // Increased timeout
+            )
+          ]);
+
+          if (response && typeof response === 'object' && 'ok' in response && response.ok) {
+            // Try to parse response
+            let data;
+            const fetchResponse = response as Response;
+            const contentType = fetchResponse.headers.get('content-type');
+            
+            if (contentType && contentType.includes('application/json')) {
+              data = await fetchResponse.json();
+            } else {
+              const text = await fetchResponse.text();
+              // Check if HTML contains ANIKO identifier
+              if (text.includes('ANIKO') || text.includes('Smart AI') || text.includes('NPK Sensor')) {
+                data = { device_type: 'ANIKO_SMART_AI_SENSOR' };
+              }
+            }
+            
+            console.log(`📤 Response from ${testIP}${endpoint}:`, data);
+            
+            // Check multiple ways to identify ANIKO Arduino
+            const isAnikoArduino = data && (
+              data.device_type === 'ANIKO_SMART_AI_SENSOR' ||
+              data.device === 'ANIKO_SMART_AI_SENSOR' ||
+              data.device_name?.includes('ANIKO') ||
+              data.device_name?.includes('Smart AI') ||
+              (typeof data === 'string' && data.includes('ANIKO'))
+            );
+            
+            if (isAnikoArduino) {
+              console.log(`✅ Found ANIKO Arduino at: ${testIP}`);
+              setDiscoveredArduinos(prev => {
+                if (!prev.includes(testIP)) {
+                  console.log(`➕ Adding ${testIP} to discovered devices`);
+                  return [...prev, testIP];
+                }
+                return prev;
+              });
+              break; // Found Arduino, no need to try other endpoints
+            }
+          }
+        } catch (endpointError) {
+          // Continue to next endpoint
+          continue;
+        }
+      }
+    } catch (error) {
+      // IP not responding or not Arduino - ignore
+    }
+  };
+
+  // Select discovered Arduino
+  const selectDiscoveredArduino = async (ip: string) => {
+    console.log('✅ User selected Arduino:', ip);
+    setArduinoIP(ip);
+    setShowDiscoveredDevices(false);
+    
+    // Test connection to selected Arduino
+    await testConnection();
+    
+    Alert.alert(
+      'Arduino Selected', 
+      `Connected to ANIKO Arduino at ${ip}\n\nTap "Connect" to start monitoring.`,
+      [{ text: 'OK' }]
+    );
   };
 
   // Test connection to Arduino
@@ -251,6 +426,65 @@ const NPKSensorDashboard: React.FC = () => {
     setIsSensorConnected(false);
     setConnectionStatus('Disconnected');
     setSensorData(null);
+  };
+
+  // Configure WiFi on Arduino
+  const configureWiFi = async () => {
+    if (!wifiSSID || !wifiPassword) {
+      Alert.alert('Error', 'Please enter both WiFi SSID and password');
+      return;
+    }
+
+    setIsConfiguringWiFi(true);
+    
+    try {
+      console.log(`Configuring WiFi on Arduino: ${arduinoIP}`);
+      
+      const response = await fetch(`http://${arduinoIP}/api/configure-wifi`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: JSON.stringify({
+          ssid: wifiSSID,
+          password: wifiPassword
+        })
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        console.log('WiFi configuration response:', result);
+        
+        Alert.alert(
+          'WiFi Configured',
+          `Arduino will restart and connect to "${wifiSSID}"\n\nThe IP address may change after restart. Use "Scan for Arduino" to find the new IP.`,
+          [
+            { 
+              text: 'OK', 
+              onPress: () => {
+                setShowWiFiConfig(false);
+                setWiFiSSID('');
+                setWiFiPassword('');
+                // Disconnect current connection since IP will change
+                disconnect();
+              }
+            }
+          ]
+        );
+      } else {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+    } catch (error: any) {
+      console.error('WiFi configuration failed:', error);
+      
+      Alert.alert(
+        'WiFi Configuration Failed',
+        `Could not configure WiFi on Arduino\n\nError: ${error.message}\n\nMake sure:\n1. Arduino is connected\n2. Arduino firmware supports WiFi configuration\n3. Both devices are on same network`
+      );
+    } finally {
+      setIsConfiguringWiFi(false);
+    }
   };
 
   // Start/stop fetching based on connection status only
@@ -443,7 +677,193 @@ const NPKSensorDashboard: React.FC = () => {
           </View>
         )}
 
-        {/* Connection Panel */}
+        {/* WiFi Configuration Panel */}
+        <View style={styles.ipConfigPanel}>
+          <Text style={styles.ipConfigTitle}>📶 WiFi Configuration</Text>
+          <Text style={styles.discoverySubtitle}>
+            Configure Arduino WiFi settings remotely
+          </Text>
+          
+          <TouchableOpacity
+            style={styles.manualIPButton}
+            onPress={() => setShowWiFiConfig(!showWiFiConfig)}
+          >
+            <Text style={styles.manualIPText}>
+              {showWiFiConfig ? "Hide WiFi Setup" : "Configure Arduino WiFi"}
+            </Text>
+          </TouchableOpacity>
+          
+          {showWiFiConfig && (
+            <View style={styles.wifiConfigSection}>
+              <Text style={styles.wifiLabel}>Network Name (SSID):</Text>
+              <TextInput
+                style={styles.ipInput}
+                value={wifiSSID}
+                onChangeText={setWiFiSSID}
+                placeholder="Enter WiFi network name"
+                autoCapitalize="none"
+                autoCorrect={false}
+              />
+              
+              <Text style={styles.wifiLabel}>WiFi Password:</Text>
+              <TextInput
+                style={styles.ipInput}
+                value={wifiPassword}
+                onChangeText={setWiFiPassword}
+                placeholder="Enter WiFi password"
+                secureTextEntry={true}
+                autoCapitalize="none"
+                autoCorrect={false}
+              />
+              
+              <TouchableOpacity
+                style={[styles.saveIPButton, isConfiguringWiFi && styles.scanningButton]}
+                onPress={configureWiFi}
+                disabled={isConfiguringWiFi}
+              >
+                {isConfiguringWiFi ? (
+                  <View style={styles.scanningRow}>
+                    <ActivityIndicator size="small" color="white" />
+                    <Text style={styles.saveIPButtonText}>Configuring...</Text>
+                  </View>
+                ) : (
+                  <View style={styles.scanningRow}>
+                    <Ionicons name="wifi" size={16} color="white" />
+                    <Text style={styles.saveIPButtonText}>Configure WiFi</Text>
+                  </View>
+                )}
+              </TouchableOpacity>
+              
+              <View style={styles.wifiWarning}>
+                <Ionicons name="warning-outline" size={16} color={COLORS.warning} />
+                <Text style={styles.wifiWarningText}>
+                  Arduino will restart after WiFi change. IP address may change.
+                </Text>
+              </View>
+            </View>
+          )}
+        </View>
+
+        {/* Arduino Discovery Panel */}
+        <View style={styles.ipConfigPanel}>
+          <Text style={styles.ipConfigTitle}>🔍 Arduino Discovery</Text>
+          <Text style={styles.discoverySubtitle}>
+            Automatically find ANIKO Arduino devices on your network
+          </Text>
+          
+          <TouchableOpacity
+            style={[styles.saveIPButton, isScanning && styles.scanningButton]}
+            onPress={discoverArduinos}
+            disabled={isScanning}
+          >
+            {isScanning ? (
+              <View style={styles.scanningRow}>
+                <ActivityIndicator size="small" color="white" />
+                <Text style={styles.saveIPButtonText}>Scanning...</Text>
+              </View>
+            ) : (
+              <View style={styles.scanningRow}>
+                <Ionicons name="search" size={16} color="white" />
+                <Text style={styles.saveIPButtonText}>Scan for Arduino</Text>
+              </View>
+            )}
+          </TouchableOpacity>
+          
+          {/* Quick Test Known IP Button */}
+        
+          
+          {/* Discovered Devices */}
+          {showDiscoveredDevices && (
+            <View style={styles.discoveredSection}>
+              {discoveredArduinos.length > 0 ? (
+                <>
+                  <Text style={styles.discoveredTitle}>📡 Found ANIKO Devices:</Text>
+                  {discoveredArduinos.map((ip, index) => (
+                    <TouchableOpacity
+                      key={index}
+                      style={[
+                        styles.deviceOption,
+                        arduinoIP === ip && styles.selectedDevice
+                      ]}
+                      onPress={() => selectDiscoveredArduino(ip)}
+                    >
+                      <View style={styles.deviceRow}>
+                        <Ionicons 
+                          name="hardware-chip" 
+                          size={18} 
+                          color={arduinoIP === ip ? "white" : COLORS.primaryGreen} 
+                        />
+                        <Text style={[
+                          styles.deviceIP,
+                          arduinoIP === ip && styles.selectedDeviceText
+                        ]}>
+                          ANIKO Arduino at {ip}
+                        </Text>
+                        {arduinoIP === ip && (
+                          <Ionicons name="checkmark-circle" size={16} color="white" />
+                        )}
+                      </View>
+                    </TouchableOpacity>
+                  ))}
+                </>
+              ) : (
+                <View style={styles.noDevicesFound}>
+                  <Ionicons name="warning-outline" size={24} color={COLORS.warning} />
+                  <Text style={styles.noDevicesText}>
+                    No ANIKO Arduino devices found
+                  </Text>
+                  <Text style={styles.noDevicesSubtext}>
+                    Make sure your Arduino is powered on and connected to the same WiFi network
+                  </Text>
+                </View>
+              )}
+              
+              <TouchableOpacity
+                style={styles.hideDevicesButton}
+                onPress={() => setShowDiscoveredDevices(false)}
+              >
+                <Text style={styles.hideDevicesText}>Hide</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+          
+          {/* Manual IP Input */}
+          <TouchableOpacity
+            style={styles.manualIPButton}
+            onPress={() => setShowIPInput(!showIPInput)}
+          >
+            <Text style={styles.manualIPText}>
+              {showIPInput ? "Hide Manual Setup" : "Manual IP Setup"}
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* IP Configuration */}
+        {showIPInput && (
+          <View style={styles.ipConfigPanel}>
+            <Text style={styles.ipConfigTitle}>Arduino IP Address</Text>
+            <TextInput
+              style={styles.ipInput}
+              value={arduinoIP}
+              onChangeText={setArduinoIP}
+              placeholder="192.168.1.100"
+              keyboardType="numeric"
+            />
+            <TouchableOpacity
+              style={styles.saveIPButton}
+              onPress={() => setShowIPInput(false)}
+            >
+              <Text style={styles.saveIPButtonText}>Save</Text>
+            </TouchableOpacity>
+            
+            {/* Debug Info */}
+            <View style={styles.debugInfo}>
+              <Text style={styles.debugText}>Debug Info:</Text>
+              <Text style={styles.debugText}>Target URL: http://{arduinoIP}/api/status</Text>
+              <Text style={styles.debugText}>Status: {connectionStatus}</Text>
+            </View>
+          </View>
+        )}
         <View style={styles.connectionPanel}>
           <View style={styles.connectionInfo}>
             <View style={[
@@ -825,6 +1245,143 @@ const styles = StyleSheet.create({
     color: '#0066cc',
     fontFamily: 'monospace',
     marginBottom: 5,
+  },
+  
+  // Arduino Discovery Styles
+  discoverySubtitle: {
+    fontSize: 12,
+    color: '#666',
+    marginBottom: 15,
+    textAlign: 'center',
+  },
+  scanningButton: {
+    backgroundColor: '#666',
+  },
+  scanningRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  discoveredSection: {
+    marginTop: 15,
+    padding: 15,
+    backgroundColor: 'white',
+    borderRadius: 8,
+  },
+  discoveredTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: COLORS.primaryGreen,
+    marginBottom: 10,
+  },
+  deviceOption: {
+    backgroundColor: COLORS.lightGreen,
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 8,
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+  },
+  selectedDevice: {
+    backgroundColor: COLORS.primaryGreen,
+    borderColor: COLORS.primaryGreen,
+  },
+  deviceRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  deviceIP: {
+    flex: 1,
+    fontSize: 14,
+    color: COLORS.primaryGreen,
+    fontWeight: '500',
+  },
+  selectedDeviceText: {
+    color: 'white',
+  },
+  noDevicesFound: {
+    alignItems: 'center',
+    padding: 20,
+  },
+  noDevicesText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#666',
+    marginTop: 8,
+    textAlign: 'center',
+  },
+  noDevicesSubtext: {
+    fontSize: 12,
+    color: '#999',
+    marginTop: 5,
+    textAlign: 'center',
+    lineHeight: 18,
+  },
+  hideDevicesButton: {
+    alignSelf: 'center',
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    marginTop: 10,
+  },
+  hideDevicesText: {
+    fontSize: 12,
+    color: COLORS.primaryGreen,
+    fontWeight: '600',
+  },
+  manualIPButton: {
+    alignSelf: 'center',
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    marginTop: 10,
+  },
+  manualIPText: {
+    fontSize: 12,
+    color: COLORS.primaryGreen,
+    fontWeight: '600',
+    textDecorationLine: 'underline',
+  },
+  quickTestButton: {
+    backgroundColor: COLORS.info,
+    padding: 8,
+    borderRadius: 6,
+    alignItems: 'center',
+    marginTop: 8,
+  },
+  quickTestText: {
+    color: 'white',
+    fontSize: 12,
+    fontWeight: '500',
+  },
+  
+  // WiFi Configuration Styles
+  wifiConfigSection: {
+    marginTop: 15,
+    padding: 15,
+    backgroundColor: 'white',
+    borderRadius: 8,
+  },
+  wifiLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: COLORS.primaryGreen,
+    marginBottom: 5,
+    marginTop: 10,
+  },
+  wifiWarning: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFF3CD',
+    padding: 10,
+    borderRadius: 6,
+    marginTop: 10,
+    gap: 8,
+  },
+  wifiWarningText: {
+    flex: 1,
+    fontSize: 12,
+    color: '#856404',
+    lineHeight: 16,
   },
 });
 export default NPKSensorDashboard;
