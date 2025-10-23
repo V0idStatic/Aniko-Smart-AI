@@ -1,4 +1,4 @@
--- Check what foreign key constraints exist
+
 SELECT
     tc.table_name, 
     tc.constraint_name, 

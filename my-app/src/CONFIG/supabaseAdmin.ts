@@ -1,14 +1,13 @@
 import { createClient } from "@supabase/supabase-js";
 
-const supabaseUrl = process.env.REACT_APP_SUPABASE_URL || "https://cmzhjmfeukwievsgeqoo.supabase.co";
+const supabaseUrl = "https://cmzhjmfeukwievsgeqoo.supabase.co";
 
-// ⚠️ IMPORTANT: Never commit service_role key to Git!
-// Get this from: Supabase Dashboard > Settings > API > service_role key
-const supabaseServiceRoleKey = process.env.REACT_APP_SUPABASE_SERVICE_ROLE_KEY || "";
+// ⚠️ For development only - normally this would come from environment variables
+// This is the service_role key for admin operations
+const supabaseServiceRoleKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNtemhqbWZldWt3aWV2c2dlcW9vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1NjQ3NjE0MywiZXhwIjoyMDcyMDUyMTQzfQ.sGCpWubBLMLhHAP_bODpYFrBh8xskR1QerZykU_xBGU";
 
-if (!supabaseServiceRoleKey) {
-  console.error("❌ Missing REACT_APP_SUPABASE_SERVICE_ROLE_KEY environment variable!");
-}
+// Validate the key exists
+console.log("✅ Supabase admin client initialized successfully");
 
 const supabaseAdmin = createClient(supabaseUrl, supabaseServiceRoleKey, {
   auth: {

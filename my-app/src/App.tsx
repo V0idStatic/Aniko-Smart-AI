@@ -2,6 +2,7 @@ import { Routes, Route } from "react-router-dom";
 import Header from "./INCLUDE/Header"; // ✅ Import the smart header
 import Login from "./Pages/Login";
 import Home from "./Pages/home";
+import DebugHome from "./Pages/DebugHome"; // Debug component
 import Compliance from "./Pages/compliance";
 import TestimonialSubmit from "./Pages/testimonialSubmit";
 import QueryComponent from "./Pages/Query";
@@ -34,6 +35,7 @@ function App() {
       {/* Default Pages WITH Header */}
       <Route path="/" element={<LayoutWithHeader><Home /></LayoutWithHeader>} />
       <Route path="/home" element={<LayoutWithHeader><Home /></LayoutWithHeader>} />
+      <Route path="/debug" element={<DebugHome />} />
       <Route path="/compliance" element={<LayoutWithHeader><Compliance /></LayoutWithHeader>} />
       <Route path="/testimonialSubmit" element={<LayoutWithHeader><TestimonialSubmit /></LayoutWithHeader>} />
       <Route path="/query" element={<LayoutWithHeader><QueryComponent /></LayoutWithHeader>} />
