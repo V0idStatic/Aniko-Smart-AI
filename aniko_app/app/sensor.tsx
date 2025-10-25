@@ -119,8 +119,12 @@ const NPKSensorDashboard: React.FC = () => {
       const response = await fetch(`http://${arduinoIP}/api/sensor-data`, {
         method: 'GET',
         headers: {
+          'Accept': 'application/json, text/plain, */*',
           'Content-Type': 'application/json',
-          'Accept': 'application/json',
+          'Cache-Control': 'no-cache',
+          'User-Agent': 'AniKo-Mobile-App/1.0.0',
+          'X-Requested-With': 'XMLHttpRequest',
+          'Origin': 'aniko-app://localhost'
         },
         // Remove AbortController for now to simplify debugging
       });
@@ -443,10 +447,12 @@ const NPKSensorDashboard: React.FC = () => {
       const response = await fetch(`http://${arduinoIP}/api/status`, {
         method: 'GET',
         headers: {
+          'Accept': 'application/json, text/plain, */*',
           'Content-Type': 'application/json',
-          'Accept': 'application/json',
           'Cache-Control': 'no-cache',
           'User-Agent': 'AniKo-Mobile-App/1.0.0',
+          'X-Requested-With': 'XMLHttpRequest',
+          'Origin': 'aniko-app://localhost'
         },
         signal: controller.signal,
       });
@@ -488,8 +494,12 @@ const NPKSensorDashboard: React.FC = () => {
       const sensorResponse = await fetch(`http://${arduinoIP}/api/sensor-data`, {
         method: 'GET',
         headers: {
+          'Accept': 'application/json, text/plain, */*',
           'Content-Type': 'application/json',
-          'Accept': 'application/json',
+          'Cache-Control': 'no-cache',
+          'User-Agent': 'AniKo-Mobile-App/1.0.0',
+          'X-Requested-With': 'XMLHttpRequest',
+          'Origin': 'aniko-app://localhost'
         },
         signal: sensorController.signal,
       });
@@ -937,7 +947,7 @@ const NPKSensorDashboard: React.FC = () => {
 
         {/* Arduino Discovery Panel */}
         <View style={styles.ipConfigPanel}>
-          <Text style={styles.ipConfigTitle}> Arduino Discovery</Text>
+          <Text style={styles.ipConfigTitle}> Arduino Discovery v0.0.1</Text>
           <Text style={styles.discoverySubtitle}>
             Automatically find ANIKO Arduino devices on your network
           </Text>
