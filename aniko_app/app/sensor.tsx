@@ -309,7 +309,8 @@ const NPKSensorDashboard: React.FC = () => {
               method: 'GET',
               headers: {
                 'Accept': 'application/json',
-                'Content-Type': 'application/json'
+                // 🔧 CORS FIX: Remove Content-Type to avoid preflight
+                // 'Content-Type': 'application/json'  // This triggers CORS preflight
               }
             }),
             new Promise((_, reject) => 
@@ -444,6 +445,14 @@ const NPKSensorDashboard: React.FC = () => {
       }, 15000); // 15 second timeout
 
       console.log('📡 Making HTTP request to Arduino status endpoint...');
+      console.log('🔍 Request details:');
+      console.log('   Method: GET');
+      console.log('   URL:', `http://${arduinoIP}/api/status`);
+      console.log('   Headers:', {
+        'Accept': 'application/json',
+        'Cache-Control': 'no-cache',
+        'User-Agent': 'AniKo-Mobile-App/1.0.0',
+      });
       
       const response = await fetch(`http://${arduinoIP}/api/status`, {
         method: 'GET',
@@ -660,7 +669,7 @@ const NPKSensorDashboard: React.FC = () => {
       const response = await fetch(`http://${arduinoIP}/api/configure-wifi`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/json',  // POST requests need this - requires Arduino CORS
           'Accept': 'application/json',
         },
         body: JSON.stringify({
@@ -963,7 +972,7 @@ const NPKSensorDashboard: React.FC = () => {
 
         {/* Arduino Discovery Panel */}
         <View style={styles.ipConfigPanel}>
-          <Text style={styles.ipConfigTitle}> Arduino Discovery v0.0.3</Text>
+          <Text style={styles.ipConfigTitle}> Arduino Discovery v0.0.4</Text>
           <Text style={styles.discoverySubtitle}>
             Automatically find ANIKO Arduino devices on your network
           </Text>
@@ -992,23 +1001,57 @@ const NPKSensorDashboard: React.FC = () => {
             onPress={async () => {
               try {
                 console.log('🧪 QUICK TEST - Testing 192.168.18.56 directly...');
+                console.log('📱 Mobile app making HTTP request...');
+                console.log('🌐 Network security should allow this IP');
                 
-                // Test with minimal headers to avoid CORS preflight
-                const response = await fetch('http://192.168.18.56/api/status', {
-                  method: 'GET',
-                  headers: { 
-                    'Accept': 'application/json',
-                    // Remove headers that trigger CORS preflight
-                    // 'Content-Type': 'application/json'  // This triggers preflight
-                  },
-                });
+                // Use absolutely minimal request - no custom headers at all
+                const response = await fetch('http://192.168.18.56/api/status');
+                
                 console.log('✅ Quick test response:', response.status);
-                const data = await response.json();
-                console.log('📦 Quick test data:', data);
-                Alert.alert('Quick Test Result', `Status: ${response.status}\nDevice: ${data.device || data.device_type || 'Unknown'}\nIP: ${data.ip}\nUptime: ${data.uptime}ms`);
+                console.log('📊 Response OK:', response.ok);
+                console.log('🌐 Response URL:', response.url);
+                
+                if (response.ok) {
+                  const data = await response.json();
+                  console.log('📦 Quick test data:', data);
+                  Alert.alert(
+                    '✅ Quick Test SUCCESS!', 
+                    `🎉 Mobile app can reach Arduino!\n\nStatus: ${response.status}\nDevice: ${data.device || data.device_type || 'Unknown'}\nIP: ${data.ip}\nUptime: ${data.uptime}ms\n\n✅ Network security is working!\n🔗 Your Arduino connection should work now.`,
+                    [{ text: 'Try Connect Now', onPress: testConnection }]
+                  );
+                } else {
+                  throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
               } catch (error: any) {
                 console.error('❌ Quick test failed:', error);
-                Alert.alert('Quick Test Failed', `Error: ${error.message}\n\n🔍 CORS Issue Detection:\nThis is likely a CORS problem. Arduino is responding but blocking subsequent requests.\n\n🔧 Solution: Add CORS headers to Arduino code.`);
+                console.log('📱 Mobile app error details:', {
+                  name: error.name,
+                  message: error.message,
+                  stack: error.stack
+                });
+                
+                let errorType = 'Unknown';
+                let solution = '';
+                
+                if (error.name === 'TypeError' || error.message.includes('Network request failed')) {
+                  errorType = 'Network Security Block';
+                  solution = '🔧 SOLUTION:\n1. Rebuild your app: npm run android\n2. Make sure Arduino is at 192.168.18.56\n3. Check if both devices on same WiFi\n\n📱 Mobile app network security may be blocking HTTP requests.';
+                } else if (error.message.includes('timeout')) {
+                  errorType = 'Connection Timeout';
+                  solution = '🔧 SOLUTION:\n1. Check Arduino is powered on\n2. Verify IP address: 192.168.18.56\n3. Test in browser first\n4. Check WiFi connection';
+                } else {
+                  errorType = 'HTTP Error';
+                  solution = '🔧 SOLUTION:\n1. Arduino may be busy\n2. Try restarting Arduino\n3. Check Arduino Serial Monitor';
+                }
+                
+                Alert.alert(
+                  `❌ Quick Test Failed: ${errorType}`, 
+                  `Error: ${error.message}\n\n${solution}\n\n🔍 Your Arduino works via URL but mobile app is blocked.\n📱 This confirms network security issue.`,
+                  [
+                    { text: 'Retry', onPress: () => {} },
+                    { text: 'Cancel', style: 'cancel' }
+                  ]
+                );
               }
             }}
           >
