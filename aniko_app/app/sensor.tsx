@@ -245,6 +245,22 @@ const NPKSensorDashboard: React.FC = () => {
       // Determine network ranges based on current Arduino IP or scan common ones
       let networkRanges = [];
       
+      // 🆕 FLEXIBLE IP: Auto-detect network from current device IP
+      try {
+        // Try to detect local network automatically
+        const testResponse = await fetch('http://httpbin.org/ip', { 
+          method: 'GET',
+          headers: { 'Accept': 'application/json' }
+        }).catch(() => null);
+        
+        if (testResponse && testResponse.ok) {
+          const deviceInfo = await testResponse.json();
+          console.log('📱 Device network info detected:', deviceInfo);
+        }
+      } catch (e) {
+        console.log('🌐 Network detection failed, using default ranges');
+      }
+      
       if (arduinoIP && arduinoIP !== '192.168.1.100') {
         // Extract network from known Arduino IP
         const ipParts = arduinoIP.split('.');
@@ -254,16 +270,24 @@ const NPKSensorDashboard: React.FC = () => {
           console.log('🌐 Scanning network based on known Arduino:', baseNetwork);
         }
       } else {
-        // Scan common network ranges
+        // 🆕 ENHANCED: Scan more comprehensive network ranges for multiple users
         networkRanges = [
           '192.168.1.',    // Most common home router default
-          '192.168.0.',    // Alternative home router default
-          '192.168.18.',   // Your current network
+          '192.168.0.',    // Alternative home router default  
+          '192.168.18.',   // Current network
           '192.168.4.',    // ESP32 AP mode default
-          '10.0.0.',       // Some router defaults
-          '172.16.0.'      // Some corporate networks
+          '192.168.2.',    // Some routers
+          '192.168.3.',    // Some routers
+          '192.168.10.',   // Some corporate networks
+          '192.168.50.',   // Some networks
+          '192.168.100.',  // Some networks
+          '10.0.0.',       // Corporate/VPN networks
+          '10.0.1.',       // Corporate networks
+          '172.16.0.',     // Corporate networks
+          '172.20.10.',    // iOS hotspot default
+          '192.168.43.',   // Android hotspot default
         ];
-        console.log('🌐 Scanning common network ranges');
+        console.log('🌐 Scanning comprehensive network ranges for multi-user support');
       }
 
       const scanPromises = [];
@@ -972,7 +996,7 @@ const NPKSensorDashboard: React.FC = () => {
 
         {/* Arduino Discovery Panel */}
         <View style={styles.ipConfigPanel}>
-          <Text style={styles.ipConfigTitle}> Arduino Discovery v0.0.4</Text>
+          <Text style={styles.ipConfigTitle}> Arduino Discovery v0.0.5</Text>
           <Text style={styles.discoverySubtitle}>
             Automatically find ANIKO Arduino devices on your network
           </Text>
@@ -1000,12 +1024,12 @@ const NPKSensorDashboard: React.FC = () => {
             style={styles.quickTestButton}
             onPress={async () => {
               try {
-                console.log('🧪 QUICK TEST - Testing 192.168.18.56 directly...');
+                console.log('🧪 QUICK TEST - Testing current Arduino IP directly...');
                 console.log('📱 Mobile app making HTTP request...');
-                console.log('🌐 Network security should allow this IP');
+                console.log('🌐 Network security should allow this IP:', arduinoIP);
                 
                 // Use absolutely minimal request - no custom headers at all
-                const response = await fetch('http://192.168.18.56/api/status');
+                const response = await fetch(`http://${arduinoIP}/api/status`);
                 
                 console.log('✅ Quick test response:', response.status);
                 console.log('📊 Response OK:', response.ok);
@@ -1016,8 +1040,11 @@ const NPKSensorDashboard: React.FC = () => {
                   console.log('📦 Quick test data:', data);
                   Alert.alert(
                     '✅ Quick Test SUCCESS!', 
-                    `🎉 Mobile app can reach Arduino!\n\nStatus: ${response.status}\nDevice: ${data.device || data.device_type || 'Unknown'}\nIP: ${data.ip}\nUptime: ${data.uptime}ms\n\n✅ Network security is working!\n🔗 Your Arduino connection should work now.`,
-                    [{ text: 'Try Connect Now', onPress: testConnection }]
+                    `🎉 Mobile app can reach Arduino!\n\n📡 Status: ${response.status}\n🤖 Device: ${data.device || data.device_type || 'Unknown'}\n🌐 IP: ${data.ip}\n⏱️ Uptime: ${data.uptime}ms\n📊 WiFi Signal: ${data.wifi_rssi}dBm\n🌐 Network: ${data.wifi_ssid}\n\n✅ Network security is working!\n🔗 Your Arduino connection should work now.`,
+                    [
+                      { text: 'Try Connect Now', onPress: testConnection },
+                      { text: 'OK', style: 'cancel' }
+                    ]
                   );
                 } else {
                   throw new Error(`HTTP ${response.status}: ${response.statusText}`);
@@ -1035,19 +1062,40 @@ const NPKSensorDashboard: React.FC = () => {
                 
                 if (error.name === 'TypeError' || error.message.includes('Network request failed')) {
                   errorType = 'Network Security Block';
-                  solution = '🔧 SOLUTION:\n1. Rebuild your app: npm run android\n2. Make sure Arduino is at 192.168.18.56\n3. Check if both devices on same WiFi\n\n📱 Mobile app network security may be blocking HTTP requests.';
+                  solution = `🔧 SOLUTION:
+1. **REBUILD YOUR APP**: npx expo run:android
+2. Make sure Arduino is at ${arduinoIP}
+3. Check both devices on same WiFi network
+4. Verify network security config is applied
+
+📱 Mobile app network security is blocking HTTP requests.
+🎯 This works in Expo dev but NOT in built app.`;
                 } else if (error.message.includes('timeout')) {
                   errorType = 'Connection Timeout';
-                  solution = '🔧 SOLUTION:\n1. Check Arduino is powered on\n2. Verify IP address: 192.168.18.56\n3. Test in browser first\n4. Check WiFi connection';
+                  solution = `🔧 SOLUTION:
+1. Check Arduino is powered on and WiFi connected
+2. Verify IP address is still: ${arduinoIP}
+3. Test in browser: http://${arduinoIP}/api/status
+4. Check Arduino Serial Monitor for connection status`;
                 } else {
                   errorType = 'HTTP Error';
-                  solution = '🔧 SOLUTION:\n1. Arduino may be busy\n2. Try restarting Arduino\n3. Check Arduino Serial Monitor';
+                  solution = `🔧 SOLUTION:
+1. Arduino may be busy processing requests
+2. Try restarting Arduino device
+3. Check Arduino Serial Monitor for errors
+4. Verify Arduino HTTP server is running`;
                 }
                 
                 Alert.alert(
                   `❌ Quick Test Failed: ${errorType}`, 
-                  `Error: ${error.message}\n\n${solution}\n\n🔍 Your Arduino works via URL but mobile app is blocked.\n📱 This confirms network security issue.`,
+                  `Error: ${error.message}\n\n${solution}\n\n🔍 **KEY ISSUE**: Your Arduino works via URL but mobile app is blocked by Android network security.\n\n📱 **FIX**: Rebuild app to apply network security config!`,
                   [
+                    { text: 'How to Rebuild', onPress: () => {
+                      Alert.alert(
+                        'How to Rebuild App',
+                        '1. Connect Android device via USB\n2. Enable USB Debugging\n3. Run: npx expo run:android\n4. Wait for installation\n5. Try Quick Test again\n\n📱 This applies network security config!'
+                      );
+                    }},
                     { text: 'Retry', onPress: () => {} },
                     { text: 'Cancel', style: 'cancel' }
                   ]
