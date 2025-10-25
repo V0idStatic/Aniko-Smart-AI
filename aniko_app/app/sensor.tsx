@@ -119,12 +119,10 @@ const NPKSensorDashboard: React.FC = () => {
       const response = await fetch(`http://${arduinoIP}/api/sensor-data`, {
         method: 'GET',
         headers: {
-          'Accept': 'application/json, text/plain, */*',
-          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          // 🔧 CORS FIX: Minimal headers to avoid preflight
           'Cache-Control': 'no-cache',
           'User-Agent': 'AniKo-Mobile-App/1.0.0',
-          'X-Requested-With': 'XMLHttpRequest',
-          'Origin': 'aniko-app://localhost'
         },
         // Remove AbortController for now to simplify debugging
       });
@@ -450,15 +448,14 @@ const NPKSensorDashboard: React.FC = () => {
       const response = await fetch(`http://${arduinoIP}/api/status`, {
         method: 'GET',
         headers: {
-          'Accept': 'application/json, text/plain, */*',
-          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          // 🔧 CORS FIX: Use minimal headers to avoid CORS preflight
+          // Remove headers that trigger CORS preflight until Arduino has CORS support
+          // 'Content-Type': 'application/json',        // This triggers preflight
+          // 'X-Requested-With': 'XMLHttpRequest',      // This triggers preflight  
+          // 'Origin': 'aniko-app://localhost',         // This triggers preflight
           'Cache-Control': 'no-cache',
           'User-Agent': 'AniKo-Mobile-App/1.0.0',
-          'X-Requested-With': 'XMLHttpRequest',
-          'Origin': 'aniko-app://localhost',
-          // 🆕 Add headers that worked in diagnostics
-          'Connection': 'keep-alive',
-          'Pragma': 'no-cache'
         },
         signal: controller.signal,
       });
@@ -500,15 +497,10 @@ const NPKSensorDashboard: React.FC = () => {
       const sensorResponse = await fetch(`http://${arduinoIP}/api/sensor-data`, {
         method: 'GET',
         headers: {
-          'Accept': 'application/json, text/plain, */*',
-          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          // 🔧 CORS FIX: Use minimal headers to avoid CORS preflight
           'Cache-Control': 'no-cache',
           'User-Agent': 'AniKo-Mobile-App/1.0.0',
-          'X-Requested-With': 'XMLHttpRequest',
-          'Origin': 'aniko-app://localhost',
-          // 🆕 Add headers that worked in diagnostics
-          'Connection': 'keep-alive',
-          'Pragma': 'no-cache'
         },
         signal: sensorController.signal,
       });
@@ -971,7 +963,7 @@ const NPKSensorDashboard: React.FC = () => {
 
         {/* Arduino Discovery Panel */}
         <View style={styles.ipConfigPanel}>
-          <Text style={styles.ipConfigTitle}> Arduino Discovery v0.0.2</Text>
+          <Text style={styles.ipConfigTitle}> Arduino Discovery v0.0.3</Text>
           <Text style={styles.discoverySubtitle}>
             Automatically find ANIKO Arduino devices on your network
           </Text>
@@ -1000,23 +992,73 @@ const NPKSensorDashboard: React.FC = () => {
             onPress={async () => {
               try {
                 console.log('🧪 QUICK TEST - Testing 192.168.18.56 directly...');
+                
+                // Test with minimal headers to avoid CORS preflight
                 const response = await fetch('http://192.168.18.56/api/status', {
                   method: 'GET',
-                  headers: { 'Content-Type': 'application/json' },
+                  headers: { 
+                    'Accept': 'application/json',
+                    // Remove headers that trigger CORS preflight
+                    // 'Content-Type': 'application/json'  // This triggers preflight
+                  },
                 });
                 console.log('✅ Quick test response:', response.status);
                 const data = await response.json();
                 console.log('📦 Quick test data:', data);
-                Alert.alert('Quick Test Result', `Status: ${response.status}\nDevice: ${data.device || data.device_type || 'Unknown'}`);
+                Alert.alert('Quick Test Result', `Status: ${response.status}\nDevice: ${data.device || data.device_type || 'Unknown'}\nIP: ${data.ip}\nUptime: ${data.uptime}ms`);
               } catch (error: any) {
                 console.error('❌ Quick test failed:', error);
-                Alert.alert('Quick Test Failed', `Error: ${error.message}\n\nThis helps diagnose if the issue is with the connection logic or network.`);
+                Alert.alert('Quick Test Failed', `Error: ${error.message}\n\n🔍 CORS Issue Detection:\nThis is likely a CORS problem. Arduino is responding but blocking subsequent requests.\n\n🔧 Solution: Add CORS headers to Arduino code.`);
               }
             }}
           >
             <View style={styles.scanningRow}>
               <Ionicons name="flash" size={16} color="white" />
-              <Text style={styles.saveIPButtonText}>🧪 Quick Test 192.168.18.56</Text>
+              <Text style={styles.saveIPButtonText}>🧪 Quick Test (CORS-Safe)</Text>
+            </View>
+          </TouchableOpacity>
+
+          {/* CORS Test Button */}
+          <TouchableOpacity
+            style={[styles.quickTestButton, { backgroundColor: '#8B5CF6' }]}
+            onPress={async () => {
+              try {
+                console.log('🔬 CORS TEST - Testing with different headers...');
+                
+                // Test 1: Simple GET (no preflight)
+                console.log('Test 1: Simple GET...');
+                const response1 = await fetch('http://192.168.18.56/api/status');
+                console.log('✅ Simple GET:', response1.status);
+                
+                // Test 2: GET with Accept header only
+                console.log('Test 2: GET with Accept header...');
+                const response2 = await fetch('http://192.168.18.56/api/device-info', {
+                  headers: { 'Accept': 'application/json' }
+                });
+                console.log('✅ Accept header:', response2.status);
+                
+                // Test 3: Full headers (triggers preflight)
+                console.log('Test 3: Full headers (may fail)...');
+                const response3 = await fetch('http://192.168.18.56/api/sensor-data', {
+                  headers: { 
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                  }
+                });
+                console.log('✅ Full headers:', response3.status);
+                
+                Alert.alert('CORS Test Results', 'All tests passed! Check console for details. If test 3 failed, Arduino needs CORS headers.');
+                
+              } catch (error: any) {
+                console.error('❌ CORS test failed:', error);
+                Alert.alert('CORS Test Failed', `Error: ${error.message}\n\n🔍 This confirms CORS issue:\n- Arduino responds to simple requests\n- Fails on requests with custom headers\n- Need to add CORS headers to Arduino\n\n💡 Update your Arduino code with proper CORS handling.`);
+              }
+            }}
+          >
+            <View style={styles.scanningRow}>
+              <Ionicons name="flask" size={16} color="white" />
+              <Text style={styles.saveIPButtonText}>🔬 CORS Test</Text>
             </View>
           </TouchableOpacity>
 
