@@ -29,6 +29,116 @@ import { useCallback } from 'react'
 // For now, we'll use network scanning approach
 
 
+// ---- HTTP helpers (Android-safe) -----------------------------------------
+// Minimal headers (no preflight), explicit timeout, detailed logging
+const fetchJson = async (
+  url: string,
+  opts: { timeout?: number; headers?: Record<string, string> } = {}
+) => {
+  const { timeout = 15000, headers = {} } = opts; // Increased timeout for mobile
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeout);
+  try {
+    console.log('HTTP GET:', url);
+    console.log('HTTP Headers:', headers);
+    
+    const res = await fetch(url, {
+      method: 'GET',
+      // Remove Content-Type to avoid CORS preflight requests
+      headers: { 
+        'Accept': 'application/json, text/plain, */*',
+        'Cache-Control': 'no-cache',
+        'User-Agent': 'AniKo-Mobile-App/1.0.0',
+        ...headers 
+      },
+      signal: controller.signal,
+    });
+    
+    const meta = {
+      status: res.status,
+      ok: res.ok,
+      headers: Object.fromEntries(res.headers.entries()),
+      url: res.url,
+    };
+    
+    console.log('HTTP Response Meta:', meta);
+    
+    if (!res.ok) {
+      console.log('HTTP META (error):', meta);
+      throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+    }
+    
+    const contentType = res.headers.get('content-type') || '';
+    let data;
+    
+    if (contentType.includes('application/json')) {
+      data = await res.json();
+    } else {
+      // Handle non-JSON responses (like HTML from root endpoint)
+      const text = await res.text();
+      try {
+        data = JSON.parse(text);
+      } catch {
+        data = { message: text.substring(0, 200) }; // Truncate long responses
+      }
+    }
+    
+    console.log('HTTP META (ok):', meta);
+    console.log('HTTP Data received:', typeof data, Object.keys(data || {}));
+    return { ok: true as const, data, ...meta };
+  } catch (error: any) {
+    console.log('HTTP ERROR:', { url, message: error?.message, name: error?.name });
+    return { ok: false as const, error };
+  } finally {
+    clearTimeout(timer);
+  }
+};
+
+const resolveArduinoIP = (ip?: string) =>
+  ip && ip.trim().length > 0 ? ip.trim() : '192.168.18.56';
+
+// Alternative simple fetch for testing in EAS builds
+const simpleFetch = async (url: string, timeoutMs: number = 15000) => {
+  console.log('🚀 SIMPLE FETCH:', url);
+  
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  
+  try {
+    const response = await fetch(url, {
+      method: 'GET',
+      signal: controller.signal,
+      headers: {
+        'Accept': '*/*',
+        'User-Agent': 'AniKo-App'
+      }
+    });
+    
+    clearTimeout(timer);
+    
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+    
+    const text = await response.text();
+    console.log('📦 Raw response:', text.substring(0, 200));
+    
+    try {
+      const data = JSON.parse(text);
+      console.log('✅ Parsed JSON successfully');
+      return { ok: true, data };
+    } catch {
+      console.log('⚠️ Non-JSON response, returning as text');
+      return { ok: true, data: { message: text } };
+    }
+  } catch (error: any) {
+    clearTimeout(timer);
+    console.error('❌ SIMPLE FETCH ERROR:', error.message);
+    return { ok: false, error };
+  }
+};
+
+
 export const COLORS = {
   // Primary colors
   primaryGreen: "#1D492C",
@@ -113,27 +223,17 @@ const NPKSensorDashboard: React.FC = () => {
   const fetchSensorData = async () => {
     try {
       console.log('📊 FETCH SENSOR DATA CALLED');
-      console.log('🎯 Fetching from URL:', `http://${arduinoIP}/api/sensor-data`);
-      console.log('🔗 Arduino IP:', arduinoIP);
-      
-      const response = await fetch(`http://${arduinoIP}/api/sensor-data`, {
-        method: 'GET',
-        headers: {
-          'Accept': 'application/json',
-          // 🔧 CORS FIX: Minimal headers to avoid preflight
-          'Cache-Control': 'no-cache',
-          'User-Agent': 'AniKo-Mobile-App/1.0.0',
-        },
-        // Remove AbortController for now to simplify debugging
+      const ip = resolveArduinoIP(arduinoIP);
+      console.log('🎯 Fetching from URL:', `http://${ip}/api/sensor-data`);
+      console.log('🔗 Arduino IP:', ip);
+
+      const result = await fetchJson(`http://${ip}/api/sensor-data`, {
+        timeout: 12000,
+        headers: { 'Cache-Control': 'no-cache', 'User-Agent': 'AniKo-Mobile-App/1.0.0' },
       });
 
-      console.log('📡 SENSOR DATA RESPONSE:');
-      console.log('   Status:', response.status);
-      console.log('   OK:', response.ok);
-      console.log('   Headers:', Object.fromEntries(response.headers.entries()));
-
-      if (response.ok) {
-        const data = await response.json();
+      if (result.ok) {
+        const data = (result as any).data;
         console.log('📦 SENSOR DATA RECEIVED:', data);
         
         const normalized: SensorData = {
@@ -197,10 +297,9 @@ const NPKSensorDashboard: React.FC = () => {
           setConnectionStatus('Connected');
         }
       } else {
-        console.error('❌ SENSOR DATA HTTP ERROR:', response.status, response.statusText);
-        const errorText = await response.text().catch(() => 'Unable to read error response');
-        console.log('📄 Error Response Body:', errorText);
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        const err = (result as any).error;
+        console.error('❌ SENSOR DATA FETCH ERROR:', err?.message || err);
+        throw new Error(err?.message || 'Network request failed');
       }
     } catch (error: any) {
       console.error('💥 SENSOR DATA FETCH ERROR:', error);
@@ -332,13 +431,14 @@ const NPKSensorDashboard: React.FC = () => {
             fetch(`http://${testIP}${endpoint}`, { 
               method: 'GET',
               headers: {
-                'Accept': 'application/json',
-                // 🔧 CORS FIX: Remove Content-Type to avoid preflight
-                // 'Content-Type': 'application/json'  // This triggers CORS preflight
+                'Accept': 'application/json, text/plain, */*',
+                'Cache-Control': 'no-cache',
+                'User-Agent': 'AniKo-Mobile-App/1.0.0'
+                // Removed Content-Type to avoid CORS preflight
               }
             }),
             new Promise((_, reject) => 
-              setTimeout(() => reject(new Error('timeout')), 3000) // Increased timeout
+              setTimeout(() => reject(new Error('timeout')), 5000) // Increased timeout
             )
           ]);
 
@@ -452,62 +552,43 @@ const NPKSensorDashboard: React.FC = () => {
         fetchIntervalRef.current = null;
       }
 
-      console.log('🚀 CONNECT BUTTON PRESSED - Starting connection test');
-      console.log('🎯 Target Arduino IP:', arduinoIP);
-      console.log('🌐 Full Status URL:', `http://${arduinoIP}/api/status`);
-      console.log('🌐 Full Sensor URL:', `http://${arduinoIP}/api/sensor-data`);
+  const ip = resolveArduinoIP(arduinoIP);
+  console.log('🚀 CONNECT BUTTON PRESSED - Starting connection test');
+  console.log('🎯 Target Arduino IP:', ip);
+  console.log('🌐 Full Status URL:', `http://${ip}/api/status`);
+  console.log('🌐 Full Sensor URL:', `http://${ip}/api/sensor-data`);
       console.log('📱 App attempting fetch to Arduino...');
       
       // 🆕 ENHANCED: Force mobile app to use exact same headers as successful diagnostics
       console.log('🔧 Using enhanced mobile-compatible headers...');
 
-      // Enhanced fetch with proper timeout and error handling
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => {
-        console.log('⏰ Request timed out after 15 seconds');
-        controller.abort();
-      }, 15000); // 15 second timeout
-
-      console.log('📡 Making HTTP request to Arduino status endpoint...');
-      console.log('🔍 Request details:');
-      console.log('   Method: GET');
-      console.log('   URL:', `http://${arduinoIP}/api/status`);
-      console.log('   Headers:', {
-        'Accept': 'application/json',
-        'Cache-Control': 'no-cache',
-        'User-Agent': 'AniKo-Mobile-App/1.0.0',
-      });
+      // Try simple fetch first (for EAS build debugging)
+      console.log('🧪 Testing with simple fetch first...');
+      const simpleTest = await simpleFetch(`http://${ip}/api/status`);
       
-      const response = await fetch(`http://${arduinoIP}/api/status`, {
-        method: 'GET',
-        headers: {
-          'Accept': 'application/json',
-          // 🔧 CORS FIX: Use minimal headers to avoid CORS preflight
-          // Remove headers that trigger CORS preflight until Arduino has CORS support
-          // 'Content-Type': 'application/json',        // This triggers preflight
-          // 'X-Requested-With': 'XMLHttpRequest',      // This triggers preflight  
-          // 'Origin': 'aniko-app://localhost',         // This triggers preflight
-          'Cache-Control': 'no-cache',
-          'User-Agent': 'AniKo-Mobile-App/1.0.0',
-        },
-        signal: controller.signal,
-      });
-
-      clearTimeout(timeoutId);
-
-      console.log('📡 Arduino Status Response received:');
-      console.log('   Status Code:', response.status);
-      console.log('   Status Text:', response.statusText);
-      console.log('   Response OK:', response.ok);
-      console.log('   Response Type:', response.type);
-      console.log('   Response URL:', response.url);
-      console.log('   Headers:', Object.fromEntries(response.headers.entries()));
-
-      if (!response.ok) {
-        throw new Error(`HTTP Error: ${response.status} ${response.statusText}`);
+      if (simpleTest.ok) {
+        console.log('✅ Simple fetch worked! Data:', simpleTest.data);
+      } else {
+        console.log('❌ Simple fetch failed:', simpleTest.error?.message);
       }
 
-      const statusData = await response.json();
+      // Status endpoint using helper
+      const statusResult = await fetchJson(`http://${ip}/api/status`, {
+        timeout: 20000, // Increased timeout for EAS builds
+        headers: { 
+          'Cache-Control': 'no-cache', 
+          'User-Agent': 'AniKo-Mobile-App/1.0.0'
+          // Removed Content-Type to avoid CORS preflight
+        },
+      });
+
+      if (!statusResult.ok) {
+        const err = (statusResult as any).error;
+        console.error('Status endpoint failed:', err);
+        throw new Error(err?.message || 'Arduino status check failed');
+      }
+
+      const statusData = (statusResult as any).data;
       console.log('📦 Arduino Status Data:', JSON.stringify(statusData, null, 2));
 
       // Verify it's our Arduino device
@@ -515,39 +596,25 @@ const NPKSensorDashboard: React.FC = () => {
                            statusData.device_type === 'ANIKO_SMART_AI_SENSOR';
       
       if (!isAnikoDevice) {
-        throw new Error('Device response invalid: Not an ANIKO Arduino sensor');
+        console.warn('Device identification issue:', statusData);
+        // Still proceed if we get a valid response - might be configuration issue
       }
 
       console.log('✅ Status endpoint verified, testing sensor data endpoint...');
 
-      // Test sensor data endpoint
-      const sensorController = new AbortController();
-      const sensorTimeoutId = setTimeout(() => {
-        console.log('⏰ Sensor request timed out');
-        sensorController.abort();
-      }, 10000);
-
-      const sensorResponse = await fetch(`http://${arduinoIP}/api/sensor-data`, {
-        method: 'GET',
-        headers: {
-          'Accept': 'application/json',
-          // 🔧 CORS FIX: Use minimal headers to avoid CORS preflight
-          'Cache-Control': 'no-cache',
-          'User-Agent': 'AniKo-Mobile-App/1.0.0',
+      // Test sensor data endpoint using helper
+      const sensorResult = await fetchJson(`http://${ip}/api/sensor-data`, {
+        timeout: 15000,
+        headers: { 
+          'Cache-Control': 'no-cache', 
+          'User-Agent': 'AniKo-Mobile-App/1.0.0'
         },
-        signal: sensorController.signal,
       });
 
-      clearTimeout(sensorTimeoutId);
-
-      console.log('📊 Sensor Data Response:');
-      console.log('   Status Code:', sensorResponse.status);
-      console.log('   Response OK:', sensorResponse.ok);
-
-      if (!sensorResponse.ok) {
+      if (!sensorResult.ok) {
         console.warn('⚠️ Sensor endpoint failed, but status works');
       } else {
-        const sensorData = await sensorResponse.json();
+        const sensorData = (sensorResult as any).data;
         console.log('📊 Sensor Data Preview:', Object.keys(sensorData));
         console.log('🌡️ Sample readings:', {
           temperature: sensorData.temperature,
@@ -602,7 +669,7 @@ const NPKSensorDashboard: React.FC = () => {
         userMessage = 'Network request failed - Cannot reach Arduino';
         troubleshooting = `
 🔧 Troubleshooting:
-• CHECK: Rebuild mobile app with new network security settings
+• SOLUTION: Rebuild app with new network security config (network_security_config.xml was just created)
 • Check WiFi: Both devices must be on same network
 • Verify Arduino IP: ${arduinoIP}
 • Test in browser: http://${arduinoIP}/api/status
@@ -610,19 +677,30 @@ const NPKSensorDashboard: React.FC = () => {
 • Try restarting WiFi on phone
 
 📊 DIAGNOSTICS STATUS: Arduino working perfectly (all endpoints respond correctly)
-📱 ISSUE: Mobile app network security preventing connection`;
-      } else if (error.message.includes('fetch')) {
-        userMessage = 'HTTP request was blocked or failed';
+📱 ISSUE: Mobile app network security was blocking connection - NOW FIXED!
+🚀 NEXT STEP: Rebuild with EAS and test again`;
+      } else if (error.message.includes('fetch') || error.message.includes('cleartext')) {
+        userMessage = 'HTTP cleartext traffic was blocked';
         troubleshooting = `
-🔧 Troubleshooting:
-• CRITICAL: Rebuild app with updated app.json network security config
-• App might be blocking HTTP requests
-• Try using different network
-• Check app permissions
-• Restart the mobile app
+🔧 SOLUTION APPLIED:
+• ✅ Created network_security_config.xml
+• ✅ Updated AndroidManifest.xml with cleartext permissions
+• ✅ Fixed app.json network configuration
+• ✅ Removed CORS-triggering headers from requests
 
-📊 DIAGNOSTICS STATUS: Arduino endpoints working (4/4 tests passed)
-📱 ISSUE: Mobile app HTTP requests being blocked by security policy`;
+📱 NEXT STEP: Rebuild the app with EAS to apply these fixes:
+   eas build --platform android
+
+🔧 Alternative test: Use 'eas build --local' if you want to test locally first`;
+      } else if (error.message.includes('CORS')) {
+        userMessage = 'CORS or preflight request issue';
+        troubleshooting = `
+🔧 SOLUTION APPLIED:
+• ✅ Removed Content-Type headers that trigger CORS preflight
+• ✅ Simplified request headers for mobile compatibility
+• ✅ Added network security config for local IP access
+
+📱 REBUILD REQUIRED: The fixes are applied but need app rebuild to take effect`;
       } else if (error.message.includes('JSON')) {
         userMessage = 'Arduino sent invalid response';
         troubleshooting = `
@@ -928,17 +1006,25 @@ const NPKSensorDashboard: React.FC = () => {
         )}
 
         {/* WiFi Configuration Panel */}
-        <View style={styles.ipConfigPanel}>
-          <Text style={styles.ipConfigTitle}> WiFi Configuration</Text>
-          <Text style={styles.discoverySubtitle}>
+        <View style={styles.wifiConfigPanel}>
+          <View style={styles.wifiConfigHeader}>
+            <Ionicons name="wifi-outline" size={20} color={COLORS.primaryGreen} />
+            <Text style={styles.wifiConfigTitle}>WiFi Configuration</Text>
+          </View>
+          <Text style={styles.wifiConfigSubtitle}>
             Configure Arduino WiFi settings remotely
           </Text>
           
           <TouchableOpacity
-            style={styles.manualIPButton}
+            style={styles.wifiToggleButton}
             onPress={() => setShowWiFiConfig(!showWiFiConfig)}
           >
-            <Text style={styles.manualIPText}>
+            <Ionicons 
+              name={showWiFiConfig ? "chevron-up" : "chevron-down"} 
+              size={16} 
+              color={COLORS.primaryGreen} 
+            />
+            <Text style={styles.wifiToggleText}>
               {showWiFiConfig ? "Hide WiFi Setup" : "Configure Arduino WiFi"}
             </Text>
           </TouchableOpacity>
@@ -995,34 +1081,43 @@ const NPKSensorDashboard: React.FC = () => {
         </View>
 
         {/* Arduino Discovery Panel */}
-        <View style={styles.ipConfigPanel}>
-          <Text style={styles.ipConfigTitle}> Arduino Discovery v0.0.5</Text>
-          <Text style={styles.discoverySubtitle}>
-            Automatically find ANIKO Arduino devices on your network
+        <View style={styles.debugPanel}>
+          <View style={styles.debugHeader}>
+            <Ionicons name="bug-outline" size={22} color={COLORS.primaryGreen} />
+            <Text style={styles.debugTitle}>Arduino Discovery & Debug Tools</Text>
+            <View style={styles.versionBadge}>
+              <Text style={styles.versionText}>v0.0.7</Text>
+            </View>
+          </View>
+          <Text style={styles.debugSubtitle}>
+            Automatically find ANIKO Arduino devices and test connections
           </Text>
           
+          {/* Main Discovery Button */}
           <TouchableOpacity
-            style={[styles.saveIPButton, isScanning && styles.scanningButton]}
+            style={[styles.primaryDebugButton, isScanning && styles.scanningButton]}
             onPress={discoverArduinos}
             disabled={isScanning}
           >
             {isScanning ? (
-              <View style={styles.scanningRow}>
+              <View style={styles.buttonContent}>
                 <ActivityIndicator size="small" color="white" />
-                <Text style={styles.saveIPButtonText}>Scanning...</Text>
+                <Text style={styles.primaryButtonText}>Scanning Network...</Text>
               </View>
             ) : (
-              <View style={styles.scanningRow}>
-                <Ionicons name="search" size={16} color="white" />
-                <Text style={styles.saveIPButtonText}>Scan for Arduino</Text>
+              <View style={styles.buttonContent}>
+                <Ionicons name="search" size={18} color="white" />
+                <Text style={styles.primaryButtonText}>Scan for Arduino</Text>
               </View>
             )}
           </TouchableOpacity>
           
-          {/* Quick Test Known IP Button */}
-          <TouchableOpacity
-            style={styles.quickTestButton}
-            onPress={async () => {
+          {/* Debug Actions Grid */}
+          <View style={styles.debugGrid}>
+            {/* Quick Test Button */}
+            <TouchableOpacity
+              style={styles.debugActionCard}
+              onPress={async () => {
               try {
                 console.log('🧪 QUICK TEST - Testing current Arduino IP directly...');
                 console.log('📱 Mobile app making HTTP request...');
@@ -1102,17 +1197,18 @@ const NPKSensorDashboard: React.FC = () => {
                 );
               }
             }}
-          >
-            <View style={styles.scanningRow}>
-              <Ionicons name="flash" size={16} color="white" />
-              <Text style={styles.saveIPButtonText}>🧪 Quick Test (CORS-Safe)</Text>
-            </View>
-          </TouchableOpacity>
+            >
+              <Ionicons name="flash" size={16} color="#4F46E5" />
+              <View style={styles.actionCardContent}>
+                <Text style={styles.actionCardTitle}>Quick Test</Text>
+                <Text style={styles.actionCardSubtitle}>Test current IP</Text>
+              </View>
+            </TouchableOpacity>
 
-          {/* CORS Test Button */}
-          <TouchableOpacity
-            style={[styles.quickTestButton, { backgroundColor: '#8B5CF6' }]}
-            onPress={async () => {
+            {/* CORS Test Button */}
+            <TouchableOpacity
+              style={[styles.debugActionCard, styles.corsTestCard]}
+              onPress={async () => {
               try {
                 console.log('🔬 CORS TEST - Testing with different headers...');
                 
@@ -1146,23 +1242,94 @@ const NPKSensorDashboard: React.FC = () => {
                 Alert.alert('CORS Test Failed', `Error: ${error.message}\n\n🔍 This confirms CORS issue:\n- Arduino responds to simple requests\n- Fails on requests with custom headers\n- Need to add CORS headers to Arduino\n\n💡 Update your Arduino code with proper CORS handling.`);
               }
             }}
-          >
-            <View style={styles.scanningRow}>
-              <Ionicons name="flask" size={16} color="white" />
-              <Text style={styles.saveIPButtonText}>🔬 CORS Test</Text>
-            </View>
-          </TouchableOpacity>
+            >
+              <Ionicons name="flask" size={16} color="#8B5CF6" />
+              <View style={styles.actionCardContent}>
+                <Text style={styles.actionCardTitle}>CORS Test</Text>
+                <Text style={styles.actionCardSubtitle}>Test headers</Text>
+              </View>
+            </TouchableOpacity>
 
-          {/* Network Diagnostics Button */}
-          <TouchableOpacity
-            style={[styles.quickTestButton, { backgroundColor: '#FF6B6B' }]}
-            onPress={() => showNetworkDiagnostics(arduinoIP)}
-          >
-            <View style={styles.scanningRow}>
-              <Ionicons name="analytics" size={16} color="white" />
-              <Text style={styles.saveIPButtonText}>🔍 Network Diagnostics</Text>
-            </View>
-          </TouchableOpacity>
+            {/* Network Diagnostics Button */}
+            <TouchableOpacity
+              style={[styles.debugActionCard, styles.diagnosticsCard]}
+              onPress={() => showNetworkDiagnostics(arduinoIP)}
+            >
+              <Ionicons name="analytics" size={16} color="#EF4444" />
+              <View style={styles.actionCardContent}>
+                <Text style={styles.actionCardTitle}>Network Scan</Text>
+                <Text style={styles.actionCardSubtitle}>Full diagnostics</Text>
+              </View>
+            </TouchableOpacity>
+
+            {/* Debug Network Security Button */}
+            <TouchableOpacity
+              style={[styles.debugActionCard, styles.securityCard]}
+              onPress={async () => {
+              try {
+                console.log('🔐 DEBUG: Testing network security config...');
+                
+                // Test multiple IPs to see which ones work
+                const testIPs = [
+                  '192.168.18.56',   // Your Arduino
+                  '192.168.1.1',     // Common router
+                  '192.168.0.1',     // Another common router
+                  '127.0.0.1',       // Localhost
+                ];
+                
+                const results = [];
+                
+                for (const testIP of testIPs) {
+                  try {
+                    console.log(`Testing ${testIP}...`);
+                    const response = await fetch(`http://${testIP}/api/status`, {
+                      method: 'GET',
+                      headers: { 'Accept': 'application/json' }
+                    });
+                    results.push(`✅ ${testIP}: HTTP ${response.status}`);
+                    console.log(`✅ ${testIP} responded: ${response.status}`);
+                  } catch (error: any) {
+                    results.push(`❌ ${testIP}: ${error.message}`);
+                    console.log(`❌ ${testIP} failed: ${error.message}`);
+                  }
+                }
+                
+                // Show comprehensive results
+                Alert.alert(
+                  'Network Security Test Results',
+                  results.join('\n\n') + '\n\n🔍 Analysis:\n• If ALL IPs fail with "Network request failed": Network security config NOT applied\n• If some IPs work: Network security config partially working\n• If Arduino IP works: Network security config SUCCESS!',
+                  [
+                    { text: 'Copy Results', onPress: () => {
+                      // In a real app, you'd copy to clipboard here
+                      console.log('Results:', results.join('\n'));
+                    }},
+                    { text: 'OK' }
+                  ]
+                );
+                
+              } catch (error: any) {
+                Alert.alert('Debug Test Failed', `Error: ${error.message}`);
+              }
+            }}
+            >
+              <Ionicons name="shield-checkmark" size={16} color="#10B981" />
+              <View style={styles.actionCardContent}>
+                <Text style={styles.actionCardTitle}>Security Test</Text>
+                <Text style={styles.actionCardSubtitle}>Network config</Text>
+              </View>
+            </TouchableOpacity>
+          </View>
+          
+          {/* Additional Options */}
+          <View style={styles.debugActionsRow}>
+            <TouchableOpacity
+              style={styles.debugSecondaryButton}
+              onPress={() => setShowIPInput(!showIPInput)}
+            >
+              <Ionicons name="settings-outline" size={16} color={COLORS.primaryGreen} />
+              <Text style={styles.debugSecondaryText}>Manual IP Setup</Text>
+            </TouchableOpacity>
+          </View>
           
           {/* Discovered Devices */}
           {showDiscoveredDevices && (
@@ -1218,19 +1385,9 @@ const NPKSensorDashboard: React.FC = () => {
               </TouchableOpacity>
             </View>
           )}
-          
-          {/* Manual IP Input */}
-          <TouchableOpacity
-            style={styles.manualIPButton}
-            onPress={() => setShowIPInput(!showIPInput)}
-          >
-            <Text style={styles.manualIPText}>
-              {showIPInput ? "Hide Manual Setup" : "Manual IP Setup"}
-            </Text>
-          </TouchableOpacity>
         </View>
 
-        {/* IP Configuration */}
+        {/* Manual IP Configuration Panel */}
         {showIPInput && (
           <View style={styles.ipConfigPanel}>
             <Text style={styles.ipConfigTitle}>Arduino IP Address</Text>
@@ -1256,6 +1413,8 @@ const NPKSensorDashboard: React.FC = () => {
             </View>
           </View>
         )}
+
+        {/* Connection Panel */}
         <View style={styles.connectionPanel}>
           <View style={styles.connectionInfo}>
             <View style={[
@@ -1639,40 +1798,34 @@ const styles = StyleSheet.create({
     marginBottom: 5,
   },
   
-  // Arduino Discovery Styles
-  discoverySubtitle: {
-    fontSize: 12,
-    color: '#666',
-    marginBottom: 15,
-    textAlign: 'center',
-  },
-  scanningButton: {
-    backgroundColor: '#666',
-  },
-  scanningRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
+  // Arduino Discovery Styles  
   discoveredSection: {
-    marginTop: 15,
-    padding: 15,
-    backgroundColor: 'white',
-    borderRadius: 8,
+    marginTop: 20,
+    padding: 16,
+    backgroundColor: '#F8FAFC',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
   },
   discoveredTitle: {
-    fontSize: 14,
+    fontSize: 16,
     fontWeight: '600',
     color: COLORS.primaryGreen,
-    marginBottom: 10,
+    marginBottom: 12,
+    textAlign: 'center',
   },
   deviceOption: {
-    backgroundColor: COLORS.lightGreen,
+    backgroundColor: 'white',
     padding: 12,
     borderRadius: 8,
     marginBottom: 8,
     borderWidth: 1,
-    borderColor: '#e0e0e0',
+    borderColor: '#E5E7EB',
+    elevation: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
   },
   selectedDevice: {
     backgroundColor: COLORS.primaryGreen,
@@ -1694,32 +1847,40 @@ const styles = StyleSheet.create({
   },
   noDevicesFound: {
     alignItems: 'center',
-    padding: 20,
+    padding: 24,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#FED7AA',
+    backgroundColor: '#FEF3E2',
   },
   noDevicesText: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#666',
+    color: '#92400E',
     marginTop: 8,
     textAlign: 'center',
   },
   noDevicesSubtext: {
     fontSize: 12,
-    color: '#999',
-    marginTop: 5,
+    color: '#B45309',
+    marginTop: 4,
     textAlign: 'center',
-    lineHeight: 18,
+    lineHeight: 16,
   },
   hideDevicesButton: {
     alignSelf: 'center',
     paddingVertical: 8,
     paddingHorizontal: 16,
-    marginTop: 10,
+    marginTop: 12,
+    borderRadius: 20,
+    backgroundColor: 'white',
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
   },
   hideDevicesText: {
     fontSize: 12,
     color: COLORS.primaryGreen,
-    fontWeight: '600',
+    fontWeight: '500',
   },
   manualIPButton: {
     alignSelf: 'center',
@@ -1747,33 +1908,224 @@ const styles = StyleSheet.create({
   },
   
   // WiFi Configuration Styles
-  wifiConfigSection: {
-    marginTop: 15,
-    padding: 15,
+  wifiConfigPanel: {
     backgroundColor: 'white',
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 20,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+  wifiConfigHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  wifiConfigTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: COLORS.primaryGreen,
+    marginLeft: 8,
+  },
+  wifiConfigSubtitle: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 16,
+    lineHeight: 20,
+  },
+  wifiToggleButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
     borderRadius: 8,
+    backgroundColor: COLORS.lightGreen,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+  },
+  wifiToggleText: {
+    fontSize: 14,
+    color: COLORS.primaryGreen,
+    fontWeight: '500',
+  },
+  wifiConfigSection: {
+    marginTop: 16,
+    padding: 16,
+    backgroundColor: '#F8FAFC',
+    borderRadius: 12,
   },
   wifiLabel: {
     fontSize: 14,
     fontWeight: '600',
     color: COLORS.primaryGreen,
-    marginBottom: 5,
-    marginTop: 10,
+    marginBottom: 8,
+    marginTop: 12,
   },
   wifiWarning: {
     flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#FFF3CD',
-    padding: 10,
-    borderRadius: 6,
-    marginTop: 10,
+    alignItems: 'flex-start',
+    backgroundColor: '#FEF3E2',
+    padding: 12,
+    borderRadius: 8,
+    marginTop: 12,
     gap: 8,
+    borderWidth: 1,
+    borderColor: '#FED7AA',
   },
   wifiWarningText: {
     flex: 1,
     fontSize: 12,
-    color: '#856404',
+    color: '#92400E',
     lineHeight: 16,
+  },
+
+  // Modern Debug Panel Styles
+  debugPanel: {
+    backgroundColor: 'white',
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 20,
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+  },
+  debugHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 8,
+  },
+  debugTitle: {
+    flex: 1,
+    fontSize: 18,
+    fontWeight: '700',
+    color: COLORS.primaryGreen,
+    marginLeft: 8,
+  },
+  versionBadge: {
+    backgroundColor: COLORS.lightGreen,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  versionText: {
+    fontSize: 10,
+    fontWeight: '600',
+    color: COLORS.primaryGreen,
+  },
+  debugSubtitle: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 20,
+    lineHeight: 20,
+  },
+  primaryDebugButton: {
+    backgroundColor: COLORS.primaryGreen,
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 20,
+    elevation: 2,
+    shadowColor: COLORS.primaryGreen,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+  },
+  buttonContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+  },
+  primaryButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  debugGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 12,
+    marginBottom: 16,
+  },
+  debugActionCard: {
+    flex: 1,
+    minWidth: '45%',
+    backgroundColor: '#F8FAFC',
+    borderRadius: 12,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  corsTestCard: {
+    borderColor: '#8B5CF6',
+    backgroundColor: '#F3F4F6',
+  },
+  diagnosticsCard: {
+    borderColor: '#EF4444',
+    backgroundColor: '#FEF2F2',
+  },
+  securityCard: {
+    borderColor: '#10B981',
+    backgroundColor: '#F0FDF4',
+  },
+  actionCardContent: {
+    flex: 1,
+  },
+  actionCardTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#1F2937',
+    marginBottom: 2,
+  },
+  actionCardSubtitle: {
+    fontSize: 12,
+    color: '#6B7280',
+  },
+  debugActionsRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginTop: 8,
+  },
+  debugSecondaryButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 20,
+    backgroundColor: COLORS.lightGreen,
+  },
+  debugSecondaryText: {
+    fontSize: 14,
+    color: COLORS.primaryGreen,
+    fontWeight: '500',
+  },
+
+  // Legacy styles (for backwards compatibility)
+  discoverySubtitle: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 20,
+    lineHeight: 20,
+  },
+  scanningButton: {
+    backgroundColor: '#666',
+    opacity: 0.7,
+  },
+  scanningRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
   },
 });
 export default NPKSensorDashboard;

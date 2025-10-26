@@ -50,6 +50,7 @@
         "android.permission.INTERNET",
         "android.permission.ACCESS_NETWORK_STATE",
         "android.permission.ACCESS_WIFI_STATE",
+        "android.permission.CHANGE_WIFI_STATE",
         "android.permission.ACCESS_FINE_LOCATION",
         "android.permission.ACCESS_COARSE_LOCATION"
       ],
@@ -61,7 +62,21 @@
       "package": "com.troy12.aniko_app",
       "usesCleartextTraffic": true,
       "allowBackup": false,
-      "networkSecurityConfig": "./android/app/src/main/res/xml/network_security_config.xml"
+      "networkSecurityConfig": "./android/app/src/main/res/xml/network_security_config.xml",
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "data": [
+            {
+              "scheme": "http"
+            },
+            {
+              "scheme": "https"
+            }
+          ],
+          "category": ["BROWSABLE", "DEFAULT"]
+        }
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -74,8 +89,9 @@
       "openrouterApiKey": "${EXPO_PUBLIC_OPENROUTER_API_KEY}",
       "router": {},
       "eas": {
-        "projectId": "ced4f348-1c33-4a31-8ee9-f25147f6c813"
+        "projectId": "639b496f-9709-4220-8c27-d08cd6f59747"
       }
-    }
+    },
+    "owner": "troy_pogi_loneviber"
   }
 }

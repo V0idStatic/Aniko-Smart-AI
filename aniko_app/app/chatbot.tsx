@@ -534,7 +534,8 @@ export default function Chatbot({ userId }: ChatbotProps) {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer `,
+            Authorization: `
+Bearer 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`,
           },
           body: JSON.stringify({
             model: "gpt-3.5-turbo",
@@ -593,7 +594,8 @@ export default function Chatbot({ userId }: ChatbotProps) {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer `,
+          Authorization: `
+Bearer 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`,
         },
         body: JSON.stringify({
           model: "gpt-3.5-turbo",

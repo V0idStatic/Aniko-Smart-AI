@@ -65,7 +65,7 @@ export default function SignUpScreen() {
         return false;
       }
       const usernameExists = data.users.some(
-        (user) =>
+        (user: { user_metadata?: { username?: string } }) =>
           user.user_metadata?.username?.toLowerCase() === username.toLowerCase()
       );
       return usernameExists;

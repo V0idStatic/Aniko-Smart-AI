@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <!-- Allow cleartext traffic for local IP ranges -->
+    <domain-config cleartextTrafficPermitted="true">
+        <!-- Local network IP ranges -->
+        <domain includeSubdomains="false">10.0.0.1</domain>
+        <domain includeSubdomains="false">10.0.0.0</domain>
+        <domain includeSubdomains="false">10.0.1.0</domain>
+        <domain includeSubdomains="false">172.16.0.0</domain>
+        <domain includeSubdomains="false">172.20.10.0</domain>
+        <domain includeSubdomains="false">192.168.0.0</domain>
+        <domain includeSubdomains="false">192.168.1.0</domain>
+        <domain includeSubdomains="false">192.168.2.0</domain>
+        <domain includeSubdomains="false">192.168.3.0</domain>
+        <domain includeSubdomains="false">192.168.4.0</domain>
+        <domain includeSubdomains="false">192.168.10.0</domain>
+        <domain includeSubdomains="false">192.168.18.0</domain>
+        <domain includeSubdomains="false">192.168.43.0</domain>
+        <domain includeSubdomains="false">192.168.50.0</domain>
+        <domain includeSubdomains="false">192.168.100.0</domain>
+        
+        <!-- Specific Arduino IPs -->
+        <domain includeSubdomains="false">192.168.18.56</domain>
+        <domain includeSubdomains="false">192.168.1.1</domain>
+        <domain includeSubdomains="false">192.168.0.1</domain>
+        
+        <!-- Local development -->
+        <domain includeSubdomains="true">localhost</domain>
+        <domain includeSubdomains="false">127.0.0.1</domain>
+    </domain-config>
+    
+    <!-- Allow cleartext traffic for any IP in local ranges using wildcards -->
+    <base-config cleartextTrafficPermitted="false">
+        <trust-anchors>
+            <certificates src="system"/>
+        </trust-anchors>
+    </base-config>
+    
+    <!-- Debug override for local development (remove in production) -->
+    <debug-overrides>
+        <trust-anchors>
+            <certificates src="system"/>
+            <certificates src="user"/>
+        </trust-anchors>
+    </debug-overrides>
+</network-security-config>
